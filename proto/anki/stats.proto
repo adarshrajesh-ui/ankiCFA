@@ -16,6 +16,10 @@ service StatsService {
   rpc Graphs(GraphsRequest) returns (GraphsResponse);
   rpc GetGraphPreferences(generic.Empty) returns (GraphPreferences);
   rpc SetGraphPreferences(GraphPreferences) returns (generic.Empty);
+  // Per-deck "mastery" summary computed in the Rust engine. Returns, for every
+  // deck, how many of its cards are considered mastered and the average recall
+  // proxy across its reviewed cards.
+  rpc GetDeckMastery(generic.Empty) returns (DeckMasteryResponse);
 }
 
 // Implicitly includes any of the above methods that are not listed in the
@@ -68,6 +72,23 @@ message CardStatsResponse {
   optional string original_deck = 22;
   optional float desired_retention = 23;
   repeated float fsrs_params = 24;
+}
+
+message DeckMasteryResponse {
+  message DeckMastery {
+    int64 deck_id = 1;
+    string deck_name = 2;
+    // Total number of (non-filtered-origin) cards in the deck.
+    uint32 total_cards = 3;
+    // Cards considered mastered: review-type cards whose interval is at least
+    // the mastery threshold (21 days).
+    uint32 mastered_count = 4;
+    // Mean per-card recall proxy over cards that have been reviewed at least
+    // once, where a card's recall is (reps - lapses) / reps. Decks with no
+    // reviewed cards report 0.
+    float avg_recall = 5;
+  }
+  repeated DeckMastery decks = 1;
 }
 
 message GraphsRequest {

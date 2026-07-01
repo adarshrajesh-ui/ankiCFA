@@ -28,10 +28,17 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
 # 2. just command runner (official task runner for this repo)
 brew install just
+
+# 3. Git submodules (only needed to run the qt installer test suite). These are
+#    the Briefcase app templates; without them qt/tests/test_installer.py fails
+#    with "Unable to clone application template".
+git submodule update --init qt/installer/mac-template qt/installer/windows-template
 ```
 
 The build system itself downloads N2/Ninja, Node, protoc and uv on demand, so no
-other manual toolchain installation is needed on macOS.
+other manual toolchain installation is needed on macOS. The submodule step above
+is not needed to build or launch the app — only to run the installer tests that
+`just test` (and `scripts/verify_desktop.sh`) exercise.
 
 ## Build
 

@@ -477,6 +477,15 @@ impl super::SqliteStorage {
             .collect()
     }
 
+    /// Every card in the collection. Used by whole-collection summaries such as
+    /// the per-deck mastery query.
+    pub(crate) fn all_cards(&self) -> Result<Vec<Card>> {
+        self.db
+            .prepare_cached(include_str!("get_card.sql"))?
+            .query_and_then([], |r| row_to_card(r).map_err(Into::into))?
+            .collect()
+    }
+
     pub(crate) fn all_cards_of_notes_above_ordinal(
         &mut self,
         note_ids: &[NoteId],
