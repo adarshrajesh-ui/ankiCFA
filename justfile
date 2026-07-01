@@ -71,6 +71,33 @@ test-e2e ui='': _install-playwright-browsers
     {{ ninja }} pyenv ts:generated pylib qt
     {{ playwright_env }} {{ yarn }} test:e2e {{ ui }}
 
+# --- CFA Ethics Minimal-Pairs feature (cfa/ethics_pairs) ---
+
+# Validate the 30-pair bank (pairs.jsonl) without opening a collection
+cfa-validate:
+    {{ py }} cfa/ethics_pairs/import_pairs.py --dry-run
+
+# Run the Ethics Minimal-Pairs unit tests + jsonl->notes round-trip (builds pylib first)
+cfa-test:
+    {{ ninja }} pylib
+    {{ cfa_env }} {{ py }} -m pytest cfa/ethics_pairs/tests -q
+
+# Import the 30-pair bank into a collection (must be CLOSED in Anki). Pass col=/path/to/collection.anki2
+cfa-import col:
+    {{ ninja }} pylib
+    {{ cfa_env }} {{ py }} cfa/ethics_pairs/import_pairs.py --col "{{ col }}"
+
+# Generate + open the offline discrimination dashboard for a collection (must be CLOSED in Anki)
+cfa-dashboard col:
+    {{ ninja }} pylib
+    {{ cfa_env }} {{ py }} cfa/ethics_pairs/ethics_dashboard.py --col "{{ col }}" --open
+
+# Symlink the in-app dashboard add-on into Anki's addons21 folder (macOS default path)
+cfa-install-addon:
+    mkdir -p "$HOME/Library/Application Support/Anki2/addons21"
+    ln -sfn "$(pwd)/cfa/ethics_pairs" "$HOME/Library/Application Support/Anki2/addons21/cfa_ethics_pairs"
+    @echo "Linked add-on into Anki2/addons21 (macOS). See cfa/ethics_pairs/README.md for Linux/Windows paths."
+
 [private]
 _test:
     {{ ninja }} check:rust_test check:pytest check:vitest
@@ -186,3 +213,5 @@ playwright_env := if os() == "windows" { "set PLAYWRIGHT_BROWSERS_PATH=out\\play
 yarn := if os() == "windows" { "out\\extracted\\node\\yarn.cmd" } else { "out/extracted/node/bin/yarn" }
 uv := env("UV_BINARY", if os() == "windows" { "out\\extracted\\uv\\uv" } else { "out/extracted/uv/uv" })
 export UV_PROJECT_ENVIRONMENT := if os() == "windows" { "out\\pyenv" } else { "out/pyenv" }
+py := if os() == "windows" { "out\\pyenv\\Scripts\\python.exe" } else { "out/pyenv/bin/python" }
+cfa_env := if os() == "windows" { "$env:PYTHONPATH='out\\pylib;cfa\\ethics_pairs'; $env:ANKI_TEST_MODE='1';" } else { "PYTHONPATH=out/pylib:cfa/ethics_pairs ANKI_TEST_MODE=1" }

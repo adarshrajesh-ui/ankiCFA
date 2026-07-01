@@ -1,0 +1,43 @@
+<!-- CFA Ethics Minimal-Pair — BACK (answer) template.
+     This side deliberately contains NO Standard/Rationale text, so pressing Anki's built-in
+     "Show Answer" before completing the attempt can never leak the answer.
+     Its only job is to commit the deterministic grade the front computed: it reads the grade
+     the front stashed in localStorage and, on desktop (pycmd present), auto-rates the card
+     Good (fully correct) or Again (not) so the review log faithfully records discrimination.
+     On mobile, it shows the recommended rating and the learner taps it. -->
+
+<div class="cfa-commit" id="cfa-commit">
+  <div class="big muted" id="cfa-commit-title">Recording…</div>
+  <div class="muted" id="cfa-commit-sub"></div>
+</div>
+
+<script>
+(function () {
+  var title = document.getElementById("cfa-commit-title");
+  var sub = document.getElementById("cfa-commit-sub");
+  var pending = null;
+  try { pending = JSON.parse(localStorage.getItem("cfaEthics:pending") || "null"); } catch (e) {}
+
+  if (!pending) {
+    // Reached the answer side without completing the attempt (e.g. built-in Show Answer).
+    title.className = "big no";
+    title.textContent = "Attempt not completed";
+    sub.textContent =
+      "The governing Standard is shown only after you judge both cases and name the decisive fact. Rate Again to redo this pair.";
+    return;
+  }
+
+  try { localStorage.removeItem("cfaEthics:pending"); } catch (e) {}
+  var correct = !!pending.correct;
+  title.className = "big " + (correct ? "ok" : "no");
+  title.textContent = correct ? "✓ Recorded: fully correct" : "✗ Recorded: not fully correct";
+
+  if (typeof pycmd !== "undefined") {
+    sub.textContent = "Scheduling…";
+    // Answer is already shown here, so easeN is valid. Small delay avoids racing the render.
+    setTimeout(function () { pycmd(correct ? "ease3" : "ease1"); }, 350);
+  } else {
+    sub.textContent = "Rate " + (correct ? "Good" : "Again") + " to record this attempt.";
+  }
+})();
+</script>

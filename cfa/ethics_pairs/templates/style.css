@@ -1,0 +1,118 @@
+/* CFA Ethics Minimal-Pair — shared card styling.
+   Self-contained; works in Anki desktop/mobile webviews and standalone (for the flow test).
+   Night-mode aware via Anki's `.nightMode` body class. */
+
+.card { font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif; }
+
+.cfa-pair {
+  max-width: 900px;
+  margin: 0 auto;
+  text-align: left;
+  color: #1a1a1a;
+  line-height: 1.45;
+}
+.nightMode .cfa-pair { color: #e8e8e8; }
+
+.cfa-src { display: none !important; }
+
+.cfa-header { margin-bottom: 14px; }
+.cfa-header h2 { font-size: 1.15rem; margin: 6px 0 0; }
+.cfa-cluster {
+  display: inline-block;
+  font: 600 0.72rem/1 ui-monospace, Menlo, monospace;
+  letter-spacing: .02em;
+  color: #5a4b8a;
+  background: #efeafc;
+  border: 1px solid #d8ccf5;
+  padding: 4px 8px;
+  border-radius: 999px;
+}
+.nightMode .cfa-cluster { color: #cbb8ff; background: #2a2440; border-color: #43396b; }
+
+/* two co-presented cases, side by side (stacks on narrow screens) */
+.cfa-cases {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin: 10px 0 18px;
+}
+@media (max-width: 640px) { .cfa-cases { grid-template-columns: 1fr; } }
+
+.cfa-case {
+  border: 1px solid #dcdce3;
+  border-radius: 12px;
+  padding: 14px 16px;
+  background: #fbfbfd;
+}
+.nightMode .cfa-case { background: #23242a; border-color: #3a3b44; }
+.cfa-case-label { font-weight: 700; font-size: .8rem; text-transform: uppercase; letter-spacing: .04em; color: #888; }
+.cfa-vignette { margin: 8px 0 12px; }
+
+.cfa-judge { display: flex; gap: 8px; }
+.cfa-judge-btn, .cfa-opt {
+  cursor: pointer;
+  border: 1px solid #c7c7d1;
+  background: #fff;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: .92rem;
+  color: inherit;
+}
+.nightMode .cfa-judge-btn, .nightMode .cfa-opt { background: #2c2d34; border-color: #474853; }
+.cfa-judge-btn { flex: 1; font-weight: 600; }
+.cfa-judge-btn.sel { border-color: #3b6fe0; background: #e8f0ff; color: #123a8f; }
+.nightMode .cfa-judge-btn.sel { background: #21335c; color: #cfe0ff; border-color: #4d78d6; }
+
+/* MCQ */
+.cfa-mcq h3 { font-size: 1rem; margin: 0 0 10px; }
+#cfa-options { display: grid; gap: 8px; }
+.cfa-opt { text-align: left; }
+.cfa-opt.sel { border-color: #3b6fe0; background: #e8f0ff; color: #123a8f; }
+.nightMode .cfa-opt.sel { background: #21335c; color: #cfe0ff; border-color: #4d78d6; }
+
+/* post-attempt marks */
+.cfa-case.correct { border-color: #2e9e5b; box-shadow: 0 0 0 1px #2e9e5b inset; }
+.cfa-case.wrong { border-color: #d1453b; box-shadow: 0 0 0 1px #d1453b inset; }
+.cfa-verdict { margin-top: 8px; font-weight: 600; font-size: .85rem; }
+.cfa-opt.correct { border-color: #2e9e5b; background: #eafaf0; color: #14663a; }
+.cfa-opt.wrong { border-color: #d1453b; background: #fcecea; color: #8f201a; }
+.nightMode .cfa-opt.correct { background: #16351f; color: #7fe0a6; }
+.nightMode .cfa-opt.wrong { background: #3a1c1a; color: #f0a49d; }
+
+.cfa-actions { margin: 8px 0; }
+#cfa-check, #cfa-record-btn {
+  cursor: pointer; font-weight: 700; font-size: .95rem;
+  border: none; border-radius: 9px; padding: 11px 20px;
+  background: #3b6fe0; color: #fff;
+}
+#cfa-check:disabled { background: #b9c2d6; cursor: not-allowed; }
+.cfa-hint { color: #8a8a93; font-size: .85rem; margin: 8px 0 0; }
+
+/* reveal panel — hidden until the attempt is checked */
+.cfa-reveal {
+  margin-top: 18px;
+  border-top: 2px dashed #d6d6de;
+  padding-top: 16px;
+}
+.cfa-grade { font-size: 1.2rem; font-weight: 800; margin-bottom: 10px; }
+.cfa-grade.ok { color: #2e9e5b; }
+.cfa-grade.no { color: #d1453b; }
+.cfa-breakdown { margin: 0 0 12px; padding-left: 18px; font-size: .9rem; color: #555; }
+.nightMode .cfa-breakdown { color: #b6b6bf; }
+.cfa-standard { font-size: 1.05rem; font-weight: 600; margin-bottom: 8px; }
+.cfa-badge {
+  font: 700 .68rem/1 ui-monospace, Menlo, monospace;
+  text-transform: uppercase; letter-spacing: .05em;
+  color: #fff; background: #5a4b8a; padding: 4px 7px; border-radius: 6px; margin-right: 6px;
+}
+.cfa-rationale { color: #333; }
+.nightMode .cfa-rationale { color: #d0d0d8; }
+
+.cfa-record { margin-top: 16px; }
+
+/* back-of-card commit UI */
+.cfa-commit { max-width: 720px; margin: 0 auto; text-align: center; font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif; }
+.cfa-commit .big { font-size: 1.3rem; font-weight: 800; margin-bottom: 8px; }
+.cfa-commit .big.ok { color: #2e9e5b; }
+.cfa-commit .big.no { color: #d1453b; }
+.cfa-commit .muted { color: #8a8a93; font-size: .9rem; }
