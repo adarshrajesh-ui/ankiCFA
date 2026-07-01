@@ -56,6 +56,36 @@ class Scheduler(SchedulerBaseWithLegacy):
             fetch_limit=fetch_limit, intraday_learning_only=intraday_learning_only
         )
 
+    # CFA fork: exam-prep queue
+    ##########################################################################
+
+    def build_exam_queue(
+        self,
+        *,
+        deck_id: DeckId | int,
+        days_to_exam: int,
+        topic_weights: dict[str, float],
+        fetch_limit: int = 0,
+    ) -> scheduler_pb2.BuildExamQueueResponse:
+        """CFA fork. Read-only exam-prep queue for a deck (and subdecks).
+
+        Returns due cards reordered by
+        ``topic_weight * (1 - retrievability) * deadline_urgency`` as parallel
+        ``card_ids`` / ``scores`` arrays (score descending). ``topic_weights``
+        maps a hierarchical tag prefix (e.g. ``los::ethics``) to its weight;
+        a card whose ``los::`` topic has no entry sinks to the bottom. Smaller
+        ``days_to_exam`` raises urgency. ``fetch_limit`` of 0 means no limit.
+
+        This call never mutates card/queue/scheduling state, so FSRS scheduling
+        and undo remain valid. It is idempotent.
+        """
+        return self.col._backend.build_exam_queue(
+            deck_id=deck_id,
+            days_to_exam=days_to_exam,
+            topic_weights=topic_weights,
+            fetch_limit=fetch_limit,
+        )
+
     def describe_next_states(self, next_states: SchedulingStates) -> Sequence[str]:
         "Labels for each of the answer buttons."
         return self.col._backend.describe_next_states(next_states)

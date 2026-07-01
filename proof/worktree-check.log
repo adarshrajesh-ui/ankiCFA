@@ -1,0 +1,298 @@
+=== FINAL just check in worktree of 38972c9 (Wed Jul  1 16:22:28 CDT 2026) ===
+./ninja pylib qt check
+[1m[92m    Finished[0m ]8;;https://doc.rust-lang.org/cargo/reference/profiles.html#default-profiles\`release` profile [optimized]]8;;\ target(s) in 0.63s
+[1/9; 6 active; 0.090s] qt:aqt:data:web:sveltekit
+[2/9; 8 active; 0.149s] check:format:python:pylib
+71 files already formatted
+All checks passed!
+[3/9; 7 active; 0.183s] check:ruff
+All checks passed!
+[4/9; 6 active; 0.454s] check:complexipy:pylib
+──────────────────────────────── 🐙 complexipy ─────────────────────────────────
+Results saved at 
+/private/tmp/claude-501/-Users-adarshrajesh-AlphaWeek2-ankiCFA/10e9c46b-6d2f-449
+f-9446-8489f97ae17e/scratchpad/wt-check/out/complexipy/complexipy-results.sarif
+No functions were found with complexity greater than 50.
+────────────────────────── 🎉 Analysis completed! 🎉 ───────────────────────────
+[5/9; 5 active; 1.440s] check:minilints
+     Ignored package `cargo-license v0.7.0` is already installed, use --force to override
+[6/9; 4 active; 2.086s] check:pytest:pylib
+============================= test session starts ==============================
+platform darwin -- Python 3.13.13, pytest-8.4.1, pluggy-1.6.0
+rootdir: /private/tmp/claude-501/-Users-adarshrajesh-AlphaWeek2-ankiCFA/10e9c46b-6d2f-449f-9446-8489f97ae17e/scratchpad/wt-check/pylib
+configfile: pyproject.toml
+plugins: mock-3.15.1, anyio-4.13.0
+collected 128 items
+
+pylib/tests/test_cards.py ....                                           [  3%]
+pylib/tests/test_cfa.py .......                                          [  8%]
+pylib/tests/test_collection.py ........                                  [ 14%]
+pylib/tests/test_decks.py ...                                            [ 17%]
+pylib/tests/test_exporting.py .....                                      [ 21%]
+pylib/tests/test_find.py ...                                             [ 23%]
+pylib/tests/test_flags.py .                                              [ 24%]
+pylib/tests/test_hooks.py ...........                                    [ 32%]
+pylib/tests/test_httpclient.py ...                                       [ 35%]
+pylib/tests/test_importing.py ..........                                 [ 42%]
+pylib/tests/test_latex.py .                                              [ 43%]
+pylib/tests/test_media.py ...                                            [ 46%]
+pylib/tests/test_models.py ............                                  [ 55%]
+pylib/tests/test_schedv3.py ..................................           [ 82%]
+pylib/tests/test_stats.py ...                                            [ 84%]
+pylib/tests/test_template.py .                                           [ 85%]
+pylib/tests/test_utils.py ...................                            [100%]
+
+============================= 128 passed in 1.58s ==============================
+[7/9; 3 active; 3.167s] check:mypy
+Success: no issues found in 300 source files(B
+[8/9; 2 active; 3.175s] check:pytest:aqt
+FAILED: /private/tmp/claude-501/-Users-adarshrajesh-AlphaWeek2-ankiCFA/10e9c46b-6d2f-449f-9446-8489f97ae17e/scratchpad/wt-check/out/tests/python_pytest.6267549634483751550 
+/private/tmp/claude-501/-Users-adarshrajesh-AlphaWeek2-ankiCFA/10e9c46b-6d2f-449f-9446-8489f97ae17e/scratchpad/wt-check/out/rust/release/runner run --stamp=/private/tmp/claude-501/-Users-adarshrajesh-AlphaWeek2-ankiCFA/10e9c46b-6d2f-449f-9446-8489f97ae17e/scratchpad/wt-check/out/tests/python_pytest.6267549634483751550 --env="PYTHONPATH=pylib:/private/tmp/claude-501/-Users-adarshrajesh-AlphaWeek2-ankiCFA/10e9c46b-6d2f-449f-9446-8489f97ae17e/scratchpad/wt-check/out/pylib:/private/tmp/claude-501/-Users-adarshrajesh-AlphaWeek2-ankiCFA/10e9c46b-6d2f-449f-9446-8489f97ae17e/scratchpad/wt-check/out/qt:/private/tmp/claude-501/-Users-adarshrajesh-AlphaWeek2-ankiCFA/10e9c46b-6d2f-449f-9446-8489f97ae17e/scratchpad/wt-check/out/qt/tools" --env="ANKI_TEST_MODE=1" /private/tmp/claude-501/-Users-adarshrajesh-AlphaWeek2-ankiCFA/10e9c46b-6d2f-449f-9446-8489f97ae17e/scratchpad/wt-check/out/pyenv/bin/pytest -p no:cacheprovider qt/tests
+============================= test session starts ==============================
+platform darwin -- Python 3.13.13, pytest-8.4.1, pluggy-1.6.0
+rootdir: /private/tmp/claude-501/-Users-adarshrajesh-AlphaWeek2-ankiCFA/10e9c46b-6d2f-449f-9446-8489f97ae17e/scratchpad/wt-check/qt
+configfile: pyproject.toml
+plugins: mock-3.15.1, anyio-4.13.0
+collected 73 items
+
+qt/tests/test_addons.py ...........                                      [ 15%]
+qt/tests/test_i18n.py ..                                                 [ 17%]
+qt/tests/test_installer.py .........F................F                   [ 54%]
+qt/tests/test_mediasrv.py .................................              [100%]
+
+=================================== FAILURES ===================================
+__________________________ test_compile_fails_loudly ___________________________
+
+mocker = <pytest_mock.plugin.MockerFixture object at 0x113ccfb60>
+out_dir = PosixPath('/private/var/folders/nk/kq2nv0sn1xzdhvwd_fv1c8000000gn/T/pytest-of-adarshrajesh/pytest-4/test_compile_fails_loudly0')
+cmd_args = Namespace(version='0.0.1', aqt_wheel=PosixPath('/private/var/folders/nk/kq2nv0sn1xzdhvwd_fv1c8000000gn/T/pytest-of-ada...n/T/pytest-of-adarshrajesh/pytest-4/test_compile_fails_loudly0/dummy_package-0.1.0-py3-none-any.whl'), skip_fcitx=True)
+
+    def test_compile_fails_loudly(
+        mocker, out_dir: Path, cmd_args: argparse.Namespace
+    ) -> None:
+        mocker.patch("compileall.compile_dir", return_value=False)
+        with pytest.raises(RuntimeError):
+>           build(cmd_args)
+
+qt/tests/test_installer.py:140: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+qt/tools/build_installer.py:195: in build
+    subprocess.check_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+popenargs = (['/private/tmp/claude-501/-Users-adarshrajesh-AlphaWeek2-ankiCFA/10e9c46b-6d2f-449f-9446-8489f97ae17e/scratchpad/wt-check/out/pyenv/bin/python', '-m', 'briefcase', 'build', '-C', 'version="0.0.1"', ...],)
+kwargs = {'cwd': PosixPath('/private/var/folders/nk/kq2nv0sn1xzdhvwd_fv1c8000000gn/T/pytest-of-adarshrajesh/pytest-4/test_compile_fails_loudly0')}
+retcode = 200
+cmd = ['/private/tmp/claude-501/-Users-adarshrajesh-AlphaWeek2-ankiCFA/10e9c46b-6d2f-449f-9446-8489f97ae17e/scratchpad/wt-check/out/pyenv/bin/python', '-m', 'briefcase', 'build', '-C', 'version="0.0.1"', ...]
+
+    def check_call(*popenargs, **kwargs):
+        """Run command with arguments.  Wait for command to complete.  If
+        the exit code was zero then return, otherwise raise
+        CalledProcessError.  The CalledProcessError object will have the
+        return code in the returncode attribute.
+    
+        The arguments are the same as for the call function.  Example:
+    
+        check_call(["ls", "-l"])
+        """
+        retcode = call(*popenargs, **kwargs)
+        if retcode:
+            cmd = kwargs.get("args")
+            if cmd is None:
+                cmd = popenargs[0]
+>           raise CalledProcessError(retcode, cmd)
+E           subprocess.CalledProcessError: Command '['/private/tmp/claude-501/-Users-adarshrajesh-AlphaWeek2-ankiCFA/10e9c46b-6d2f-449f-9446-8489f97ae17e/scratchpad/wt-check/out/pyenv/bin/python', '-m', 'briefcase', 'build', '-C', 'version="0.0.1"', '-C', 'requires=["/private/var/folders/nk/kq2nv0sn1xzdhvwd_fv1c8000000gn/T/pytest-of-adarshrajesh/pytest-4/test_compile_fails_loudly0/dummy_package-0.1.0-py3-none-any.whl[qt,audio]","/private/var/folders/nk/kq2nv0sn1xzdhvwd_fv1c8000000gn/T/pytest-of-adarshrajesh/pytest-4/test_compile_fails_loudly0/dummy_package-0.1.0-py3-none-any.whl"]', '-C', 'template="/private/tmp/claude-501/-Users-adarshrajesh-AlphaWeek2-ankiCFA/10e9c46b-6d2f-449f-9446-8489f97ae17e/scratchpad/wt-check/qt/installer/mac-template"', '--update', '--update-requirements', '--update-resources', '--update-support', '--log']' returned non-zero exit status 200.
+
+/Users/adarshrajesh/.local/share/uv/python/cpython-3.13.13-macos-aarch64-none/lib/python3.13/subprocess.py:419: CalledProcessError
+----------------------------- Captured stdout call -----------------------------
+
+[anki] Generating application template...
+Using app template: /private/tmp/claude-501/-Users-adarshrajesh-AlphaWeek2-ankiCFA/10e9c46b-6d2f-449f-9446-8489f97ae17e/scratchpad/wt-check/qt/installer/mac-template, branch v0.4.2
+
+Unable to clone application template; is the template path '/private/tmp/claude-501/-Users-adarshrajesh-AlphaWeek2-ankiCFA/10e9c46b-6d2f-449f-9446-8489f97ae17e/scratchpad/wt-check/qt/installer/mac-template' correct?
+Saving log... started
+
+Log saved to /private/var/folders/nk/kq2nv0sn1xzdhvwd_fv1c8000000gn/T/pytest-of-adarshrajesh/pytest-4/test_compile_fails_loudly0/logs/briefcase.2026_07_01-16_22_31.build.log
+
+Saving log... done
+____________________________ test_build_and_package ____________________________
+
+out_dir = PosixPath('/private/var/folders/nk/kq2nv0sn1xzdhvwd_fv1c8000000gn/T/pytest-of-adarshrajesh/pytest-4/test_build_and_package0')
+cmd_args = Namespace(version='0.0.1', aqt_wheel=PosixPath('/private/var/folders/nk/kq2nv0sn1xzdhvwd_fv1c8000000gn/T/pytest-of-ada...00gn/T/pytest-of-adarshrajesh/pytest-4/test_build_and_package0/dummy_package-0.1.0-py3-none-any.whl'), skip_fcitx=True)
+
+    def test_build_and_package(out_dir: Path, cmd_args: argparse.Namespace) -> None:
+>       build(cmd_args)
+
+qt/tests/test_installer.py:244: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+qt/tools/build_installer.py:195: in build
+    subprocess.check_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+popenargs = (['/private/tmp/claude-501/-Users-adarshrajesh-AlphaWeek2-ankiCFA/10e9c46b-6d2f-449f-9446-8489f97ae17e/scratchpad/wt-check/out/pyenv/bin/python', '-m', 'briefcase', 'build', '-C', 'version="0.0.1"', ...],)
+kwargs = {'cwd': PosixPath('/private/var/folders/nk/kq2nv0sn1xzdhvwd_fv1c8000000gn/T/pytest-of-adarshrajesh/pytest-4/test_build_and_package0')}
+retcode = 200
+cmd = ['/private/tmp/claude-501/-Users-adarshrajesh-AlphaWeek2-ankiCFA/10e9c46b-6d2f-449f-9446-8489f97ae17e/scratchpad/wt-check/out/pyenv/bin/python', '-m', 'briefcase', 'build', '-C', 'version="0.0.1"', ...]
+
+    def check_call(*popenargs, **kwargs):
+        """Run command with arguments.  Wait for command to complete.  If
+        the exit code was zero then return, otherwise raise
+        CalledProcessError.  The CalledProcessError object will have the
+        return code in the returncode attribute.
+    
+        The arguments are the same as for the call function.  Example:
+    
+        check_call(["ls", "-l"])
+        """
+        retcode = call(*popenargs, **kwargs)
+        if retcode:
+            cmd = kwargs.get("args")
+            if cmd is None:
+                cmd = popenargs[0]
+>           raise CalledProcessError(retcode, cmd)
+E           subprocess.CalledProcessError: Command '['/private/tmp/claude-501/-Users-adarshrajesh-AlphaWeek2-ankiCFA/10e9c46b-6d2f-449f-9446-8489f97ae17e/scratchpad/wt-check/out/pyenv/bin/python', '-m', 'briefcase', 'build', '-C', 'version="0.0.1"', '-C', 'requires=["/private/var/folders/nk/kq2nv0sn1xzdhvwd_fv1c8000000gn/T/pytest-of-adarshrajesh/pytest-4/test_build_and_package0/dummy_package-0.1.0-py3-none-any.whl[qt,audio]","/private/var/folders/nk/kq2nv0sn1xzdhvwd_fv1c8000000gn/T/pytest-of-adarshrajesh/pytest-4/test_build_and_package0/dummy_package-0.1.0-py3-none-any.whl"]', '-C', 'template="/private/tmp/claude-501/-Users-adarshrajesh-AlphaWeek2-ankiCFA/10e9c46b-6d2f-449f-9446-8489f97ae17e/scratchpad/wt-check/qt/installer/mac-template"', '--update', '--update-requirements', '--update-resources', '--update-support', '--log']' returned non-zero exit status 200.
+
+/Users/adarshrajesh/.local/share/uv/python/cpython-3.13.13-macos-aarch64-none/lib/python3.13/subprocess.py:419: CalledProcessError
+----------------------------- Captured stdout call -----------------------------
+
+[anki] Generating application template...
+Using app template: /private/tmp/claude-501/-Users-adarshrajesh-AlphaWeek2-ankiCFA/10e9c46b-6d2f-449f-9446-8489f97ae17e/scratchpad/wt-check/qt/installer/mac-template, branch v0.4.2
+
+Unable to clone application template; is the template path '/private/tmp/claude-501/-Users-adarshrajesh-AlphaWeek2-ankiCFA/10e9c46b-6d2f-449f-9446-8489f97ae17e/scratchpad/wt-check/qt/installer/mac-template' correct?
+Saving log... started
+
+Log saved to /private/var/folders/nk/kq2nv0sn1xzdhvwd_fv1c8000000gn/T/pytest-of-adarshrajesh/pytest-4/test_build_and_package0/logs/briefcase.2026_07_01-16_22_32.build.log
+
+Saving log... done
+=========================== short test summary info ============================
+FAILED qt/tests/test_installer.py::test_compile_fails_loudly - subprocess.CalledProcessError: Command '['/private/tmp/claude-501/-Users-ad...
+FAILED qt/tests/test_installer.py::test_build_and_package - subprocess.CalledProcessError: Command '['/private/tmp/claude-501/-Users-ad...
+========================= 2 failed, 71 passed in 2.25s =========================
+Failed to run (1): /private/tmp/claude-501/-Users-adarshrajesh-AlphaWeek2-ankiCFA/10e9c46b-6d2f-449f-9446-8489f97ae17e/scratchpad/wt-check/out/pyenv/bin/pytest -p no:cacheprovider qt/tests
+[9/9; 1 active; 3.802s] check:complexipy-diff:pylib
+──────────────────────────────── 🐙 complexipy ─────────────────────────────────
+Results saved at 
+/private/tmp/claude-501/-Users-adarshrajesh-AlphaWeek2-ankiCFA/10e9c46b-6d2f-449
+f-9446-8489f97ae17e/scratchpad/wt-check/out/complexipy/complexipy-results.sarif
+pylib/anki/_backend.py
+    backend_exception_to_pylib 22  ❌ FAILED 
+
+      Refactor plans:
+        1. Split conditional dispatcher into handlers, lines 210-269
+           estimated: 22 -> 6 (-16)
+           steps:
+             - create one handler per case
+             - replace the chain with a dispatch table or small delegating match
+             - keep the orchestration function shallow
+
+pylib/anki/importing/anki2.py
+    Anki2Importer::_importCards 27  ❌ FAILED 
+
+      Refactor plans:
+        1. Extract complex block into helper function, lines 328-385
+           estimated: 27 -> 4 (-23)
+           steps:
+             - move the selected block into a private helper
+             - pass required values as parameters
+             - return the result/status needed by the caller
+        2. Flatten loop body with continue guards, lines 328-385
+           estimated: 27 -> 17 (-10)
+           steps:
+             - add negative condition checks at the top of the loop
+             - use continue for skipped items
+             - keep the main processing path unindented
+    Anki2Importer::_importNotes 38  ❌ FAILED 
+
+      Refactor plans:
+        1. Extract complex block into helper function, lines 112-148
+           estimated: 38 -> 21 (-17)
+           steps:
+             - move the selected block into a private helper
+             - pass required values as parameters
+             - return the result/status needed by the caller
+        2. Flatten loop body with continue guards, lines 112-148
+           estimated: 38 -> 28 (-10)
+           steps:
+             - add negative condition checks at the top of the loop
+             - use continue for skipped items
+             - keep the main processing path unindented
+        3. Flatten nested condition block with guard clauses, lines 137-146
+           estimated: 38 -> 34 (-4)
+           steps:
+             - invert the outer condition
+             - return early when the condition fails
+             - move the main success path one indentation level left
+             - repeat for inner nested conditions where safe
+
+pylib/anki/importing/mnemo.py
+    MnemosyneImporter::run 29  ❌ FAILED 
+
+      Refactor plans:
+        1. Extract complex block into helper function, lines 49-95
+           estimated: 29 -> 15 (-14)
+           steps:
+             - move the selected block into a private helper
+             - pass required values as parameters
+             - return the result/status needed by the caller
+        2. Extract complex block into helper function, lines 30-41
+           estimated: 29 -> 24 (-5)
+           steps:
+             - move the selected block into a private helper
+             - pass required values as parameters
+             - return the result/status needed by the caller
+        3. Flatten loop body with continue guards, lines 49-95
+           estimated: 29 -> 24 (-5)
+           steps:
+             - add negative condition checks at the top of the loop
+             - use continue for skipped items
+             - keep the main processing path unindented
+
+Failed functions:
+ - pylib/anki/_backend.py: backend_exception_to_pylib
+ - pylib/anki/importing/anki2.py: Anki2Importer::_importCards, 
+Anki2Importer::_importNotes
+ - pylib/anki/importing/mnemo.py: MnemosyneImporter::run
+────────────────────────── 🎉 Analysis completed! 🎉 ───────────────────────────
+Complexity diff  (vs main)
+────────────────────────────────────────────────────────────────────────
+  NEW         pylib/anki/cfa.py::MemoryScore::as_dict                  0  (new)
+  NEW         pylib/anki/cfa.py::_build_topic_scores                   9  (new)
+  NEW         pylib/anki/cfa.py::_derive_topics                        10  (new)
+  NEW         pylib/anki/cfa.py::_giveup_reason                        8  (new)
+  NEW         pylib/anki/cfa.py::_range                                1  (new)
+  NEW         pylib/anki/cfa.py::_topic_of                             14  (new)
+  NEW         pylib/anki/cfa.py::build_exam_queue                      1  (new)
+  NEW         pylib/anki/cfa.py::days_to_exam                          3  (new)
+  NEW         pylib/anki/cfa.py::get_exam_config                       0  (new)
+  NEW         pylib/anki/cfa.py::memory_score                          10  (new)
+  NEW         pylib/anki/cfa.py::set_exam_config                       0  (new)
+  NEW         pylib/anki/scheduler/v3.py::Scheduler::build_exam_queue  0  (new)
+  NEW         pylib/tests/test_cfa.py::_add_card                       0  (new)
+  NEW         pylib/tests/test_cfa.py::_seed_studied                   3  (new)
+  NEW         
+pylib/tests/test_cfa.py::test_build_exam_queue_is_read_only_and_undo_still_works
+0  (new)
+  NEW         pylib/tests/test_cfa.py::test_build_exam_queue_orders_by_weight  0
+(new)
+  NEW         
+pylib/tests/test_cfa.py::test_build_exam_queue_zero_weight_and_empty_deck  0  
+(new)
+  NEW         
+pylib/tests/test_cfa.py::test_exam_config_roundtrip_and_days_to_exam  0  (new)
+  NEW         
+pylib/tests/test_cfa.py::test_memory_score_abstains_when_high_weight_topic_skipp
+ed  0  (new)
+  NEW         
+pylib/tests/test_cfa.py::test_memory_score_abstains_without_enough_data  1  
+(new)
+  NEW         
+pylib/tests/test_cfa.py::test_memory_score_reports_range_when_sufficient  1  
+(new)
+────────────────────────────────────────────────────────────────────────
+Net: 21 new
+
+ninja: build stopped: subcommand failed.
+[0m[1m[31m
+Build failed.
+[0merror: recipe `check` failed on line 35 with exit code 1
+WORKTREE CHECK EXIT: 1

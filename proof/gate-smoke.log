@@ -1,0 +1,7 @@
+=== gate smoke test: import from source (Wed Jul  1 15:27:00 CDT 2026) ===
+anki version: 26.05
+anki module: None
+aqt module : /Users/adarshrajesh/AlphaWeek2/ankiCFA/qt/aqt/__init__.py
+collection opened OK; scheduler ver: 2
+backend methods present: True
+SMOKE OK

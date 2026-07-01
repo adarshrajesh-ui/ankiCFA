@@ -1,0 +1,2394 @@
+=== baseline build start: commit 6770ad3ef460b766d85a3399bd268ff87f4224cb ===
+Wed Jul  1 15:22:35 CDT 2026
+=== just build (./ninja pylib qt) ===
+./ninja pylib qt
+[1m[92m   Compiling[0m libc v0.2.175
+[1m[92m   Compiling[0m proc-macro2 v1.0.101
+[1m[92m   Compiling[0m unicode-ident v1.0.18
+[1m[92m   Compiling[0m cfg-if v1.0.3
+[1m[92m   Compiling[0m shlex v1.3.0
+[1m[92m   Compiling[0m stable_deref_trait v1.2.0
+[1m[92m   Compiling[0m bytes v1.11.1
+[1m[92m   Compiling[0m pin-project-lite v0.2.16
+[1m[92m   Compiling[0m futures-core v0.3.31
+[1m[92m   Compiling[0m bitflags v2.9.3
+[1m[92m   Compiling[0m itoa v1.0.15
+[1m[92m   Compiling[0m pkg-config v0.3.32
+[1m[92m   Compiling[0m once_cell v1.21.3
+[1m[92m   Compiling[0m version_check v0.9.5
+[1m[92m   Compiling[0m litemap v0.8.0
+[1m[92m   Compiling[0m zeroize v1.8.1
+[1m[92m   Compiling[0m smallvec v1.15.1
+[1m[92m   Compiling[0m fnv v1.0.7
+[1m[92m   Compiling[0m writeable v0.6.1
+[1m[92m   Compiling[0m getrandom v0.3.3
+[1m[92m   Compiling[0m unicase v2.6.0
+[1m[92m   Compiling[0m rustls-pki-types v1.12.0
+[1m[92m   Compiling[0m pin-utils v0.1.0
+[1m[92m   Compiling[0m rustix v1.0.8
+[1m[92m   Compiling[0m serde_core v1.0.228
+[1m[92m   Compiling[0m icu_normalizer_data v2.0.0
+[1m[92m   Compiling[0m icu_properties_data v2.0.1
+[1m[92m   Compiling[0m heck v0.5.0
+[1m[92m   Compiling[0m untrusted v0.9.0
+[1m[92m   Compiling[0m http v1.3.1
+[1m[92m   Compiling[0m zerocopy v0.8.26
+[1m[92m   Compiling[0m futures-task v0.3.31
+[1m[92m   Compiling[0m core-foundation-sys v0.8.7
+[1m[92m   Compiling[0m serde v1.0.228
+[1m[92m   Compiling[0m percent-encoding v2.3.2
+[1m[92m   Compiling[0m httparse v1.10.1
+[1m[92m   Compiling[0m futures-util v0.3.31
+[1m[92m   Compiling[0m rustls v0.23.31
+[1m[92m   Compiling[0m http-body v1.0.1
+[1m[92m   Compiling[0m typenum v1.20.0
+[1m[92m   Compiling[0m crc32fast v1.5.0
+[1m[92m   Compiling[0m tower-service v0.3.3
+[1m[92m   Compiling[0m try-lock v0.2.5
+[1m[92m   Compiling[0m hybrid-array v0.4.11
+[1m[92m   Compiling[0m want v0.3.1
+[1m[92m   Compiling[0m tracing-core v0.1.34
+[1m[92m   Compiling[0m futures-channel v0.3.31
+[1m[92m   Compiling[0m subtle v2.6.1
+[1m[92m   Compiling[0m atomic-waker v1.1.2
+[1m[92m   Compiling[0m utf8parse v0.2.2
+[1m[92m   Compiling[0m tracing v0.1.41
+[1m[92m   Compiling[0m anstyle-parse v0.2.7
+[1m[92m   Compiling[0m form_urlencoded v1.2.2
+[1m[92m   Compiling[0m quote v1.0.40
+[1m[92m   Compiling[0m sync_wrapper v1.0.2
+[1m[92m   Compiling[0m ipnet v2.11.0
+[1m[92m   Compiling[0m log v0.4.27
+[1m[92m   Compiling[0m syn v2.0.106
+[1m[92m   Compiling[0m ryu v1.0.20
+[1m[92m   Compiling[0m anstyle v1.0.11
+[1m[92m   Compiling[0m serde_json v1.0.143
+[1m[92m   Compiling[0m jobserver v0.1.34
+[1m[92m   Compiling[0m socket2 v0.6.0
+[1m[92m   Compiling[0m signal-hook-registry v1.4.6
+[1m[92m   Compiling[0m mio v1.0.4
+[1m[92m   Compiling[0m errno v0.3.13
+[1m[92m   Compiling[0m cc v1.2.34
+[1m[92m   Compiling[0m getrandom v0.2.16
+[1m[92m   Compiling[0m security-framework-sys v2.14.0
+[1m[92m   Compiling[0m core-foundation v0.10.1
+[1m[92m   Compiling[0m rand_core v0.9.3
+[1m[92m   Compiling[0m is_terminal_polyfill v1.70.1
+[1m[92m   Compiling[0m zstd-safe v7.2.4
+[1m[92m   Compiling[0m powerfmt v0.2.0
+[1m[92m   Compiling[0m base64 v0.22.1
+[1m[92m   Compiling[0m security-framework v3.3.0
+[1m[92m   Compiling[0m zlib-rs v0.5.1
+[1m[92m   Compiling[0m memchr v2.7.5
+[1m[92m   Compiling[0m utf8_iter v1.0.4
+[1m[92m   Compiling[0m camino v1.1.12
+[1m[92m   Compiling[0m adler2 v2.0.1
+[1m[92m   Compiling[0m mime_guess v2.0.5
+[1m[92m   Compiling[0m anstyle-query v1.1.4
+[1m[92m   Compiling[0m colorchoice v1.0.4
+[1m[92m   Compiling[0m tower-layer v0.3.3
+[1m[92m   Compiling[0m ppv-lite86 v0.2.21
+[1m[92m   Compiling[0m anstream v0.6.20
+[1m[92m   Compiling[0m miniz_oxide v0.8.9
+[1m[92m   Compiling[0m rand_chacha v0.9.0
+[1m[92m   Compiling[0m deranged v0.5.2
+[1m[92m   Compiling[0m block-buffer v0.12.0
+[1m[92m   Compiling[0m ring v0.17.14
+[1m[92m   Compiling[0m zstd-sys v2.0.15+zstd.1.5.7
+[1m[92m   Compiling[0m lzma-sys v0.1.20
+[1m[92m   Compiling[0m rustls-native-certs v0.8.1
+[1m[92m   Compiling[0m synstructure v0.13.2
+[1m[92m   Compiling[0m crypto-common v0.2.1
+[1m[92m   Compiling[0m webpki-roots v1.0.2
+[1m[92m   Compiling[0m clap_lex v0.7.5
+[1m[92m   Compiling[0m equivalent v1.0.2
+[1m[92m   Compiling[0m simd-adler32 v0.3.7
+[1m[92m   Compiling[0m iri-string v0.7.8
+[1m[92m   Compiling[0m const-oid v0.10.2
+[1m[92m   Compiling[0m either v1.15.0
+[1m[92m   Compiling[0m mime v0.3.17
+[1m[92m   Compiling[0m bumpalo v3.19.0
+[1m[92m   Compiling[0m time-core v0.1.8
+[1m[92m   Compiling[0m strsim v0.11.1
+[1m[92m   Compiling[0m anyhow v1.0.99
+[1m[92m   Compiling[0m hashbrown v0.15.5
+[1m[92m   Compiling[0m futures-sink v0.3.31
+[1m[92m   Compiling[0m libz-rs-sys v0.5.1
+[1m[92m   Compiling[0m num-conv v0.2.0
+[1m[92m   Compiling[0m fastrand v2.3.0
+[1m[92m   Compiling[0m zerofrom-derive v0.1.6
+[1m[92m   Compiling[0m yoke-derive v0.8.0
+[1m[92m   Compiling[0m zerovec-derive v0.11.1
+[1m[92m   Compiling[0m displaydoc v0.2.5
+[1m[92m   Compiling[0m tokio-macros v2.5.0
+[1m[92m   Compiling[0m serde_derive v1.0.228
+[1m[92m   Compiling[0m snafu-derive v0.8.8
+[1m[92m   Compiling[0m indexmap v2.11.0
+[1m[92m   Compiling[0m tempfile v3.21.0
+[1m[92m   Compiling[0m tokio v1.47.1
+[1m[92m   Compiling[0m clap_derive v4.5.45
+[1m[92m   Compiling[0m time v0.3.47
+[1m[92m   Compiling[0m flate2 v1.1.2
+[1m[92m   Compiling[0m clap_builder v4.5.46
+[1m[92m   Compiling[0m zerofrom v0.1.6
+[1m[92m   Compiling[0m zopfli v0.8.2
+[1m[92m   Compiling[0m digest v0.11.2
+[1m[92m   Compiling[0m yoke v0.8.0
+[1m[92m   Compiling[0m itertools v0.14.0
+[1m[92m   Compiling[0m rand v0.9.4
+[1m[92m   Compiling[0m xattr v1.5.1
+[1m[92m   Compiling[0m zerovec v0.11.4
+[1m[92m   Compiling[0m zerotrie v0.2.2
+[1m[92m   Compiling[0m snafu v0.8.8
+[1m[92m   Compiling[0m cpufeatures v0.3.0
+[1m[92m   Compiling[0m filetime v0.2.26
+[1m[92m   Compiling[0m http-body-util v0.1.3
+[1m[92m   Compiling[0m env_home v0.1.0
+[1m[92m   Compiling[0m runner v0.0.0 (/Users/adarshrajesh/AlphaWeek2/ankiCFA/build/runner)
+[1m[92m   Compiling[0m which v8.0.0
+[1m[92m   Compiling[0m tar v0.4.46
+[1m[92m   Compiling[0m anki_io v0.0.0 (/Users/adarshrajesh/AlphaWeek2/ankiCFA/rslib/io)
+[1m[92m   Compiling[0m anki_process v0.0.0 (/Users/adarshrajesh/AlphaWeek2/ankiCFA/rslib/process)
+[1m[92m   Compiling[0m clap v4.5.46
+[1m[92m   Compiling[0m sha2 v0.11.0
+[1m[92m   Compiling[0m tinystr v0.8.1
+[1m[92m   Compiling[0m potential_utf v0.1.3
+[1m[92m   Compiling[0m icu_locale_core v2.0.0
+[1m[92m   Compiling[0m icu_collections v2.0.0
+[1m[92m   Compiling[0m zip v4.6.0
+[1m[92m   Compiling[0m hex v0.4.3
+[1m[92m   Compiling[0m termcolor v1.4.1
+[1m[92m   Compiling[0m icu_provider v2.0.0
+[1m[92m   Compiling[0m serde_urlencoded v0.7.1
+[1m[92m   Compiling[0m junction v1.2.0
+[1m[92m   Compiling[0m icu_properties v2.0.1
+[1m[92m   Compiling[0m icu_normalizer v2.0.0
+[1m[92m   Compiling[0m idna_adapter v1.2.1
+[1m[92m   Compiling[0m hyper v1.7.0
+[1m[92m   Compiling[0m idna v1.1.0
+[1m[92m   Compiling[0m tower v0.5.2
+[1m[92m   Compiling[0m tokio-util v0.7.16
+[1m[92m   Compiling[0m url v2.5.7
+[1m[92m   Compiling[0m hyper-util v0.1.16
+[1m[92m   Compiling[0m tower-http v0.6.6
+[1m[92m   Compiling[0m rustls-webpki v0.103.13
+[1m[92m   Compiling[0m xz2 v0.1.7
+[1m[92m   Compiling[0m zstd v0.13.3
+[1m[92m   Compiling[0m tokio-rustls v0.26.2
+[1m[92m   Compiling[0m hyper-rustls v0.27.7
+[1m[92m   Compiling[0m reqwest v0.12.23
+[1m[92m    Finished[0m ]8;;https://doc.rust-lang.org/cargo/reference/profiles.html#default-profiles\`release` profile [optimized]]8;;\ target(s) in 15.22s
+[1m[92m   Compiling[0m proc-macro2 v1.0.101
+[1m[92m   Compiling[0m unicode-ident v1.0.18
+[1m[92m   Compiling[0m libc v0.2.175
+[1m[92m   Compiling[0m memchr v2.7.5
+[1m[92m   Compiling[0m stable_deref_trait v1.2.0
+[1m[92m   Compiling[0m cfg-if v1.0.3
+[1m[92m   Compiling[0m shlex v1.3.0
+[1m[92m   Compiling[0m pin-project-lite v0.2.16
+[1m[92m   Compiling[0m bytes v1.11.1
+[1m[92m   Compiling[0m futures-core v0.3.31
+[1m[92m   Compiling[0m itoa v1.0.15
+[1m[92m   Compiling[0m once_cell v1.21.3
+[1m[92m   Compiling[0m serde_core v1.0.228
+[1m[92m   Compiling[0m futures-sink v0.3.31
+[1m[92m   Compiling[0m serde v1.0.228
+[1m[92m   Compiling[0m litemap v0.8.0
+[1m[92m   Compiling[0m smallvec v1.15.1
+[1m[92m   Compiling[0m cc v1.2.34
+[1m[92m   Compiling[0m writeable v0.6.1
+[1m[92m   Compiling[0m fnv v1.0.7
+[1m[92m   Compiling[0m pin-utils v0.1.0
+[1m[92m   Compiling[0m zeroize v1.8.1
+[1m[92m   Compiling[0m icu_normalizer_data v2.0.0
+[1m[92m   Compiling[0m version_check v0.9.5
+[1m[92m   Compiling[0m icu_properties_data v2.0.1
+[1m[92m   Compiling[0m getrandom v0.3.3
+[1m[92m   Compiling[0m rustls-pki-types v1.12.0
+[1m[92m   Compiling[0m http v1.3.1
+[1m[92m   Compiling[0m bitflags v2.9.3
+[1m[92m   Compiling[0m slab v0.4.11
+[1m[92m   Compiling[0m percent-encoding v2.3.2
+[1m[92m   Compiling[0m futures-io v0.3.31
+[1m[92m   Compiling[0m http-body v1.0.1
+[1m[92m   Compiling[0m httparse v1.10.1
+[1m[92m   Compiling[0m futures-task v0.3.31
+[1m[92m   Compiling[0m zerocopy v0.8.26
+[1m[92m   Compiling[0m unicase v2.6.0
+[1m[92m   Compiling[0m semver v1.0.26
+[1m[92m   Compiling[0m untrusted v0.9.0
+[1m[92m   Compiling[0m futures-util v0.3.31
+[1m[92m   Compiling[0m quote v1.0.40
+[1m[92m   Compiling[0m syn v2.0.106
+[1m[92m   Compiling[0m socket2 v0.6.0
+[1m[92m   Compiling[0m mio v1.0.4
+[1m[92m   Compiling[0m getrandom v0.2.16
+[1m[92m   Compiling[0m tokio v1.47.1
+[1m[92m   Compiling[0m tower-service v0.3.3
+[1m[92m   Compiling[0m rustix v1.0.8
+[1m[92m   Compiling[0m try-lock v0.2.5
+[1m[92m   Compiling[0m winnow v0.7.13
+[1m[92m   Compiling[0m rustls v0.23.31
+[1m[92m   Compiling[0m typenum v1.20.0
+[1m[92m   Compiling[0m want v0.3.1
+[1m[92m   Compiling[0m serde_spanned v1.0.0
+[1m[92m   Compiling[0m toml_datetime v0.7.0
+[1m[92m   Compiling[0m errno v0.3.13
+[1m[92m   Compiling[0m tracing-core v0.1.34
+[1m[92m   Compiling[0m futures-channel v0.3.31
+[1m[92m   Compiling[0m subtle v2.6.1
+[1m[92m   Compiling[0m toml_writer v1.0.2
+[1m[92m   Compiling[0m atomic-waker v1.1.2
+[1m[92m   Compiling[0m rustc_version v0.4.1
+[1m[92m   Compiling[0m hybrid-array v0.4.11
+[1m[92m   Compiling[0m tracing v0.1.41
+[1m[92m   Compiling[0m mime_guess v2.0.5
+[1m[92m   Compiling[0m rand_core v0.9.3
+[1m[92m   Compiling[0m synstructure v0.13.2
+[1m[92m   Compiling[0m form_urlencoded v1.2.2
+[1m[92m   Compiling[0m aho-corasick v1.1.3
+[1m[92m   Compiling[0m toml_parser v1.0.2
+[1m[92m   Compiling[0m sync_wrapper v1.0.2
+[1m[92m   Compiling[0m serde_json v1.0.143
+[1m[92m   Compiling[0m regex-syntax v0.8.6
+[1m[92m   Compiling[0m ryu v1.0.20
+[1m[92m   Compiling[0m tower-layer v0.3.3
+[1m[92m   Compiling[0m ipnet v2.11.0
+[1m[92m   Compiling[0m base64 v0.22.1
+[1m[92m   Compiling[0m utf8_iter v1.0.4
+[1m[92m   Compiling[0m toml v0.9.5
+[1m[92m   Compiling[0m camino v1.1.12
+[1m[92m   Compiling[0m heck v0.5.0
+[1m[92m   Compiling[0m ppv-lite86 v0.2.21
+[1m[92m   Compiling[0m crypto-common v0.2.1
+[1m[92m   Compiling[0m rand_chacha v0.9.0
+[1m[92m   Compiling[0m block-buffer v0.12.0
+[1m[92m   Compiling[0m ring v0.17.14
+[1m[92m   Compiling[0m embed-resource v3.0.5
+[1m[92m   Compiling[0m hyper v1.7.0
+[1m[92m   Compiling[0m tower v0.5.2
+[1m[92m   Compiling[0m webpki-roots v1.0.2
+[1m[92m   Compiling[0m fastrand v2.3.0
+[1m[92m   Compiling[0m regex-automata v0.4.10
+[1m[92m   Compiling[0m const-oid v0.10.2
+[1m[92m   Compiling[0m log v0.4.27
+[1m[92m   Compiling[0m iri-string v0.7.8
+[1m[92m   Compiling[0m mime v0.3.17
+[1m[92m   Compiling[0m hyper-util v0.1.16
+[1m[92m   Compiling[0m anyhow v1.0.99
+[1m[92m   Compiling[0m tower-http v0.6.6
+[1m[92m   Compiling[0m digest v0.11.2
+[1m[92m   Compiling[0m tempfile v3.21.0
+[1m[92m   Compiling[0m tokio-util v0.7.16
+[1m[92m   Compiling[0m rand v0.9.4
+[1m[92m   Compiling[0m cpufeatures v0.3.0
+[1m[92m   Compiling[0m ninja_gen v0.0.0 (/Users/adarshrajesh/AlphaWeek2/ankiCFA/build/ninja_gen)
+[1m[92m   Compiling[0m http-body-util v0.1.3
+[1m[92m   Compiling[0m bstr v1.12.0
+[1m[92m   Compiling[0m same-file v1.0.6
+[1m[92m   Compiling[0m either v1.15.0
+[1m[92m   Compiling[0m env_home v0.1.0
+[1m[92m   Compiling[0m which v8.0.0
+[1m[92m   Compiling[0m itertools v0.14.0
+[1m[92m   Compiling[0m walkdir v2.5.0
+[1m[92m   Compiling[0m globset v0.4.16
+[1m[92m   Compiling[0m sha2 v0.11.0
+[1m[92m   Compiling[0m regex v1.11.2
+[1m[92m   Compiling[0m num_cpus v1.17.0
+[1m[92m   Compiling[0m dunce v1.0.5
+[1m[92m   Compiling[0m hex v0.4.3
+[1m[92m   Compiling[0m maplit v1.0.2
+[1m[92m   Compiling[0m zerofrom-derive v0.1.6
+[1m[92m   Compiling[0m yoke-derive v0.8.0
+[1m[92m   Compiling[0m zerovec-derive v0.11.1
+[1m[92m   Compiling[0m displaydoc v0.2.5
+[1m[92m   Compiling[0m serde_derive v1.0.228
+[1m[92m   Compiling[0m snafu-derive v0.8.8
+[1m[92m   Compiling[0m rustls-webpki v0.103.13
+[1m[92m   Compiling[0m zerofrom v0.1.6
+[1m[92m   Compiling[0m snafu v0.8.8
+[1m[92m   Compiling[0m tokio-rustls v0.26.2
+[1m[92m   Compiling[0m hyper-rustls v0.27.7
+[1m[92m   Compiling[0m yoke v0.8.0
+[1m[92m   Compiling[0m anki_io v0.0.0 (/Users/adarshrajesh/AlphaWeek2/ankiCFA/rslib/io)
+[1m[92m   Compiling[0m zerovec v0.11.4
+[1m[92m   Compiling[0m zerotrie v0.2.2
+[1m[92m   Compiling[0m serde_urlencoded v0.7.1
+[1m[92m   Compiling[0m tinystr v0.8.1
+[1m[92m   Compiling[0m potential_utf v0.1.3
+[1m[92m   Compiling[0m icu_locale_core v2.0.0
+[1m[92m   Compiling[0m icu_collections v2.0.0
+[1m[92m   Compiling[0m icu_provider v2.0.0
+[1m[92m   Compiling[0m icu_normalizer v2.0.0
+[1m[92m   Compiling[0m icu_properties v2.0.1
+[1m[92m   Compiling[0m idna_adapter v1.2.1
+[1m[92m   Compiling[0m idna v1.1.0
+[1m[92m   Compiling[0m url v2.5.7
+[1m[92m   Compiling[0m reqwest v0.12.23
+[1m[92m   Compiling[0m configure v0.0.0 (/Users/adarshrajesh/AlphaWeek2/ankiCFA/build/configure)
+[1m[92m    Finished[0m ]8;;https://doc.rust-lang.org/cargo/reference/profiles.html#default-profiles\`dev` profile [unoptimized + debuginfo]]8;;\ target(s) in 15.18s
+[1m[92m     Running[0m `out/rust/debug/configure`
+[1/2; 1 active; 0.307s] build:configure_bin
+    Finished ]8;;https://doc.rust-lang.org/cargo/reference/profiles.html#default-profiles\`dev` profile [unoptimized + debuginfo]]8;;\ target(s) in 0.25s
+[1/64; 8 active; 0.052s] qt:aqt:py.typed
+[2/64; 7 active; 0.052s] ts:generated:src
+[3/64; 6 active; 0.055s] qt:aqt:data:qt:icons:from_src
+[4/64; 5 active; 0.055s] qt:aqt:data:web:imgs
+[5/64; 4 active; 2.955s] download:protoc
+[6/64; 4 active; 3.030s] extract:protoc
+[7/64; 4 active; 11.840s] ftl:repo:core
+Submodule 'ftl/core-repo' (https://github.com/ankitects/anki-core-i18n.git) registered for path 'ftl/core-repo'
+Cloning into '/Users/adarshrajesh/AlphaWeek2/ankiCFA/ftl/core-repo'...
+From https://github.com/ankitects/anki-core-i18n
+ * branch              af7c60d7f1aa1b831eb3b893558e4c625309ac2b -> FETCH_HEAD
+Submodule path 'ftl/core-repo': checked out 'af7c60d7f1aa1b831eb3b893558e4c625309ac2b'
+[8/64; 4 active; 15.880s] download:uv
+[9/64; 4 active; 16.029s] extract:uv
+[10/64; 4 active; 17.171s] rslib:proto
+   Compiling libc v0.2.175
+   Compiling bytes v1.11.1
+   Compiling memchr v2.7.5
+   Compiling hashbrown v0.15.5
+   Compiling prettyplease v0.2.37
+   Compiling equivalent v1.0.2
+   Compiling fixedbitset v0.5.7
+   Compiling inflections v1.1.1
+   Compiling syn v2.0.106
+   Compiling multimap v0.10.1
+   Compiling aho-corasick v1.1.3
+   Compiling indexmap v2.11.0
+   Compiling petgraph v0.7.1
+   Compiling regex-automata v0.4.10
+   Compiling getrandom v0.3.3
+   Compiling errno v0.3.13
+   Compiling rustix v1.0.8
+   Compiling rand_core v0.9.3
+   Compiling rand_chacha v0.9.0
+   Compiling rand v0.9.4
+   Compiling tempfile v3.21.0
+   Compiling regex v1.11.2
+   Compiling prost-derive v0.13.5
+   Compiling snafu-derive v0.8.8
+   Compiling serde_derive v1.0.228
+   Compiling strum_macros v0.27.2
+   Compiling prost v0.13.5
+   Compiling prost-types v0.13.5
+   Compiling snafu v0.8.8
+   Compiling strum v0.27.2
+   Compiling prost-reflect v0.14.7
+   Compiling prost-build v0.13.5
+   Compiling anki_io v0.0.0 (/Users/adarshrajesh/AlphaWeek2/ankiCFA/rslib/io)
+   Compiling serde v1.0.228
+   Compiling anki_proto_gen v0.0.0 (/Users/adarshrajesh/AlphaWeek2/ankiCFA/rslib/proto_gen)
+   Compiling anki_proto v0.0.0 (/Users/adarshrajesh/AlphaWeek2/ankiCFA/rslib/proto)
+    Finished ]8;;https://doc.rust-lang.org/cargo/reference/profiles.html#default-profiles\`dev` profile [unoptimized + debuginfo]]8;;\ target(s) in 14.09s
+[11/64; 3 active; 17.268s] ftl:repo:qt
+Submodule 'ftl/qt-repo' (https://github.com/ankitects/anki-desktop-ftl.git) registered for path 'ftl/qt-repo'
+Cloning into '/Users/adarshrajesh/AlphaWeek2/ankiCFA/ftl/qt-repo'...
+From https://github.com/ankitects/anki-desktop-ftl
+ * branch            3a35d0aba2b1d04a69ddb471fb4d62645f6763d3 -> FETCH_HEAD
+Submodule path 'ftl/qt-repo': checked out '3a35d0aba2b1d04a69ddb471fb4d62645f6763d3'
+[12/64; 3 active; 18.610s] pyenv
+Using CPython 3.13.13
+Creating virtual environment at: out/pyenv
+Resolved 169 packages in 1ms
+   Building anki @ file:///Users/adarshrajesh/AlphaWeek2/ankiCFA/pylib
+   Building aqt @ file:///Users/adarshrajesh/AlphaWeek2/ankiCFA/qt
+   Building briefcase-plugins @ file:///Users/adarshrajesh/AlphaWeek2/ankiCFA/qt/installer/briefcase_plugins
+      Built briefcase-plugins @ file:///Users/adarshrajesh/AlphaWeek2/ankiCFA/qt/installer/briefcase_plugins
+      Built aqt @ file:///Users/adarshrajesh/AlphaWeek2/ankiCFA/qt
+      Built anki @ file:///Users/adarshrajesh/AlphaWeek2/ankiCFA/pylib
+Prepared 3 packages in 1.55s
+Installed 115 packages in 507ms
+ + anki==26.5 (from file:///Users/adarshrajesh/AlphaWeek2/ankiCFA/pylib)
+ + anki-audio==0.2.2
+ + anki-mac-helper==0.1.1
+ + annotated-doc==0.0.4
+ + anyio==4.13.0
+ + aqt==26.5 (from file:///Users/adarshrajesh/AlphaWeek2/ankiCFA/qt)
+ + arrow==1.4.0
+ + attrs==25.3.0
+ + beautifulsoup4==4.14.3
+ + binaryornot==0.4.4
+ + blinker==1.9.0
+ + briefcase==0.4.2
+ + briefcase-plugins==0.0.1 (from file:///Users/adarshrajesh/AlphaWeek2/ankiCFA/qt/installer/briefcase_plugins)
+ + build==1.4.4
+ + certifi==2025.6.15
+ + cfgv==3.5.0
+ + chardet==5.2.0
+ + charset-normalizer==3.4.2
+ + click==8.3.1
+ + cogapp==3.6.0
+ + complexipy==5.6.1
+ + cookiecutter==2.7.1
+ + coverage==7.13.5
+ + decorator==5.2.1
+ + distlib==0.4.0
+ + dmgbuild==1.6.7
+ + ds-store==1.3.2
+ + filelock==3.25.2
+ + flask==3.1.3
+ + gitdb==4.0.12
+ + gitpython==3.1.49
+ + h11==0.16.0
+ + hatchling==1.29.0
+ + httpcore==1.0.9
+ + httpx==0.28.1
+ + identify==2.6.18
+ + idna==3.15
+ + iniconfig==2.1.0
+ + itsdangerous==2.2.0
+ + jinja2==3.1.6
+ + jsonschema==4.26.0
+ + jsonschema-specifications==2025.4.1
+ + mac-alias==2.2.3
+ + markdown==3.10.2
+ + markdown-it-py==3.0.0
+ + markupsafe==3.0.2
+ + mdurl==0.1.2
+ + mock==5.2.0
+ + mypy==1.17.1
+ + mypy-extensions==1.1.0
+ + mypy-protobuf==3.6.0
+ + nodeenv==1.10.0
+ + orjson==3.11.8
+ + packaging==25.0
+ + pathspec==1.1.1
+ + pip==26.1
+ + platformdirs==4.9.4
+ + pluggy==1.6.0
+ + pre-commit==4.6.0
+ + protobuf==6.33.5
+ + psutil==7.2.2
+ + pychromedevtools==1.0.4
+ + pygments==2.19.2
+ + pyproject-hooks==1.2.0
+ + pyqt6==6.11.0
+ + pyqt6-qt6==6.11.0
+ + pyqt6-sip==13.11.1
+ + pyqt6-webengine==6.11.0
+ + pyqt6-webengine-qt6==6.11.0
+ + pysocks==1.7.1
+ + pytest==8.4.1
+ + pytest-mock==3.15.1
+ + python-dateutil==2.9.0.post0
+ + python-discovery==1.2.1
+ + python-slugify==8.0.4
+ + pyyaml==6.0.2
+ + referencing==0.36.2
+ + requests==2.33.1
+ + rich==14.3.4
+ + rpds-py==0.25.1
+ + ruff==0.13.3
+ + send2trash==1.8.3
+ + setuptools==82.0.1
+ + shellingham==1.5.4
+ + six==1.17.0
+ + smmap==5.0.3
+ + soupsieve==2.7
+ + tenacity==9.1.4
+ + text-unidecode==1.3
+ + tomli==2.4.1
+ + tomli-w==1.2.0
+ + trove-classifiers==2025.5.9.12
+ + truststore==0.10.4
+ + typer==0.25.1
+ + types-click==7.1.8
+ + types-decorator==5.2.0.20260408
+ + types-flask==1.1.6
+ + types-flask-cors==6.0.0.20250520
+ + types-jinja2==2.11.9
+ + types-markdown==3.10.2.20260408
+ + types-markupsafe==1.1.10
+ + types-orjson==3.6.2
+ + types-protobuf==6.30.2.20250516
+ + types-pywin32==310.0.0.20250516
+ + types-requests==2.33.0.20260503
+ + types-waitress==3.0.1.20241117
+ + types-werkzeug==1.0.9
+ + typing-extensions==4.15.0
+ + tzdata==2026.2
+ + urllib3==2.6.3
+ + virtualenv==21.2.0
+ + waitress==3.0.2
+ + websocket-client==1.8.0
+ + werkzeug==3.1.6
+ + wheel==0.47.0
+[13/64; 7 active; 18.723s] pylib:anki:buildinfo.py
+[14/64; 6 active; 19.096s] pylib:anki:hooks_gen.py
+[15/64; 5 active; 19.099s] qt:aqt:hooks.py
+[16/64; 4 active; 19.486s] download:node
+[17/64; 4 active; 19.807s] pylib:anki:proto
+Writing mypy to anki/ankidroid_pb2.pyi
+Writing mypy to anki/ankihub_pb2.pyi
+Writing mypy to anki/ankiweb_pb2.pyi
+Writing mypy to anki/backend_pb2.pyi
+Writing mypy to anki/card_rendering_pb2.pyi
+Writing mypy to anki/cards_pb2.pyi
+Writing mypy to anki/collection_pb2.pyi
+Writing mypy to anki/config_pb2.pyi
+Writing mypy to anki/deck_config_pb2.pyi
+Writing mypy to anki/decks_pb2.pyi
+Writing mypy to anki/frontend_pb2.pyi
+Writing mypy to anki/generic_pb2.pyi
+Writing mypy to anki/github_pb2.pyi
+Writing mypy to anki/i18n_pb2.pyi
+Writing mypy to anki/image_occlusion_pb2.pyi
+Writing mypy to anki/import_export_pb2.pyi
+Writing mypy to anki/links_pb2.pyi
+Writing mypy to anki/media_pb2.pyi
+Writing mypy to anki/notes_pb2.pyi
+Writing mypy to anki/notetypes_pb2.pyi
+Writing mypy to anki/scheduler_pb2.pyi
+Writing mypy to anki/search_pb2.pyi
+Writing mypy to anki/stats_pb2.pyi
+Writing mypy to anki/sync_pb2.pyi
+Writing mypy to anki/tags_pb2.pyi
+[18/64; 3 active; 20.117s] qt:aqt:forms
+[19/64; 2 active; 23.318s] extract:node
+[20/64; 2 active; 24.332s] yarn
+[21/64; 2 active; 27.366s] rslib:i18n
+   Compiling proc-macro-hack v0.5.20+deprecated
+   Compiling thiserror v2.0.16
+   Compiling rustc-hash v2.1.1
+   Compiling siphasher v1.0.1
+   Compiling aho-corasick v1.1.3
+   Compiling once_cell v1.21.3
+   Compiling self_cell v1.2.0
+   Compiling syn v2.0.106
+   Compiling smallvec v1.15.1
+   Compiling rand_core v0.6.4
+   Compiling arrayvec v0.7.6
+   Compiling type-map v0.5.1
+   Compiling rand v0.8.5
+   Compiling phf_shared v0.11.3
+   Compiling tempfile v3.21.0
+   Compiling num-format v0.4.4
+   Compiling phf_generator v0.11.3
+   Compiling regex-automata v0.4.10
+   Compiling regex v1.11.2
+   Compiling displaydoc v0.2.5
+   Compiling thiserror-impl v2.0.16
+   Compiling serde_derive v1.0.228
+   Compiling snafu-derive v0.8.8
+   Compiling phf_macros v0.11.3
+   Compiling phf v0.11.3
+   Compiling tinystr v0.8.1
+   Compiling unic-langid-impl v0.9.6
+   Compiling unic-langid-macros-impl v0.9.6
+   Compiling fluent-syntax v0.12.0
+   Compiling unic-langid-macros v0.9.6
+   Compiling unic-langid v0.9.6
+   Compiling fluent-langneg v0.13.0
+   Compiling intl_pluralrules v7.0.2
+   Compiling intl-memoizer v0.5.3
+   Compiling snafu v0.8.8
+   Compiling fluent-bundle v0.16.0
+   Compiling serde v1.0.228
+   Compiling fluent v0.17.0
+   Compiling anki_io v0.0.0 (/Users/adarshrajesh/AlphaWeek2/ankiCFA/rslib/io)
+   Compiling serde_json v1.0.143
+   Compiling anki_i18n v0.0.0 (/Users/adarshrajesh/AlphaWeek2/ankiCFA/rslib/i18n)
+    Finished ]8;;https://doc.rust-lang.org/cargo/reference/profiles.html#default-profiles\`dev` profile [unoptimized + debuginfo]]8;;\ target(s) in 10.01s
+[22/64; 2 active; 31.403s] node_modules
+➤ YN0000: · Yarn 4.11.0
+➤ YN0000: ┌ Resolution step
+➤ YN0000: └ Completed
+➤ YN0000: ┌ Post-resolution validation
+➤ ]8;;https://yarnpkg.com/advanced/error-codes#yn0002---missing_peer_dependencyYN0002]8;;: │ anki@workspace:. doesn't provide sass-embedded (p85ef9a), requested by esbuild-sass-plugin and other dependencies.
+➤ ]8;;https://yarnpkg.com/advanced/error-codes#yn0086---explain_peer_dependencies_ctaYN0086]8;;: │ Some peer dependencies are incorrectly met by your project; run yarn explain peer-requirements <hash> for details, where <hash> is the six-letter p-prefixed code.
+➤ ]8;;https://yarnpkg.com/advanced/error-codes#yn0086---explain_peer_dependencies_ctaYN0086]8;;: │ Some peer dependencies are incorrectly met by dependencies; run yarn explain peer-requirements for details.
+➤ YN0000: └ Completed
+➤ YN0000: ┌ Fetch step
+➤ YN0000: └ Completed in 0s 345ms
+➤ YN0000: ┌ Link step
+➤ ]8;;https://yarnpkg.com/advanced/error-codes#yn0004---disabled_build_scriptsYN0004]8;;: │ dprint@npm:0.54.0 lists build scripts, but all build scripts have been disabled.
+➤ ]8;;https://yarnpkg.com/advanced/error-codes#yn0004---disabled_build_scriptsYN0004]8;;: │ esbuild@npm:0.25.5 lists build scripts, but all build scripts have been disabled.
+➤ ]8;;https://yarnpkg.com/advanced/error-codes#yn0004---disabled_build_scriptsYN0004]8;;: │ esbuild@npm:0.28.0 lists build scripts, but all build scripts have been disabled.
+➤ ]8;;https://yarnpkg.com/advanced/error-codes#yn0004---disabled_build_scriptsYN0004]8;;: │ svelte-preprocess@npm:6.0.3 [f4825] lists build scripts, but all build scripts have been disabled.
+➤ YN0000: └ Completed in 5s 746ms
+➤ YN0000: · Done with warnings in 6s 329ms
+[23/64; 16 active; 31.504s] qt:aqt:data:web:js:vendor
+[24/64; 16 active; 31.514s] qt:aqt:data:qt:icons:mdi_unthemed
+[25/64; 16 active; 31.802s] qt:aqt:data:web:js
+[26/64; 15 active; 31.803s] qt:aqt:data:web:js
+[27/64; 14 active; 31.803s] qt:aqt:data:web:js
+[28/64; 13 active; 31.812s] qt:aqt:data:web:js
+[29/64; 12 active; 31.978s] qt:aqt:data:web:js:vendor:mathjax
+[30/64; 11 active; 32.199s] qt:aqt:data:web:css
+[31/64; 10 active; 32.285s] qt:aqt:data:web:css
+[32/64; 9 active; 32.561s] qt:aqt:data:web:css
+[33/64; 8 active; 32.573s] qt:aqt:data:web:css
+[34/64; 7 active; 32.579s] ts:reviewer:reviewer.css
+[35/64; 6 active; 32.589s] qt:aqt:data:web:css
+[36/64; 5 active; 32.631s] css:_root-vars
+[37/64; 5 active; 32.634s] qt:aqt:data:web:css
+[38/64; 4 active; 32.675s] qt:aqt:data:web:css
+[39/64; 3 active; 32.730s] qt:aqt:sass_vars
+[40/64; 13 active; 32.837s] qt:aqt:data:qt:icons:mdi_themed
+[41/64; 12 active; 32.837s] qt:aqt:data:qt:icons:mdi_themed
+[42/64; 11 active; 32.846s] qt:aqt:data:qt:icons:mdi_themed
+[43/64; 10 active; 32.849s] qt:aqt:data:qt:icons:mdi_themed
+[44/64; 9 active; 32.852s] qt:aqt:data:qt:icons:mdi_themed
+[45/64; 8 active; 32.852s] qt:aqt:data:qt:icons:mdi_themed
+[46/64; 7 active; 32.861s] qt:aqt:data:qt:icons:mdi_themed
+[47/64; 6 active; 32.861s] qt:aqt:data:qt:icons:mdi_themed
+[48/64; 5 active; 32.861s] qt:aqt:data:qt:icons:mdi_themed
+[49/64; 4 active; 32.863s] qt:aqt:data:qt:icons:mdi_themed
+[50/64; 3 active; 32.885s] qt:aqt:data:qt:icons:mdi_themed
+[51/64; 3 active; 32.936s] qt:aqt:data:qt:icons
+[52/64; 2 active; 33.474s] ts:generated:proto
+[53/64; 2 active; 62.204s] sveltekit
+▲ [WARNING] Cannot find base config file "./.svelte-kit/tsconfig.json" [tsconfig.json]
+
+    tsconfig.json:2:16:
+      2 │     "extends": ["./.svelte-kit/tsconfig.json"],
+        ╵                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+vite v6.4.2 building SSR bundle for production...
+transforming...
+DEPRECATION WARNING [import]: Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+  ╷
+1 │ @import "$lib/sass/base";
+  │         ^^^^^^^^^^^^^^^^
+  ╵
+    routes/base.scss 1:9  root stylesheet
+
+DEPRECATION WARNING [import]: Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+  ╷
+6 │ @import "bootstrap/scss/buttons";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+    routes/base.scss 6:9  root stylesheet
+
+DEPRECATION WARNING [import]: Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+  ╷
+7 │ @import "bootstrap/scss/button-group";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+    routes/base.scss 7:9  root stylesheet
+
+DEPRECATION WARNING [import]: Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+  ╷
+8 │ @import "bootstrap/scss/transitions";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+    routes/base.scss 8:9  root stylesheet
+
+DEPRECATION WARNING [import]: Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+  ╷
+9 │ @import "bootstrap/scss/modal";
+  │         ^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+    routes/base.scss 9:9  root stylesheet
+
+DEPRECATION WARNING [if-function]: The Sass if() syntax is deprecated in favor of the modern CSS syntax.
+
+Suggestion: if(sass($arg == "$value"): $value; else: $arg)
+
+More info: https://sass-lang.com/d/if-function
+
+   ╷
+58 │       $_args: append($_args, if($arg == "$key", $key, if($arg == "$value", $value, $arg)));
+   │                                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   ╵
+    ../out/node_modules/bootstrap/scss/_functions.scss 58:55      @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 4:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+DEPRECATION WARNING [if-function]: The Sass if() syntax is deprecated in favor of the modern CSS syntax.
+
+Suggestion: if(sass($arg == "$key"): $key; else: if($arg == "$value", $value, $arg))
+
+More info: https://sass-lang.com/d/if-function
+
+   ╷
+58 │       $_args: append($_args, if($arg == "$key", $key, if($arg == "$value", $value, $arg)));
+   │                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   ╵
+    ../out/node_modules/bootstrap/scss/_functions.scss 58:30      @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 4:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+DEPRECATION WARNING [if-function]: The Sass if() syntax is deprecated in favor of the modern CSS syntax.
+
+Suggestion: if(sass($l1 > $l2): divide($l1 + 0.05, $l2 + 0.05); else: divide($l2 + 0.05, $l1 + 0.05))
+
+More info: https://sass-lang.com/d/if-function
+
+    ╷
+177 │   @return if($l1 > $l2, divide($l1 + .05, $l2 + .05), divide($l2 + .05, $l1 + .05));
+    │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ╵
+    ../out/node_modules/bootstrap/scss/_functions.scss 177:11     @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 4:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+DEPRECATION WARNING [if-function]: The Sass if() syntax is deprecated in favor of the modern CSS syntax.
+
+Suggestion: if(sass(divide($value, 255) < 0.04045): divide(divide($value, 255), 12.92); else: nth($_luminance-list, $value + 1))
+
+More info: https://sass-lang.com/d/if-function
+
+    ╷
+191 │     $value: if(divide($value, 255) < .04045, divide(divide($value, 255), 12.92), nth($_luminance-list, $value + 1));
+    │             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ╵
+    ../out/node_modules/bootstrap/scss/_functions.scss 191:13     @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 4:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+DEPRECATION WARNING [if-function]: The Sass if() syntax is deprecated in favor of the modern CSS syntax.
+
+Suggestion: if(sass($weight > 0): shade-color($color, $weight); else: tint-color($color, -$weight))
+
+More info: https://sass-lang.com/d/if-function
+
+    ╷
+217 │   @return if($weight > 0, shade-color($color, $weight), tint-color($color, -$weight));
+    │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ╵
+    ../out/node_modules/bootstrap/scss/_functions.scss 217:11     @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 4:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+DEPRECATION WARNING [global-builtin]: Global built-in functions are deprecated and will be removed in Dart Sass 3.0.0.
+Use color.mix instead.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+    ╷
+207 │   @return mix(white, $color, $weight);
+    │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ╵
+    ../out/node_modules/bootstrap/scss/_functions.scss 207:11     tint-color()
+    ../out/node_modules/bootstrap/scss/_variables.scss 79:12      @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 5:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+DEPRECATION WARNING [global-builtin]: Global built-in functions are deprecated and will be removed in Dart Sass 3.0.0.
+Use color.mix instead.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+    ╷
+212 │   @return mix(black, $color, $weight);
+    │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ╵
+    ../out/node_modules/bootstrap/scss/_functions.scss 212:11     shade-color()
+    ../out/node_modules/bootstrap/scss/_variables.scss 84:12      @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 5:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+DEPRECATION WARNING [global-builtin]: Global built-in functions are deprecated and will be removed in Dart Sass 3.0.0.
+Use color.mix instead.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+    ╷
+342 │ $light-bg-subtle:         mix($gray-100, $white) !default;
+    │                           ^^^^^^^^^^^^^^^^^^^^^^
+    ╵
+    ../out/node_modules/bootstrap/scss/_variables.scss 342:27     @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 5:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+DEPRECATION WARNING [global-builtin]: Global built-in functions are deprecated and will be removed in Dart Sass 3.0.0.
+Use math.unit instead.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+   ╷
+11 │     @if $prev-num == null or unit($num) == "%" or unit($prev-num) == "%" {
+   │                              ^^^^^^^^^^
+   ╵
+    ../out/node_modules/bootstrap/scss/_functions.scss 11:30      -assert-ascending()
+    ../out/node_modules/bootstrap/scss/_variables.scss 494:1      @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 5:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+DEPRECATION WARNING [global-builtin]: Global built-in functions are deprecated and will be removed in Dart Sass 3.0.0.
+Use math.unit instead.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+   ╷
+11 │     @if $prev-num == null or unit($num) == "%" or unit($prev-num) == "%" {
+   │                                                   ^^^^^^^^^^^^^^^
+   ╵
+    ../out/node_modules/bootstrap/scss/_functions.scss 11:51      -assert-ascending()
+    ../out/node_modules/bootstrap/scss/_variables.scss 494:1      @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 5:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+DEPRECATION WARNING [color-functions]: red() is deprecated. Suggestion:
+
+color.channel($color, "red", $space: rgb)
+
+More info: https://sass-lang.com/d/color-functions
+
+    ╷
+185 │     "r": red($color),
+    │          ^^^^^^^^^^^
+    ╵
+    ../out/node_modules/bootstrap/scss/_functions.scss 185:10     luminance()
+    ../out/node_modules/bootstrap/scss/_functions.scss 174:8      contrast-ratio()
+    ../out/node_modules/bootstrap/scss/_functions.scss 159:22     color-contrast()
+    ../out/node_modules/bootstrap/scss/_variables.scss 846:42     @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 5:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+DEPRECATION WARNING [color-functions]: green() is deprecated. Suggestion:
+
+color.channel($color, "green", $space: rgb)
+
+More info: https://sass-lang.com/d/color-functions
+
+    ╷
+186 │     "g": green($color),
+    │          ^^^^^^^^^^^^^
+    ╵
+    ../out/node_modules/bootstrap/scss/_functions.scss 186:10     luminance()
+    ../out/node_modules/bootstrap/scss/_functions.scss 174:8      contrast-ratio()
+    ../out/node_modules/bootstrap/scss/_functions.scss 159:22     color-contrast()
+    ../out/node_modules/bootstrap/scss/_variables.scss 846:42     @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 5:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+DEPRECATION WARNING [color-functions]: blue() is deprecated. Suggestion:
+
+color.channel($color, "blue", $space: rgb)
+
+More info: https://sass-lang.com/d/color-functions
+
+    ╷
+187 │     "b": blue($color)
+    │          ^^^^^^^^^^^^
+    ╵
+    ../out/node_modules/bootstrap/scss/_functions.scss 187:10     luminance()
+    ../out/node_modules/bootstrap/scss/_functions.scss 174:8      contrast-ratio()
+    ../out/node_modules/bootstrap/scss/_functions.scss 159:22     color-contrast()
+    ../out/node_modules/bootstrap/scss/_variables.scss 846:42     @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 5:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+DEPRECATION WARNING [color-functions]: red() is deprecated. Suggestion:
+
+color.channel($color, "red", $space: rgb)
+
+More info: https://sass-lang.com/d/color-functions
+
+   ╷
+37 │   @return red($value), green($value), blue($value);
+   │           ^^^^^^^^^^^
+   ╵
+    ../out/node_modules/bootstrap/scss/_functions.scss 37:11      to-rgb()
+    ../out/node_modules/bootstrap/scss/_variables.scss 846:31     @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 5:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+DEPRECATION WARNING [color-functions]: green() is deprecated. Suggestion:
+
+color.channel($color, "green", $space: rgb)
+
+More info: https://sass-lang.com/d/color-functions
+
+   ╷
+37 │   @return red($value), green($value), blue($value);
+   │                        ^^^^^^^^^^^^^
+   ╵
+    ../out/node_modules/bootstrap/scss/_functions.scss 37:24      to-rgb()
+    ../out/node_modules/bootstrap/scss/_variables.scss 846:31     @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 5:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+WARNING: 267 repetitive deprecation warnings omitted.
+Run in verbose mode to see all warnings.
+
+✓ 744 modules transformed.
+rendering chunks...
+vite v6.4.2 building for production...
+transforming...
+DEPRECATION WARNING [import]: Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+  ╷
+1 │ @import "$lib/sass/base";
+  │         ^^^^^^^^^^^^^^^^
+  ╵
+    routes/base.scss 1:9  root stylesheet
+
+DEPRECATION WARNING [import]: Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+  ╷
+6 │ @import "bootstrap/scss/buttons";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+    routes/base.scss 6:9  root stylesheet
+
+DEPRECATION WARNING [import]: Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+  ╷
+7 │ @import "bootstrap/scss/button-group";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+    routes/base.scss 7:9  root stylesheet
+
+DEPRECATION WARNING [import]: Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+  ╷
+8 │ @import "bootstrap/scss/transitions";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+    routes/base.scss 8:9  root stylesheet
+
+DEPRECATION WARNING [import]: Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+  ╷
+9 │ @import "bootstrap/scss/modal";
+  │         ^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+    routes/base.scss 9:9  root stylesheet
+
+DEPRECATION WARNING [if-function]: The Sass if() syntax is deprecated in favor of the modern CSS syntax.
+
+Suggestion: if(sass($arg == "$value"): $value; else: $arg)
+
+More info: https://sass-lang.com/d/if-function
+
+   ╷
+58 │       $_args: append($_args, if($arg == "$key", $key, if($arg == "$value", $value, $arg)));
+   │                                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   ╵
+    ../out/node_modules/bootstrap/scss/_functions.scss 58:55      @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 4:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+DEPRECATION WARNING [if-function]: The Sass if() syntax is deprecated in favor of the modern CSS syntax.
+
+Suggestion: if(sass($arg == "$key"): $key; else: if($arg == "$value", $value, $arg))
+
+More info: https://sass-lang.com/d/if-function
+
+   ╷
+58 │       $_args: append($_args, if($arg == "$key", $key, if($arg == "$value", $value, $arg)));
+   │                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   ╵
+    ../out/node_modules/bootstrap/scss/_functions.scss 58:30      @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 4:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+DEPRECATION WARNING [if-function]: The Sass if() syntax is deprecated in favor of the modern CSS syntax.
+
+Suggestion: if(sass($l1 > $l2): divide($l1 + 0.05, $l2 + 0.05); else: divide($l2 + 0.05, $l1 + 0.05))
+
+More info: https://sass-lang.com/d/if-function
+
+    ╷
+177 │   @return if($l1 > $l2, divide($l1 + .05, $l2 + .05), divide($l2 + .05, $l1 + .05));
+    │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ╵
+    ../out/node_modules/bootstrap/scss/_functions.scss 177:11     @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 4:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+DEPRECATION WARNING [if-function]: The Sass if() syntax is deprecated in favor of the modern CSS syntax.
+
+Suggestion: if(sass(divide($value, 255) < 0.04045): divide(divide($value, 255), 12.92); else: nth($_luminance-list, $value + 1))
+
+More info: https://sass-lang.com/d/if-function
+
+    ╷
+191 │     $value: if(divide($value, 255) < .04045, divide(divide($value, 255), 12.92), nth($_luminance-list, $value + 1));
+    │             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ╵
+    ../out/node_modules/bootstrap/scss/_functions.scss 191:13     @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 4:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+DEPRECATION WARNING [if-function]: The Sass if() syntax is deprecated in favor of the modern CSS syntax.
+
+Suggestion: if(sass($weight > 0): shade-color($color, $weight); else: tint-color($color, -$weight))
+
+More info: https://sass-lang.com/d/if-function
+
+    ╷
+217 │   @return if($weight > 0, shade-color($color, $weight), tint-color($color, -$weight));
+    │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ╵
+    ../out/node_modules/bootstrap/scss/_functions.scss 217:11     @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 4:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+DEPRECATION WARNING [global-builtin]: Global built-in functions are deprecated and will be removed in Dart Sass 3.0.0.
+Use color.mix instead.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+    ╷
+207 │   @return mix(white, $color, $weight);
+    │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ╵
+    ../out/node_modules/bootstrap/scss/_functions.scss 207:11     tint-color()
+    ../out/node_modules/bootstrap/scss/_variables.scss 79:12      @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 5:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+DEPRECATION WARNING [global-builtin]: Global built-in functions are deprecated and will be removed in Dart Sass 3.0.0.
+Use color.mix instead.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+    ╷
+212 │   @return mix(black, $color, $weight);
+    │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ╵
+    ../out/node_modules/bootstrap/scss/_functions.scss 212:11     shade-color()
+    ../out/node_modules/bootstrap/scss/_variables.scss 84:12      @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 5:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+DEPRECATION WARNING [global-builtin]: Global built-in functions are deprecated and will be removed in Dart Sass 3.0.0.
+Use color.mix instead.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+    ╷
+342 │ $light-bg-subtle:         mix($gray-100, $white) !default;
+    │                           ^^^^^^^^^^^^^^^^^^^^^^
+    ╵
+    ../out/node_modules/bootstrap/scss/_variables.scss 342:27     @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 5:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+DEPRECATION WARNING [global-builtin]: Global built-in functions are deprecated and will be removed in Dart Sass 3.0.0.
+Use math.unit instead.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+   ╷
+11 │     @if $prev-num == null or unit($num) == "%" or unit($prev-num) == "%" {
+   │                              ^^^^^^^^^^
+   ╵
+    ../out/node_modules/bootstrap/scss/_functions.scss 11:30      -assert-ascending()
+    ../out/node_modules/bootstrap/scss/_variables.scss 494:1      @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 5:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+DEPRECATION WARNING [global-builtin]: Global built-in functions are deprecated and will be removed in Dart Sass 3.0.0.
+Use math.unit instead.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+   ╷
+11 │     @if $prev-num == null or unit($num) == "%" or unit($prev-num) == "%" {
+   │                                                   ^^^^^^^^^^^^^^^
+   ╵
+    ../out/node_modules/bootstrap/scss/_functions.scss 11:51      -assert-ascending()
+    ../out/node_modules/bootstrap/scss/_variables.scss 494:1      @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 5:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+DEPRECATION WARNING [color-functions]: red() is deprecated. Suggestion:
+
+color.channel($color, "red", $space: rgb)
+
+More info: https://sass-lang.com/d/color-functions
+
+    ╷
+185 │     "r": red($color),
+    │          ^^^^^^^^^^^
+    ╵
+    ../out/node_modules/bootstrap/scss/_functions.scss 185:10     luminance()
+    ../out/node_modules/bootstrap/scss/_functions.scss 174:8      contrast-ratio()
+    ../out/node_modules/bootstrap/scss/_functions.scss 159:22     color-contrast()
+    ../out/node_modules/bootstrap/scss/_variables.scss 846:42     @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 5:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+DEPRECATION WARNING [color-functions]: green() is deprecated. Suggestion:
+
+color.channel($color, "green", $space: rgb)
+
+More info: https://sass-lang.com/d/color-functions
+
+    ╷
+186 │     "g": green($color),
+    │          ^^^^^^^^^^^^^
+    ╵
+    ../out/node_modules/bootstrap/scss/_functions.scss 186:10     luminance()
+    ../out/node_modules/bootstrap/scss/_functions.scss 174:8      contrast-ratio()
+    ../out/node_modules/bootstrap/scss/_functions.scss 159:22     color-contrast()
+    ../out/node_modules/bootstrap/scss/_variables.scss 846:42     @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 5:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+DEPRECATION WARNING [color-functions]: blue() is deprecated. Suggestion:
+
+color.channel($color, "blue", $space: rgb)
+
+More info: https://sass-lang.com/d/color-functions
+
+    ╷
+187 │     "b": blue($color)
+    │          ^^^^^^^^^^^^
+    ╵
+    ../out/node_modules/bootstrap/scss/_functions.scss 187:10     luminance()
+    ../out/node_modules/bootstrap/scss/_functions.scss 174:8      contrast-ratio()
+    ../out/node_modules/bootstrap/scss/_functions.scss 159:22     color-contrast()
+    ../out/node_modules/bootstrap/scss/_variables.scss 846:42     @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 5:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+DEPRECATION WARNING [color-functions]: red() is deprecated. Suggestion:
+
+color.channel($color, "red", $space: rgb)
+
+More info: https://sass-lang.com/d/color-functions
+
+   ╷
+37 │   @return red($value), green($value), blue($value);
+   │           ^^^^^^^^^^^
+   ╵
+    ../out/node_modules/bootstrap/scss/_functions.scss 37:11      to-rgb()
+    ../out/node_modules/bootstrap/scss/_variables.scss 846:31     @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 5:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+DEPRECATION WARNING [color-functions]: green() is deprecated. Suggestion:
+
+color.channel($color, "green", $space: rgb)
+
+More info: https://sass-lang.com/d/color-functions
+
+   ╷
+37 │   @return red($value), green($value), blue($value);
+   │                        ^^^^^^^^^^^^^
+   ╵
+    ../out/node_modules/bootstrap/scss/_functions.scss 37:24      to-rgb()
+    ../out/node_modules/bootstrap/scss/_variables.scss 846:31     @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 5:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+WARNING: 267 repetitive deprecation warnings omitted.
+Run in verbose mode to see all warnings.
+
+✓ 2144 modules transformed.
+rendering chunks...
+.svelte-kit/output/client/_app/version.json                                     0.03 kB
+.svelte-kit/output/client/.vite/manifest.json                                  24.53 kB
+.svelte-kit/output/client/_app/immutable/assets/3.CpQNAuFF.css                  0.02 kB
+.svelte-kit/output/client/_app/immutable/assets/WithTooltip.CwY-QSVm.css        0.02 kB
+.svelte-kit/output/client/_app/immutable/assets/theme.D57v17Wl.css              0.13 kB
+.svelte-kit/output/client/_app/immutable/assets/ButtonToolbar.B8K_2NwJ.css      0.17 kB
+.svelte-kit/output/client/_app/immutable/assets/5.BKDBnYQO.css                  0.22 kB
+.svelte-kit/output/client/_app/immutable/assets/Badge.sgQJmhGi.css              0.28 kB
+.svelte-kit/output/client/_app/immutable/assets/4.KXcaXAK_.css                  0.29 kB
+.svelte-kit/output/client/_app/immutable/assets/TableData.Xa_ve1fb.css          0.58 kB
+.svelte-kit/output/client/_app/immutable/assets/10.BQsRbckJ.css                 0.59 kB
+.svelte-kit/output/client/_app/immutable/assets/events.BXCy_DyE.css             0.62 kB
+.svelte-kit/output/client/_app/immutable/assets/TitledContainer.BAKyrPx4.css    0.78 kB
+.svelte-kit/output/client/_app/immutable/assets/Col.BlXTyLZT.css                0.82 kB
+.svelte-kit/output/client/_app/immutable/assets/Container.Bgb8JICy.css          1.08 kB
+.svelte-kit/output/client/_app/immutable/assets/EnumSelectorRow.DTtkeyxk.css    1.18 kB
+.svelte-kit/output/client/_app/immutable/assets/HelpModal.BCzy2CK4.css          1.25 kB
+.svelte-kit/output/client/_app/immutable/assets/Select.DHoTlc42.css             1.40 kB
+.svelte-kit/output/client/_app/immutable/assets/HoverColumns.Kz-SlMu5.css       1.41 kB
+.svelte-kit/output/client/_app/immutable/assets/CardInfo.D9Qkr6yG.css           1.55 kB
+.svelte-kit/output/client/_app/immutable/assets/WithFloating.CeA8f18S.css       1.89 kB
+.svelte-kit/output/client/_app/immutable/assets/ImportPage.Bzcjk0Fw.css         2.09 kB
+.svelte-kit/output/client/_app/immutable/assets/IconButton.DcKapxC2.css         2.12 kB
+.svelte-kit/output/client/_app/immutable/assets/LabelButton.By2GQxez.css        2.49 kB
+.svelte-kit/output/client/_app/immutable/assets/7.CuG4I3_F.css                  3.64 kB
+.svelte-kit/output/client/_app/immutable/assets/8.00F4sp74.css                  3.81 kB
+.svelte-kit/output/client/_app/immutable/assets/6.CsQ5pMaH.css                  4.96 kB
+.svelte-kit/output/client/_app/immutable/assets/TagEditor.VJ78vyQ5.css          4.98 kB
+.svelte-kit/output/client/_app/immutable/assets/0.B-RkoCHw.css                147.66 kB
+.svelte-kit/output/client/_app/immutable/entry/start.D-eDTH1Q.mjs               0.08 kB
+.svelte-kit/output/client/_app/immutable/chunks/Dbye-yJ_.mjs                    0.13 kB
+.svelte-kit/output/client/_app/immutable/chunks/7QduYamX.mjs                    0.13 kB
+.svelte-kit/output/client/_app/immutable/chunks/BbkoyQuY.mjs                    0.13 kB
+.svelte-kit/output/client/_app/immutable/chunks/BKPCpP_4.mjs                    0.20 kB
+.svelte-kit/output/client/_app/immutable/chunks/D5aP86yo.mjs                    0.22 kB
+.svelte-kit/output/client/_app/immutable/chunks/DS5KYiI9.mjs                    0.26 kB
+.svelte-kit/output/client/_app/immutable/chunks/DH6j0Xz-.mjs                    0.31 kB
+.svelte-kit/output/client/_app/immutable/chunks/BdvjDRs_.mjs                    0.39 kB
+.svelte-kit/output/client/_app/immutable/nodes/1.BBdDLAVV.mjs                   0.41 kB
+.svelte-kit/output/client/_app/immutable/chunks/BjkmJsJr.mjs                    0.46 kB
+.svelte-kit/output/client/_app/immutable/chunks/CEohWXjE.mjs                    0.54 kB
+.svelte-kit/output/client/_app/immutable/chunks/4LA4kwGm.mjs                    0.58 kB
+.svelte-kit/output/client/_app/immutable/nodes/11.B_7afAkI.mjs                  0.61 kB
+.svelte-kit/output/client/_app/immutable/chunks/DeS6YXkP.mjs                    0.70 kB
+.svelte-kit/output/client/_app/immutable/chunks/_d1bhYXs.mjs                    0.73 kB
+.svelte-kit/output/client/_app/immutable/chunks/DB8w6JNV.mjs                    0.75 kB
+.svelte-kit/output/client/_app/immutable/nodes/0.BfvrewNY.mjs                   0.78 kB
+.svelte-kit/output/client/_app/immutable/chunks/D8oh8-Gg.mjs                    0.78 kB
+.svelte-kit/output/client/_app/immutable/chunks/BtrlUR0E.mjs                    0.79 kB
+.svelte-kit/output/client/_app/immutable/nodes/2.BUe4CMg0.mjs                   0.96 kB
+.svelte-kit/output/client/_app/immutable/chunks/CAVb66_W.mjs                    1.10 kB
+.svelte-kit/output/client/_app/immutable/chunks/D68rH1eU.mjs                    1.11 kB
+.svelte-kit/output/client/_app/immutable/chunks/Z4XWOC_z.mjs                    1.15 kB
+.svelte-kit/output/client/_app/immutable/chunks/BQEoOQuA.mjs                    1.43 kB
+.svelte-kit/output/client/_app/immutable/chunks/DDqSGGpk.mjs                    1.57 kB
+.svelte-kit/output/client/_app/immutable/nodes/3.CJdl9iJ0.mjs                   1.59 kB
+.svelte-kit/output/client/_app/immutable/chunks/BfqB08zp.mjs                    1.75 kB
+.svelte-kit/output/client/_app/immutable/chunks/sh3A81SU.mjs                    1.80 kB
+.svelte-kit/output/client/_app/immutable/chunks/dadLMnsd.mjs                    2.14 kB
+.svelte-kit/output/client/_app/immutable/nodes/5.DgBlf5U5.mjs                   3.05 kB
+.svelte-kit/output/client/_app/immutable/chunks/RWwv3F0F.mjs                    3.80 kB
+.svelte-kit/output/client/_app/immutable/chunks/CQKPd2l4.mjs                    3.95 kB
+.svelte-kit/output/client/_app/immutable/nodes/9.CAkPTAIH.mjs                   4.30 kB
+.svelte-kit/output/client/_app/immutable/chunks/BThdrneP.mjs                    4.41 kB
+.svelte-kit/output/client/_app/immutable/chunks/DD95wICf.mjs                    5.16 kB
+.svelte-kit/output/client/_app/immutable/chunks/CwijadMk.mjs                    5.28 kB
+.svelte-kit/output/client/_app/immutable/chunks/D6zJYWBm.mjs                    6.10 kB
+.svelte-kit/output/client/_app/immutable/chunks/Ccv9XhzK.mjs                    8.34 kB
+.svelte-kit/output/client/_app/immutable/entry/app.CooUcoK5.mjs                10.29 kB
+.svelte-kit/output/client/_app/immutable/chunks/1JviX1jy.mjs                   11.04 kB
+.svelte-kit/output/client/_app/immutable/chunks/BN0fnbsC.mjs                   11.04 kB
+.svelte-kit/output/client/_app/immutable/chunks/D56EhfwE.mjs                   11.75 kB
+.svelte-kit/output/client/_app/immutable/chunks/DnPBscIQ.mjs                   12.71 kB
+.svelte-kit/output/client/_app/immutable/nodes/4.DantOrH8.mjs                  13.39 kB
+.svelte-kit/output/client/_app/immutable/nodes/10.BpiBXC23.mjs                 15.96 kB
+.svelte-kit/output/client/_app/immutable/chunks/CQz9itg7.mjs                   16.43 kB
+.svelte-kit/output/client/_app/immutable/chunks/DGQfpFuc.mjs                   22.61 kB
+.svelte-kit/output/client/_app/immutable/chunks/C7J4MjeE.mjs                   25.13 kB
+.svelte-kit/output/client/_app/immutable/chunks/1V9HOqFh.mjs                   27.11 kB
+.svelte-kit/output/client/_app/immutable/chunks/I6i_mJyp.mjs                   30.59 kB
+.svelte-kit/output/client/_app/immutable/chunks/CTIk6S6H.mjs                   34.70 kB
+.svelte-kit/output/client/_app/immutable/chunks/DNVY512u.mjs                   34.76 kB
+.svelte-kit/output/client/_app/immutable/chunks/Dz_xrHy5.mjs                   34.88 kB
+.svelte-kit/output/client/_app/immutable/chunks/bCmLN4C_.mjs                   39.27 kB
+.svelte-kit/output/client/_app/immutable/chunks/CcaWrs5J.mjs                   40.27 kB
+.svelte-kit/output/client/_app/immutable/chunks/D3dlqEWp.mjs                   64.93 kB
+.svelte-kit/output/client/_app/immutable/nodes/7.DJf51mFC.mjs                  69.05 kB
+.svelte-kit/output/client/_app/immutable/chunks/Di_o2wft.mjs                   81.41 kB
+.svelte-kit/output/client/_app/immutable/nodes/6.BZ5fyO29.mjs                 107.99 kB
+.svelte-kit/output/client/_app/immutable/chunks/Bz61hAW0.mjs                  158.96 kB
+.svelte-kit/output/client/_app/immutable/nodes/8.DNEehJFF.mjs                 379.34 kB
+✓ built in 13.75s
+.svelte-kit/output/server/.vite/manifest.json                                                    23.31 kB
+.svelte-kit/output/server/_app/immutable/assets/_page.CpQNAuFF.css                                0.02 kB
+.svelte-kit/output/server/_app/immutable/assets/WithTooltip.CwY-QSVm.css                          0.02 kB
+.svelte-kit/output/server/_app/immutable/assets/theme.D57v17Wl.css                                0.13 kB
+.svelte-kit/output/server/_app/immutable/assets/ButtonToolbar.B8K_2NwJ.css                        0.17 kB
+.svelte-kit/output/server/_app/immutable/assets/_page.BKDBnYQO.css                                0.22 kB
+.svelte-kit/output/server/_app/immutable/assets/Badge.sgQJmhGi.css                                0.28 kB
+.svelte-kit/output/server/_app/immutable/assets/_page.KXcaXAK_.css                                0.29 kB
+.svelte-kit/output/server/_app/immutable/assets/lib.wJT_b_RN.css                                  0.51 kB
+.svelte-kit/output/server/_app/immutable/assets/TableData.Xa_ve1fb.css                            0.58 kB
+.svelte-kit/output/server/_app/immutable/assets/_page.BQsRbckJ.css                                0.59 kB
+.svelte-kit/output/server/_app/immutable/assets/IconConstrain.BXCy_DyE.css                        0.62 kB
+.svelte-kit/output/server/_app/immutable/assets/TitledContainer.BAKyrPx4.css                      0.78 kB
+.svelte-kit/output/server/_app/immutable/assets/Col.BlXTyLZT.css                                  0.82 kB
+.svelte-kit/output/server/_app/immutable/assets/Container.Bgb8JICy.css                            1.08 kB
+.svelte-kit/output/server/_app/immutable/assets/HoverColumns.CgL5Y0lf.css                         1.08 kB
+.svelte-kit/output/server/_app/immutable/assets/EnumSelectorRow.DTtkeyxk.css                      1.18 kB
+.svelte-kit/output/server/_app/immutable/assets/HelpModal.BCzy2CK4.css                            1.25 kB
+.svelte-kit/output/server/_app/immutable/assets/Select.DHoTlc42.css                               1.40 kB
+.svelte-kit/output/server/_app/immutable/assets/ImportPage.BsD82kkf.css                           1.54 kB
+.svelte-kit/output/server/_app/immutable/assets/CardInfo.D9Qkr6yG.css                             1.55 kB
+.svelte-kit/output/server/_app/immutable/assets/WithFloating.CeA8f18S.css                         1.89 kB
+.svelte-kit/output/server/_app/immutable/assets/IconButton.DcKapxC2.css                           2.12 kB
+.svelte-kit/output/server/_app/immutable/assets/LabelButton.By2GQxez.css                          2.49 kB
+.svelte-kit/output/server/_app/immutable/assets/_page.uKn-nVCr.css                                3.31 kB
+.svelte-kit/output/server/_app/immutable/assets/_page.CuG4I3_F.css                                3.64 kB
+.svelte-kit/output/server/_app/immutable/assets/_page.CsQ5pMaH.css                                4.96 kB
+.svelte-kit/output/server/_app/immutable/assets/TagEditor.VJ78vyQ5.css                            4.98 kB
+.svelte-kit/output/server/_app/immutable/assets/_layout.B-RkoCHw.css                            147.66 kB
+.svelte-kit/output/server/chunks/false.js                                                         0.04 kB
+.svelte-kit/output/server/entries/pages/import-page/_...path_/_page.ts.js                         0.09 kB
+.svelte-kit/output/server/chunks/html.js                                                          0.16 kB
+.svelte-kit/output/server/entries/pages/congrats/_page.ts.js                                      0.17 kB
+.svelte-kit/output/server/entries/pages/import-anki-package/_...path_/_page.ts.js                 0.24 kB
+.svelte-kit/output/server/chunks/context-keys.js                                                  0.25 kB
+.svelte-kit/output/server/chunks/helpers.js                                                       0.32 kB
+.svelte-kit/output/server/entries/pages/card-info/_cardId_/_page.ts.js                            0.35 kB
+.svelte-kit/output/server/internal.js                                                             0.35 kB
+.svelte-kit/output/server/chunks/bridgecommand.js                                                 0.35 kB
+.svelte-kit/output/server/entries/pages/_error.svelte.js                                          0.36 kB
+.svelte-kit/output/server/entries/pages/deck-options/_deckId_/_page.ts.js                         0.41 kB
+.svelte-kit/output/server/entries/pages/_layout.ts.js                                             0.49 kB
+.svelte-kit/output/server/entries/pages/import-page/_...path_/_page.svelte.js                     0.53 kB
+.svelte-kit/output/server/entries/pages/card-info/_cardId_/_previousId_/_page.ts.js               0.55 kB
+.svelte-kit/output/server/entries/pages/_layout.svelte.js                                         0.57 kB
+.svelte-kit/output/server/chunks/environment.js                                                   0.62 kB
+.svelte-kit/output/server/entries/pages/change-notetype/_...notetypeIds_/_page.ts.js              0.70 kB
+.svelte-kit/output/server/entries/pages/card-info/_cardId_/_page.svelte.js                        0.75 kB
+.svelte-kit/output/server/chunks/Col.js                                                           0.76 kB
+.svelte-kit/output/server/chunks/runtime-require.js                                               0.94 kB
+.svelte-kit/output/server/chunks/Container.js                                                     0.94 kB
+.svelte-kit/output/server/chunks/Warning.js                                                       0.96 kB
+.svelte-kit/output/server/chunks/TableData.js                                                     1.06 kB
+.svelte-kit/output/server/chunks/theme.js                                                         1.08 kB
+.svelte-kit/output/server/chunks/utils.js                                                         1.09 kB
+.svelte-kit/output/server/chunks/index2.js                                                        1.28 kB
+.svelte-kit/output/server/chunks/ftl-helpers.js                                                   1.33 kB
+.svelte-kit/output/server/chunks/ButtonToolbar.js                                                 1.44 kB
+.svelte-kit/output/server/entries/pages/card-info/_cardId_/_previousId_/_page.svelte.js           1.45 kB
+.svelte-kit/output/server/chunks/TitledContainer.js                                               1.56 kB
+.svelte-kit/output/server/chunks/Badge.js                                                         1.59 kB
+.svelte-kit/output/server/chunks/IconButton.js                                                    1.60 kB
+.svelte-kit/output/server/chunks/index-server.js                                                  1.62 kB
+.svelte-kit/output/server/chunks/abort-signal.js                                                  1.95 kB
+.svelte-kit/output/server/chunks/LabelButton.js                                                   2.04 kB
+.svelte-kit/output/server/chunks/hydratable.js                                                    2.17 kB
+.svelte-kit/output/server/chunks/utils2.js                                                        2.19 kB
+.svelte-kit/output/server/chunks/render-context.js                                                2.52 kB
+.svelte-kit/output/server/chunks/index.js                                                         2.94 kB
+.svelte-kit/output/server/chunks/internal.js                                                      3.26 kB
+.svelte-kit/output/server/entries/pages/congrats/_page.svelte.js                                  4.82 kB
+.svelte-kit/output/server/chunks/Shortcut.js                                                      5.34 kB
+.svelte-kit/output/server/chunks/HoverColumns.js                                                  5.37 kB
+.svelte-kit/output/server/chunks/time.js                                                          5.49 kB
+.svelte-kit/output/server/chunks/exports.js                                                       5.60 kB
+.svelte-kit/output/server/chunks/lib.js                                                           5.75 kB
+.svelte-kit/output/server/chunks/Select.js                                                        6.96 kB
+.svelte-kit/output/server/entries/pages/import-csv/_...path_/_page.ts.js                          7.43 kB
+.svelte-kit/output/server/chunks/lib3.js                                                          8.14 kB
+.svelte-kit/output/server/entries/pages/import-anki-package/_...path_/_page.svelte.js             8.60 kB
+.svelte-kit/output/server/chunks/HelpModal.js                                                    10.49 kB
+.svelte-kit/output/server/chunks/EnumSelectorRow.js                                              11.49 kB
+.svelte-kit/output/server/chunks/WithFloating.js                                                 11.84 kB
+.svelte-kit/output/server/chunks/lib2.js                                                         12.93 kB
+.svelte-kit/output/server/entries/pages/image-occlusion/_...imagePathOrNoteId_/_page.ts.js       14.24 kB
+.svelte-kit/output/server/chunks/ImportPage.js                                                   14.43 kB
+.svelte-kit/output/server/entries/pages/change-notetype/_...notetypeIds_/_page.svelte.js         15.70 kB
+.svelte-kit/output/server/chunks/stats_pb.js                                                     15.75 kB
+.svelte-kit/output/server/entries/pages/import-csv/_...path_/_page.svelte.js                     27.48 kB
+.svelte-kit/output/server/chunks/TagEditor.js                                                    28.54 kB
+.svelte-kit/output/server/chunks/CardInfo.js                                                     29.23 kB
+.svelte-kit/output/server/remote-entry.js                                                        32.69 kB
+.svelte-kit/output/server/chunks/root.js                                                         33.78 kB
+.svelte-kit/output/server/chunks/shared.js                                                       34.95 kB
+.svelte-kit/output/server/chunks/renderer.js                                                     39.53 kB
+.svelte-kit/output/server/chunks/backend.js                                                      43.38 kB
+.svelte-kit/output/server/chunks/events.js                                                       47.20 kB
+.svelte-kit/output/server/entries/pages/image-occlusion/_...imagePathOrNoteId_/_page.svelte.js   57.43 kB
+.svelte-kit/output/server/chunks/ftl.js                                                          67.07 kB
+.svelte-kit/output/server/chunks/utils3.js                                                       67.85 kB
+.svelte-kit/output/server/entries/pages/graphs/_page.svelte.js                                   99.45 kB
+.svelte-kit/output/server/index.js                                                              138.91 kB
+.svelte-kit/output/server/entries/pages/deck-options/_deckId_/_page.svelte.js                   193.31 kB
+✓ built in 25.00s
+
+Run npm run preview to preview your production build locally.
+
+> Using @sveltejs/adapter-static
+  Wrote site to "../out/sveltekit"
+  ✔ done
+[54/64; 7 active; 62.381s] ts:mathjax
+[55/64; 6 active; 62.466s] ts:reviewer:reviewer.js
+[56/64; 5 active; 62.502s] qt:aqt:data:web:sveltekit
+[57/64; 4 active; 63.214s] ts:editable
+[58/64; 3 active; 64.298s] ts:congrats
+▲ [WARNING] sass warning: 222 repetitive deprecation warnings omitted.
+Run in verbose mode to see all warnings. [plugin sass-plugin]
+
+    ts/routes/congrats/index.ts:9:7:
+      9 │ import "./congrats-base.scss";
+        ╵        ~~~~~~~~~~~~~~~~~~~~~~
+
+▲ [WARNING] Global built-in functions are deprecated and will be removed in Dart Sass 3.0.0.
+Use math.unit instead.
+
+More info and automated migrator: https://sass-lang.com/d/import [plugin sass-plugin]
+
+    node_modules/bootstrap/scss/_functions.scss:10:10:
+      10 │ unit($num)
+         ╵           ^
+
+  The plugin "sass-plugin" was triggered by this import
+
+    ts/routes/congrats/index.ts:9:7:
+      9 │ import "./congrats-base.scss";
+        ╵        ~~~~~~~~~~~~~~~~~~~~~~
+
+▲ [WARNING] Global built-in functions are deprecated and will be removed in Dart Sass 3.0.0.
+Use math.unit instead.
+
+More info and automated migrator: https://sass-lang.com/d/import [plugin sass-plugin]
+
+    node_modules/bootstrap/scss/_functions.scss:10:15:
+      10 │ unit($prev-num)
+         ╵                ^
+
+  The plugin "sass-plugin" was triggered by this import
+
+    ts/routes/congrats/index.ts:9:7:
+      9 │ import "./congrats-base.scss";
+        ╵        ~~~~~~~~~~~~~~~~~~~~~~
+
+▲ [WARNING] red() is deprecated. Suggestion:
+
+color.channel($color, "red", $space: rgb)
+
+More info: https://sass-lang.com/d/color-functions [plugin sass-plugin]
+
+    node_modules/bootstrap/scss/_functions.scss:36:10:
+      36 │ red($value)
+         ╵           ^
+
+  The plugin "sass-plugin" was triggered by this import
+
+    ts/routes/congrats/index.ts:9:7:
+      9 │ import "./congrats-base.scss";
+        ╵        ~~~~~~~~~~~~~~~~~~~~~~
+
+▲ [WARNING] green() is deprecated. Suggestion:
+
+color.channel($color, "green", $space: rgb)
+
+More info: https://sass-lang.com/d/color-functions [plugin sass-plugin]
+
+    node_modules/bootstrap/scss/_functions.scss:36:13:
+      36 │ green($value)
+         ╵              ^
+
+  The plugin "sass-plugin" was triggered by this import
+
+    ts/routes/congrats/index.ts:9:7:
+      9 │ import "./congrats-base.scss";
+        ╵        ~~~~~~~~~~~~~~~~~~~~~~
+
+▲ [WARNING] The Sass if() syntax is deprecated in favor of the modern CSS syntax.
+
+Suggestion: if(sass($arg == "$key"): $key; else: if($arg == "$value", $value, $arg))
+
+More info: https://sass-lang.com/d/if-function [plugin sass-plugin]
+
+    node_modules/bootstrap/scss/_functions.scss:57:29:
+      57 │ if($arg == "$key", $key, if($arg == "$value", $value, $arg))
+         ╵                              ^
+
+  The plugin "sass-plugin" was triggered by this import
+
+    ts/routes/congrats/index.ts:9:7:
+      9 │ import "./congrats-base.scss";
+        ╵        ~~~~~~~~~~~~~~~~~~~~~~
+
+▲ [WARNING] The Sass if() syntax is deprecated in favor of the modern CSS syntax.
+
+Suggestion: if(sass($arg == "$value"): $value; else: $arg)
+
+More info: https://sass-lang.com/d/if-function [plugin sass-plugin]
+
+    node_modules/bootstrap/scss/_functions.scss:57:34:
+      57 │ if($arg == "$value", $value, $arg)
+         ╵                                   ^
+
+  The plugin "sass-plugin" was triggered by this import
+
+    ts/routes/congrats/index.ts:9:7:
+      9 │ import "./congrats-base.scss";
+        ╵        ~~~~~~~~~~~~~~~~~~~~~~
+
+▲ [WARNING] The Sass if() syntax is deprecated in favor of the modern CSS syntax.
+
+Suggestion: if(sass($l1 > $l2): divide($l1 + 0.05, $l2 + 0.05); else: divide($l2 + 0.05, $l1 + 0.05))
+
+More info: https://sass-lang.com/d/if-function [plugin sass-plugin]
+
+    node_modules/bootstrap/scss/_functions.scss:176:10:
+      176 │ if($l1 > $l2, divide($l1 + .05, $l2 + .05), divide($l2 + .05, $l1...
+          ╵           ^
+
+  The plugin "sass-plugin" was triggered by this import
+
+    ts/routes/congrats/index.ts:9:7:
+      9 │ import "./congrats-base.scss";
+        ╵        ~~~~~~~~~~~~~~~~~~~~~~
+
+▲ [WARNING] red() is deprecated. Suggestion:
+
+color.channel($color, "red", $space: rgb)
+
+More info: https://sass-lang.com/d/color-functions [plugin sass-plugin]
+
+    node_modules/bootstrap/scss/_functions.scss:184:9:
+      184 │ red($color)
+          ╵          ^
+
+  The plugin "sass-plugin" was triggered by this import
+
+    ts/routes/congrats/index.ts:9:7:
+      9 │ import "./congrats-base.scss";
+        ╵        ~~~~~~~~~~~~~~~~~~~~~~
+
+▲ [WARNING] green() is deprecated. Suggestion:
+
+color.channel($color, "green", $space: rgb)
+
+More info: https://sass-lang.com/d/color-functions [plugin sass-plugin]
+
+    node_modules/bootstrap/scss/_functions.scss:185:9:
+      185 │ green($color)
+          ╵          ^
+
+  The plugin "sass-plugin" was triggered by this import
+
+    ts/routes/congrats/index.ts:9:7:
+      9 │ import "./congrats-base.scss";
+        ╵        ~~~~~~~~~~~~~~~~~~~~~~
+
+▲ [WARNING] blue() is deprecated. Suggestion:
+
+color.channel($color, "blue", $space: rgb)
+
+More info: https://sass-lang.com/d/color-functions [plugin sass-plugin]
+
+    node_modules/bootstrap/scss/_functions.scss:186:9:
+      186 │ blue($color)
+          ╵          ^
+
+  The plugin "sass-plugin" was triggered by this import
+
+    ts/routes/congrats/index.ts:9:7:
+      9 │ import "./congrats-base.scss";
+        ╵        ~~~~~~~~~~~~~~~~~~~~~~
+
+▲ [WARNING] The Sass if() syntax is deprecated in favor of the modern CSS syntax.
+
+Suggestion: if(sass(divide($value, 255) < 0.04045): divide(divide($value, 255), 12.92); else: nth($_luminance-list, $value + 1))
+
+More info: https://sass-lang.com/d/if-function [plugin sass-plugin]
+
+    node_modules/bootstrap/scss/_functions.scss:190:12:
+      190 │ if(divide($value, 255) < .04045, divide(divide($value, 255), 12.9...
+          ╵             ^
+
+  The plugin "sass-plugin" was triggered by this import
+
+    ts/routes/congrats/index.ts:9:7:
+      9 │ import "./congrats-base.scss";
+        ╵        ~~~~~~~~~~~~~~~~~~~~~~
+
+▲ [WARNING] Global built-in functions are deprecated and will be removed in Dart Sass 3.0.0.
+Use color.mix instead.
+
+More info and automated migrator: https://sass-lang.com/d/import [plugin sass-plugin]
+
+    node_modules/bootstrap/scss/_functions.scss:206:10:
+      206 │ mix(white, $color, $weight)
+          ╵           ^
+
+  The plugin "sass-plugin" was triggered by this import
+
+    ts/routes/congrats/index.ts:9:7:
+      9 │ import "./congrats-base.scss";
+        ╵        ~~~~~~~~~~~~~~~~~~~~~~
+
+▲ [WARNING] Global built-in functions are deprecated and will be removed in Dart Sass 3.0.0.
+Use color.mix instead.
+
+More info and automated migrator: https://sass-lang.com/d/import [plugin sass-plugin]
+
+    node_modules/bootstrap/scss/_functions.scss:211:10:
+      211 │ mix(black, $color, $weight)
+          ╵           ^
+
+  The plugin "sass-plugin" was triggered by this import
+
+    ts/routes/congrats/index.ts:9:7:
+      9 │ import "./congrats-base.scss";
+        ╵        ~~~~~~~~~~~~~~~~~~~~~~
+
+▲ [WARNING] The Sass if() syntax is deprecated in favor of the modern CSS syntax.
+
+Suggestion: if(sass($weight > 0): shade-color($color, $weight); else: tint-color($color, -$weight))
+
+More info: https://sass-lang.com/d/if-function [plugin sass-plugin]
+
+    node_modules/bootstrap/scss/_functions.scss:216:10:
+      216 │ if($weight > 0, shade-color($color, $weight), tint-color($color, ...
+          ╵           ^
+
+  The plugin "sass-plugin" was triggered by this import
+
+    ts/routes/congrats/index.ts:9:7:
+      9 │ import "./congrats-base.scss";
+        ╵        ~~~~~~~~~~~~~~~~~~~~~~
+
+▲ [WARNING] Global built-in functions are deprecated and will be removed in Dart Sass 3.0.0.
+Use color.mix instead.
+
+More info and automated migrator: https://sass-lang.com/d/import [plugin sass-plugin]
+
+    node_modules/bootstrap/scss/_variables.scss:341:22:
+      341 │ mix($gray-100, $white)
+          ╵                       ^
+
+  The plugin "sass-plugin" was triggered by this import
+
+    ts/routes/congrats/index.ts:9:7:
+      9 │ import "./congrats-base.scss";
+        ╵        ~~~~~~~~~~~~~~~~~~~~~~
+
+▲ [WARNING] Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import [plugin sass-plugin]
+
+    node_modules/bootstrap/scss/bootstrap-reboot.scss:0:8:
+      0 │ "mixins/banner"
+        ╵         ^
+
+  The plugin "sass-plugin" was triggered by this import
+
+    ts/routes/congrats/index.ts:9:7:
+      9 │ import "./congrats-base.scss";
+        ╵        ~~~~~~~~~~~~~~~~~~~~~~
+
+▲ [WARNING] Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import [plugin sass-plugin]
+
+    ts/lib/sass/base.scss:24:8:
+      24 │ "bootstrap/scss/bootstrap-reboot"
+         ╵         ^
+
+  The plugin "sass-plugin" was triggered by this import
+
+    ts/routes/congrats/index.ts:9:7:
+      9 │ import "./congrats-base.scss";
+        ╵        ~~~~~~~~~~~~~~~~~~~~~~
+
+▲ [WARNING] Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import [plugin sass-plugin]
+
+    ts/lib/sass/base.scss:25:8:
+      25 │ "bootstrap/scss/bootstrap-utilities"
+         ╵         ^
+
+  The plugin "sass-plugin" was triggered by this import
+
+    ts/routes/congrats/index.ts:9:7:
+      9 │ import "./congrats-base.scss";
+        ╵        ~~~~~~~~~~~~~~~~~~~~~~
+
+▲ [WARNING] Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import [plugin sass-plugin]
+
+    ts/routes/congrats/congrats-base.scss:1:8:
+      1 │ "../../lib/sass/base"
+        ╵         ^
+
+  The plugin "sass-plugin" was triggered by this import
+
+    ts/routes/congrats/index.ts:9:7:
+      9 │ import "./congrats-base.scss";
+        ╵        ~~~~~~~~~~~~~~~~~~~~~~
+
+▲ [WARNING] Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import [plugin sass-plugin]
+
+    ts/routes/congrats/congrats-base.scss:3:8:
+      3 │ "bootstrap/scss/containers"
+        ╵         ^
+
+  The plugin "sass-plugin" was triggered by this import
+
+    ts/routes/congrats/index.ts:9:7:
+      9 │ import "./congrats-base.scss";
+        ╵        ~~~~~~~~~~~~~~~~~~~~~~
+
+[59/64; 3 active; 64.356s] qt:aqt:data:web:pages
+[60/64; 2 active; 66.404s] ts:editor
+▲ [WARNING] sass warning: 232 repetitive deprecation warnings omitted.
+Run in verbose mode to see all warnings. [plugin sass-plugin]
+
+    ts/editor/base.ts:9:7:
+      9 │ import "./editor-base.scss";
+        ╵        ~~~~~~~~~~~~~~~~~~~~
+
+▲ [WARNING] Global built-in functions are deprecated and will be removed in Dart Sass 3.0.0.
+Use math.unit instead.
+
+More info and automated migrator: https://sass-lang.com/d/import [plugin sass-plugin]
+
+    node_modules/bootstrap/scss/_functions.scss:10:10:
+      10 │ unit($num)
+         ╵           ^
+
+  The plugin "sass-plugin" was triggered by this import
+
+    ts/editor/base.ts:9:7:
+      9 │ import "./editor-base.scss";
+        ╵        ~~~~~~~~~~~~~~~~~~~~
+
+▲ [WARNING] Global built-in functions are deprecated and will be removed in Dart Sass 3.0.0.
+Use math.unit instead.
+
+More info and automated migrator: https://sass-lang.com/d/import [plugin sass-plugin]
+
+    node_modules/bootstrap/scss/_functions.scss:10:15:
+      10 │ unit($prev-num)
+         ╵                ^
+
+  The plugin "sass-plugin" was triggered by this import
+
+    ts/editor/base.ts:9:7:
+      9 │ import "./editor-base.scss";
+        ╵        ~~~~~~~~~~~~~~~~~~~~
+
+▲ [WARNING] red() is deprecated. Suggestion:
+
+color.channel($color, "red", $space: rgb)
+
+More info: https://sass-lang.com/d/color-functions [plugin sass-plugin]
+
+    node_modules/bootstrap/scss/_functions.scss:36:10:
+      36 │ red($value)
+         ╵           ^
+
+  The plugin "sass-plugin" was triggered by this import
+
+    ts/editor/base.ts:9:7:
+      9 │ import "./editor-base.scss";
+        ╵        ~~~~~~~~~~~~~~~~~~~~
+
+▲ [WARNING] green() is deprecated. Suggestion:
+
+color.channel($color, "green", $space: rgb)
+
+More info: https://sass-lang.com/d/color-functions [plugin sass-plugin]
+
+    node_modules/bootstrap/scss/_functions.scss:36:13:
+      36 │ green($value)
+         ╵              ^
+
+  The plugin "sass-plugin" was triggered by this import
+
+    ts/editor/base.ts:9:7:
+      9 │ import "./editor-base.scss";
+        ╵        ~~~~~~~~~~~~~~~~~~~~
+
+▲ [WARNING] The Sass if() syntax is deprecated in favor of the modern CSS syntax.
+
+Suggestion: if(sass($arg == "$key"): $key; else: if($arg == "$value", $value, $arg))
+
+More info: https://sass-lang.com/d/if-function [plugin sass-plugin]
+
+    node_modules/bootstrap/scss/_functions.scss:57:29:
+      57 │ if($arg == "$key", $key, if($arg == "$value", $value, $arg))
+         ╵                              ^
+
+  The plugin "sass-plugin" was triggered by this import
+
+    ts/editor/base.ts:9:7:
+      9 │ import "./editor-base.scss";
+        ╵        ~~~~~~~~~~~~~~~~~~~~
+
+▲ [WARNING] The Sass if() syntax is deprecated in favor of the modern CSS syntax.
+
+Suggestion: if(sass($arg == "$value"): $value; else: $arg)
+
+More info: https://sass-lang.com/d/if-function [plugin sass-plugin]
+
+    node_modules/bootstrap/scss/_functions.scss:57:34:
+      57 │ if($arg == "$value", $value, $arg)
+         ╵                                   ^
+
+  The plugin "sass-plugin" was triggered by this import
+
+    ts/editor/base.ts:9:7:
+      9 │ import "./editor-base.scss";
+        ╵        ~~~~~~~~~~~~~~~~~~~~
+
+▲ [WARNING] The Sass if() syntax is deprecated in favor of the modern CSS syntax.
+
+Suggestion: if(sass($l1 > $l2): divide($l1 + 0.05, $l2 + 0.05); else: divide($l2 + 0.05, $l1 + 0.05))
+
+More info: https://sass-lang.com/d/if-function [plugin sass-plugin]
+
+    node_modules/bootstrap/scss/_functions.scss:176:10:
+      176 │ if($l1 > $l2, divide($l1 + .05, $l2 + .05), divide($l2 + .05, $l1...
+          ╵           ^
+
+  The plugin "sass-plugin" was triggered by this import
+
+    ts/editor/base.ts:9:7:
+      9 │ import "./editor-base.scss";
+        ╵        ~~~~~~~~~~~~~~~~~~~~
+
+▲ [WARNING] red() is deprecated. Suggestion:
+
+color.channel($color, "red", $space: rgb)
+
+More info: https://sass-lang.com/d/color-functions [plugin sass-plugin]
+
+    node_modules/bootstrap/scss/_functions.scss:184:9:
+      184 │ red($color)
+          ╵          ^
+
+  The plugin "sass-plugin" was triggered by this import
+
+    ts/editor/base.ts:9:7:
+      9 │ import "./editor-base.scss";
+        ╵        ~~~~~~~~~~~~~~~~~~~~
+
+▲ [WARNING] green() is deprecated. Suggestion:
+
+color.channel($color, "green", $space: rgb)
+
+More info: https://sass-lang.com/d/color-functions [plugin sass-plugin]
+
+    node_modules/bootstrap/scss/_functions.scss:185:9:
+      185 │ green($color)
+          ╵          ^
+
+  The plugin "sass-plugin" was triggered by this import
+
+    ts/editor/base.ts:9:7:
+      9 │ import "./editor-base.scss";
+        ╵        ~~~~~~~~~~~~~~~~~~~~
+
+▲ [WARNING] blue() is deprecated. Suggestion:
+
+color.channel($color, "blue", $space: rgb)
+
+More info: https://sass-lang.com/d/color-functions [plugin sass-plugin]
+
+    node_modules/bootstrap/scss/_functions.scss:186:9:
+      186 │ blue($color)
+          ╵          ^
+
+  The plugin "sass-plugin" was triggered by this import
+
+    ts/editor/base.ts:9:7:
+      9 │ import "./editor-base.scss";
+        ╵        ~~~~~~~~~~~~~~~~~~~~
+
+▲ [WARNING] The Sass if() syntax is deprecated in favor of the modern CSS syntax.
+
+Suggestion: if(sass(divide($value, 255) < 0.04045): divide(divide($value, 255), 12.92); else: nth($_luminance-list, $value + 1))
+
+More info: https://sass-lang.com/d/if-function [plugin sass-plugin]
+
+    node_modules/bootstrap/scss/_functions.scss:190:12:
+      190 │ if(divide($value, 255) < .04045, divide(divide($value, 255), 12.9...
+          ╵             ^
+
+  The plugin "sass-plugin" was triggered by this import
+
+    ts/editor/base.ts:9:7:
+      9 │ import "./editor-base.scss";
+        ╵        ~~~~~~~~~~~~~~~~~~~~
+
+▲ [WARNING] Global built-in functions are deprecated and will be removed in Dart Sass 3.0.0.
+Use color.mix instead.
+
+More info and automated migrator: https://sass-lang.com/d/import [plugin sass-plugin]
+
+    node_modules/bootstrap/scss/_functions.scss:206:10:
+      206 │ mix(white, $color, $weight)
+          ╵           ^
+
+  The plugin "sass-plugin" was triggered by this import
+
+    ts/editor/base.ts:9:7:
+      9 │ import "./editor-base.scss";
+        ╵        ~~~~~~~~~~~~~~~~~~~~
+
+▲ [WARNING] Global built-in functions are deprecated and will be removed in Dart Sass 3.0.0.
+Use color.mix instead.
+
+More info and automated migrator: https://sass-lang.com/d/import [plugin sass-plugin]
+
+    node_modules/bootstrap/scss/_functions.scss:211:10:
+      211 │ mix(black, $color, $weight)
+          ╵           ^
+
+  The plugin "sass-plugin" was triggered by this import
+
+    ts/editor/base.ts:9:7:
+      9 │ import "./editor-base.scss";
+        ╵        ~~~~~~~~~~~~~~~~~~~~
+
+▲ [WARNING] The Sass if() syntax is deprecated in favor of the modern CSS syntax.
+
+Suggestion: if(sass($weight > 0): shade-color($color, $weight); else: tint-color($color, -$weight))
+
+More info: https://sass-lang.com/d/if-function [plugin sass-plugin]
+
+    node_modules/bootstrap/scss/_functions.scss:216:10:
+      216 │ if($weight > 0, shade-color($color, $weight), tint-color($color, ...
+          ╵           ^
+
+  The plugin "sass-plugin" was triggered by this import
+
+    ts/editor/base.ts:9:7:
+      9 │ import "./editor-base.scss";
+        ╵        ~~~~~~~~~~~~~~~~~~~~
+
+▲ [WARNING] Global built-in functions are deprecated and will be removed in Dart Sass 3.0.0.
+Use color.mix instead.
+
+More info and automated migrator: https://sass-lang.com/d/import [plugin sass-plugin]
+
+    node_modules/bootstrap/scss/_variables.scss:341:22:
+      341 │ mix($gray-100, $white)
+          ╵                       ^
+
+  The plugin "sass-plugin" was triggered by this import
+
+    ts/editor/base.ts:9:7:
+      9 │ import "./editor-base.scss";
+        ╵        ~~~~~~~~~~~~~~~~~~~~
+
+▲ [WARNING] Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import [plugin sass-plugin]
+
+    ts/editor/editor-base.scss:3:8:
+      3 │ "../lib/sass/base"
+        ╵         ^
+
+  The plugin "sass-plugin" was triggered by this import
+
+    ts/editor/base.ts:9:7:
+      9 │ import "./editor-base.scss";
+        ╵        ~~~~~~~~~~~~~~~~~~~~
+
+▲ [WARNING] Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import [plugin sass-plugin]
+
+    ts/editor/editor-base.scss:6:8:
+      6 │ "bootstrap/scss/buttons"
+        ╵         ^
+
+  The plugin "sass-plugin" was triggered by this import
+
+    ts/editor/base.ts:9:7:
+      9 │ import "./editor-base.scss";
+        ╵        ~~~~~~~~~~~~~~~~~~~~
+
+▲ [WARNING] Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import [plugin sass-plugin]
+
+    ts/editor/editor-base.scss:7:8:
+      7 │ "bootstrap/scss/button-group"
+        ╵         ^
+
+  The plugin "sass-plugin" was triggered by this import
+
+    ts/editor/base.ts:9:7:
+      9 │ import "./editor-base.scss";
+        ╵        ~~~~~~~~~~~~~~~~~~~~
+
+▲ [WARNING] Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import [plugin sass-plugin]
+
+    ts/editor/editor-base.scss:8:8:
+      8 │ "../lib/sass/bootstrap-tooltip"
+        ╵         ^
+
+  The plugin "sass-plugin" was triggered by this import
+
+    ts/editor/base.ts:9:7:
+      9 │ import "./editor-base.scss";
+        ╵        ~~~~~~~~~~~~~~~~~~~~
+
+▲ [WARNING] Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import [plugin sass-plugin]
+
+    ts/lib/sass/base.scss:24:8:
+      24 │ "bootstrap/scss/bootstrap-reboot"
+         ╵         ^
+
+  The plugin "sass-plugin" was triggered by this import
+
+    ts/editor/base.ts:9:7:
+      9 │ import "./editor-base.scss";
+        ╵        ~~~~~~~~~~~~~~~~~~~~
+
+▲ [WARNING] "import.meta" is not available with the "iife" output format and will be empty [empty-import-meta]
+
+    ts/lib/components/Icon.svelte:11:5:
+      11 │   if (import.meta.env) {
+         ╵       ~~~~~~~~~~~
+
+  You need to set the output format to "esm" for "import.meta" to work correctly.
+
+[61/64; 3 active; 66.464s] qt:aqt:data:web:css
+[62/64; 2 active; 66.482s] qt:aqt:data:web:js
+[63/64; 1 active; 94.979s] pylib:rsbridge
+   Compiling autocfg v1.5.0
+   Compiling serde v1.0.228
+   Compiling log v0.4.27
+   Compiling libm v0.2.15
+   Compiling crossbeam-utils v0.8.21
+   Compiling futures-io v0.3.31
+   Compiling syn v2.0.106
+   Compiling scopeguard v1.2.0
+   Compiling jobserver v0.1.34
+   Compiling tracing-core v0.1.34
+   Compiling rayon-core v1.13.0
+   Compiling phf_shared v0.11.3
+   Compiling foldhash v0.1.5
+   Compiling core-foundation-sys v0.8.7
+   Compiling allocator-api2 v0.2.21
+   Compiling parking v2.2.1
+   Compiling signal-hook-registry v1.4.6
+   Compiling cc v1.2.34
+   Compiling serde_json v1.0.143
+   Compiling phf_generator v0.11.3
+   Compiling pkg-config v0.3.32
+   Compiling unicode-xid v0.2.6
+   Compiling generic-array v0.14.7
+   Compiling paste v1.0.15
+   Compiling ident_case v1.0.1
+   Compiling cubecl-common v0.5.0
+   Compiling strsim v0.11.1
+   Compiling num-traits v0.2.19
+   Compiling lock_api v0.4.13
+   Compiling futures-lite v2.6.1
+   Compiling regex-automata v0.4.10
+   Compiling embassy-futures v0.1.2
+   Compiling toml_datetime v0.6.11
+   Compiling winnow v0.7.13
+   Compiling target-lexicon v0.13.5
+   Compiling crc32fast v1.5.0
+   Compiling portable-atomic v1.11.1
+   Compiling crossbeam-epoch v0.9.18
+   Compiling synstructure v0.13.2
+   Compiling crossbeam-deque v0.8.6
+   Compiling darling_core v0.20.11
+   Compiling crossbeam-channel v0.5.15
+   Compiling parking_lot_core v0.9.11
+   Compiling spin v0.9.8
+   Compiling toml_edit v0.22.27
+   Compiling httpdate v1.0.3
+   Compiling rayon v1.11.0
+   Compiling powerfmt v0.2.0
+   Compiling colored v3.0.0
+   Compiling deranged v0.5.2
+   Compiling crypto-common v0.1.6
+   Compiling block-buffer v0.10.4
+   Compiling prettyplease v0.2.37
+   Compiling matrixmultiply v0.3.10
+   Compiling rand_distr v0.5.1
+   Compiling byteorder v1.5.0
+   Compiling time-core v0.1.8
+   Compiling thiserror v1.0.69
+   Compiling cfg_aliases v0.2.1
+   Compiling rustversion v1.0.22
+   Compiling zlib-rs v0.5.1
+   Compiling adler2 v2.0.1
+   Compiling new_debug_unreachable v1.0.6
+   Compiling lazy_static v1.5.0
+   Compiling option-ext v0.2.0
+   Compiling num-conv v0.2.0
+   Compiling dirs-sys v0.5.0
+   Compiling miniz_oxide v0.8.9
+   Compiling macerator v0.2.9
+   Compiling time v0.3.47
+   Compiling proc-macro-crate v3.3.0
+   Compiling rmp v0.8.14
+   Compiling digest v0.10.7
+   Compiling pyo3-build-config v0.29.0
+   Compiling regex v1.11.2
+   Compiling spin v0.10.0
+   Compiling thread-tree v0.3.3
+   Compiling concurrent-queue v2.5.0
+   Compiling rstest_macros v0.25.0
+   Compiling phf_codegen v0.11.3
+   Compiling zstd-sys v2.0.15+zstd.1.5.7
+   Compiling string_cache_codegen v0.5.4
+   Compiling csv-core v0.1.12
+   Compiling ahash v0.8.12
+   Compiling rawpointer v0.2.1
+   Compiling event-listener v5.4.1
+   Compiling sanitize-filename v0.6.0
+   Compiling parking_lot v0.12.4
+   Compiling dirs v6.0.0
+   Compiling sharded-slab v0.1.7
+   Compiling num-complex v0.4.6
+   Compiling web_atoms v0.1.3
+   Compiling num-integer v0.1.46
+   Compiling matchers v0.2.0
+   Compiling tracing-log v0.2.0
+   Compiling core-foundation v0.9.4
+   Compiling security-framework-sys v2.14.0
+   Compiling cpufeatures v0.2.17
+   Compiling multer v3.1.0
+   Compiling thread_local v1.1.9
+   Compiling libloading v0.8.8
+   Compiling nu-ansi-term v0.50.1
+   Compiling precomputed-hash v0.1.1
+   Compiling mac v0.1.1
+   Compiling native-tls v0.2.14
+   Compiling glob v0.3.3
+   Compiling moddef v0.3.0
+   Compiling relative-path v1.9.3
+   Compiling unty v0.0.4
+   Compiling burn-ndarray v0.17.1
+   Compiling zstd-safe v7.2.4
+   Compiling futf v0.1.5
+   Compiling nvml-wrapper-sys v0.8.0
+   Compiling security-framework v2.11.1
+   Compiling ndarray v0.16.1
+   Compiling libz-rs-sys v0.5.1
+   Compiling flate2 v1.1.2
+   Compiling event-listener-strategy v0.5.4
+   Compiling encoding_rs v0.8.35
+   Compiling bytesize v1.3.3
+   Compiling seq-macro v0.3.6
+   Compiling atomic_float v1.1.0
+   Compiling vcpkg v0.2.15
+   Compiling pyo3-ffi v0.29.0
+   Compiling utf-8 v0.7.6
+   Compiling data-encoding v2.9.0
+   Compiling uuid v1.18.0
+   Compiling futures-timer v3.0.3
+   Compiling static_assertions v1.1.0
+   Compiling tendril v0.4.3
+   Compiling systemstat v0.2.5
+   Compiling async-channel v2.5.0
+   Compiling sysinfo v0.33.1
+   Compiling dtoa v1.0.10
+   Compiling matchit v0.8.4
+   Compiling dtoa-short v0.3.5
+   Compiling pyo3 v0.29.0
+   Compiling sha1 v0.10.6
+   Compiling blake3 v1.8.2
+   Compiling ordered-float v2.10.1
+   Compiling iana-time-zone v0.1.63
+   Compiling headers-core v0.3.0
+   Compiling unic-char-range v0.9.0
+   Compiling compression-core v0.4.29
+   Compiling bumpalo v3.19.0
+   Compiling unic-common v0.9.0
+   Compiling simd-adler32 v0.3.7
+   Compiling base64ct v1.8.0
+   Compiling pulldown-cmark v0.13.0
+   Compiling unicode-width v0.2.1
+   Compiling tinyvec_macros v0.1.1
+   Compiling tinyvec v1.10.0
+   Compiling getopts v0.2.24
+   Compiling libsqlite3-sys v0.34.0
+   Compiling password-hash v0.5.0
+   Compiling zopfli v0.8.2
+   Compiling unic-ucd-version v0.9.0
+   Compiling unic-char-property v0.9.0
+   Compiling headers v0.4.1
+   Compiling chrono v0.4.41
+   Compiling sha2 v0.10.9
+   Compiling hmac v0.12.1
+   Compiling pyo3-macros-backend v0.29.0
+   Compiling client-ip v0.1.1
+   Compiling snowflake v1.3.0
+   Compiling fallible-iterator v0.3.0
+   Compiling unicode-segmentation v1.12.0
+   Compiling pulldown-cmark-escape v0.11.0
+   Compiling constant_time_eq v0.3.1
+   Compiling matches v0.1.10
+   Compiling fallible-streaming-iterator v0.1.9
+   Compiling arrayref v0.3.9
+   Compiling unic-ucd-category v0.9.0
+   Compiling id_tree v1.8.0
+   Compiling convert_case v0.8.0
+   Compiling pbkdf2 v0.12.2
+   Compiling unicode-normalization v0.1.24
+   Compiling rustls-pemfile v2.2.0
+   Compiling coarsetime v0.1.36
+   Compiling nom v8.0.0
+   Compiling difflib v0.4.0
+   Compiling rsbridge v0.0.0 (/Users/adarshrajesh/AlphaWeek2/ankiCFA/pylib/rsbridge)
+   Compiling permutation v0.4.1
+   Compiling percent-encoding-iri v2.2.0 (https://github.com/ankitects/rust-url.git?rev=bb930b8d089f4d30d7d19c12e54e66191de47b88#bb930b8d)
+   Compiling htmlescape v0.3.1
+   Compiling serde_derive v1.0.228
+   Compiling displaydoc v0.2.5
+   Compiling zerofrom-derive v0.1.6
+   Compiling yoke-derive v0.8.0
+   Compiling zerovec-derive v0.11.1
+   Compiling futures-macro v0.3.31
+   Compiling tracing-attributes v0.1.30
+   Compiling tinystr v0.8.1
+   Compiling unic-langid-impl v0.9.6
+   Compiling unic-langid-macros-impl v0.9.6
+   Compiling thiserror-impl v2.0.16
+   Compiling tokio-macros v2.5.0
+   Compiling snafu-derive v0.8.8
+   Compiling futures-util v0.3.31
+   Compiling bytemuck_derive v1.10.1
+   Compiling prost-derive v0.13.5
+   Compiling zerofrom v0.1.6
+   Compiling derive_more-impl v1.0.0
+   Compiling derive-new v0.7.0
+   Compiling yoke v0.8.0
+   Compiling zerovec v0.11.4
+   Compiling strum_macros v0.27.2
+   Compiling tokio v1.47.1
+   Compiling derive-new v0.6.0
+   Compiling tracing v0.1.41
+   Compiling unic-langid-macros v0.9.6
+   Compiling darling_macro v0.20.11
+   Compiling unic-langid v0.9.6
+   Compiling icu_locale_core v2.0.0
+   Compiling potential_utf v0.1.3
+   Compiling darling v0.20.11
+   Compiling zerotrie v0.2.2
+   Compiling icu_collections v2.0.0
+   Compiling icu_provider v2.0.0
+   Compiling phf_macros v0.11.3
+   Compiling thiserror v2.0.16
+   Compiling hashbrown v0.15.5
+   Compiling serde_bytes v0.11.17
+   Compiling fluent-syntax v0.12.0
+   Compiling thiserror-impl v1.0.69
+   Compiling rmp-serde v1.3.0
+   Compiling csv v1.3.1
+   Compiling icu_normalizer v2.0.0
+   Compiling icu_properties v2.0.1
+   Compiling macerator-macros v0.1.3
+   Compiling bytemuck v1.23.2
+   Compiling half v2.6.0
+   Compiling intl_pluralrules v7.0.2
+   Compiling intl-memoizer v0.5.3
+   Compiling fluent-langneg v0.13.0
+   Compiling idna_adapter v1.2.1
+   Compiling fluent-bundle v0.16.0
+   Compiling bincode v2.0.1
+   Compiling hyper v1.7.0
+   Compiling prost v0.13.5
+   Compiling phf v0.11.3
+   Compiling tower v0.5.2
+   Compiling prost-types v0.13.5
+   Compiling serde_urlencoded v0.7.1
+   Compiling string_cache v0.8.9
+   Compiling wrapcenum-derive v0.4.1
+   Compiling tracing-subscriber v0.3.20
+   Compiling burn-derive v0.17.1
+   Compiling hyper-util v0.1.16
+   Compiling prost-reflect v0.14.7
+   Compiling snafu v0.8.8
+   Compiling prost-build v0.13.5
+   Compiling anki_io v0.0.0 (/Users/adarshrajesh/AlphaWeek2/ankiCFA/rslib/io)
+   Compiling fluent v0.17.0
+   Compiling idna v1.1.0
+   Compiling indexmap v2.11.0
+   Compiling tracing-appender v0.2.3
+   Compiling nvml-wrapper v0.10.0
+   Compiling anki_proto_gen v0.0.0 (/Users/adarshrajesh/AlphaWeek2/ankiCFA/rslib/proto_gen)
+   Compiling derive_more v1.0.0
+   Compiling burn-common v0.17.1
+   Compiling strum v0.27.2
+   Compiling burn-tensor v0.17.1
+   Compiling burn-dataset v0.17.1
+   Compiling serde_path_to_error v0.1.17
+   Compiling axum-core v0.5.2
+   Compiling axum-macros v0.5.0
+   Compiling markup5ever v0.35.0
+   Compiling url v2.5.7
+   Compiling zstd v0.13.3
+   Compiling tokio-native-tls v0.3.1
+   Compiling match_token v0.35.0
+   Compiling cssparser-macros v0.6.1
+   Compiling hyper-tls v0.6.0
+   Compiling compression-codecs v0.4.30
+   Compiling priority-queue v2.5.0
+   Compiling tower-http v0.6.6
+   Compiling anki_i18n v0.0.0 (/Users/adarshrajesh/AlphaWeek2/ankiCFA/rslib/i18n)
+   Compiling burn-autodiff v0.17.1
+   Compiling burn-ir v0.17.1
+   Compiling burn-core v0.17.1
+   Compiling cssparser v0.35.0
+   Compiling html5ever v0.35.0
+   Compiling tokio-util v0.7.16
+   Compiling hashlink v0.10.0
+   Compiling serde-value v0.7.0
+   Compiling futures-executor v0.3.31
+   Compiling pin-project-internal v1.1.10
+   Compiling num_enum_derive v0.7.4
+   Compiling serde_tuple_macros v1.1.2
+   Compiling futures v0.3.31
+   Compiling serde-aux v4.7.0
+   Compiling ammonia v4.1.2
+   Compiling reqwest v0.12.23
+   Compiling async-compression v0.4.30
+   Compiling zip v4.6.0
+   Compiling serde_tuple v1.1.2
+   Compiling envy v0.4.2
+   Compiling pyo3-macros v0.29.0
+   Compiling async-trait v0.1.89
+   Compiling serde_repr v0.1.20
+   Compiling num_enum v0.7.4
+   Compiling axum v0.8.4
+   Compiling pin-project v1.1.10
+   Compiling anki_proto v0.0.0 (/Users/adarshrajesh/AlphaWeek2/ankiCFA/rslib/proto)
+   Compiling axum-extra v0.10.1
+   Compiling axum-client-ip v1.1.3
+   Compiling rstest v0.25.0
+   Compiling burn-train v0.17.1
+   Compiling burn v0.17.1
+   Compiling fsrs v5.2.0
+   Compiling rusqlite v0.36.0
+   Compiling anki v0.0.0 (/Users/adarshrajesh/AlphaWeek2/ankiCFA/rslib)
+    Finished ]8;;https://doc.rust-lang.org/cargo/reference/profiles.html#default-profiles\`dev` profile [unoptimized + debuginfo]]8;;\ target(s) in 1m 07s
+[64/64; 1 active; 95.360s] pylib:anki:rsbridge
+[0m[1m[32m
+Build succeeded in 95.72s.
+[0m

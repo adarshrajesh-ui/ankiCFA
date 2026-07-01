@@ -1,0 +1,1680 @@
+=== just check (Wed Jul  1 15:52:12 CDT 2026) ===
+./ninja pylib qt check
+[1m[92m    Finished[0m ]8;;https://doc.rust-lang.org/cargo/reference/profiles.html#default-profiles\`release` profile [optimized]]8;;\ target(s) in 0.39s
+[1/43; 16 active; 0.115s] check:format:proto
+[2/43; 16 active; 0.125s] check:format:python:tools
+8 files already formatted
+All checks passed!
+[3/43; 16 active; 0.127s] check:format:python:qt
+165 files already formatted
+All checks passed!
+[4/43; 16 active; 0.151s] check:format:python:pylib
+71 files already formatted
+All checks passed!
+[5/43; 16 active; 0.169s] check:format:cog:docs
+Checking docs-site/addons/hooks-reference.mdx
+[6/43; 16 active; 0.368s] pylib:anki:proto
+Writing mypy to anki/ankidroid_pb2.pyi
+Writing mypy to anki/ankihub_pb2.pyi
+Writing mypy to anki/ankiweb_pb2.pyi
+Writing mypy to anki/backend_pb2.pyi
+Writing mypy to anki/card_rendering_pb2.pyi
+Writing mypy to anki/cards_pb2.pyi
+Writing mypy to anki/collection_pb2.pyi
+Writing mypy to anki/config_pb2.pyi
+Writing mypy to anki/deck_config_pb2.pyi
+Writing mypy to anki/decks_pb2.pyi
+Writing mypy to anki/frontend_pb2.pyi
+Writing mypy to anki/generic_pb2.pyi
+Writing mypy to anki/github_pb2.pyi
+Writing mypy to anki/i18n_pb2.pyi
+Writing mypy to anki/image_occlusion_pb2.pyi
+Writing mypy to anki/import_export_pb2.pyi
+Writing mypy to anki/links_pb2.pyi
+Writing mypy to anki/media_pb2.pyi
+Writing mypy to anki/notes_pb2.pyi
+Writing mypy to anki/notetypes_pb2.pyi
+Writing mypy to anki/scheduler_pb2.pyi
+Writing mypy to anki/search_pb2.pyi
+Writing mypy to anki/stats_pb2.pyi
+Writing mypy to anki/sync_pb2.pyi
+Writing mypy to anki/tags_pb2.pyi
+[7/43; 16 active; 0.465s] check:format:dprint
+[8/43; 15 active; 0.705s] check:format:sql
+[9/43; 14 active; 1.059s] ts:generated:proto
+[10/43; 13 active; 1.174s] check:pytest:tools
+============================= test session starts ==============================
+platform darwin -- Python 3.13.13, pytest-8.4.1, pluggy-1.6.0
+rootdir: /Users/adarshrajesh/AlphaWeek2/ankiCFA
+configfile: pyproject.toml
+plugins: mock-3.15.1, anyio-4.13.0
+collected 4 items
+
+tools/tests/test_mintlify_hooks.py ....                                  [100%]
+
+============================== 4 passed in 0.03s ===============================
+[11/43; 12 active; 1.182s] check:complexipy:pylib
+──────────────────────────────── 🐙 complexipy ─────────────────────────────────
+Results saved at 
+/Users/adarshrajesh/AlphaWeek2/ankiCFA/out/complexipy/complexipy-results.sarif
+No functions were found with complexity greater than 50.
+────────────────────────── 🎉 Analysis completed! 🎉 ───────────────────────────
+[12/43; 11 active; 1.473s] check:complexipy:qt
+──────────────────────────────── 🐙 complexipy ─────────────────────────────────
+Results saved at 
+/Users/adarshrajesh/AlphaWeek2/ankiCFA/out/complexipy/complexipy-results.sarif
+No functions were found with complexity greater than 50.
+────────────────────────── 🎉 Analysis completed! 🎉 ───────────────────────────
+[13/43; 10 active; 1.514s] check:typescript:aqt
+[14/43; 9 active; 1.598s] check:format:rust
+[15/43; 8 active; 2.050s] check:format:prettier
+Checking formatting...
+All matched files use Prettier code style!
+[16/43; 7 active; 2.297s] check:eslint
+Browserslist: browsers data (caniuse-lite) is 15 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+[17/43; 6 active; 3.020s] build:minilints
+   Compiling serde v1.0.228
+   Compiling which v8.0.0
+   Compiling anki_process v0.0.0 (/Users/adarshrajesh/AlphaWeek2/ankiCFA/rslib/process)
+   Compiling anki_io v0.0.0 (/Users/adarshrajesh/AlphaWeek2/ankiCFA/rslib/io)
+   Compiling serde_json v1.0.143
+   Compiling minilints v0.0.0 (/Users/adarshrajesh/AlphaWeek2/ankiCFA/tools/minilints)
+    Finished ]8;;https://doc.rust-lang.org/cargo/reference/profiles.html#default-profiles\`dev` profile [unoptimized + debuginfo]]8;;\ target(s) in 2.92s
+[18/43; 6 active; 5.374s] rslib:proto
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on build directory
+   Compiling anki_proto v0.0.0 (/Users/adarshrajesh/AlphaWeek2/ankiCFA/rslib/proto)
+    Finished ]8;;https://doc.rust-lang.org/cargo/reference/profiles.html#default-profiles\`dev` profile [unoptimized + debuginfo]]8;;\ target(s) in 5.15s
+[19/43; 9 active; 10.427s] check:eslint
+Browserslist: browsers data (caniuse-lite) is 15 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+[20/43; 8 active; 14.381s] check:complexipy-diff:pylib
+FAILED: /Users/adarshrajesh/AlphaWeek2/ankiCFA/out/tests/complexipy.diff.14492138859511356896 
+/Users/adarshrajesh/AlphaWeek2/ankiCFA/out/rust/release/runner run --stamp=/Users/adarshrajesh/AlphaWeek2/ankiCFA/out/tests/complexipy.diff.14492138859511356896 /Users/adarshrajesh/AlphaWeek2/ankiCFA/out/pyenv/bin/complexipy pylib --suggest-refactors --diff main -R -mx 20
+──────────────────────────────── 🐙 complexipy ─────────────────────────────────
+Results saved at 
+/Users/adarshrajesh/AlphaWeek2/ankiCFA/out/complexipy/complexipy-results.sarif
+pylib/anki/_backend.py
+    backend_exception_to_pylib 22  ❌ FAILED 
+
+      Refactor plans:
+        1. Split conditional dispatcher into handlers, lines 210-269
+           estimated: 22 -> 6 (-16)
+           steps:
+             - create one handler per case
+             - replace the chain with a dispatch table or small delegating match
+             - keep the orchestration function shallow
+
+pylib/anki/cfa.py
+    memory_score 26  ❌ FAILED 
+
+      Refactor plans:
+        1. Flatten loop body with continue guards, lines 251-258
+           estimated: 26 -> 24 (-2)
+           steps:
+             - add negative condition checks at the top of the loop
+             - use continue for skipped items
+             - keep the main processing path unindented
+
+pylib/anki/importing/anki2.py
+    Anki2Importer::_importCards 27  ❌ FAILED 
+
+      Refactor plans:
+        1. Extract complex block into helper function, lines 328-385
+           estimated: 27 -> 4 (-23)
+           steps:
+             - move the selected block into a private helper
+             - pass required values as parameters
+             - return the result/status needed by the caller
+        2. Flatten loop body with continue guards, lines 328-385
+           estimated: 27 -> 17 (-10)
+           steps:
+             - add negative condition checks at the top of the loop
+             - use continue for skipped items
+             - keep the main processing path unindented
+    Anki2Importer::_importNotes 38  ❌ FAILED 
+
+      Refactor plans:
+        1. Extract complex block into helper function, lines 112-148
+           estimated: 38 -> 21 (-17)
+           steps:
+             - move the selected block into a private helper
+             - pass required values as parameters
+             - return the result/status needed by the caller
+        2. Flatten loop body with continue guards, lines 112-148
+           estimated: 38 -> 28 (-10)
+           steps:
+             - add negative condition checks at the top of the loop
+             - use continue for skipped items
+             - keep the main processing path unindented
+        3. Flatten nested condition block with guard clauses, lines 137-146
+           estimated: 38 -> 34 (-4)
+           steps:
+             - invert the outer condition
+             - return early when the condition fails
+             - move the main success path one indentation level left
+             - repeat for inner nested conditions where safe
+
+pylib/anki/importing/mnemo.py
+    MnemosyneImporter::run 29  ❌ FAILED 
+
+      Refactor plans:
+        1. Extract complex block into helper function, lines 49-95
+           estimated: 29 -> 15 (-14)
+           steps:
+             - move the selected block into a private helper
+             - pass required values as parameters
+             - return the result/status needed by the caller
+        2. Extract complex block into helper function, lines 30-41
+           estimated: 29 -> 24 (-5)
+           steps:
+             - move the selected block into a private helper
+             - pass required values as parameters
+             - return the result/status needed by the caller
+        3. Flatten loop body with continue guards, lines 49-95
+           estimated: 29 -> 24 (-5)
+           steps:
+             - add negative condition checks at the top of the loop
+             - use continue for skipped items
+             - keep the main processing path unindented
+
+Failed functions:
+ - pylib/anki/_backend.py: backend_exception_to_pylib
+ - pylib/anki/cfa.py: memory_score
+ - pylib/anki/importing/anki2.py: Anki2Importer::_importCards, 
+Anki2Importer::_importNotes
+ - pylib/anki/importing/mnemo.py: MnemosyneImporter::run
+────────────────────────── 🎉 Analysis completed! 🎉 ───────────────────────────
+Complexity diff  (vs main)
+────────────────────────────────────────────────────────────────────────
+  NEW         pylib/anki/cfa.py::MemoryScore::as_dict                  0  (new)
+  NEW         pylib/anki/cfa.py::_derive_topics                        10  (new)
+  NEW         pylib/anki/cfa.py::_range                                1  (new)
+  NEW         pylib/anki/cfa.py::_topic_of                             14  (new)
+  NEW         pylib/anki/cfa.py::build_exam_queue                      1  (new)
+  NEW         pylib/anki/cfa.py::days_to_exam                          3  (new)
+  NEW         pylib/anki/cfa.py::get_exam_config                       0  (new)
+  NEW         pylib/anki/cfa.py::memory_score                          26  (new)
+  NEW         pylib/anki/cfa.py::set_exam_config                       0  (new)
+  NEW         pylib/anki/scheduler/v3.py::Scheduler::build_exam_queue  0  (new)
+  NEW         pylib/tests/test_cfa.py::_add_card                       0  (new)
+  NEW         pylib/tests/test_cfa.py::_seed_studied                   3  (new)
+  NEW         
+pylib/tests/test_cfa.py::test_build_exam_queue_is_read_only_and_undo_still_works
+0  (new)
+  NEW         pylib/tests/test_cfa.py::test_build_exam_queue_orders_by_weight  0
+(new)
+  NEW         
+pylib/tests/test_cfa.py::test_build_exam_queue_zero_weight_and_empty_deck  0  
+(new)
+  NEW         
+pylib/tests/test_cfa.py::test_exam_config_roundtrip_and_days_to_exam  0  (new)
+  NEW         
+pylib/tests/test_cfa.py::test_memory_score_abstains_when_high_weight_topic_skipp
+ed  0  (new)
+  NEW         
+pylib/tests/test_cfa.py::test_memory_score_abstains_without_enough_data  1  
+(new)
+  NEW         
+pylib/tests/test_cfa.py::test_memory_score_reports_range_when_sufficient  1  
+(new)
+────────────────────────────────────────────────────────────────────────
+Net: 19 new
+
+Failed to run (1): /Users/adarshrajesh/AlphaWeek2/ankiCFA/out/pyenv/bin/complexipy pylib --suggest-refactors --diff main -R -mx 20
+[21/43; 7 active; 19.850s] check:vitest
+
+ RUN  v3.2.4 /Users/adarshrajesh/AlphaWeek2/ankiCFA/ts
+
+ ✓ lib/tslib/time.test.ts (2 tests) 3ms
+ ✓ routes/deck-options/steps.test.ts (4 tests) 3ms
+ ✓ html-filter/index.test.ts (9 tests) 26ms
+ ✓ reviewer/lib.test.ts (5 tests) 11ms
+ ✓ lib/domlib/surround/unsurround.test.ts (4 tests) 25ms
+ ✓ lib/domlib/surround/surround.test.ts (17 tests) 54ms
+ ✓ routes/change-notetype/lib.test.ts (4 tests) 10ms
+ ✓ routes/deck-options/lib.test.ts (5 tests) 16ms
+
+ Test Files  8 passed (8)
+      Tests  50 passed (50)
+   Start at  15:52:28
+   Duration  4.69s (transform 4.42s, setup 0ms, collect 14.89s, tests 148ms, environment 3.04s, prepare 2.35s)
+
+[22/43; 6 active; 22.938s] check:complexipy-diff:qt
+──────────────────────────────── 🐙 complexipy ─────────────────────────────────
+Results saved at 
+/Users/adarshrajesh/AlphaWeek2/ankiCFA/out/complexipy/complexipy-results.sarif
+qt/aqt/__init__.py
+    AnkiApp::eventFilter 21  ❌ FAILED 
+
+      Refactor plans:
+        1. Extract complex block into helper function, lines 406-419
+           estimated: 21 -> 10 (-11)
+           steps:
+             - move the selected block into a private helper
+             - pass required values as parameters
+             - return the result/status needed by the caller
+        2. Extract complex block into helper function, lines 430-443
+           estimated: 21 -> 16 (-5)
+           steps:
+             - move the selected block into a private helper
+             - pass required values as parameters
+             - return the result/status needed by the caller
+        3. Flatten nested condition block with guard clauses, lines 417-418
+           estimated: 21 -> 18 (-3)
+           steps:
+             - invert the outer condition
+             - return early when the condition fails
+             - move the main success path one indentation level left
+             - repeat for inner nested conditions where safe
+    setupGL 40  ❌ FAILED 
+
+      Refactor plans:
+        1. Extract complex block into helper function, lines 537-559
+           estimated: 40 -> 31 (-9)
+           steps:
+             - move the selected block into a private helper
+             - pass required values as parameters
+             - return the result/status needed by the caller
+        2. Split conditional dispatcher into handlers, lines 486-499
+           estimated: 40 -> 36 (-4)
+           steps:
+             - create one handler per case
+             - replace the chain with a dispatch table or small delegating match
+             - keep the orchestration function shallow
+        3. Extract complex condition into named predicate, lines 511-511
+           estimated: 40 -> 37 (-3)
+           steps:
+             - move the condition into a well-named helper function
+             - use the helper in the branch condition
+             - keep the caller focused on control flow
+    _run 47  ❌ FAILED 
+
+      Refactor plans:
+        1. Extract complex block into helper function, lines 619-634
+           estimated: 47 -> 40 (-7)
+           steps:
+             - move the selected block into a private helper
+             - pass required values as parameters
+             - return the result/status needed by the caller
+        2. Extract complex block into helper function, lines 715-724
+           estimated: 47 -> 42 (-5)
+           steps:
+             - move the selected block into a private helper
+             - pass required values as parameters
+             - return the result/status needed by the caller
+
+qt/aqt/addcards.py
+    AddCards::on_notetype_change 23  ❌ FAILED 
+
+      Refactor plans:
+        1. Extract complex block into helper function, lines 179-207
+           estimated: 23 -> 4 (-19)
+           steps:
+             - move the selected block into a private helper
+             - pass required values as parameters
+             - return the result/status needed by the caller
+        2. Flatten loop body with continue guards, lines 190-205
+           estimated: 23 -> 19 (-4)
+           steps:
+             - add negative condition checks at the top of the loop
+             - use continue for skipped items
+             - keep the main processing path unindented
+        3. Flatten loop body with continue guards, lines 183-188
+           estimated: 23 -> 21 (-2)
+           steps:
+             - add negative condition checks at the top of the loop
+             - use continue for skipped items
+             - keep the main processing path unindented
+
+qt/aqt/editor.py
+    Editor::_pastePreFilter 28  ❌ FAILED 
+
+      Refactor plans:
+        1. Extract complex block into helper function, lines 1064-1087
+           estimated: 28 -> 17 (-11)
+           steps:
+             - move the selected block into a private helper
+             - pass required values as parameters
+             - return the result/status needed by the caller
+        2. Extract complex block into helper function, lines 1054-1062
+           estimated: 28 -> 18 (-10)
+           steps:
+             - move the selected block into a private helper
+             - pass required values as parameters
+             - return the result/status needed by the caller
+        3. Flatten loop body with continue guards, lines 1064-1087
+           estimated: 28 -> 23 (-5)
+           steps:
+             - add negative condition checks at the top of the loop
+             - use continue for skipped items
+             - keep the main processing path unindented
+    Editor::onBridgeCmd 38  ❌ FAILED 
+
+      Refactor plans:
+        1. Extract complex block into helper function, lines 444-560
+           estimated: 38 -> 16 (-22)
+           steps:
+             - move the selected block into a private helper
+             - pass required values as parameters
+             - return the result/status needed by the caller
+        2. Split conditional dispatcher into handlers, lines 444-560
+           estimated: 38 -> 29 (-9)
+           steps:
+             - create one handler per case
+             - replace the chain with a dispatch table or small delegating match
+             - keep the orchestration function shallow
+        3. Flatten loop body with continue guards, lines 490-494
+           estimated: 38 -> 36 (-2)
+           steps:
+             - add negative condition checks at the top of the loop
+             - use continue for skipped items
+             - keep the main processing path unindented
+
+qt/aqt/importing.py
+    importFile 36  ❌ FAILED 
+
+      Refactor plans:
+        1. Extract complex block into helper function, lines 354-427
+           estimated: 36 -> 16 (-20)
+           steps:
+             - move the selected block into a private helper
+             - pass required values as parameters
+             - return the result/status needed by the caller
+        2. Extract complex block into helper function, lines 341-348
+           estimated: 36 -> 29 (-7)
+           steps:
+             - move the selected block into a private helper
+             - pass required values as parameters
+             - return the result/status needed by the caller
+        3. Flatten loop body with continue guards, lines 341-348
+           estimated: 36 -> 33 (-3)
+           steps:
+             - add negative condition checks at the top of the loop
+             - use continue for skipped items
+             - keep the main processing path unindented
+
+qt/aqt/mpv.py
+    MPVBase::_reader 25  ❌ FAILED 
+
+      Refactor plans:
+        1. Extract complex block into helper function, lines 254-289
+           estimated: 25 -> 4 (-21)
+           steps:
+             - move the selected block into a private helper
+             - pass required values as parameters
+             - return the result/status needed by the caller
+        2. Flatten loop body with continue guards, lines 254-289
+           estimated: 25 -> 16 (-9)
+           steps:
+             - add negative condition checks at the top of the loop
+             - use continue for skipped items
+             - keep the main processing path unindented
+        3. Flatten nested condition block with guard clauses, lines 272-273
+           estimated: 25 -> 21 (-4)
+           steps:
+             - invert the outer condition
+             - return early when the condition fails
+             - move the main success path one indentation level left
+             - repeat for inner nested conditions where safe
+
+qt/aqt/progress.py
+    ProgressManager::finish 24  ❌ FAILED 
+
+      Refactor plans:
+        1. Extract complex block into helper function, lines 239-256
+           estimated: 24 -> 6 (-18)
+           steps:
+             - move the selected block into a private helper
+             - pass required values as parameters
+             - return the result/status needed by the caller
+        2. Flatten nested condition block with guard clauses, lines 241-242
+           estimated: 24 -> 21 (-3)
+           steps:
+             - invert the outer condition
+             - return early when the condition fails
+             - move the main success path one indentation level left
+             - repeat for inner nested conditions where safe
+        3. Flatten nested condition block with guard clauses, lines 243-245
+           estimated: 24 -> 21 (-3)
+           steps:
+             - invert the outer condition
+             - return early when the condition fails
+             - move the main success path one indentation level left
+             - repeat for inner nested conditions where safe
+
+qt/audio/hatch_build.py
+    CustomBuildHook::initialize 21  ❌ FAILED 
+
+      Refactor plans:
+        1. Extract complex block into helper function, lines 31-53
+           estimated: 21 -> 16 (-5)
+           steps:
+             - move the selected block into a private helper
+             - pass required values as parameters
+             - return the result/status needed by the caller
+        2. Extract complex block into helper function, lines 65-72
+           estimated: 21 -> 16 (-5)
+           steps:
+             - move the selected block into a private helper
+             - pass required values as parameters
+             - return the result/status needed by the caller
+        3. Flatten loop body with continue guards, lines 35-40
+           estimated: 21 -> 19 (-2)
+           steps:
+             - add negative condition checks at the top of the loop
+             - use continue for skipped items
+             - keep the main processing path unindented
+
+Failed functions:
+ - qt/aqt/__init__.py: AnkiApp::eventFilter, _run, setupGL
+ - qt/aqt/addcards.py: AddCards::on_notetype_change
+ - qt/aqt/editor.py: Editor::_pastePreFilter, Editor::onBridgeCmd
+ - qt/aqt/importing.py: importFile
+ - qt/aqt/mpv.py: MPVBase::_reader
+ - qt/aqt/progress.py: ProgressManager::finish
+ - qt/audio/hatch_build.py: CustomBuildHook::initialize
+────────────────────────── 🎉 Analysis completed! 🎉 ───────────────────────────
+Complexity diff  (vs main)
+────────────────────────────────────────────────────────────────────────
+  NEW         qt/aqt/cfa.py::ExamReadinessDialog::__init__             12  (new)
+  NEW         qt/aqt/cfa.py::_pct                                      1  (new)
+  NEW         qt/aqt/cfa.py::setup_menu                                0  (new)
+  NEW         qt/aqt/cfa.py::show_exam_readiness                       1  (new)
+────────────────────────────────────────────────────────────────────────
+Net: 4 new
+
+[23/43; 5 active; 30.972s] pylib:rsbridge
+    Blocking waiting for file lock on package cache
+   Compiling anki_proto v0.0.0 (/Users/adarshrajesh/AlphaWeek2/ankiCFA/rslib/proto)
+   Compiling anki v0.0.0 (/Users/adarshrajesh/AlphaWeek2/ankiCFA/rslib)
+   Compiling rsbridge v0.0.0 (/Users/adarshrajesh/AlphaWeek2/ankiCFA/pylib/rsbridge)
+    Finished ]8;;https://doc.rust-lang.org/cargo/reference/profiles.html#default-profiles\`dev` profile [unoptimized + debuginfo]]8;;\ target(s) in 25.04s
+[24/43; 4 active; 33.869s] check:svelte
+1782939167011 START "/Users/adarshrajesh/AlphaWeek2/ankiCFA/ts"
+1782939167014 COMPLETED 1261 FILES 0 ERRORS 0 WARNINGS 0 FILES_WITH_PROBLEMS
+[25/43; 3 active; 36.346s] sveltekit
+vite v6.4.2 building SSR bundle for production...
+transforming...
+DEPRECATION WARNING [import]: Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+  ╷
+1 │ @import "$lib/sass/base";
+  │         ^^^^^^^^^^^^^^^^
+  ╵
+    routes/base.scss 1:9  root stylesheet
+
+DEPRECATION WARNING [import]: Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+  ╷
+6 │ @import "bootstrap/scss/buttons";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+    routes/base.scss 6:9  root stylesheet
+
+DEPRECATION WARNING [import]: Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+  ╷
+7 │ @import "bootstrap/scss/button-group";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+    routes/base.scss 7:9  root stylesheet
+
+DEPRECATION WARNING [import]: Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+  ╷
+8 │ @import "bootstrap/scss/transitions";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+    routes/base.scss 8:9  root stylesheet
+
+DEPRECATION WARNING [import]: Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+  ╷
+9 │ @import "bootstrap/scss/modal";
+  │         ^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+    routes/base.scss 9:9  root stylesheet
+
+DEPRECATION WARNING [if-function]: The Sass if() syntax is deprecated in favor of the modern CSS syntax.
+
+Suggestion: if(sass($arg == "$value"): $value; else: $arg)
+
+More info: https://sass-lang.com/d/if-function
+
+   ╷
+58 │       $_args: append($_args, if($arg == "$key", $key, if($arg == "$value", $value, $arg)));
+   │                                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   ╵
+    ../out/node_modules/bootstrap/scss/_functions.scss 58:55      @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 4:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+DEPRECATION WARNING [if-function]: The Sass if() syntax is deprecated in favor of the modern CSS syntax.
+
+Suggestion: if(sass($arg == "$key"): $key; else: if($arg == "$value", $value, $arg))
+
+More info: https://sass-lang.com/d/if-function
+
+   ╷
+58 │       $_args: append($_args, if($arg == "$key", $key, if($arg == "$value", $value, $arg)));
+   │                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   ╵
+    ../out/node_modules/bootstrap/scss/_functions.scss 58:30      @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 4:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+DEPRECATION WARNING [if-function]: The Sass if() syntax is deprecated in favor of the modern CSS syntax.
+
+Suggestion: if(sass($l1 > $l2): divide($l1 + 0.05, $l2 + 0.05); else: divide($l2 + 0.05, $l1 + 0.05))
+
+More info: https://sass-lang.com/d/if-function
+
+    ╷
+177 │   @return if($l1 > $l2, divide($l1 + .05, $l2 + .05), divide($l2 + .05, $l1 + .05));
+    │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ╵
+    ../out/node_modules/bootstrap/scss/_functions.scss 177:11     @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 4:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+DEPRECATION WARNING [if-function]: The Sass if() syntax is deprecated in favor of the modern CSS syntax.
+
+Suggestion: if(sass(divide($value, 255) < 0.04045): divide(divide($value, 255), 12.92); else: nth($_luminance-list, $value + 1))
+
+More info: https://sass-lang.com/d/if-function
+
+    ╷
+191 │     $value: if(divide($value, 255) < .04045, divide(divide($value, 255), 12.92), nth($_luminance-list, $value + 1));
+    │             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ╵
+    ../out/node_modules/bootstrap/scss/_functions.scss 191:13     @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 4:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+DEPRECATION WARNING [if-function]: The Sass if() syntax is deprecated in favor of the modern CSS syntax.
+
+Suggestion: if(sass($weight > 0): shade-color($color, $weight); else: tint-color($color, -$weight))
+
+More info: https://sass-lang.com/d/if-function
+
+    ╷
+217 │   @return if($weight > 0, shade-color($color, $weight), tint-color($color, -$weight));
+    │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ╵
+    ../out/node_modules/bootstrap/scss/_functions.scss 217:11     @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 4:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+DEPRECATION WARNING [global-builtin]: Global built-in functions are deprecated and will be removed in Dart Sass 3.0.0.
+Use color.mix instead.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+    ╷
+207 │   @return mix(white, $color, $weight);
+    │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ╵
+    ../out/node_modules/bootstrap/scss/_functions.scss 207:11     tint-color()
+    ../out/node_modules/bootstrap/scss/_variables.scss 79:12      @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 5:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+DEPRECATION WARNING [global-builtin]: Global built-in functions are deprecated and will be removed in Dart Sass 3.0.0.
+Use color.mix instead.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+    ╷
+212 │   @return mix(black, $color, $weight);
+    │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ╵
+    ../out/node_modules/bootstrap/scss/_functions.scss 212:11     shade-color()
+    ../out/node_modules/bootstrap/scss/_variables.scss 84:12      @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 5:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+DEPRECATION WARNING [global-builtin]: Global built-in functions are deprecated and will be removed in Dart Sass 3.0.0.
+Use color.mix instead.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+    ╷
+342 │ $light-bg-subtle:         mix($gray-100, $white) !default;
+    │                           ^^^^^^^^^^^^^^^^^^^^^^
+    ╵
+    ../out/node_modules/bootstrap/scss/_variables.scss 342:27     @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 5:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+DEPRECATION WARNING [global-builtin]: Global built-in functions are deprecated and will be removed in Dart Sass 3.0.0.
+Use math.unit instead.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+   ╷
+11 │     @if $prev-num == null or unit($num) == "%" or unit($prev-num) == "%" {
+   │                              ^^^^^^^^^^
+   ╵
+    ../out/node_modules/bootstrap/scss/_functions.scss 11:30      -assert-ascending()
+    ../out/node_modules/bootstrap/scss/_variables.scss 494:1      @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 5:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+DEPRECATION WARNING [global-builtin]: Global built-in functions are deprecated and will be removed in Dart Sass 3.0.0.
+Use math.unit instead.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+   ╷
+11 │     @if $prev-num == null or unit($num) == "%" or unit($prev-num) == "%" {
+   │                                                   ^^^^^^^^^^^^^^^
+   ╵
+    ../out/node_modules/bootstrap/scss/_functions.scss 11:51      -assert-ascending()
+    ../out/node_modules/bootstrap/scss/_variables.scss 494:1      @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 5:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+DEPRECATION WARNING [color-functions]: red() is deprecated. Suggestion:
+
+color.channel($color, "red", $space: rgb)
+
+More info: https://sass-lang.com/d/color-functions
+
+    ╷
+185 │     "r": red($color),
+    │          ^^^^^^^^^^^
+    ╵
+    ../out/node_modules/bootstrap/scss/_functions.scss 185:10     luminance()
+    ../out/node_modules/bootstrap/scss/_functions.scss 174:8      contrast-ratio()
+    ../out/node_modules/bootstrap/scss/_functions.scss 159:22     color-contrast()
+    ../out/node_modules/bootstrap/scss/_variables.scss 846:42     @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 5:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+DEPRECATION WARNING [color-functions]: green() is deprecated. Suggestion:
+
+color.channel($color, "green", $space: rgb)
+
+More info: https://sass-lang.com/d/color-functions
+
+    ╷
+186 │     "g": green($color),
+    │          ^^^^^^^^^^^^^
+    ╵
+    ../out/node_modules/bootstrap/scss/_functions.scss 186:10     luminance()
+    ../out/node_modules/bootstrap/scss/_functions.scss 174:8      contrast-ratio()
+    ../out/node_modules/bootstrap/scss/_functions.scss 159:22     color-contrast()
+    ../out/node_modules/bootstrap/scss/_variables.scss 846:42     @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 5:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+DEPRECATION WARNING [color-functions]: blue() is deprecated. Suggestion:
+
+color.channel($color, "blue", $space: rgb)
+
+More info: https://sass-lang.com/d/color-functions
+
+    ╷
+187 │     "b": blue($color)
+    │          ^^^^^^^^^^^^
+    ╵
+    ../out/node_modules/bootstrap/scss/_functions.scss 187:10     luminance()
+    ../out/node_modules/bootstrap/scss/_functions.scss 174:8      contrast-ratio()
+    ../out/node_modules/bootstrap/scss/_functions.scss 159:22     color-contrast()
+    ../out/node_modules/bootstrap/scss/_variables.scss 846:42     @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 5:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+DEPRECATION WARNING [color-functions]: red() is deprecated. Suggestion:
+
+color.channel($color, "red", $space: rgb)
+
+More info: https://sass-lang.com/d/color-functions
+
+   ╷
+37 │   @return red($value), green($value), blue($value);
+   │           ^^^^^^^^^^^
+   ╵
+    ../out/node_modules/bootstrap/scss/_functions.scss 37:11      to-rgb()
+    ../out/node_modules/bootstrap/scss/_variables.scss 846:31     @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 5:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+DEPRECATION WARNING [color-functions]: green() is deprecated. Suggestion:
+
+color.channel($color, "green", $space: rgb)
+
+More info: https://sass-lang.com/d/color-functions
+
+   ╷
+37 │   @return red($value), green($value), blue($value);
+   │                        ^^^^^^^^^^^^^
+   ╵
+    ../out/node_modules/bootstrap/scss/_functions.scss 37:24      to-rgb()
+    ../out/node_modules/bootstrap/scss/_variables.scss 846:31     @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 5:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+WARNING: 267 repetitive deprecation warnings omitted.
+Run in verbose mode to see all warnings.
+
+✓ 744 modules transformed.
+rendering chunks...
+vite v6.4.2 building for production...
+transforming...
+DEPRECATION WARNING [import]: Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+  ╷
+1 │ @import "$lib/sass/base";
+  │         ^^^^^^^^^^^^^^^^
+  ╵
+    routes/base.scss 1:9  root stylesheet
+
+DEPRECATION WARNING [import]: Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+  ╷
+6 │ @import "bootstrap/scss/buttons";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+    routes/base.scss 6:9  root stylesheet
+
+DEPRECATION WARNING [import]: Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+  ╷
+7 │ @import "bootstrap/scss/button-group";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+    routes/base.scss 7:9  root stylesheet
+
+DEPRECATION WARNING [import]: Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+  ╷
+8 │ @import "bootstrap/scss/transitions";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+    routes/base.scss 8:9  root stylesheet
+
+DEPRECATION WARNING [import]: Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+  ╷
+9 │ @import "bootstrap/scss/modal";
+  │         ^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+    routes/base.scss 9:9  root stylesheet
+
+DEPRECATION WARNING [if-function]: The Sass if() syntax is deprecated in favor of the modern CSS syntax.
+
+Suggestion: if(sass($arg == "$value"): $value; else: $arg)
+
+More info: https://sass-lang.com/d/if-function
+
+   ╷
+58 │       $_args: append($_args, if($arg == "$key", $key, if($arg == "$value", $value, $arg)));
+   │                                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   ╵
+    ../out/node_modules/bootstrap/scss/_functions.scss 58:55      @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 4:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+DEPRECATION WARNING [if-function]: The Sass if() syntax is deprecated in favor of the modern CSS syntax.
+
+Suggestion: if(sass($arg == "$key"): $key; else: if($arg == "$value", $value, $arg))
+
+More info: https://sass-lang.com/d/if-function
+
+   ╷
+58 │       $_args: append($_args, if($arg == "$key", $key, if($arg == "$value", $value, $arg)));
+   │                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   ╵
+    ../out/node_modules/bootstrap/scss/_functions.scss 58:30      @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 4:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+DEPRECATION WARNING [if-function]: The Sass if() syntax is deprecated in favor of the modern CSS syntax.
+
+Suggestion: if(sass($l1 > $l2): divide($l1 + 0.05, $l2 + 0.05); else: divide($l2 + 0.05, $l1 + 0.05))
+
+More info: https://sass-lang.com/d/if-function
+
+    ╷
+177 │   @return if($l1 > $l2, divide($l1 + .05, $l2 + .05), divide($l2 + .05, $l1 + .05));
+    │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ╵
+    ../out/node_modules/bootstrap/scss/_functions.scss 177:11     @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 4:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+DEPRECATION WARNING [if-function]: The Sass if() syntax is deprecated in favor of the modern CSS syntax.
+
+Suggestion: if(sass(divide($value, 255) < 0.04045): divide(divide($value, 255), 12.92); else: nth($_luminance-list, $value + 1))
+
+More info: https://sass-lang.com/d/if-function
+
+    ╷
+191 │     $value: if(divide($value, 255) < .04045, divide(divide($value, 255), 12.92), nth($_luminance-list, $value + 1));
+    │             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ╵
+    ../out/node_modules/bootstrap/scss/_functions.scss 191:13     @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 4:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+DEPRECATION WARNING [if-function]: The Sass if() syntax is deprecated in favor of the modern CSS syntax.
+
+Suggestion: if(sass($weight > 0): shade-color($color, $weight); else: tint-color($color, -$weight))
+
+More info: https://sass-lang.com/d/if-function
+
+    ╷
+217 │   @return if($weight > 0, shade-color($color, $weight), tint-color($color, -$weight));
+    │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ╵
+    ../out/node_modules/bootstrap/scss/_functions.scss 217:11     @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 4:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+DEPRECATION WARNING [global-builtin]: Global built-in functions are deprecated and will be removed in Dart Sass 3.0.0.
+Use color.mix instead.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+    ╷
+207 │   @return mix(white, $color, $weight);
+    │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ╵
+    ../out/node_modules/bootstrap/scss/_functions.scss 207:11     tint-color()
+    ../out/node_modules/bootstrap/scss/_variables.scss 79:12      @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 5:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+DEPRECATION WARNING [global-builtin]: Global built-in functions are deprecated and will be removed in Dart Sass 3.0.0.
+Use color.mix instead.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+    ╷
+212 │   @return mix(black, $color, $weight);
+    │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ╵
+    ../out/node_modules/bootstrap/scss/_functions.scss 212:11     shade-color()
+    ../out/node_modules/bootstrap/scss/_variables.scss 84:12      @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 5:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+DEPRECATION WARNING [global-builtin]: Global built-in functions are deprecated and will be removed in Dart Sass 3.0.0.
+Use color.mix instead.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+    ╷
+342 │ $light-bg-subtle:         mix($gray-100, $white) !default;
+    │                           ^^^^^^^^^^^^^^^^^^^^^^
+    ╵
+    ../out/node_modules/bootstrap/scss/_variables.scss 342:27     @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 5:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+DEPRECATION WARNING [global-builtin]: Global built-in functions are deprecated and will be removed in Dart Sass 3.0.0.
+Use math.unit instead.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+   ╷
+11 │     @if $prev-num == null or unit($num) == "%" or unit($prev-num) == "%" {
+   │                              ^^^^^^^^^^
+   ╵
+    ../out/node_modules/bootstrap/scss/_functions.scss 11:30      -assert-ascending()
+    ../out/node_modules/bootstrap/scss/_variables.scss 494:1      @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 5:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+DEPRECATION WARNING [global-builtin]: Global built-in functions are deprecated and will be removed in Dart Sass 3.0.0.
+Use math.unit instead.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+   ╷
+11 │     @if $prev-num == null or unit($num) == "%" or unit($prev-num) == "%" {
+   │                                                   ^^^^^^^^^^^^^^^
+   ╵
+    ../out/node_modules/bootstrap/scss/_functions.scss 11:51      -assert-ascending()
+    ../out/node_modules/bootstrap/scss/_variables.scss 494:1      @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 5:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+DEPRECATION WARNING [color-functions]: red() is deprecated. Suggestion:
+
+color.channel($color, "red", $space: rgb)
+
+More info: https://sass-lang.com/d/color-functions
+
+    ╷
+185 │     "r": red($color),
+    │          ^^^^^^^^^^^
+    ╵
+    ../out/node_modules/bootstrap/scss/_functions.scss 185:10     luminance()
+    ../out/node_modules/bootstrap/scss/_functions.scss 174:8      contrast-ratio()
+    ../out/node_modules/bootstrap/scss/_functions.scss 159:22     color-contrast()
+    ../out/node_modules/bootstrap/scss/_variables.scss 846:42     @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 5:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+DEPRECATION WARNING [color-functions]: green() is deprecated. Suggestion:
+
+color.channel($color, "green", $space: rgb)
+
+More info: https://sass-lang.com/d/color-functions
+
+    ╷
+186 │     "g": green($color),
+    │          ^^^^^^^^^^^^^
+    ╵
+    ../out/node_modules/bootstrap/scss/_functions.scss 186:10     luminance()
+    ../out/node_modules/bootstrap/scss/_functions.scss 174:8      contrast-ratio()
+    ../out/node_modules/bootstrap/scss/_functions.scss 159:22     color-contrast()
+    ../out/node_modules/bootstrap/scss/_variables.scss 846:42     @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 5:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+DEPRECATION WARNING [color-functions]: blue() is deprecated. Suggestion:
+
+color.channel($color, "blue", $space: rgb)
+
+More info: https://sass-lang.com/d/color-functions
+
+    ╷
+187 │     "b": blue($color)
+    │          ^^^^^^^^^^^^
+    ╵
+    ../out/node_modules/bootstrap/scss/_functions.scss 187:10     luminance()
+    ../out/node_modules/bootstrap/scss/_functions.scss 174:8      contrast-ratio()
+    ../out/node_modules/bootstrap/scss/_functions.scss 159:22     color-contrast()
+    ../out/node_modules/bootstrap/scss/_variables.scss 846:42     @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 5:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+DEPRECATION WARNING [color-functions]: red() is deprecated. Suggestion:
+
+color.channel($color, "red", $space: rgb)
+
+More info: https://sass-lang.com/d/color-functions
+
+   ╷
+37 │   @return red($value), green($value), blue($value);
+   │           ^^^^^^^^^^^
+   ╵
+    ../out/node_modules/bootstrap/scss/_functions.scss 37:11      to-rgb()
+    ../out/node_modules/bootstrap/scss/_variables.scss 846:31     @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 5:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+DEPRECATION WARNING [color-functions]: green() is deprecated. Suggestion:
+
+color.channel($color, "green", $space: rgb)
+
+More info: https://sass-lang.com/d/color-functions
+
+   ╷
+37 │   @return red($value), green($value), blue($value);
+   │                        ^^^^^^^^^^^^^
+   ╵
+    ../out/node_modules/bootstrap/scss/_functions.scss 37:24      to-rgb()
+    ../out/node_modules/bootstrap/scss/_variables.scss 846:31     @import
+    ../out/node_modules/bootstrap/scss/bootstrap-reboot.scss 5:9  @import
+    lib/sass/base.scss 25:9                                       @import
+    routes/base.scss 1:9                                          root stylesheet
+
+WARNING: 267 repetitive deprecation warnings omitted.
+Run in verbose mode to see all warnings.
+
+✓ 2144 modules transformed.
+rendering chunks...
+.svelte-kit/output/client/_app/version.json                                     0.03 kB
+.svelte-kit/output/client/.vite/manifest.json                                  24.53 kB
+.svelte-kit/output/client/_app/immutable/assets/3.CpQNAuFF.css                  0.02 kB
+.svelte-kit/output/client/_app/immutable/assets/WithTooltip.CwY-QSVm.css        0.02 kB
+.svelte-kit/output/client/_app/immutable/assets/theme.D57v17Wl.css              0.13 kB
+.svelte-kit/output/client/_app/immutable/assets/ButtonToolbar.B8K_2NwJ.css      0.17 kB
+.svelte-kit/output/client/_app/immutable/assets/5.BKDBnYQO.css                  0.22 kB
+.svelte-kit/output/client/_app/immutable/assets/Badge.sgQJmhGi.css              0.28 kB
+.svelte-kit/output/client/_app/immutable/assets/4.KXcaXAK_.css                  0.29 kB
+.svelte-kit/output/client/_app/immutable/assets/TableData.Xa_ve1fb.css          0.58 kB
+.svelte-kit/output/client/_app/immutable/assets/10.BQsRbckJ.css                 0.59 kB
+.svelte-kit/output/client/_app/immutable/assets/events.BXCy_DyE.css             0.62 kB
+.svelte-kit/output/client/_app/immutable/assets/TitledContainer.BAKyrPx4.css    0.78 kB
+.svelte-kit/output/client/_app/immutable/assets/Col.BlXTyLZT.css                0.82 kB
+.svelte-kit/output/client/_app/immutable/assets/Container.Bgb8JICy.css          1.08 kB
+.svelte-kit/output/client/_app/immutable/assets/EnumSelectorRow.DTtkeyxk.css    1.18 kB
+.svelte-kit/output/client/_app/immutable/assets/HelpModal.BCzy2CK4.css          1.25 kB
+.svelte-kit/output/client/_app/immutable/assets/Select.DHoTlc42.css             1.40 kB
+.svelte-kit/output/client/_app/immutable/assets/HoverColumns.Kz-SlMu5.css       1.41 kB
+.svelte-kit/output/client/_app/immutable/assets/CardInfo.D9Qkr6yG.css           1.55 kB
+.svelte-kit/output/client/_app/immutable/assets/WithFloating.CeA8f18S.css       1.89 kB
+.svelte-kit/output/client/_app/immutable/assets/ImportPage.Bzcjk0Fw.css         2.09 kB
+.svelte-kit/output/client/_app/immutable/assets/IconButton.DcKapxC2.css         2.12 kB
+.svelte-kit/output/client/_app/immutable/assets/LabelButton.By2GQxez.css        2.49 kB
+.svelte-kit/output/client/_app/immutable/assets/7.CuG4I3_F.css                  3.64 kB
+.svelte-kit/output/client/_app/immutable/assets/8.00F4sp74.css                  3.81 kB
+.svelte-kit/output/client/_app/immutable/assets/6.CsQ5pMaH.css                  4.96 kB
+.svelte-kit/output/client/_app/immutable/assets/TagEditor.VJ78vyQ5.css          4.98 kB
+.svelte-kit/output/client/_app/immutable/assets/0.B-RkoCHw.css                147.66 kB
+.svelte-kit/output/client/_app/immutable/entry/start.C8M4vkXa.mjs               0.08 kB
+.svelte-kit/output/client/_app/immutable/chunks/Dbye-yJ_.mjs                    0.13 kB
+.svelte-kit/output/client/_app/immutable/chunks/7QduYamX.mjs                    0.13 kB
+.svelte-kit/output/client/_app/immutable/chunks/BbkoyQuY.mjs                    0.13 kB
+.svelte-kit/output/client/_app/immutable/chunks/BKPCpP_4.mjs                    0.20 kB
+.svelte-kit/output/client/_app/immutable/chunks/D5aP86yo.mjs                    0.22 kB
+.svelte-kit/output/client/_app/immutable/chunks/DS5KYiI9.mjs                    0.26 kB
+.svelte-kit/output/client/_app/immutable/chunks/CBuFU4N3.mjs                    0.31 kB
+.svelte-kit/output/client/_app/immutable/chunks/BdvjDRs_.mjs                    0.39 kB
+.svelte-kit/output/client/_app/immutable/nodes/1.B68qQBmJ.mjs                   0.41 kB
+.svelte-kit/output/client/_app/immutable/chunks/BjkmJsJr.mjs                    0.46 kB
+.svelte-kit/output/client/_app/immutable/chunks/CEohWXjE.mjs                    0.54 kB
+.svelte-kit/output/client/_app/immutable/chunks/4LA4kwGm.mjs                    0.58 kB
+.svelte-kit/output/client/_app/immutable/nodes/11.B_7afAkI.mjs                  0.61 kB
+.svelte-kit/output/client/_app/immutable/chunks/DeS6YXkP.mjs                    0.70 kB
+.svelte-kit/output/client/_app/immutable/chunks/_d1bhYXs.mjs                    0.73 kB
+.svelte-kit/output/client/_app/immutable/chunks/DB8w6JNV.mjs                    0.75 kB
+.svelte-kit/output/client/_app/immutable/nodes/0.BfvrewNY.mjs                   0.78 kB
+.svelte-kit/output/client/_app/immutable/chunks/D8oh8-Gg.mjs                    0.78 kB
+.svelte-kit/output/client/_app/immutable/chunks/BtrlUR0E.mjs                    0.79 kB
+.svelte-kit/output/client/_app/immutable/nodes/2.Bw5zMXPB.mjs                   0.96 kB
+.svelte-kit/output/client/_app/immutable/chunks/CAVb66_W.mjs                    1.10 kB
+.svelte-kit/output/client/_app/immutable/chunks/D68rH1eU.mjs                    1.11 kB
+.svelte-kit/output/client/_app/immutable/chunks/Z4XWOC_z.mjs                    1.15 kB
+.svelte-kit/output/client/_app/immutable/chunks/BQEoOQuA.mjs                    1.43 kB
+.svelte-kit/output/client/_app/immutable/chunks/DDqSGGpk.mjs                    1.57 kB
+.svelte-kit/output/client/_app/immutable/nodes/3.iP3g1K4Q.mjs                   1.59 kB
+.svelte-kit/output/client/_app/immutable/chunks/BfqB08zp.mjs                    1.75 kB
+.svelte-kit/output/client/_app/immutable/chunks/sh3A81SU.mjs                    1.80 kB
+.svelte-kit/output/client/_app/immutable/chunks/dadLMnsd.mjs                    2.14 kB
+.svelte-kit/output/client/_app/immutable/nodes/5.DgBlf5U5.mjs                   3.05 kB
+.svelte-kit/output/client/_app/immutable/chunks/RWwv3F0F.mjs                    3.80 kB
+.svelte-kit/output/client/_app/immutable/chunks/CQKPd2l4.mjs                    3.95 kB
+.svelte-kit/output/client/_app/immutable/nodes/9.CAkPTAIH.mjs                   4.30 kB
+.svelte-kit/output/client/_app/immutable/chunks/BThdrneP.mjs                    4.41 kB
+.svelte-kit/output/client/_app/immutable/chunks/DD95wICf.mjs                    5.16 kB
+.svelte-kit/output/client/_app/immutable/chunks/CwijadMk.mjs                    5.28 kB
+.svelte-kit/output/client/_app/immutable/chunks/D6zJYWBm.mjs                    6.10 kB
+.svelte-kit/output/client/_app/immutable/chunks/Ccv9XhzK.mjs                    8.34 kB
+.svelte-kit/output/client/_app/immutable/entry/app.vQ3KZpJq.mjs                10.29 kB
+.svelte-kit/output/client/_app/immutable/chunks/1JviX1jy.mjs                   11.04 kB
+.svelte-kit/output/client/_app/immutable/chunks/BN0fnbsC.mjs                   11.04 kB
+.svelte-kit/output/client/_app/immutable/chunks/D56EhfwE.mjs                   11.75 kB
+.svelte-kit/output/client/_app/immutable/chunks/DnPBscIQ.mjs                   12.71 kB
+.svelte-kit/output/client/_app/immutable/nodes/4.DantOrH8.mjs                  13.39 kB
+.svelte-kit/output/client/_app/immutable/nodes/10.BpiBXC23.mjs                 15.96 kB
+.svelte-kit/output/client/_app/immutable/chunks/CQz9itg7.mjs                   16.43 kB
+.svelte-kit/output/client/_app/immutable/chunks/DGQfpFuc.mjs                   22.61 kB
+.svelte-kit/output/client/_app/immutable/chunks/C7J4MjeE.mjs                   25.13 kB
+.svelte-kit/output/client/_app/immutable/chunks/1V9HOqFh.mjs                   27.11 kB
+.svelte-kit/output/client/_app/immutable/chunks/DPRXgKB9.mjs                   30.58 kB
+.svelte-kit/output/client/_app/immutable/chunks/CTIk6S6H.mjs                   34.70 kB
+.svelte-kit/output/client/_app/immutable/chunks/DNVY512u.mjs                   34.76 kB
+.svelte-kit/output/client/_app/immutable/chunks/Dz_xrHy5.mjs                   34.88 kB
+.svelte-kit/output/client/_app/immutable/chunks/bCmLN4C_.mjs                   39.27 kB
+.svelte-kit/output/client/_app/immutable/chunks/CcaWrs5J.mjs                   40.27 kB
+.svelte-kit/output/client/_app/immutable/chunks/D3dlqEWp.mjs                   64.93 kB
+.svelte-kit/output/client/_app/immutable/nodes/7.DJf51mFC.mjs                  69.05 kB
+.svelte-kit/output/client/_app/immutable/chunks/Di_o2wft.mjs                   81.41 kB
+.svelte-kit/output/client/_app/immutable/nodes/6.BZ5fyO29.mjs                 107.99 kB
+.svelte-kit/output/client/_app/immutable/chunks/Bz61hAW0.mjs                  158.96 kB
+.svelte-kit/output/client/_app/immutable/nodes/8.DNEehJFF.mjs                 379.34 kB
+✓ built in 4.93s
+.svelte-kit/output/server/.vite/manifest.json                                                    23.31 kB
+.svelte-kit/output/server/_app/immutable/assets/_page.CpQNAuFF.css                                0.02 kB
+.svelte-kit/output/server/_app/immutable/assets/WithTooltip.CwY-QSVm.css                          0.02 kB
+.svelte-kit/output/server/_app/immutable/assets/theme.D57v17Wl.css                                0.13 kB
+.svelte-kit/output/server/_app/immutable/assets/ButtonToolbar.B8K_2NwJ.css                        0.17 kB
+.svelte-kit/output/server/_app/immutable/assets/_page.BKDBnYQO.css                                0.22 kB
+.svelte-kit/output/server/_app/immutable/assets/Badge.sgQJmhGi.css                                0.28 kB
+.svelte-kit/output/server/_app/immutable/assets/_page.KXcaXAK_.css                                0.29 kB
+.svelte-kit/output/server/_app/immutable/assets/lib.wJT_b_RN.css                                  0.51 kB
+.svelte-kit/output/server/_app/immutable/assets/TableData.Xa_ve1fb.css                            0.58 kB
+.svelte-kit/output/server/_app/immutable/assets/_page.BQsRbckJ.css                                0.59 kB
+.svelte-kit/output/server/_app/immutable/assets/IconConstrain.BXCy_DyE.css                        0.62 kB
+.svelte-kit/output/server/_app/immutable/assets/TitledContainer.BAKyrPx4.css                      0.78 kB
+.svelte-kit/output/server/_app/immutable/assets/Col.BlXTyLZT.css                                  0.82 kB
+.svelte-kit/output/server/_app/immutable/assets/Container.Bgb8JICy.css                            1.08 kB
+.svelte-kit/output/server/_app/immutable/assets/HoverColumns.CgL5Y0lf.css                         1.08 kB
+.svelte-kit/output/server/_app/immutable/assets/EnumSelectorRow.DTtkeyxk.css                      1.18 kB
+.svelte-kit/output/server/_app/immutable/assets/HelpModal.BCzy2CK4.css                            1.25 kB
+.svelte-kit/output/server/_app/immutable/assets/Select.DHoTlc42.css                               1.40 kB
+.svelte-kit/output/server/_app/immutable/assets/ImportPage.BsD82kkf.css                           1.54 kB
+.svelte-kit/output/server/_app/immutable/assets/CardInfo.D9Qkr6yG.css                             1.55 kB
+.svelte-kit/output/server/_app/immutable/assets/WithFloating.CeA8f18S.css                         1.89 kB
+.svelte-kit/output/server/_app/immutable/assets/IconButton.DcKapxC2.css                           2.12 kB
+.svelte-kit/output/server/_app/immutable/assets/LabelButton.By2GQxez.css                          2.49 kB
+.svelte-kit/output/server/_app/immutable/assets/_page.uKn-nVCr.css                                3.31 kB
+.svelte-kit/output/server/_app/immutable/assets/_page.CuG4I3_F.css                                3.64 kB
+.svelte-kit/output/server/_app/immutable/assets/_page.CsQ5pMaH.css                                4.96 kB
+.svelte-kit/output/server/_app/immutable/assets/TagEditor.VJ78vyQ5.css                            4.98 kB
+.svelte-kit/output/server/_app/immutable/assets/_layout.B-RkoCHw.css                            147.66 kB
+.svelte-kit/output/server/chunks/false.js                                                         0.04 kB
+.svelte-kit/output/server/entries/pages/import-page/_...path_/_page.ts.js                         0.09 kB
+.svelte-kit/output/server/chunks/html.js                                                          0.16 kB
+.svelte-kit/output/server/entries/pages/congrats/_page.ts.js                                      0.17 kB
+.svelte-kit/output/server/entries/pages/import-anki-package/_...path_/_page.ts.js                 0.24 kB
+.svelte-kit/output/server/chunks/context-keys.js                                                  0.25 kB
+.svelte-kit/output/server/chunks/helpers.js                                                       0.32 kB
+.svelte-kit/output/server/entries/pages/card-info/_cardId_/_page.ts.js                            0.35 kB
+.svelte-kit/output/server/internal.js                                                             0.35 kB
+.svelte-kit/output/server/chunks/bridgecommand.js                                                 0.35 kB
+.svelte-kit/output/server/entries/pages/_error.svelte.js                                          0.36 kB
+.svelte-kit/output/server/entries/pages/deck-options/_deckId_/_page.ts.js                         0.41 kB
+.svelte-kit/output/server/entries/pages/_layout.ts.js                                             0.49 kB
+.svelte-kit/output/server/entries/pages/import-page/_...path_/_page.svelte.js                     0.53 kB
+.svelte-kit/output/server/entries/pages/card-info/_cardId_/_previousId_/_page.ts.js               0.55 kB
+.svelte-kit/output/server/entries/pages/_layout.svelte.js                                         0.57 kB
+.svelte-kit/output/server/chunks/environment.js                                                   0.62 kB
+.svelte-kit/output/server/entries/pages/change-notetype/_...notetypeIds_/_page.ts.js              0.70 kB
+.svelte-kit/output/server/entries/pages/card-info/_cardId_/_page.svelte.js                        0.75 kB
+.svelte-kit/output/server/chunks/Col.js                                                           0.76 kB
+.svelte-kit/output/server/chunks/runtime-require.js                                               0.94 kB
+.svelte-kit/output/server/chunks/Container.js                                                     0.94 kB
+.svelte-kit/output/server/chunks/Warning.js                                                       0.96 kB
+.svelte-kit/output/server/chunks/TableData.js                                                     1.06 kB
+.svelte-kit/output/server/chunks/theme.js                                                         1.08 kB
+.svelte-kit/output/server/chunks/utils.js                                                         1.09 kB
+.svelte-kit/output/server/chunks/index2.js                                                        1.28 kB
+.svelte-kit/output/server/chunks/ftl-helpers.js                                                   1.33 kB
+.svelte-kit/output/server/chunks/ButtonToolbar.js                                                 1.44 kB
+.svelte-kit/output/server/entries/pages/card-info/_cardId_/_previousId_/_page.svelte.js           1.45 kB
+.svelte-kit/output/server/chunks/TitledContainer.js                                               1.56 kB
+.svelte-kit/output/server/chunks/Badge.js                                                         1.59 kB
+.svelte-kit/output/server/chunks/IconButton.js                                                    1.60 kB
+.svelte-kit/output/server/chunks/index-server.js                                                  1.62 kB
+.svelte-kit/output/server/chunks/abort-signal.js                                                  1.95 kB
+.svelte-kit/output/server/chunks/LabelButton.js                                                   2.04 kB
+.svelte-kit/output/server/chunks/hydratable.js                                                    2.17 kB
+.svelte-kit/output/server/chunks/utils2.js                                                        2.19 kB
+.svelte-kit/output/server/chunks/render-context.js                                                2.52 kB
+.svelte-kit/output/server/chunks/index.js                                                         2.94 kB
+.svelte-kit/output/server/chunks/internal.js                                                      3.26 kB
+.svelte-kit/output/server/entries/pages/congrats/_page.svelte.js                                  4.82 kB
+.svelte-kit/output/server/chunks/Shortcut.js                                                      5.34 kB
+.svelte-kit/output/server/chunks/HoverColumns.js                                                  5.37 kB
+.svelte-kit/output/server/chunks/time.js                                                          5.49 kB
+.svelte-kit/output/server/chunks/exports.js                                                       5.60 kB
+.svelte-kit/output/server/chunks/lib.js                                                           5.75 kB
+.svelte-kit/output/server/chunks/Select.js                                                        6.96 kB
+.svelte-kit/output/server/entries/pages/import-csv/_...path_/_page.ts.js                          7.43 kB
+.svelte-kit/output/server/chunks/lib3.js                                                          8.14 kB
+.svelte-kit/output/server/entries/pages/import-anki-package/_...path_/_page.svelte.js             8.60 kB
+.svelte-kit/output/server/chunks/HelpModal.js                                                    10.49 kB
+.svelte-kit/output/server/chunks/EnumSelectorRow.js                                              11.49 kB
+.svelte-kit/output/server/chunks/WithFloating.js                                                 11.84 kB
+.svelte-kit/output/server/chunks/lib2.js                                                         12.93 kB
+.svelte-kit/output/server/entries/pages/image-occlusion/_...imagePathOrNoteId_/_page.ts.js       14.24 kB
+.svelte-kit/output/server/chunks/ImportPage.js                                                   14.43 kB
+.svelte-kit/output/server/entries/pages/change-notetype/_...notetypeIds_/_page.svelte.js         15.70 kB
+.svelte-kit/output/server/chunks/stats_pb.js                                                     15.75 kB
+.svelte-kit/output/server/entries/pages/import-csv/_...path_/_page.svelte.js                     27.48 kB
+.svelte-kit/output/server/chunks/TagEditor.js                                                    28.54 kB
+.svelte-kit/output/server/chunks/CardInfo.js                                                     29.23 kB
+.svelte-kit/output/server/remote-entry.js                                                        32.69 kB
+.svelte-kit/output/server/chunks/root.js                                                         33.78 kB
+.svelte-kit/output/server/chunks/shared.js                                                       34.95 kB
+.svelte-kit/output/server/chunks/renderer.js                                                     39.53 kB
+.svelte-kit/output/server/chunks/backend.js                                                      43.38 kB
+.svelte-kit/output/server/chunks/events.js                                                       47.20 kB
+.svelte-kit/output/server/entries/pages/image-occlusion/_...imagePathOrNoteId_/_page.svelte.js   57.43 kB
+.svelte-kit/output/server/chunks/ftl.js                                                          67.07 kB
+.svelte-kit/output/server/chunks/utils3.js                                                       67.85 kB
+.svelte-kit/output/server/entries/pages/graphs/_page.svelte.js                                   99.45 kB
+.svelte-kit/output/server/index.js                                                              138.91 kB
+.svelte-kit/output/server/entries/pages/deck-options/_deckId_/_page.svelte.js                   193.31 kB
+✓ built in 21.86s
+
+Run npm run preview to preview your production build locally.
+
+> Using @sveltejs/adapter-static
+  Wrote site to "../out/sveltekit"
+  ✔ done
+[26/43; 2 active; 43.344s] cargo-nextest
+    Blocking waiting for file lock on package cache
+    Updating crates.io index
+  Installing cargo-nextest v0.9.99
+    Updating crates.io index
+    Updating crates.io index
+   Compiling proc-macro2 v1.0.95
+   Compiling libc v0.2.173
+   Compiling serde v1.0.219
+   Compiling cfg-if v1.0.1
+   Compiling memchr v2.7.4
+   Compiling autocfg v1.4.0
+   Compiling bitflags v2.9.1
+   Compiling rustix v1.0.7
+   Compiling log v0.4.27
+   Compiling smallvec v1.15.1
+   Compiling allocator-api2 v0.2.21
+   Compiling camino v1.1.10
+   Compiling unicode-width v0.2.0
+   Compiling typeid v1.0.3
+   Compiling serde_json v1.0.140
+   Compiling target-lexicon v0.13.2
+   Compiling object v0.36.7
+   Compiling num-traits v0.2.19
+   Compiling zerocopy v0.8.25
+   Compiling hashbrown v0.15.3
+   Compiling slab v0.4.9
+   Compiling quote v1.0.40
+   Compiling thiserror v1.0.69
+   Compiling syn v2.0.101
+   Compiling guppy-workspace-hack v0.1.0
+   Compiling winnow v0.7.11
+   Compiling toml_write v0.1.2
+   Compiling jobserver v0.1.33
+   Compiling gimli v0.31.1
+   Compiling owo-colors v4.2.1
+   Compiling adler2 v2.0.0
+   Compiling errno v0.3.12
+   Compiling getrandom v0.3.3
+   Compiling signal-hook-registry v1.4.5
+   Compiling miniz_oxide v0.8.8
+   Compiling cc v1.2.25
+   Compiling tracing-core v0.1.33
+   Compiling rustc-demangle v0.1.24
+   Compiling futures-sink v0.3.31
+   Compiling thiserror v2.0.12
+   Compiling semver v1.0.26
+   Compiling idna_adapter v1.0.0
+   Compiling percent-encoding v2.3.1
+   Compiling target-spec v3.4.2
+   Compiling zstd-sys v2.0.15+zstd.1.5.7
+   Compiling addr2line v0.24.2
+   Compiling form_urlencoded v1.2.1
+   Compiling idna v1.0.3
+   Compiling terminal_size v0.4.2
+   Compiling futures-channel v0.3.31
+   Compiling ordered-float v2.10.1
+   Compiling cfg-expr v0.18.0
+   Compiling mio v1.0.4
+   Compiling futures-io v0.3.31
+   Compiling futures-task v0.3.31
+   Compiling ahash v0.8.12
+   Compiling url v2.5.4
+   Compiling backtrace v0.3.75
+   Compiling aho-corasick v1.1.3
+   Compiling serde_derive v1.0.219
+   Compiling thiserror-impl v1.0.69
+   Compiling futures-macro v0.3.31
+   Compiling thiserror-impl v2.0.12
+   Compiling tracing-attributes v0.1.28
+   Compiling lock_api v0.4.13
+   Compiling lazy_static v1.5.0
+   Compiling unicode-xid v0.2.6
+   Compiling unicode-linebreak v0.1.5
+   Compiling futures-util v0.3.31
+   Compiling regex-syntax v0.8.5
+   Compiling is_ci v1.2.0
+   Compiling signal-hook v0.3.18
+   Compiling nextest-workspace-hack v0.1.0
+   Compiling parking_lot_core v0.9.11
+   Compiling unicode-segmentation v1.12.0
+   Compiling textwrap v0.16.2
+   Compiling supports-color v3.0.2
+   Compiling convert_case v0.7.1
+   Compiling tempfile v3.20.0
+   Compiling tracing v0.1.41
+   Compiling sharded-slab v0.1.7
+   Compiling backtrace-ext v0.2.1
+   Compiling tokio-macros v2.5.0
+   Compiling miette-derive v7.6.0
+   Compiling tracing-log v0.2.0
+   Compiling thread_local v1.1.8
+   Compiling debug-ignore v1.0.5
+   Compiling cfg_aliases v0.2.1
+   Compiling scopeguard v1.2.0
+   Compiling unicode-width v0.1.14
+   Compiling newtype-uuid v1.2.2
+   Compiling pulldown-cmark v0.13.0
+   Compiling supports-hyperlinks v3.1.0
+   Compiling portable-atomic v1.11.0
+   Compiling bytes v1.10.1
+   Compiling rustix v0.38.44
+   Compiling supports-unicode v3.0.0
+   Compiling fixedbitset v0.5.7
+   Compiling iana-time-zone v0.1.63
+   Compiling nix v0.30.1
+   Compiling anstyle-parse v0.2.6
+   Compiling tracing-subscriber v0.3.19
+   Compiling derive_more-impl v2.0.1
+   Compiling pin-project-internal v1.1.10
+   Compiling regex-automata v0.4.9
+   Compiling tokio v1.45.1
+   Compiling ppv-lite86 v0.2.21
+   Compiling miette v7.6.0
+   Compiling uuid v1.17.0
+   Compiling rand_core v0.9.3
+   Compiling console v0.15.11
+   Compiling vte v0.14.1
+   Compiling bstr v1.12.0
+   Compiling anstyle-query v1.1.2
+   Compiling litrs v0.4.1
+   Compiling tinyvec_macros v0.1.1
+   Compiling unicase v2.8.1
+   Compiling colorchoice v1.0.3
+   Compiling anstyle v1.0.10
+   Compiling nested v0.1.1
+   Compiling static_assertions v1.1.0
+   Compiling color-spantrace v0.3.0
+   Compiling eyre v0.6.12
+   Compiling pin-project v1.1.10
+   Compiling document-features v0.2.11
+   Compiling tracing-error v0.2.1
+   Compiling anstream v0.6.18
+   Compiling derive_more v2.0.1
+   Compiling tinyvec v1.9.0
+   Compiling strip-ansi-escapes v0.2.1
+   Compiling rand_chacha v0.9.0
+   Compiling indexmap v2.9.0
+   Compiling toml_datetime v0.6.11
+   Compiling serde_spanned v0.6.9
+   Compiling erased-serde v0.4.6
+   Compiling serde-value v0.7.0
+   Compiling serde-untagged v0.1.7
+   Compiling pathdiff v0.2.3
+   Compiling cargo-platform v0.2.0
+   Compiling futures-executor v0.3.31
+   Compiling smol_str v0.3.2
+   Compiling signal-hook-mio v0.2.4
+   Compiling toml_edit v0.22.27
+   Compiling petgraph v0.7.1
+   Compiling futures v0.3.31
+   Compiling parking_lot v0.12.4
+   Compiling chrono v0.4.41
+   Compiling xattr v1.5.0
+   Compiling os_pipe v1.2.2
+   Compiling filetime v0.2.25
+   Compiling regex v1.11.1
+   Compiling globset v0.4.16
+   Compiling nextest-metadata v0.12.2
+   Compiling shared_child v1.0.2
+   Compiling quick-xml v0.37.5
+   Compiling indenter v0.3.3
+   Compiling number_prefix v0.4.0
+   Compiling shell-words v1.1.0
+   Compiling humantime v2.2.0
+   Compiling recursion v0.5.4
+   Compiling foldhash v0.1.5
+   Compiling rustc-hash v2.1.1
+   Compiling clap_lex v0.7.4
+   Compiling iddqd v0.3.7
+   Compiling clap_builder v4.5.40
+   Compiling quick-junit v0.5.1
+   Compiling humantime-serde v1.1.1
+   Compiling indicatif v0.17.11
+   Compiling clap_derive v4.5.40
+   Compiling toml v0.8.23
+   Compiling async-scoped v0.9.0
+   Compiling tokio-stream v0.1.17
+   Compiling future-queue v0.4.0
+   Compiling duct v0.13.7
+   Compiling atomicwrites v0.4.4
+   Compiling cargo-util-schemas v0.2.0
+   Compiling config v0.15.11
+   Compiling target-spec-miette v0.4.4
+   Compiling tar v0.4.44
+   Compiling crossterm v0.29.0
+   Compiling unicode-normalization v0.1.24
+   Compiling camino-tempfile v1.4.1
+   Compiling cargo-nextest v0.9.99
+   Compiling serde_path_to_error v0.1.17
+   Compiling serde_ignored v0.1.12
+   Compiling rand v0.9.1
+   Compiling cargo_metadata v0.20.0
+   Compiling derive-where v1.5.0
+   Compiling swrite v0.1.0
+   Compiling unicode-ident v1.0.18
+   Compiling xxhash-rust v0.8.15
+   Compiling indent_write v2.2.0
+   Compiling home v0.5.11
+   Compiling dialoguer v0.11.0
+   Compiling clap v4.5.40
+   Compiling color-eyre v0.6.5
+   Compiling enable-ansi-support v0.2.1
+   Compiling guppy v0.17.19
+   Compiling nextest-filtering v0.16.0
+   Compiling zstd-safe v7.2.4
+   Compiling zstd v0.13.3
+   Compiling nextest-runner v0.82.0
+    Finished ]8;;https://doc.rust-lang.org/cargo/reference/profiles.html#default-profiles\`release` profile [optimized]]8;;\ target(s) in 43.23s
+  Installing /Users/adarshrajesh/AlphaWeek2/ankiCFA/out/bin/cargo-nextest
+   Installed package `cargo-nextest v0.9.99` (executable `cargo-nextest`)
+[27/43; 1 active; 66.894s] check:minilints
+FAILED: /Users/adarshrajesh/AlphaWeek2/ankiCFA/out/tests/minilints.false 
+/Users/adarshrajesh/AlphaWeek2/ankiCFA/out/rust/debug/minilints check /Users/adarshrajesh/AlphaWeek2/ankiCFA/out/tests/minilints.false
+    Updating crates.io index
+ Downloading crates ...
+  Downloaded cargo-license v0.7.0
+  Installing cargo-license v0.7.0
+    Updating crates.io index
+     Locking 95 packages to latest compatible versions
+      Adding cargo_metadata v0.21.0 (available: v0.23.1)
+      Adding itertools v0.14.0 (available: v0.15.0)
+      Adding spdx v0.10.9 (available: v0.13.4)
+      Adding toml v0.9.12+spec-1.1.0 (available: v1.1.2+spec-1.1.0)
+ Downloading crates ...
+  Downloaded anstyle-query v1.1.5
+  Downloaded anstream v1.0.0
+  Downloaded potential_utf v0.1.5
+  Downloaded clap_lex v1.1.0
+  Downloaded zerofrom-derive v0.1.7
+  Downloaded stable_deref_trait v1.2.1
+  Downloaded colorchoice v1.0.5
+  Downloaded zerofrom v0.1.8
+  Downloaded yoke-derive v0.8.2
+  Downloaded serde_spanned v1.1.1
+  Downloaded is_terminal_polyfill v1.70.2
+  Downloaded zerovec-derive v0.11.3
+  Downloaded anstyle v1.0.14
+  Downloaded itoa v1.0.18
+  Downloaded erased-serde v0.4.10
+  Downloaded either v1.16.0
+  Downloaded csv-core v0.1.13
+  Downloaded idna_adapter v1.2.2
+  Downloaded displaydoc v0.2.6
+  Downloaded thiserror-impl v2.0.18
+  Downloaded cargo_metadata v0.21.0
+  Downloaded zmij v1.0.21
+  Downloaded unicode-ident v1.0.24
+  Downloaded ryu v1.0.23
+  Downloaded proc-macro2 v1.0.106
+  Downloaded icu_normalizer v2.2.0
+  Downloaded clap_builder v4.6.0
+  Downloaded clap v4.6.1
+  Downloaded camino v1.2.4
+  Downloaded icu_properties v2.2.0
+  Downloaded zerotrie v0.2.4
+  Downloaded memchr v2.8.2
+  Downloaded indexmap v2.14.0
+  Downloaded icu_collections v2.2.0
+  Downloaded url v2.5.8
+  Downloaded toml v0.9.12+spec-1.1.0
+  Downloaded icu_locale_core v2.2.0
+  Downloaded zerovec v0.11.6
+  Downloaded icu_normalizer_data v2.2.0
+  Downloaded semver v1.0.28
+  Downloaded litemap v0.8.2
+  Downloaded icu_provider v2.2.0
+  Downloaded clap_derive v4.6.1
+  Downloaded cargo-util-schemas v0.8.2
+  Downloaded anyhow v1.0.103
+  Downloaded anstyle-parse v1.0.0
+  Downloaded yoke v0.8.3
+  Downloaded writeable v0.6.3
+  Downloaded toml_writer v1.1.1+spec-1.1.0
+  Downloaded toml_parser v1.1.2+spec-1.1.0
+  Downloaded toml_datetime v0.7.5+spec-1.1.0
+  Downloaded tinystr v0.8.3
+  Downloaded thiserror v2.0.18
+  Downloaded smallvec v1.15.2
+  Downloaded hashbrown v0.17.1
+  Downloaded serde_json v1.0.150
+  Downloaded winnow v1.0.3
+  Downloaded winnow v0.7.15
+  Downloaded icu_properties_data v2.2.0
+  Downloaded serde-untagged v0.1.9
+  Downloaded unicode-width v0.2.2
+  Downloaded quote v1.0.46
+  Downloaded autocfg v1.5.1
+  Downloaded syn v2.0.118
+  Downloaded csv v1.4.0
+  Downloaded spdx v0.10.9
+    Blocking waiting for file lock on build directory
+   Compiling proc-macro2 v1.0.106
+   Compiling unicode-ident v1.0.24
+   Compiling quote v1.0.46
+   Compiling serde_core v1.0.228
+   Compiling stable_deref_trait v1.2.1
+   Compiling litemap v0.8.2
+   Compiling writeable v0.6.3
+   Compiling icu_properties_data v2.2.0
+   Compiling icu_normalizer_data v2.2.0
+   Compiling smallvec v1.15.2
+   Compiling autocfg v1.5.1
+   Compiling winnow v0.7.15
+   Compiling hashbrown v0.17.1
+   Compiling erased-serde v0.4.10
+   Compiling zmij v1.0.21
+   Compiling thiserror v2.0.18
+   Compiling percent-encoding v2.3.2
+   Compiling memchr v2.8.2
+   Compiling anstyle-parse v1.0.0
+   Compiling num-traits v0.2.19
+   Compiling form_urlencoded v1.2.2
+   Compiling serde_json v1.0.150
+   Compiling itoa v1.0.18
+   Compiling indexmap v2.14.0
+   Compiling anstyle-query v1.1.5
+   Compiling colorchoice v1.0.5
+   Compiling anstyle v1.0.14
+   Compiling camino v1.2.4
+   Compiling is_terminal_polyfill v1.70.2
+   Compiling anstream v1.0.0
+   Compiling anyhow v1.0.103
+   Compiling winnow v1.0.3
+   Compiling clap_lex v1.1.0
+   Compiling toml_parser v1.1.2+spec-1.1.0
+   Compiling csv-core v0.1.13
+   Compiling unicode-width v0.2.2
+   Compiling clap_builder v4.6.0
+   Compiling either v1.16.0
+   Compiling ryu v1.0.23
+   Compiling toml_writer v1.1.1+spec-1.1.0
+   Compiling itertools v0.14.0
+   Compiling getopts v0.2.24
+   Compiling spdx v0.10.9
+   Compiling syn v2.0.118
+   Compiling ordered-float v2.10.1
+   Compiling semver v1.0.28
+   Compiling serde_spanned v1.1.1
+   Compiling toml_datetime v0.7.5+spec-1.1.0
+   Compiling csv v1.4.0
+   Compiling serde-untagged v0.1.9
+   Compiling toml v0.9.12+spec-1.1.0
+   Compiling synstructure v0.13.2
+   Compiling zerofrom-derive v0.1.7
+   Compiling yoke-derive v0.8.2
+   Compiling zerovec-derive v0.11.3
+   Compiling displaydoc v0.2.6
+   Compiling serde_derive v1.0.228
+   Compiling thiserror-impl v2.0.18
+   Compiling clap_derive v4.6.1
+   Compiling zerofrom v0.1.8
+   Compiling yoke v0.8.3
+   Compiling clap v4.6.1
+   Compiling zerovec v0.11.6
+   Compiling zerotrie v0.2.4
+   Compiling serde v1.0.228
+   Compiling tinystr v0.8.3
+   Compiling potential_utf v0.1.5
+   Compiling icu_collections v2.2.0
+   Compiling icu_locale_core v2.2.0
+   Compiling serde_spanned v0.6.9
+   Compiling toml_datetime v0.6.11
+   Compiling serde-value v0.7.0
+   Compiling cargo-platform v0.2.0
+   Compiling toml_edit v0.22.27
+   Compiling icu_provider v2.2.0
+   Compiling icu_properties v2.2.0
+   Compiling icu_normalizer v2.2.0
+   Compiling idna_adapter v1.2.2
+   Compiling idna v1.1.0
+   Compiling toml v0.8.23
+   Compiling url v2.5.8
+   Compiling cargo-util-schemas v0.8.2
+   Compiling cargo_metadata v0.21.0
+   Compiling cargo-license v0.7.0
+    Finished ]8;;https://doc.rust-lang.org/cargo/reference/profiles.html#default-profiles\`release` profile [optimized]]8;;\ target(s) in 48.40s
+  Installing /Users/adarshrajesh/.cargo/bin/cargo-license
+   Installed package `cargo-license v0.7.0` (executable `cargo-license`)
+missing standard copyright header: "./cfa/ethics_pairs/import_pairs.py"
+missing standard copyright header: "./cfa/ethics_pairs/ethics_revlog.py"
+missing standard copyright header: "./cfa/ethics_pairs/tests/test_dashboard.py"
+missing standard copyright header: "./cfa/ethics_pairs/tests/test_ethics_scoring.py"
+missing standard copyright header: "./cfa/ethics_pairs/tests/test_import_pairs.py"
+missing standard copyright header: "./cfa/ethics_pairs/ethics_scoring.py"
+missing standard copyright header: "./cfa/ethics_pairs/__init__.py"
+missing standard copyright header: "./cfa/ethics_pairs/ethics_dashboard.py"
+missing standard copyright header: "./cfa/ethics_pairs/ethics_notetype.py"
+missing standard copyright header: "./ts/tests/e2e/ethics_pairs_flow.test.ts"
+ninja: build stopped: subcommand failed.
+[0m[1m[31m
+Build failed.
+[0merror: recipe `check` failed on line 35 with exit code 1
+CHECK EXIT: 1

@@ -1,0 +1,5 @@
+=== 50k-card build_exam_queue benchmark (Wed Jul  1 16:04:53 CDT 2026) ===
+cards generated: 50000 in 7.0s
+build_exam_queue over 50000 due cards: best of 5 = 336.8 ms
+top score 0.0000, bottom score 0.0000
+EXIT: 0

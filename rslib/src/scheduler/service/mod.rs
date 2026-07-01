@@ -4,6 +4,8 @@
 mod answering;
 mod states;
 
+use std::collections::HashMap;
+
 use anki_proto::cards;
 use anki_proto::generic;
 use anki_proto::scheduler;
@@ -21,15 +23,22 @@ use fsrs::ComputeParametersInput;
 use fsrs::FSRSItem;
 use fsrs::FSRSReview;
 use fsrs::FSRS;
+use fsrs::FSRS5_DEFAULT_DECAY;
 
 use crate::backend::Backend;
+use crate::card::Card;
 use crate::prelude::*;
 use crate::scheduler::fsrs::params::ComputeParamsRequest;
 use crate::scheduler::new::NewCardDueOrder;
 use crate::scheduler::states::CardState;
 use crate::scheduler::states::SchedulingStates;
+use crate::scheduler::timing::SchedTimingToday;
+use crate::search::JoinSearches;
+use crate::search::SearchNode;
 use crate::search::SortMode;
+use crate::search::StateKind;
 use crate::stats::studied_today;
+use crate::tags::split_tags;
 
 impl crate::services::SchedulerService for Collection {
     /// This behaves like _updateCutoff() in older code - it also unburies at
@@ -248,6 +257,13 @@ impl crate::services::SchedulerService for Collection {
             .map(Into::into)
     }
 
+    fn build_exam_queue(
+        &mut self,
+        input: scheduler::BuildExamQueueRequest,
+    ) -> Result<scheduler::BuildExamQueueResponse> {
+        self.build_exam_queue(input)
+    }
+
     fn custom_study(
         &mut self,
         input: scheduler::CustomStudyRequest,
@@ -450,21 +466,318 @@ fn fsrs_review_proto_to_fsrs(review: anki_proto::scheduler::FsrsReview) -> FSRSR
     }
 }
 
+impl Collection {
+    /// Read-only exam-prep queue backing the `BuildExamQueue` RPC.
+    ///
+    /// Gathers the due (review + learning) cards for a deck and its subdecks
+    /// *without* mutating any card, queue, or scheduling state, scores each by
+    /// `topic_weight * (1 - retrievability) * deadline_urgency`, and returns
+    /// the card ids with their parallel scores sorted by score descending.
+    /// Because it never writes, FSRS scheduling and the undo history stay
+    /// valid.
+    pub(crate) fn build_exam_queue(
+        &mut self,
+        input: scheduler::BuildExamQueueRequest,
+    ) -> Result<scheduler::BuildExamQueueResponse> {
+        let urgency = deadline_urgency(input.days_to_exam);
+
+        // Read-only gather of the deck tree's due cards.
+        let search = SearchNode::DeckIdWithChildren(DeckId(input.deck_id))
+            .and(SearchNode::State(StateKind::Due));
+        let cards = self.all_cards_for_search(search)?;
+        if cards.is_empty() {
+            return Ok(scheduler::BuildExamQueueResponse::default());
+        }
+
+        // One bulk query for all note tags (cheap even for 50k cards).
+        let note_ids: Vec<NoteId> = cards.iter().map(|c| c.note_id).collect();
+        let tags_by_note: HashMap<NoteId, String> = self
+            .storage
+            .get_note_tags_by_id_list(&note_ids)?
+            .into_iter()
+            .map(|nt| (nt.id, nt.tags))
+            .collect();
+
+        let timing = self.timing_today()?;
+        let fsrs = FSRS::new(None).unwrap();
+
+        let mut scored: Vec<(CardId, f32)> = cards
+            .iter()
+            .map(|card| {
+                let weight = tags_by_note
+                    .get(&card.note_id)
+                    .map(|tags| topic_weight_for_tags(tags, &input.topic_weights))
+                    .unwrap_or(0.0);
+                let weakness = 1.0 - card_retrievability(&fsrs, card, &timing);
+                (card.id, weight * weakness * urgency)
+            })
+            .collect();
+
+        // Sort by score descending; ties broken by ascending id for determinism.
+        scored.sort_by(|a, b| {
+            b.1.partial_cmp(&a.1)
+                .unwrap_or(std::cmp::Ordering::Equal)
+                .then(a.0.cmp(&b.0))
+        });
+
+        let limit = if input.fetch_limit == 0 {
+            scored.len()
+        } else {
+            (input.fetch_limit as usize).min(scored.len())
+        };
+        let scored = &scored[..limit];
+
+        Ok(scheduler::BuildExamQueueResponse {
+            card_ids: scored.iter().map(|(id, _)| id.0).collect(),
+            scores: scored.iter().map(|(_, s)| *s).collect(),
+        })
+    }
+}
+
+/// Urgency multiplier that grows as the exam approaches. Strictly decreasing in
+/// `days_to_exam` for days >= 1, so a nearer exam raises every card's score.
+/// Clamped at 1 day so exam-day / overdue yields the maximum (1.0).
+fn deadline_urgency(days_to_exam: u32) -> f32 {
+    1.0 / days_to_exam.max(1) as f32
+}
+
+/// Current FSRS retrievability R in [0,1]. Cards with no memory state (never
+/// reviewed) are treated as maximally weak (R = 0) so they rise in the queue.
+fn card_retrievability(fsrs: &FSRS, card: &Card, timing: &SchedTimingToday) -> f32 {
+    match card.memory_state {
+        Some(state) => {
+            let elapsed = card.seconds_since_last_review(timing).unwrap_or_default();
+            fsrs.current_retrievability_seconds(
+                state.into(),
+                elapsed,
+                card.decay.unwrap_or(FSRS5_DEFAULT_DECAY),
+            )
+        }
+        None => 0.0,
+    }
+}
+
+/// Longest-prefix match of the note's `los::` topic tags against the weight
+/// map. Returns 0.0 when no configured topic matches, sinking that card to the
+/// bottom.
+fn topic_weight_for_tags(tags: &str, weights: &HashMap<String, f32>) -> f32 {
+    let mut best: Option<(usize, f32)> = None;
+    for tag in split_tags(tags) {
+        for (prefix, &weight) in weights {
+            let matches = tag == prefix
+                || tag
+                    .strip_prefix(prefix.as_str())
+                    .is_some_and(|rest| rest.starts_with("::"));
+            if matches && best.map_or(true, |(len, _)| prefix.len() > len) {
+                best = Some((prefix.len(), weight));
+            }
+        }
+    }
+    best.map_or(0.0, |(_, weight)| weight)
+}
+
 #[cfg(test)]
 mod tests {
+    use std::collections::HashMap;
+
     use anki_proto::scheduler::card_answer::Rating;
+    use anki_proto::scheduler::BuildExamQueueRequest;
     use anki_proto::scheduler::CardAnswer;
     use anki_proto::scheduler::GetQueuedCardsRequest;
+    use fsrs::FSRS5_DEFAULT_DECAY;
 
     use crate::card::CardQueue;
     use crate::card::CardType;
+    use crate::card::FsrsMemoryState;
     use crate::prelude::*;
     use crate::services::SchedulerService;
+    use crate::tests::DeckAdder;
     use crate::tests::NoteAdder;
 
     fn add_basic_card(col: &mut Collection) -> CardId {
         let note = NoteAdder::basic(col).add(col);
         col.storage.card_ids_of_notes(&[note.id]).unwrap()[0]
+    }
+
+    // === CFA fork: BuildExamQueue helpers & tests ===
+
+    /// Adds a note tagged with `tags`, converts its single card into a *due
+    /// review* card with the given optional FSRS memory state (stability,
+    /// difficulty) last reviewed `days_since_review` days ago, and returns the
+    /// card id. Memory state `None` models a card with no FSRS data.
+    fn add_due_card(
+        col: &mut Collection,
+        deck: DeckId,
+        tags: &[&str],
+        memory: Option<(f32, f32)>,
+        days_since_review: i64,
+    ) -> CardId {
+        let nt = col.basic_notetype();
+        let mut note = nt.new_note();
+        note.set_field(0, "q").unwrap();
+        note.tags = tags.iter().map(ToString::to_string).collect();
+        col.add_note(&mut note, deck).unwrap();
+
+        let cid = col.storage.card_ids_of_notes(&[note.id]).unwrap()[0];
+        let mut card = col.storage.get_card(cid).unwrap().unwrap();
+        card.queue = CardQueue::Review;
+        card.ctype = CardType::Review;
+        card.due = 0;
+        card.interval = 30;
+        card.decay = Some(FSRS5_DEFAULT_DECAY);
+        card.last_review_time = Some(TimestampSecs::now().adding_secs(-86_400 * days_since_review));
+        card.memory_state = memory.map(|(stability, difficulty)| FsrsMemoryState {
+            stability,
+            difficulty,
+        });
+        col.storage.update_card(&card).unwrap();
+        cid
+    }
+
+    fn weights(pairs: &[(&str, f32)]) -> HashMap<String, f32> {
+        pairs.iter().map(|(k, v)| (k.to_string(), *v)).collect()
+    }
+
+    fn exam_queue(
+        col: &mut Collection,
+        deck: DeckId,
+        days_to_exam: u32,
+        topic_weights: HashMap<String, f32>,
+    ) -> (Vec<i64>, Vec<f32>) {
+        let resp = SchedulerService::build_exam_queue(
+            col,
+            BuildExamQueueRequest {
+                deck_id: deck.0,
+                days_to_exam,
+                topic_weights,
+                fetch_limit: 0,
+            },
+        )
+        .unwrap();
+        (resp.card_ids, resp.scores)
+    }
+
+    #[test]
+    fn exam_queue_orders_by_topic_weight() {
+        let mut col = Collection::new();
+        // Two equally-weak cards (no memory state); only the topic weight differs.
+        let low = add_due_card(&mut col, DeckId(1), &["los::ethics::r1"], None, 0);
+        let high = add_due_card(&mut col, DeckId(1), &["los::quant::r2"], None, 0);
+        let (ids, scores) = exam_queue(
+            &mut col,
+            DeckId(1),
+            30,
+            weights(&[("los::ethics", 0.2), ("los::quant", 0.9)]),
+        );
+        assert_eq!(ids, vec![high.0, low.0], "higher-weight topic ranks first");
+        assert!(scores[0] > scores[1]);
+    }
+
+    #[test]
+    fn exam_queue_weaker_card_ranks_first_for_equal_weight() {
+        let mut col = Collection::new();
+        // Same topic/weight, reviewed 30 days ago: lower stability => lower
+        // retrievability => higher weakness => ranked first.
+        let strong = add_due_card(
+            &mut col,
+            DeckId(1),
+            &["los::quant::r1"],
+            Some((1000.0, 5.0)),
+            30,
+        );
+        let weak = add_due_card(
+            &mut col,
+            DeckId(1),
+            &["los::quant::r2"],
+            Some((3.0, 5.0)),
+            30,
+        );
+        let (ids, _) = exam_queue(&mut col, DeckId(1), 30, weights(&[("los::quant", 1.0)]));
+        assert_eq!(
+            ids,
+            vec![weak.0, strong.0],
+            "lower retrievability ranks first"
+        );
+    }
+
+    #[test]
+    fn exam_queue_zero_weight_topic_sinks_to_bottom() {
+        let mut col = Collection::new();
+        let weighted = add_due_card(&mut col, DeckId(1), &["los::quant::r1"], None, 0);
+        // No weight entry for this topic => weight 0 => score 0 => bottom.
+        let unweighted = add_due_card(&mut col, DeckId(1), &["los::ethics::r1"], None, 0);
+        let (ids, scores) = exam_queue(&mut col, DeckId(1), 30, weights(&[("los::quant", 0.5)]));
+        assert_eq!(ids[0], weighted.0);
+        assert!(scores[0] > 0.0);
+        assert_eq!(ids.last().copied(), Some(unweighted.0));
+        assert_eq!(*scores.last().unwrap(), 0.0, "zero-weight card scores 0");
+    }
+
+    #[test]
+    fn exam_queue_empty_deck_returns_empty() {
+        let mut col = Collection::new();
+        let empty = DeckAdder::new("Empty").add(&mut col);
+        // A due card exists elsewhere, but the queried deck has none.
+        add_due_card(&mut col, DeckId(1), &["los::quant::r1"], None, 0);
+        let (ids, scores) = exam_queue(&mut col, empty.id, 30, weights(&[("los::quant", 1.0)]));
+        assert!(ids.is_empty());
+        assert!(scores.is_empty());
+    }
+
+    #[test]
+    fn exam_queue_urgency_is_monotonic_in_days_to_exam() {
+        let mut col = Collection::new();
+        add_due_card(&mut col, DeckId(1), &["los::quant::r1"], None, 0);
+        let w = weights(&[("los::quant", 1.0)]);
+        let (_, near) = exam_queue(&mut col, DeckId(1), 1, w.clone());
+        let (_, mid) = exam_queue(&mut col, DeckId(1), 30, w.clone());
+        let (_, far) = exam_queue(&mut col, DeckId(1), 180, w);
+        assert!(
+            near[0] > mid[0] && mid[0] > far[0],
+            "a nearer exam yields a higher score for the same card"
+        );
+    }
+
+    #[test]
+    fn exam_queue_is_read_only_and_preserves_undo() {
+        let mut col = Collection::new();
+        NoteAdder::basic(&mut col).add(&mut col);
+        let cid = col.storage.get_all_cards()[0].id;
+        assert_eq!(
+            col.storage.get_card(cid).unwrap().unwrap().queue,
+            CardQueue::New
+        );
+
+        // A real review changes the card and creates an undo point.
+        answer_top_card(&mut col, Rating::Good);
+        let after_review = col.storage.get_card(cid).unwrap().unwrap();
+        assert_ne!(after_review.queue, CardQueue::New);
+        assert!(col.can_undo().is_some());
+
+        // Building the exam queue is read-only: it must not mutate the card.
+        let _ = SchedulerService::build_exam_queue(
+            &mut col,
+            BuildExamQueueRequest {
+                deck_id: DeckId(1).0,
+                days_to_exam: 10,
+                topic_weights: weights(&[("los::quant", 1.0)]),
+                fetch_limit: 0,
+            },
+        )
+        .unwrap();
+        let after_build = col.storage.get_card(cid).unwrap().unwrap();
+        assert_eq!(
+            after_review.queue, after_build.queue,
+            "build must not mutate cards"
+        );
+
+        // Undo still targets the review (not a queue-build step) and restores state.
+        col.undo().unwrap();
+        assert_eq!(
+            col.storage.get_card(cid).unwrap().unwrap().queue,
+            CardQueue::New,
+            "undo restored the pre-review state"
+        );
     }
 
     /// Answers the top queued card through the SchedulerService trait with the

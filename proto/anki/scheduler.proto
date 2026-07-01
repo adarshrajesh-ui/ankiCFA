@@ -64,6 +64,11 @@ service SchedulerService {
   // The number of days the calculated interval was fuzzed by on the previous
   // review (if any). Utilized by the FSRS add-on.
   rpc FuzzDelta(FuzzDeltaRequest) returns (FuzzDeltaResponse);
+  // CFA fork addition. Read-only exam-prep queue: returns due cards in a deck
+  // reordered by score = topic_weight * (1 - retrievability) *
+  // deadline_urgency. It does not mutate any card/queue/scheduling state, so
+  // FSRS scheduling and undo remain valid.
+  rpc BuildExamQueue(BuildExamQueueRequest) returns (BuildExamQueueResponse);
 }
 
 // Implicitly includes any of the above methods that are not listed in the
@@ -153,6 +158,27 @@ message QueuedCards {
 message GetQueuedCardsRequest {
   uint32 fetch_limit = 1;
   bool intraday_learning_only = 2;
+}
+
+// CFA fork. Inputs for the read-only exam-prep queue.
+message BuildExamQueueRequest {
+  // Deck to draw due cards from (subdecks included).
+  int64 deck_id = 1;
+  // Days remaining until the exam; smaller values raise deadline_urgency.
+  uint32 days_to_exam = 2;
+  // Maps a hierarchical tag prefix (e.g. "los::ethics") to its topic weight.
+  // A card's weight is the longest-prefix match against its `los::` tags; a
+  // card whose topic has no entry (or weight 0) sinks to the bottom.
+  map<string, float> topic_weights = 3;
+  // Maximum number of cards to return. 0 means "no limit".
+  uint32 fetch_limit = 4;
+}
+
+// CFA fork. Parallel arrays: card_ids[i] has exam score scores[i], sorted by
+// score descending (ties broken by ascending card id for determinism).
+message BuildExamQueueResponse {
+  repeated int64 card_ids = 1;
+  repeated float scores = 2;
 }
 
 message SchedTimingTodayResponse {

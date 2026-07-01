@@ -1,0 +1,9 @@
+=== Rust unit tests: BuildExamQueue (Wed Jul  1 16:01:40 CDT 2026) ===
+running 6 tests
+test scheduler::service::tests::exam_queue_empty_deck_returns_empty ... ok
+test scheduler::service::tests::exam_queue_orders_by_topic_weight ... ok
+test scheduler::service::tests::exam_queue_zero_weight_topic_sinks_to_bottom ... ok
+test scheduler::service::tests::exam_queue_weaker_card_ranks_first_for_equal_weight ... ok
+test scheduler::service::tests::exam_queue_urgency_is_monotonic_in_days_to_exam ... ok
+test scheduler::service::tests::exam_queue_is_read_only_and_preserves_undo ... ok
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 520 filtered out; finished in 0.03s

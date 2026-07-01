@@ -1465,6 +1465,11 @@ title="{}" {}>{}</button>""".format(
         )
         m.actionFullScreen.setShortcutContext(Qt.ShortcutContext.ApplicationShortcut)
 
+        # CFA fork: exam-readiness menu
+        import aqt.cfa
+
+        aqt.cfa.setup_menu(self)
+
     def updateTitleBar(self) -> None:
         self.setWindowTitle("Anki")
 

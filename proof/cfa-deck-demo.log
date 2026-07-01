@@ -1,0 +1,11 @@
+=== CFA deck authoring demo (Wed Jul  1 15:48:10 CDT 2026) ===
+Added 30 notes across 10 topics to 'CFA Level II'.
+Exam config stored (exam_date + 10 topic weights).
+=== inspect deck + tags + memory score (fresh deck should ABSTAIN) ===
+cards in deck: 0
+distinct los:: topics: 25
+sample tags: ['los::ethics::code-standards', 'los::ethics::gips', 'los::quant::multiple-regression']
+exam_date: 2026-08-25 | #weights: 10 | days_to_exam: 55
+MEMORY SCORE -> abstain: True
+  reason: not enough data: 0 graded reviews (need 200), 0% topic coverage (need 50%)
+  coverage_pct: 0.0 | graded_reviews: 0 | topics: 0/10

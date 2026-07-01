@@ -1,0 +1,10 @@
+=== gate launch test (offscreen GUI, isolated base=/var/folders/nk/kq2nv0sn1xzdhvwd_fv1c8000000gn/T/tmp.L0rxDMuiht), Wed Jul  1 15:27:56 CDT 2026 ===
+app PID: 40608
+
+=== gate launch verification (Wed Jul  1 15:29:21 CDT 2026) ===
+App PID 40608 launched offscreen from source and stayed running.
+mediasrv HTTP probe:
+  GET /_anki/pages/congrats.html -> HTTP 000
+40608   01:25 out/pyenv/bin/python tools/run.py -b /var/folders/nk/kq2nv0sn1xzdhvwd_fv1c8000000gn/T/tmp.L0rxDMuiht
+profile/collection init check:
+  created: /var/folders/nk/kq2nv0sn1xzdhvwd_fv1c8000000gn/T/tmp.L0rxDMuiht/prefs21.db
