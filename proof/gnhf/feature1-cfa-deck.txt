@@ -1,0 +1,14 @@
+# Feature 1 — CFA Level II deck from cfa/deck/*.jsonl
+date: 2026-07-02
+branch: gnhf/resuming-after-a-cra-9d3f67
+
+## Validator (just cfa-deck-validate)
+OK: 630 authored CFA Level II items, all valid.
+
+## Tests (just cfa-deck-test)
+.....                                                                    [100%]
+5 passed in 0.19s
+
+## Deck build round-trip
+Added 630 notes across 8 topics to 'CFA Level II'.
+Exam config stored (exam_date + 8 topic weights).

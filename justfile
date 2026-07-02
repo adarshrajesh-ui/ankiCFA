@@ -82,6 +82,20 @@ cfa-test:
     {{ ninja }} pylib
     {{ cfa_env }} {{ py }} -m pytest cfa/ethics_pairs/tests -q
 
+# Validate the authored CFA Level II deck items (cfa/deck/*.jsonl) and run the builder tests
+cfa-deck-validate:
+    {{ py }} cfa/deck/validate_deck.py
+
+# Run the CFA Level II deck builder + JSONL validator tests (builds pylib first for the round-trip)
+cfa-deck-test:
+    {{ ninja }} pylib
+    {{ cfa_env }} {{ py }} -m pytest tools/cfa/tests -q
+
+# Build the CFA Level II deck into a collection. Pass col=/path/to/collection.anki2 (must be CLOSED in Anki)
+cfa-deck-build col:
+    {{ ninja }} pylib
+    {{ cfa_env }} {{ py }} tools/cfa/build_cfa_deck.py --path "{{ col }}"
+
 # Import the 30-pair bank into a collection (must be CLOSED in Anki). Pass col=/path/to/collection.anki2
 cfa-import col:
     {{ ninja }} pylib
