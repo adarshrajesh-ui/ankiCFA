@@ -124,6 +124,16 @@ cfa-types-test:
     {{ cfa_env }} {{ py }} -m pytest tools/cfa/tests/test_build_cfa_deck.py -k classify -q
     PYTHONPATH="out/pylib:pylib" {{ py }} -m pytest pylib/tests/test_cfa.py -q
 
+# Feature 9: two-way sync round-trip test — desktop<->phone review propagation + more-recent-wins conflict rule
+cfa-sync-test:
+    {{ ninja }} pylib
+    PYTHONPATH="out/pylib:pylib:." {{ py }} -m pytest pylib/tests/test_cfa_sync.py -q
+
+# Feature 9: run the live desktop<->phone sync demo (stands up anki-sync-server, prints a narrated round-trip)
+cfa-sync:
+    {{ ninja }} pylib
+    {{ py }} tools/cfa/sync_roundtrip.py
+
 # Feature 5: boot straight into a freshly-seeded CFA collection (own profile base under /tmp)
 cfa *args:
     ANKI_BASE="${ANKI_BASE:-/tmp/gnhf-cfa-seed/ankibase}" {{ run_script }} {{ args }}

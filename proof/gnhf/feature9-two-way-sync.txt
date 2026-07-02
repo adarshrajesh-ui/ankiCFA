@@ -1,0 +1,47 @@
+=== Feature 9: CFA two-way sync — proof ===
+date: Thu Jul  2 14:56:59 CDT 2026
+
+### just cfa-sync-test (6 tests: 3 conflict-rule unit + 3 live round-trip) ###
+ninja: no work to do.
+[0m[1m[32m
+Build succeeded in 0.13s.
+[0mPYTHONPATH="out/pylib:pylib:." out/pyenv/bin/python -m pytest pylib/tests/test_cfa_sync.py -q
+......                                                                   [100%]
+6 passed in 12.99s
+
+### just cfa-sync (live desktop<->anki-sync-server<->phone demo) ###
+./ninja pylib
+[1m[92m    Finished[0m `release` profile [optimized] target(s) in 0.23s
+ninja: no work to do.
+[0m[1m[32m
+Build succeeded in 0.11s.
+[0mout/pyenv/bin/python tools/cfa/sync_roundtrip.py
+====================================================================
+CFA TWO-WAY SYNC ROUND-TRIP  (desktop <-> anki-sync-server <-> phone)
+====================================================================
+
+[server]  anki-sync-server listening at http://127.0.0.1:56616/
+[server]  user 'user', collections stored under /var/folders/nk/kq2nv0sn1xzdhvwd_fv1c8000000gn/T/gnhf-sync-yzjr52ki/server
+
+[desktop] created 1 CFA card, logged in, uploaded to server
+[phone]   synced down: now has 1 card, 1 note
+
+--- 1. FORWARD: review on desktop, sync, check phone -----------
+[desktop] reviewed card -> 'Good'  (revlog rows: 1)
+[phone]   after sync: 1 review present, last = 'Good'  -> review propagated ✓
+
+--- 2. REVERSE: review on phone, sync, check desktop -----------
+[phone]   reviewed card -> 'Hard'
+[desktop] after sync: 2 reviews present, last = 'Hard'  -> review propagated back ✓
+
+--- 3. CONFLICT: same card reviewed on BOTH, offline -----------
+[desktop] reviewed -> 'Again'  at 1783022237946 ms
+[phone]   reviewed -> 'Easy'  at 1783022237960 ms  (phone is 14 ms more recent)
+[both]    converged revlog ids identical: True
+[both]    total distinct reviews: 4 (no duplicates: True)
+[rule]    resolve_review_conflict() -> winner is 'phone' (more recent)
+[both]    converged card's last review == phone's review: True
+
+====================================================================
+RESULT: ALL CHECKS PASSED ✓
+====================================================================
