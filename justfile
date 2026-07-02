@@ -91,6 +91,11 @@ cfa-deck-test:
     {{ ninja }} pylib
     {{ cfa_env }} {{ py }} -m pytest tools/cfa/tests -q
 
+# Feature 4: assert the desktop CFA menu exposes its four study actions (needs pylib+_aqt built)
+cfa-menu-test:
+    {{ ninja }} pylib
+    QT_QPA_PLATFORM=offscreen PYTHONPATH="out/pylib:pylib:qt:out/qt" {{ py }} -m pytest qt/tests/test_cfa_menu.py -q
+
 # Build the CFA Level II deck into a collection. Pass col=/path/to/collection.anki2 (must be CLOSED in Anki)
 cfa-deck-build col:
     {{ ninja }} pylib

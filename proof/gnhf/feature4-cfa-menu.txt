@@ -1,0 +1,14 @@
+=== Feature 4: CFA desktop menu — 4 study actions ===
+Date: Thu Jul  2 14:16:12 CDT 2026
+
+Menu actions wired in qt/aqt/cfa.py setup_menu():
+  1. Exam Readiness…
+  2. Study Ethics Minimal-Pairs
+  3. Study by Exam Priority (build_exam_queue)
+  4. Peak-on-Exam-Day (Deadline)… (cfa_deadline.deadline_retention)
+
+--- just cfa-menu-test ---
+...                                                                      [100%]
+3 passed in 0.26s
+
+DeadlineDialog rendered headless (offscreen) -> proof/gnhf/feature4-cfa-menu.png
