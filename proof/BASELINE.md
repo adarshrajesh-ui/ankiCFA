@@ -1,8 +1,8 @@
 # Build-from-source proof — baseline
 
 Repo: https://github.com/adarshrajesh-ui/ankiCFA.git
-Commit: b431cb1265f81abe8e18eff9c8839f3a25aae665
-Commit subject: Merge remote-tracking branch 'origin/main'
+Commit: ad64247e4960b057f3f6030ee103301ffce3ea05
+Commit subject: cfa: installer launch fix + honest readiness label + new-card exam queue + proof/demo
 Branch: main (proof assembled on branch chore/wed-proof)
 Working tree clean at baseline: no
 Date: 2026-07-01
