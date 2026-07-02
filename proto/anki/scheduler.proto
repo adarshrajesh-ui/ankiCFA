@@ -69,6 +69,15 @@ service SchedulerService {
   // deadline_urgency. It does not mutate any card/queue/scheduling state, so
   // FSRS scheduling and undo remain valid.
   rpc BuildExamQueue(BuildExamQueueRequest) returns (BuildExamQueueResponse);
+  // CFA fork addition (DOK-4). Read-only deadline-retention analysis: for a
+  // deck + exam date, predicts each due card's FSRS retrievability AT the exam
+  // date and suggests a next interval capped at the days remaining, so no
+  // review is scheduled past the exam. Like BuildExamQueue it never mutates
+  // card/queue/scheduling state, so FSRS scheduling and undo stay valid. This
+  // is a SECOND, distinct read-only Rust engine change (peak-on-a-date), not a
+  // reshuffle of the BuildExamQueue score.
+  rpc DeadlineRetention(DeadlineRetentionRequest)
+      returns (DeadlineRetentionResponse);
 }
 
 // Implicitly includes any of the above methods that are not listed in the
@@ -508,4 +517,26 @@ message FuzzDeltaRequest {
 
 message FuzzDeltaResponse {
   sint32 delta_days = 1;
+}
+
+// CFA fork (DOK-4). Inputs for the read-only deadline-retention analysis.
+message DeadlineRetentionRequest {
+  // Deck to draw due cards from (subdecks included).
+  int64 deck_id = 1;
+  // Absolute exam date as a Unix timestamp in seconds. Each card's recall is
+  // predicted at this instant; a date already in the past yields a 0-day cap.
+  int64 exam_date = 2;
+  // Maximum number of cards to return. 0 means "no limit".
+  uint32 fetch_limit = 3;
+}
+
+// CFA fork (DOK-4). Parallel arrays sorted by predicted exam-day recall
+// ascending (weakest first), ties broken by ascending card id for determinism.
+message DeadlineRetentionResponse {
+  repeated int64 card_ids = 1;
+  // Predicted FSRS retrievability at exam_date, in [0,1], per card.
+  repeated float predicted_recall = 2;
+  // Deadline-capped next interval in days = min(FSRS interval, days_to_exam),
+  // clamped to be non-negative so the next review never lands after the exam.
+  repeated uint32 suggested_interval_days = 3;
 }

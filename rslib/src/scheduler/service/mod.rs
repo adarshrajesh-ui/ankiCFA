@@ -34,6 +34,7 @@ use crate::scheduler::states::CardState;
 use crate::scheduler::states::SchedulingStates;
 use crate::scheduler::timing::SchedTimingToday;
 use crate::search::JoinSearches;
+use crate::search::Negated;
 use crate::search::SearchNode;
 use crate::search::SortMode;
 use crate::search::StateKind;
@@ -264,6 +265,17 @@ impl crate::services::SchedulerService for Collection {
         self.build_exam_queue(input)
     }
 
+    // CFA fork (DOK-4). Thin delegate to the read-only deadline-retention engine
+    // in scheduler/cfa_deadline.rs. The generated SchedulerService trait has no
+    // default methods, so this one wiring method is required for the RPC to
+    // dispatch; all logic lives in the new file.
+    fn deadline_retention(
+        &mut self,
+        input: scheduler::DeadlineRetentionRequest,
+    ) -> Result<scheduler::DeadlineRetentionResponse> {
+        self.deadline_retention(input)
+    }
+
     fn custom_study(
         &mut self,
         input: scheduler::CustomStudyRequest,
@@ -484,9 +496,12 @@ impl Collection {
         let urgency = deadline_urgency(input.days_to_exam);
 
         // Read-only gather of the deck tree's studyable cards: due
-        // review/learning cards plus new (never-reviewed) cards.
+        // review/learning cards plus new (never-reviewed) cards, but never
+        // suspended cards — a suspended card is not studyable and must not leak
+        // into the exam queue.
         let search = SearchNode::DeckIdWithChildren(DeckId(input.deck_id))
-            .and(SearchNode::State(StateKind::Due).or(SearchNode::State(StateKind::New)));
+            .and(SearchNode::State(StateKind::Due).or(SearchNode::State(StateKind::New)))
+            .and(SearchNode::State(StateKind::Suspended).negated());
         let cards = self.all_cards_for_search(search)?;
         if cards.is_empty() {
             return Ok(scheduler::BuildExamQueueResponse::default());
@@ -705,7 +720,10 @@ mod tests {
             weights(&[("los::ethics", 0.3), ("los::quant", 0.9)]),
         );
         assert_eq!(ids.len(), 2, "both due and new cards are included");
-        assert_eq!(ids[0], new_card.0, "weaker, higher-weight new card ranks first");
+        assert_eq!(
+            ids[0], new_card.0,
+            "weaker, higher-weight new card ranks first"
+        );
         assert_eq!(ids[1], due_strong.0);
     }
 

@@ -1,0 +1,27 @@
+=== Feature 2: Deadline-Retention (DOK-4) — proof ===
+Date: Thu Jul 2 13:54:56 2026 -0500
+Baseline main: d5867e5b5
+
+--- Rust tests: scheduler::cfa_deadline (10) ---
+running 10 tests
+test scheduler::cfa_deadline::tests::days_until_is_signed_and_rounds_toward_zero ... ok
+test scheduler::cfa_deadline::tests::capped_interval_is_min_of_fsrs_interval_and_days_to_exam ... ok
+test scheduler::cfa_deadline::tests::fetch_limit_truncates_after_sorting ... ok
+test scheduler::cfa_deadline::tests::empty_deck_returns_empty ... ok
+test scheduler::cfa_deadline::tests::exam_in_the_past_caps_all_intervals_at_zero ... ok
+test scheduler::cfa_deadline::tests::lower_predicted_recall_sorts_first ... ok
+test scheduler::cfa_deadline::tests::never_reviewed_card_is_treated_as_weakest ... ok
+test scheduler::cfa_deadline::tests::recall_drops_as_the_exam_moves_farther_out ... ok
+test scheduler::cfa_deadline::tests::suggested_interval_is_capped_at_days_to_exam ... ok
+test scheduler::cfa_deadline::tests::deadline_retention_is_read_only_and_preserves_undo ... ok
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 529 filtered out; finished in 0.04s
+
+--- Rust tests: scheduler::service (52, incl. previously-dead suspended-card probe) ---
+test result: ok. 52 passed; 0 failed; 0 ignored; 0 measured; 487 filtered out; finished in 0.18s
+
+--- Python tests: test_cfa_deadline.py (7) ---
+.......                                                                  [100%]
+7 passed in 0.20s
+
+--- RPC path live check (used_rpc True, backend has method) ---
+used_rpc: True | backend.deadline_retention: True

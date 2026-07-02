@@ -1,7 +1,7 @@
 // Copyright: Ankitects Pty Ltd and contributors
 // License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
 
-use anki_proto::scheduler::bury_or_suspend_cards_request::Mode as BuryOrSuspendMode;
+pub(crate) use anki_proto::scheduler::bury_or_suspend_cards_request::Mode as BuryOrSuspendMode;
 use anki_proto::scheduler::unbury_deck_request::Mode as UnburyDeckMode;
 
 use super::queue::BuryMode;
