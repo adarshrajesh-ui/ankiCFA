@@ -1,9 +1,28 @@
-=== Rust unit tests: BuildExamQueue (Wed Jul  1 16:01:40 CDT 2026) ===
-running 6 tests
+=== CFA fork - Rust test proof (BuildExamQueue engine) ===
+Generated (UTC): Thu Jul  2 05:42:28 UTC 2026
+Branch: chore/wed-proof
+Commit: see proof/.commit (submission HEAD)
+Command: cargo test -p anki --lib exam_queue
+Toolchain: cargo 1.92.0 (344c4567c 2025-10-21)
+Platform: Darwin 24.6.0 arm64
+
+These are the read-only exam-prep queue (BuildExamQueue) unit tests in
+rslib/src/scheduler/service/mod.rs, including the two new-card tests added
+by this task (exam_queue_includes_new_cards, exam_queue_mixes_new_and_due_cards).
+
+===================== BEGIN cargo test =====================
+     Running unittests src/lib.rs (/var/folders/nk/kq2nv0sn1xzdhvwd_fv1c8000000gn/T/cursor-sandbox-cache/361a1c863378e64a690ecdf6c8f5fc68/cargo-target/debug/deps/anki-796446915d16bd8a)
+
+running 8 tests
+test scheduler::service::tests::exam_queue_zero_weight_topic_sinks_to_bottom ... ok
 test scheduler::service::tests::exam_queue_empty_deck_returns_empty ... ok
 test scheduler::service::tests::exam_queue_orders_by_topic_weight ... ok
-test scheduler::service::tests::exam_queue_zero_weight_topic_sinks_to_bottom ... ok
+test scheduler::service::tests::exam_queue_mixes_new_and_due_cards ... ok
+test scheduler::service::tests::exam_queue_includes_new_cards ... ok
 test scheduler::service::tests::exam_queue_weaker_card_ranks_first_for_equal_weight ... ok
 test scheduler::service::tests::exam_queue_urgency_is_monotonic_in_days_to_exam ... ok
 test scheduler::service::tests::exam_queue_is_read_only_and_preserves_undo ... ok
-test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 520 filtered out; finished in 0.03s
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 520 filtered out; finished in 0.06s
+
+===================== END cargo test =======================

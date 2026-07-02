@@ -1,6 +1,6 @@
 # Day-one gate: builds & runs from source — PASS
 
-- **Commit (baseline):** 6770ad3ef460b766d85a3399bd268ff87f4224cb (branch cfa/exam-queue-mvp)
+- **Commit (baseline):** b431cb1265f81abe8e18eff9c8839f3a25aae665 (branch main; proof on chore/wed-proof)
 - **Build:** `just build` (= `./ninja pylib qt`) → "Build succeeded in 95.72s", all 64 steps
   (Rust rslib, protobuf codegen, sveltekit web pages, qt/aqt, pylib, generated bindings).
   Full log: proof/build-baseline.log

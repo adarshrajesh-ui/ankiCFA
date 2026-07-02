@@ -469,21 +469,24 @@ fn fsrs_review_proto_to_fsrs(review: anki_proto::scheduler::FsrsReview) -> FSRSR
 impl Collection {
     /// Read-only exam-prep queue backing the `BuildExamQueue` RPC.
     ///
-    /// Gathers the due (review + learning) cards for a deck and its subdecks
-    /// *without* mutating any card, queue, or scheduling state, scores each by
+    /// Gathers the studyable cards for a deck and its subdecks — due
+    /// review/learning cards *and* new (never-reviewed) cards — *without*
+    /// mutating any card, queue, or scheduling state, scores each by
     /// `topic_weight * (1 - retrievability) * deadline_urgency`, and returns
     /// the card ids with their parallel scores sorted by score descending.
-    /// Because it never writes, FSRS scheduling and the undo history stay
-    /// valid.
+    /// New cards carry no FSRS memory state, so they are treated as maximally
+    /// weak (R = 0) and naturally rise toward the top. Because it never writes,
+    /// FSRS scheduling and the undo history stay valid.
     pub(crate) fn build_exam_queue(
         &mut self,
         input: scheduler::BuildExamQueueRequest,
     ) -> Result<scheduler::BuildExamQueueResponse> {
         let urgency = deadline_urgency(input.days_to_exam);
 
-        // Read-only gather of the deck tree's due cards.
+        // Read-only gather of the deck tree's studyable cards: due
+        // review/learning cards plus new (never-reviewed) cards.
         let search = SearchNode::DeckIdWithChildren(DeckId(input.deck_id))
-            .and(SearchNode::State(StateKind::Due));
+            .and(SearchNode::State(StateKind::Due).or(SearchNode::State(StateKind::New)));
         let cards = self.all_cards_for_search(search)?;
         if cards.is_empty() {
             return Ok(scheduler::BuildExamQueueResponse::default());
@@ -634,6 +637,17 @@ mod tests {
         cid
     }
 
+    /// Adds a note tagged with `tags` whose single card stays in the *new*
+    /// queue (never reviewed, no FSRS memory state). Returns the card id.
+    fn add_new_card(col: &mut Collection, deck: DeckId, tags: &[&str]) -> CardId {
+        let nt = col.basic_notetype();
+        let mut note = nt.new_note();
+        note.set_field(0, "q").unwrap();
+        note.tags = tags.iter().map(ToString::to_string).collect();
+        col.add_note(&mut note, deck).unwrap();
+        col.storage.card_ids_of_notes(&[note.id]).unwrap()[0]
+    }
+
     fn weights(pairs: &[(&str, f32)]) -> HashMap<String, f32> {
         pairs.iter().map(|(k, v)| (k.to_string(), *v)).collect()
     }
@@ -655,6 +669,58 @@ mod tests {
         )
         .unwrap();
         (resp.card_ids, resp.scores)
+    }
+
+    #[test]
+    fn exam_queue_includes_new_cards() {
+        let mut col = Collection::new();
+        // A brand-new (never reviewed) card must appear in the queue: it has no
+        // FSRS memory state, so it is treated as maximally weak (R = 0).
+        let new = add_new_card(&mut col, DeckId(1), &["los::quant::r1"]);
+        let (ids, scores) = exam_queue(&mut col, DeckId(1), 30, weights(&[("los::quant", 0.5)]));
+        assert_eq!(ids, vec![new.0], "new card is included in the exam queue");
+        assert!(
+            scores[0] > 0.0,
+            "new card scores > 0 (weight * full weakness * urgency)"
+        );
+    }
+
+    #[test]
+    fn exam_queue_mixes_new_and_due_cards() {
+        let mut col = Collection::new();
+        // A well-remembered due card (high R => low weakness) with a modest
+        // weight, versus a brand-new higher-weight card (max weakness).
+        let due_strong = add_due_card(
+            &mut col,
+            DeckId(1),
+            &["los::ethics::r1"],
+            Some((100.0, 5.0)),
+            1,
+        );
+        let new_card = add_new_card(&mut col, DeckId(1), &["los::quant::r1"]);
+        let (ids, _) = exam_queue(
+            &mut col,
+            DeckId(1),
+            30,
+            weights(&[("los::ethics", 0.3), ("los::quant", 0.9)]),
+        );
+        assert_eq!(ids.len(), 2, "both due and new cards are included");
+        assert_eq!(ids[0], new_card.0, "weaker, higher-weight new card ranks first");
+        assert_eq!(ids[1], due_strong.0);
+    }
+
+    #[test]
+    fn verification_probe_suspended_new_card_excluded_from_exam_queue() {
+        use crate::scheduler::bury_and_suspend::BuryOrSuspendMode;
+        let mut col = Collection::new();
+        let new = add_new_card(&mut col, DeckId(1), &["los::quant::r1"]);
+        col.bury_or_suspend_cards(&[new], BuryOrSuspendMode::Suspend)
+            .unwrap();
+        let (ids, _) = exam_queue(&mut col, DeckId(1), 30, weights(&[("los::quant", 0.5)]));
+        assert!(
+            ids.is_empty(),
+            "VERIFICATION: suspended new card ids leaked into exam queue: {ids:?}"
+        );
     }
 
     #[test]

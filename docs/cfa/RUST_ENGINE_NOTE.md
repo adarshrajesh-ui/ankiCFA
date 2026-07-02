@@ -5,14 +5,17 @@ _One-page design note for the CFA Level II fork._
 ## What it is
 
 A new, **read-only** backend RPC, `SchedulerService.BuildExamQueue`, that returns
-the due cards of a deck reordered by an exam-prep score:
+the studyable cards of a deck — its due (review + learning) cards plus new,
+never-reviewed cards — reordered by an exam-prep score:
 
 ```
 score = topic_weight × (1 − retrievability) × deadline_urgency
 ```
 
 - **retrievability (R)** — the FSRS probability of recall right now, computed
-  from each card's memory state; weakness is `1 − R`.
+  from each card's memory state; weakness is `1 − R`. New, never-reviewed cards
+  have no memory state, so they count as maximally weak (`R = 0`) and naturally
+  rise toward the top.
 - **topic_weight** — from a caller-supplied map keyed by hierarchical `los::`
   tag prefix (longest-prefix match); a topic with no weight scores 0 and sinks.
 - **deadline_urgency** — `1 / max(1, days_to_exam)`, so a nearer exam lifts every
@@ -33,12 +36,14 @@ revlog, or config mutation — so FSRS scheduling and the undo history stay vali
 2. **It needs FSRS internals.** Retrievability comes from
    `FSRS::current_retrievability_seconds(memory_state, elapsed, decay)` and the
    card's `memory_state` / `last_review_time` / `decay` fields — all Rust-side.
-   Reusing the engine's own `extract_fsrs_retrievability` path keeps our numbers
-   identical to what the scheduler and stats already show.
+   Calling the same `current_retrievability_seconds` API that backs Anki's own
+   `extract_fsrs_retrievability` (search/browser sorting) and its retrievability
+   graphs keeps our numbers identical to what the app already shows.
 3. **Performance at 50k cards.** Gathering is one read-only search
-   (`deck:… is:due`), one bulk tag query, and an O(n log n) sort — all in native
-   code with no per-card RPC round-trips. This is the difference between a snappy
-   call and a UI stall when the benchmark deck reaches 50,000 cards.
+   (`deck:… (is:due or is:new)`), one bulk tag query, and an O(n log n) sort —
+   all in native code with no per-card RPC round-trips. This is the difference
+   between a snappy call and a UI stall when the benchmark deck reaches 50,000
+   cards.
 4. **Correctness is testable at the core.** The scoring is unit-tested in Rust
    against real `Collection` state, so the guarantee (read-only, deterministic
    order) is verified where the logic lives.
@@ -48,7 +53,7 @@ revlog, or config mutation — so FSRS scheduling and the undo history stay vali
 | File                                 | Change                                                                                                                   |
 | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------ |
 | `proto/anki/scheduler.proto`         | +1 rpc on `SchedulerService`; +2 messages (`BuildExamQueueRequest`, `BuildExamQueueResponse`).                           |
-| `rslib/src/scheduler/service/mod.rs` | Trait method + inherent `Collection::build_exam_queue`; 3 private scoring helpers; 6 unit tests. New `use` imports only. |
+| `rslib/src/scheduler/service/mod.rs` | Trait method + inherent `Collection::build_exam_queue`; 3 private scoring helpers; 8 unit tests. New `use` imports only. |
 | `pylib/anki/scheduler/v3.py`         | +1 thin `build_exam_queue(...)` wrapper over the generated binding.                                                      |
 
 Everything else (`_backend_generated.py`, `out/ts/lib/generated/backend.ts`, the

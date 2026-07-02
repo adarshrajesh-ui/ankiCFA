@@ -69,7 +69,8 @@ class Scheduler(SchedulerBaseWithLegacy):
     ) -> scheduler_pb2.BuildExamQueueResponse:
         """CFA fork. Read-only exam-prep queue for a deck (and subdecks).
 
-        Returns due cards reordered by
+        Returns the studyable cards (due review/learning cards plus new,
+        never-reviewed cards) reordered by
         ``topic_weight * (1 - retrievability) * deadline_urgency`` as parallel
         ``card_ids`` / ``scores`` arrays (score descending). ``topic_weights``
         maps a hierarchical tag prefix (e.g. ``los::ethics``) to its weight;

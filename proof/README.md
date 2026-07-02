@@ -2,8 +2,8 @@
 
 CFA Level II study app, forked from Anki (AGPL-3.0-or-later). No AI features.
 
-- **Work branch:** `cfa/exam-queue-mvp` (see `git log` for the commit hash).
-- **Upstream baseline it builds from:** `6770ad3ef460b766d85a3399bd268ff87f4224cb`.
+- **Work branch:** `chore/wed-proof` (see `git log` for the commit hash).
+- **Upstream baseline it builds from:** `b431cb1265f81abe8e18eff9c8839f3a25aae665` (branch main).
 
 ## Build & run gate — PASS
 

@@ -1,9 +1,28 @@
-=== Python end-to-end tests (RPC + memory score) ===
-tests/test_cfa.py::test_build_exam_queue_orders_by_weight PASSED         [ 14%]
-tests/test_cfa.py::test_build_exam_queue_zero_weight_and_empty_deck PASSED [ 28%]
-tests/test_cfa.py::test_build_exam_queue_is_read_only_and_undo_still_works PASSED [ 42%]
-tests/test_cfa.py::test_exam_config_roundtrip_and_days_to_exam PASSED    [ 57%]
-tests/test_cfa.py::test_memory_score_abstains_without_enough_data PASSED [ 71%]
-tests/test_cfa.py::test_memory_score_reports_range_when_sufficient PASSED [ 85%]
-tests/test_cfa.py::test_memory_score_abstains_when_high_weight_topic_skipped PASSED [100%]
-============================== 7 passed in 0.24s ===============================
+=== CFA fork - Python test proof (test_cfa.py, FFI to Rust engine) ===
+Generated (UTC): Thu Jul  2 05:42:39 UTC 2026
+Branch: chore/wed-proof
+Commit: see proof/.commit (submission HEAD)
+Command: PYTHONPATH=out/pylib:pylib ANKI_TEST_MODE=1 out/pyenv/bin/python -m pytest pylib/tests/test_cfa.py -v
+Test runner (build pyenv): Python 3.13.13 arm64
+
+test_cfa.py drives the real BuildExamQueue RPC through the compiled Rust
+backend in out/pylib (Python->Rust FFI) plus the honest give-up memory score.
+
+===================== BEGIN pytest =====================
+============================= test session starts ==============================
+platform darwin -- Python 3.13.13, pytest-8.4.1, pluggy-1.6.0 -- /Users/adarshrajesh/AlphaWeek2/ankiCFA/out/pyenv/bin/python
+rootdir: /Users/adarshrajesh/AlphaWeek2/ankiCFA/pylib
+configfile: pyproject.toml
+plugins: mock-3.15.1, anyio-4.13.0
+collecting ... collected 7 items
+
+pylib/tests/test_cfa.py::test_build_exam_queue_orders_by_weight PASSED   [ 14%]
+pylib/tests/test_cfa.py::test_build_exam_queue_zero_weight_and_empty_deck PASSED [ 28%]
+pylib/tests/test_cfa.py::test_build_exam_queue_is_read_only_and_undo_still_works PASSED [ 42%]
+pylib/tests/test_cfa.py::test_exam_config_roundtrip_and_days_to_exam PASSED [ 57%]
+pylib/tests/test_cfa.py::test_memory_score_abstains_without_enough_data PASSED [ 71%]
+pylib/tests/test_cfa.py::test_memory_score_reports_range_when_sufficient PASSED [ 85%]
+pylib/tests/test_cfa.py::test_memory_score_abstains_when_high_weight_topic_skipped PASSED [100%]
+
+============================== 7 passed in 0.54s ===============================
+===================== END pytest =======================

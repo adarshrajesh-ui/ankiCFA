@@ -77,7 +77,8 @@ class ExamReadinessDialog(QDialog):
         else:
             header.setText(
                 f"<h2>{deck_name}</h2>"
-                "<p style='font-size:15px'>Memory (recall probability): "
+                "<p style='font-size:15px'>Recall probability "
+                "(unweighted mean across covered topics): "
                 f"<b>{_pct(score.range_low)}–{_pct(score.range_high)}</b> "
                 f"<span style='color:#666'>(midpoint {_pct(score.point)})</span></p>"
                 f"<p>Coverage {_pct(score.coverage_pct)} "
