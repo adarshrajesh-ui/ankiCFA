@@ -1,0 +1,24 @@
+=== Feature 5: CFA first-launch deck seeder — PROOF ===
+Date: 2026-07-02
+
+--- just cfa-seed-test (3 pytest cases) ---
+ninja: no work to do.
+[0m[1m[32m
+Build succeeded in 0.12s.
+[0mPYTHONPATH="out/pylib:pylib" out/pyenv/bin/python -m pytest pylib/tests/test_cfa_seed.py -q
+...                                                                      [100%]
+3 passed in 0.54s
+
+--- CLI seed of a FRESH collection ---
+seed: main_seeded=True (+630 notes), ethics_seeded=True (+30 cards), config_set=True
+--- re-run (idempotent: no new cards) ---
+seed: main_seeded=False (+0 notes), ethics_seeded=False (+0 cards), config_set=False
+
+--- seeded collection contents ---
+  CFA Level II             cards=630
+  CFA::Ethics Pairs        cards=30
+  exam config: exam_date=2026-08-25 topics=8
+
+Desktop wiring: qt/aqt/main.py calls aqt.cfa_seed.maybe_seed(mw) after
+gui_hooks.collection_did_load; guarded once-per-collection by cfa_seeded config.
+One-command launch: just cfa  (ANKI_BASE=/tmp/gnhf-cfa-seed/ankibase)

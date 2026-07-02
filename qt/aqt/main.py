@@ -661,6 +661,10 @@ class AnkiQt(QMainWindow):
         try:
             self.update_undo_actions()
             gui_hooks.collection_did_load(self.col)
+            # CFA fork: seed the CFA decks on first load of a fresh profile.
+            import aqt.cfa_seed
+
+            aqt.cfa_seed.maybe_seed(self)
             self.apply_collection_options()
             self.moveToState("deckBrowser")
         except Exception:

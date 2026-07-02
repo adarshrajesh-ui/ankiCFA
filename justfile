@@ -96,6 +96,15 @@ cfa-menu-test:
     {{ ninja }} pylib
     QT_QPA_PLATFORM=offscreen PYTHONPATH="out/pylib:pylib:qt:out/qt" {{ py }} -m pytest qt/tests/test_cfa_menu.py -q
 
+# Feature 5: a fresh collection seeded via the shared seeder gets both CFA decks + exam config (idempotent)
+cfa-seed-test:
+    {{ ninja }} pylib
+    PYTHONPATH="out/pylib:pylib" {{ py }} -m pytest pylib/tests/test_cfa_seed.py -q
+
+# Feature 5: boot straight into a freshly-seeded CFA collection (own profile base under /tmp)
+cfa *args:
+    ANKI_BASE="${ANKI_BASE:-/tmp/gnhf-cfa-seed/ankibase}" {{ run_script }} {{ args }}
+
 # Build the CFA Level II deck into a collection. Pass col=/path/to/collection.anki2 (must be CLOSED in Anki)
 cfa-deck-build col:
     {{ ninja }} pylib

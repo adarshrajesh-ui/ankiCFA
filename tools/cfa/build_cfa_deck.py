@@ -31,6 +31,11 @@ import sys
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DECK_DIR = os.path.join(REPO, "cfa", "deck")
 
+# Canonical deck + exam identity, reused by the first-launch seeder so desktop
+# and tests share one source of truth.
+MAIN_DECK_NAME = "CFA Level II"
+DEFAULT_EXAM_DATE = "2026-08-25"  # a representative CFA Level II sitting
+
 # The fields every authored item row must carry.
 REQUIRED_FIELDS = {"front", "back", "topic", "los_tag", "source", "license"}
 
@@ -109,6 +114,39 @@ def topic_weights_for(items: list[dict[str, str]]) -> dict[str, float]:
     return {p: round(w / total, 4) for p, w in weights.items()}
 
 
+def add_deck_notes(col, deck_dir: str = DECK_DIR) -> dict:
+    """Add the authored CFA Level II notes + exam config to an OPEN collection.
+
+    Idempotency is the caller's concern (the seeder skips a deck that already
+    has cards); this always appends. Returns a summary dict with the number of
+    notes added and the topic weights persisted.
+    """
+    from anki import cfa
+
+    items = load_items(deck_dir)
+    weights = topic_weights_for(items)
+
+    deck_id = col.decks.id(MAIN_DECK_NAME)
+    assert deck_id is not None
+    notetype = col.models.by_name("Basic")
+
+    added = 0
+    for item in items:
+        note = col.new_note(notetype)
+        note["Front"] = item["front"]
+        note["Back"] = item["back"]
+        note.tags = [item["los_tag"]]
+        col.add_note(note, deck_id)
+        added += 1
+
+    cfa.set_exam_config(
+        col,
+        exam_date=DEFAULT_EXAM_DATE,
+        topic_weights=weights,
+    )
+    return {"notes_added": added, "topic_weights": weights, "deck_id": deck_id}
+
+
 def build(path: str, apkg: str | None) -> int:
     # Ensure the built pylib is importable when run from the repo.
     for p in ("pylib", "out/pylib"):
@@ -116,35 +154,17 @@ def build(path: str, apkg: str | None) -> int:
         if full not in sys.path:
             sys.path.insert(0, full)
 
-    from anki import cfa
     from anki.collection import Collection
     from anki.exporting import AnkiPackageExporter
 
-    items = load_items()
-    weights = topic_weights_for(items)
-
     col = Collection(path)
     try:
-        deck_id = col.decks.id("CFA Level II")
-        assert deck_id is not None
-        notetype = col.models.by_name("Basic")
+        stats = add_deck_notes(col)
+        added = stats["notes_added"]
+        weights = stats["topic_weights"]
+        deck_id = stats["deck_id"]
 
-        added = 0
-        for item in items:
-            note = col.new_note(notetype)
-            note["Front"] = item["front"]
-            note["Back"] = item["back"]
-            note.tags = [item["los_tag"]]
-            col.add_note(note, deck_id)
-            added += 1
-
-        cfa.set_exam_config(
-            col,
-            exam_date="2026-08-25",  # a representative CFA Level II sitting
-            topic_weights=weights,
-        )
-
-        print(f"Added {added} notes across {len(weights)} topics to 'CFA Level II'.")
+        print(f"Added {added} notes across {len(weights)} topics to '{MAIN_DECK_NAME}'.")
         print(f"Exam config stored (exam_date + {len(weights)} topic weights).")
 
         if apkg:
