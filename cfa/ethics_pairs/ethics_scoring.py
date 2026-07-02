@@ -12,7 +12,8 @@ never depends on Anki building.)
 Two responsibilities:
 
 1. ``grade_attempt`` -- the deterministic scoring rule. A pair attempt is "correct" ONLY if
-   BOTH conform/violate judgments are right AND the decisive fact is named correctly.
+   BOTH conform/violate judgments are right AND the learner's in-vignette highlight of the decisive
+   phrase is fully "correct" (see ``grade_highlight``; a "somewhat" highlight does NOT count).
 2. ``discrimination_by_cluster`` -- the honest per-cluster "discrimination score": the
    percentage of the last N attempts that were fully correct, per confusable-Standard cluster,
    abstaining ("not enough data") below a minimum attempt count.
@@ -24,6 +25,7 @@ measures whether the learner can tell near-identical cases apart, not how well t
 from __future__ import annotations
 
 import math
+from collections.abc import Sequence
 from dataclasses import dataclass
 
 CONFORM = "conform"
@@ -40,9 +42,89 @@ DEFAULT_WINDOW = 20
 _Z_95 = 1.959963984540054
 
 
-def _norm(text: str) -> str:
-    """Whitespace/case-insensitive normalization for comparing MCQ option text."""
-    return " ".join((text or "").split()).casefold()
+# ------------------------------------------------------------------- highlight grading
+#
+# The learner highlights the decisive phrase directly inside the vignette. Grading is by WORD-SPAN
+# OVERLAP between the learner's contiguous SELECTION and the authored GOLD phrase.
+#
+# The single tunable that sets how much slack a learner gets is HIGHLIGHT_CAP_SLACK: a selection
+# that contains every gold word counts as CORRECT as long as it is at most
+# ``len(gold) + HIGHLIGHT_CAP_SLACK`` words long (the "cap"); if it contains every gold word but is
+# longer than the cap it is SOMEWHAT (right region, too wide); anything else is WRONG.
+#
+# tokenize()/normalized_tokens()/find_gold_indices()/grade_highlight() are mirrored CHARACTER-FOR-
+# CHARACTER by the card template JS (templates/front.html, between the CFA-HIGHLIGHT-SHARED markers)
+# so gold indices and grades are byte-identical on desktop Anki and on AnkiDroid. Keep them in sync;
+# tests/test_highlight.py enforces both the cross-language agreement and that the copies match.
+
+# The one tunable constant governing the CORRECT/SOMEWHAT cap (cap = len(gold) + this).
+HIGHLIGHT_CAP_SLACK = 5
+
+# Punctuation stripped from BOTH ENDS of a token before comparison; interior punctuation such as
+# the apostrophe in "client's" or the hyphen in "in-house" is preserved. Must match the JS set.
+_STRIP_CHARS = ".,;:!?\"'()[]{}…-–—‘’“”"
+
+
+def tokenize(text: str) -> list[str]:
+    """Split ``text`` into word tokens on runs of whitespace (``None``/blank -> [])."""
+    if text is None:
+        return []
+    return str(text).split()
+
+
+def _strip_token(token: str) -> str:
+    """Lowercase a token after stripping surrounding punctuation (interior punctuation kept)."""
+    return token.strip(_STRIP_CHARS).lower()
+
+
+def normalized_tokens(text: str) -> list[str]:
+    """Tokenize ``text`` then normalize each token (lowercase + surrounding-punctuation strip)."""
+    return [_strip_token(t) for t in tokenize(text)]
+
+
+def find_gold_indices(vignette: str, gold: str) -> list[int]:
+    """Locate ``gold`` inside ``vignette`` by matching normalized token runs.
+
+    Returns the FIRST contiguous list of vignette token indices whose normalized forms equal
+    ``gold``'s normalized tokens, or ``[]`` if not found. Identical algorithm to the template JS.
+    """
+    v = normalized_tokens(vignette)
+    g = normalized_tokens(gold)
+    if not g:
+        return []
+    for start in range(0, len(v) - len(g) + 1):
+        if v[start : start + len(g)] == g:
+            return list(range(start, start + len(g)))
+    return []
+
+
+def default_cap(gold_len: int) -> int:
+    """Upper bound on |SELECTION| that still counts as CORRECT: ``gold_len + HIGHLIGHT_CAP_SLACK``."""
+    return gold_len + HIGHLIGHT_CAP_SLACK
+
+
+def grade_highlight(
+    selection_indices: Sequence[int],
+    gold_indices: Sequence[int],
+    cap: int | None = None,
+) -> str:
+    """Grade a highlight by word-span overlap. Returns ``"correct"`` | ``"somewhat"`` | ``"wrong"``.
+
+    - CORRECT: the selection contains EVERY gold word AND ``|selection| <= cap``.
+    - SOMEWHAT: the selection contains EVERY gold word BUT ``|selection| > cap`` (right region, too wide).
+    - WRONG: the selection is empty, or it misses at least one gold word.
+
+    ``cap`` defaults to ``default_cap(len(gold_indices))`` == ``len(gold) + HIGHLIGHT_CAP_SLACK``.
+    """
+    selection = set(selection_indices)
+    gold = set(gold_indices)
+    if cap is None:
+        cap = default_cap(len(gold))
+    if not selection:
+        return "wrong"
+    if not gold.issubset(selection):
+        return "wrong"
+    return "correct" if len(selection) <= cap else "somewhat"
 
 
 @dataclass(frozen=True)
@@ -50,32 +132,47 @@ class PairAttempt:
     """One learner attempt at a single minimal-pair, with the correct answers to grade against.
 
     ``judged_a``/``judged_b`` are the learner's conform/violate calls for each vignette.
-    ``chosen_fact`` is the MCQ option text the learner selected as the decisive difference.
+    ``selection_case`` is the vignette the learner highlighted in ("A"/"B", or "" if nothing was
+    highlighted) and ``selection_indices`` the contiguous word indices they highlighted there.
+    ``decisive_case`` is the vignette that actually holds the decisive phrase and ``gold_indices``
+    that phrase's word indices. A highlight only counts when it is made in ``decisive_case``.
     """
 
     judged_a: str
     judged_b: str
-    chosen_fact: str
     answer_a: str
     answer_b: str
-    decisive_fact: str
+    selection_case: str
+    selection_indices: Sequence[int]
+    decisive_case: str
+    gold_indices: Sequence[int]
+    cap: int | None = None
 
 
 def grade_attempt(attempt: PairAttempt) -> dict:
     """Deterministically grade one pair attempt.
 
-    Returns a dict with the three sub-results and the overall ``correct`` flag. ``correct`` is
-    True only when every sub-answer is right -- getting the two judgments right but naming the
-    wrong decisive fact (or vice-versa) is NOT correct.
+    Returns the sub-results and the overall ``correct`` flag. ``correct`` is True only when BOTH
+    conform/violate judgments are right AND the highlight is fully ``"correct"`` -- a ``"somewhat"``
+    highlight (right region but too wide), a highlight in the wrong vignette, or no highlight at all
+    does NOT count as fully correct.
     """
     judgment_a_correct = attempt.judged_a == attempt.answer_a
     judgment_b_correct = attempt.judged_b == attempt.answer_b
-    decisive_fact_correct = _norm(attempt.chosen_fact) == _norm(attempt.decisive_fact)
-    correct = judgment_a_correct and judgment_b_correct and decisive_fact_correct
+    # A selection only applies if it was made in the vignette that actually holds the gold phrase.
+    effective_selection = (
+        attempt.selection_indices
+        if attempt.selection_case == attempt.decisive_case
+        else ()
+    )
+    highlight = grade_highlight(effective_selection, attempt.gold_indices, attempt.cap)
+    highlight_correct = highlight == "correct"
+    correct = judgment_a_correct and judgment_b_correct and highlight_correct
     return {
         "judgment_a_correct": judgment_a_correct,
         "judgment_b_correct": judgment_b_correct,
-        "decisive_fact_correct": decisive_fact_correct,
+        "highlight": highlight,
+        "highlight_correct": highlight_correct,
         "correct": correct,
     }
 

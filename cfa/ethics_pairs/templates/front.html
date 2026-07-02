@@ -1,10 +1,15 @@
 <!-- CFA Ethics Minimal-Pair — FRONT (question) template.
-     Renders both vignettes co-presented, captures two conform/violate judgments and a
-     mandatory decisive-fact MCQ, then (only after all three are answered) reveals the
-     governing Standard + rationale. The governing Standard is NEVER visible before the
-     attempt: it lives inside the hidden `.cfa-src` block and is injected into the reveal
-     panel only when the learner presses "Check answer".
-     Scoring is fully deterministic and computed in JS (mirrors ethics_scoring.grade_attempt). -->
+     Renders both vignettes co-presented as tap-to-highlight paragraphs, captures two conform/violate
+     judgments, and — instead of a multiple-choice step — asks the learner to HIGHLIGHT the exact
+     decisive phrase (in the vignette that makes it a violation) by tapping the first and last word
+     (or dragging). Only after Check does the card reveal the grade, the gold phrase, the governing
+     Standard and the rationale. The governing Standard is NEVER visible before the attempt: it lives
+     inside the hidden `.cfa-src` block and is injected into the reveal panel only on Check.
+
+     Highlight tokenization + grading are computed in JS in the CFA-HIGHLIGHT-SHARED block below,
+     which is mirrored byte-for-byte in cfa/ethics_pairs/tests/js/highlight_logic.js and, in Python,
+     in ethics_scoring.py (tokenize / normalized_tokens / find_gold_indices / grade_highlight). This
+     guarantees identical grades on desktop Anki and AnkiDroid. -->
 
 <div class="cfa-pair" data-pairid="{{PairId}}">
 
@@ -15,10 +20,8 @@
     <div data-role="answerB">{{AnswerB}}</div>
     <div data-role="vignetteA">{{VignetteA}}</div>
     <div data-role="vignetteB">{{VignetteB}}</div>
-    <div data-role="decisive">{{DecisiveFact}}</div>
-    <div data-role="distractor">{{DistractorFact1}}</div>
-    <div data-role="distractor">{{DistractorFact2}}</div>
-    <div data-role="distractor">{{DistractorFact3}}</div>
+    <div data-role="decisivePhrase">{{DecisivePhrase}}</div>
+    <div data-role="decisiveCase">{{DecisivePhraseCase}}</div>
     <div data-role="standard">{{Standard}}</div>
     <div data-role="rationale">{{Rationale}}</div>
   </div>
@@ -30,14 +33,15 @@
 
   <div class="cfa-cases" id="cfa-cases"><!-- panels injected (order shuffled per pair) --></div>
 
-  <div class="cfa-mcq">
-    <h3>Which single difference flips the answer?</h3>
-    <div id="cfa-options"><!-- 4 options injected (order shuffled per pair) --></div>
+  <div class="cfa-highlight-step">
+    <h3>Highlight the phrase that makes it a violation</h3>
+    <p class="cfa-highlight-instr">In the case you consider a <b>violation</b>, tap the <b>first word</b>
+      then the <b>last word</b> of the decisive phrase (or drag across it). Tap again to restart.</p>
   </div>
 
   <div class="cfa-actions">
     <button type="button" id="cfa-check" disabled>Check answer</button>
-    <p class="cfa-hint" id="cfa-hint">Judge <b>both</b> cases and pick the decisive difference to continue.</p>
+    <p class="cfa-hint" id="cfa-hint">Judge <b>both</b> cases and highlight the decisive phrase to continue.</p>
   </div>
 
   <div class="cfa-reveal" id="cfa-reveal" hidden></div>
@@ -53,26 +57,74 @@
   if (!root || root.dataset.cfaInit) return;
   root.dataset.cfaInit = "1";
 
+  // === CFA-HIGHLIGHT-SHARED-START ===
+  // Mirrored byte-for-byte in cfa/ethics_pairs/tests/js/highlight_logic.js and (in Python) in
+  // ethics_scoring.py. test_highlight.py enforces the JS<->JS copy match and the Python<->JS
+  // behavioural agreement. Do NOT edit one copy without the others.
+  var CFA_HIGHLIGHT_CAP_SLACK = 5;
+  var CFA_STRIP_CHARS = ".,;:!?\"'()[]{}\u2026-\u2013\u2014\u2018\u2019\u201c\u201d";
+  function cfaStripToken(tok) {
+    var s = 0, e = tok.length;
+    while (s < e && CFA_STRIP_CHARS.indexOf(tok.charAt(s)) !== -1) s++;
+    while (e > s && CFA_STRIP_CHARS.indexOf(tok.charAt(e - 1)) !== -1) e--;
+    return tok.slice(s, e).toLowerCase();
+  }
+  function cfaTokenize(text) {
+    if (text == null) return [];
+    var t = String(text).replace(/^\s+|\s+$/g, "");
+    if (t === "") return [];
+    return t.split(/\s+/);
+  }
+  function cfaNormalizedTokens(text) {
+    var toks = cfaTokenize(text), out = [];
+    for (var i = 0; i < toks.length; i++) out.push(cfaStripToken(toks[i]));
+    return out;
+  }
+  function cfaFindGold(vignette, gold) {
+    var v = cfaNormalizedTokens(vignette), g = cfaNormalizedTokens(gold);
+    if (g.length === 0) return [];
+    for (var start = 0; start + g.length <= v.length; start++) {
+      var ok = true;
+      for (var k = 0; k < g.length; k++) {
+        if (v[start + k] !== g[k]) { ok = false; break; }
+      }
+      if (ok) {
+        var idx = [];
+        for (var j = 0; j < g.length; j++) idx.push(start + j);
+        return idx;
+      }
+    }
+    return [];
+  }
+  function cfaDefaultCap(goldLen) { return goldLen + CFA_HIGHLIGHT_CAP_SLACK; }
+  function cfaGradeHighlight(selectionIndices, goldIndices, cap) {
+    if (cap == null) cap = cfaDefaultCap(goldIndices.length);
+    var sel = {}, selCount = 0, i;
+    for (i = 0; i < selectionIndices.length; i++) {
+      if (!sel[selectionIndices[i]]) { sel[selectionIndices[i]] = true; selCount++; }
+    }
+    if (selCount === 0) return "wrong";
+    for (i = 0; i < goldIndices.length; i++) {
+      if (!sel[goldIndices[i]]) return "wrong";
+    }
+    return selCount <= cap ? "correct" : "somewhat";
+  }
+  // === CFA-HIGHLIGHT-SHARED-END ===
+
   function esc(s) { return (s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
   function srcText(role) {
     var el = root.querySelector('.cfa-src [data-role="' + role + '"]');
     return el ? el.textContent.trim() : "";
-  }
-  function srcAll(role) {
-    return Array.prototype.map.call(
-      root.querySelectorAll('.cfa-src [data-role="' + role + '"]'),
-      function (el) { return el.textContent.trim(); }
-    );
   }
 
   var pairId = root.dataset.pairid || "PAIR";
   var cluster = srcText("cluster");
   var answers = { A: srcText("answerA").toLowerCase(), B: srcText("answerB").toLowerCase() };
   var vignettes = { A: srcText("vignetteA"), B: srcText("vignetteB") };
-  var decisive = srcText("decisive");
-  var distractors = srcAll("distractor");
+  var decisivePhrase = srcText("decisivePhrase");
+  var decisiveCase = (srcText("decisiveCase") || "A").toUpperCase() === "B" ? "B" : "A";
 
-  // Deterministic PRNG seeded by PairId -> stable shuffle (no positional tell, stable tests).
+  // Deterministic PRNG seeded by PairId -> stable case order (no positional tell, stable tests).
   function xmur3(str) {
     var h = 1779033703 ^ str.length;
     for (var i = 0; i < str.length; i++) { h = Math.imul(h ^ str.charCodeAt(i), 3432918353); h = (h << 13) | (h >>> 19); }
@@ -82,21 +134,29 @@
     return function () { a |= 0; a = (a + 0x6D2B79F5) | 0; var t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
   }
   var rand = mulberry32(xmur3(pairId)());
-  function shuffle(arr) { var a = arr.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(rand() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
 
   var judged = { A: null, B: null };
-  var chosenCorrect = null;
+  // Active selection: which vignette (A/B), the anchor word, and the current [start,end] range.
+  var sel = { caseId: null, anchor: null, start: null, end: null, done: false };
+  var revealed = false;
+  // Drag bookkeeping: on a real drag we set the range live and suppress the trailing click.
+  var drag = { on: false, moved: false, caseId: null, anchor: null };
 
-  // Render the two cases in a pair-stable shuffled left/right order.
+  // Render the two cases in a pair-stable shuffled left/right order; each vignette is tokenized
+  // into tappable word spans whose data-i matches the shared tokenizer's indices.
   var order = rand() < 0.5 ? ["A", "B"] : ["B", "A"];
   var casesEl = root.querySelector("#cfa-cases");
   order.forEach(function (caseId, idx) {
+    var toks = cfaTokenize(vignettes[caseId]);
+    var spans = toks.map(function (t, i) {
+      return '<span class="cfa-tok" data-i="' + i + '">' + esc(t) + "</span>";
+    }).join(" ");
     var panel = document.createElement("div");
     panel.className = "cfa-case";
     panel.dataset.case = caseId;
     panel.innerHTML =
       '<div class="cfa-case-label">Case ' + (idx + 1) + "</div>" +
-      '<p class="cfa-vignette">' + esc(vignettes[caseId]) + "</p>" +
+      '<p class="cfa-vignette" data-case="' + caseId + '">' + spans + "</p>" +
       '<div class="cfa-judge">' +
         '<button type="button" class="cfa-judge-btn" data-j="conform">Conforms</button>' +
         '<button type="button" class="cfa-judge-btn" data-j="violate">Violates</button>' +
@@ -104,26 +164,47 @@
     casesEl.appendChild(panel);
   });
 
-  // Render the decisive-fact MCQ (4 options, shuffled). The correct one is flagged.
-  var optsEl = root.querySelector("#cfa-options");
-  var options = shuffle(
-    [{ t: decisive, correct: true }].concat(distractors.map(function (d) { return { t: d, correct: false }; }))
-  );
-  options.forEach(function (o) {
-    var b = document.createElement("button");
-    b.type = "button";
-    b.className = "cfa-opt";
-    b.textContent = o.t;
-    b.dataset.correct = o.correct ? "1" : "0";
-    optsEl.appendChild(b);
-  });
-
   var checkBtn = root.querySelector("#cfa-check");
   var hint = root.querySelector("#cfa-hint");
-  function complete() { return judged.A && judged.B && chosenCorrect !== null; }
+  function hasSelection() { return sel.caseId !== null && sel.start !== null; }
+  function complete() { return judged.A && judged.B && hasSelection(); }
   function updateCheck() { checkBtn.disabled = !complete(); hint.style.display = complete() ? "none" : ""; }
 
+  function caseOf(el) { var p = el.closest(".cfa-case"); return p ? p.dataset.case : null; }
+  function tokIndex(el) { return parseInt(el.dataset.i, 10); }
+
+  function paintSelection() {
+    root.querySelectorAll(".cfa-tok.sel").forEach(function (x) { x.classList.remove("sel"); });
+    if (!hasSelection()) return;
+    var panel = root.querySelector('.cfa-case[data-case="' + sel.caseId + '"]');
+    if (!panel) return;
+    var lo = Math.min(sel.start, sel.end), hi = Math.max(sel.start, sel.end);
+    panel.querySelectorAll(".cfa-tok").forEach(function (x) {
+      var i = tokIndex(x);
+      if (i >= lo && i <= hi) x.classList.add("sel");
+    });
+  }
+
+  function setRange(caseId, anchor, other) {
+    sel.caseId = caseId; sel.anchor = anchor;
+    sel.start = Math.min(anchor, other); sel.end = Math.max(anchor, other);
+  }
+
+  // Tap-to-select: first tap anchors a single word; second tap in the same vignette extends to a
+  // range; any tap after a completed range (or a tap in the other vignette) starts a new anchor.
+  function onTap(el) {
+    var c = caseOf(el), i = tokIndex(el);
+    if (c === null || isNaN(i)) return;
+    if (!sel.done && sel.caseId === c && sel.anchor !== null) {
+      setRange(c, sel.anchor, i); sel.done = true;
+    } else {
+      sel.caseId = c; sel.anchor = i; sel.start = i; sel.end = i; sel.done = false;
+    }
+    paintSelection(); updateCheck();
+  }
+
   root.addEventListener("click", function (ev) {
+    if (revealed) return;
     var jb = ev.target.closest(".cfa-judge-btn");
     if (jb && !jb.disabled) {
       var panel = jb.closest(".cfa-case");
@@ -132,51 +213,98 @@
       updateCheck();
       return;
     }
-    var op = ev.target.closest(".cfa-opt");
-    if (op && !op.disabled) {
-      chosenCorrect = op.dataset.correct === "1";
-      optsEl.querySelectorAll(".cfa-opt").forEach(function (x) { x.classList.toggle("sel", x === op); });
-      updateCheck();
+    var tk = ev.target.closest(".cfa-tok");
+    if (tk) {
+      if (drag.moved) { drag.moved = false; return; } // this click just concluded a drag
+      onTap(tk);
     }
   });
+
+  // Drag-to-select (pointer events work with mouse on desktop and touch on AnkiDroid). We only
+  // commit a range once the pointer actually moves onto another token, so pure taps fall through
+  // to the click handler above (keeping tap-then-tap working identically on every platform).
+  root.addEventListener("pointerdown", function (ev) {
+    if (revealed) return;
+    var tk = ev.target.closest(".cfa-tok");
+    if (!tk) return;
+    drag.on = true; drag.moved = false; drag.caseId = caseOf(tk); drag.anchor = tokIndex(tk);
+  });
+  root.addEventListener("pointermove", function (ev) {
+    if (!drag.on || revealed) return;
+    var over = document.elementFromPoint(ev.clientX, ev.clientY);
+    var tk = over && over.closest ? over.closest(".cfa-tok") : null;
+    if (!tk || caseOf(tk) !== drag.caseId) return;
+    var i = tokIndex(tk);
+    if (i === drag.anchor && !drag.moved) return; // no movement yet
+    drag.moved = true;
+    setRange(drag.caseId, drag.anchor, i); sel.done = true;
+    paintSelection(); updateCheck();
+  });
+  function endDrag() { drag.on = false; }
+  root.addEventListener("pointerup", endDrag);
+  root.addEventListener("pointercancel", function () { drag.on = false; drag.moved = false; });
 
   checkBtn.addEventListener("click", function () { if (complete()) reveal(); });
 
   function reveal() {
+    revealed = true;
     var aOK = judged.A === answers.A;
     var bOK = judged.B === answers.B;
-    var fOK = !!chosenCorrect;
-    var correct = aOK && bOK && fOK;
 
+    var goldIdx = cfaFindGold(vignettes[decisiveCase], decisivePhrase);
+    var cap = cfaDefaultCap(goldIdx.length);
+    var effSel = [];
+    if (hasSelection() && sel.caseId === decisiveCase) {
+      var lo = Math.min(sel.start, sel.end), hi = Math.max(sel.start, sel.end);
+      for (var i = lo; i <= hi; i++) effSel.push(i);
+    }
+    var hl = cfaGradeHighlight(effSel, goldIdx, cap);
+    var correct = aOK && bOK && hl === "correct";
+
+    // Per-case verdicts + lock the judge buttons.
     order.forEach(function (caseId) {
       var panel = root.querySelector('.cfa-case[data-case="' + caseId + '"]');
       var ok = judged[caseId] === answers[caseId];
       panel.classList.add(ok ? "correct" : "wrong");
       var v = document.createElement("div");
       v.className = "cfa-verdict";
-      v.textContent = "Correct answer: " + (answers[caseId] === "violate" ? "Violates" : "Conforms") + " — your call " + (ok ? "✓" : "✗");
+      v.textContent = "Correct answer: " + (answers[caseId] === "violate" ? "Violates" : "Conforms") + " — your call " + (ok ? "\u2713" : "\u2717");
       panel.appendChild(v);
     });
-    optsEl.querySelectorAll(".cfa-opt").forEach(function (x) {
-      if (x.dataset.correct === "1") x.classList.add("correct");
-      else if (x.classList.contains("sel")) x.classList.add("wrong");
-      x.disabled = true;
-    });
     root.querySelectorAll(".cfa-judge-btn").forEach(function (x) { x.disabled = true; });
-    checkBtn.disabled = true;
-    checkBtn.style.display = "none";
-    hint.style.display = "none";
+    root.querySelectorAll(".cfa-tok").forEach(function (x) { x.classList.add("locked"); });
+
+    // Recolor the learner's pick, then always paint the true gold phrase in the decisive vignette.
+    root.querySelectorAll(".cfa-tok.sel").forEach(function (x) { x.classList.remove("sel"); x.classList.add("pick", "pick-" + hl); });
+    var goldPanel = root.querySelector('.cfa-case[data-case="' + decisiveCase + '"]');
+    if (goldPanel) {
+      goldPanel.querySelectorAll(".cfa-tok").forEach(function (x) {
+        if (goldIdx.indexOf(tokIndex(x)) !== -1) x.classList.add("gold");
+      });
+    }
+
+    var messages = {
+      correct: "Correct — you found it.",
+      somewhat: "Close — right region, but you only needed these words.",
+      wrong: "Not the deciding phrase — here it is."
+    };
 
     var rv = root.querySelector("#cfa-reveal");
     rv.innerHTML =
-      '<div class="cfa-grade ' + (correct ? "ok" : "no") + '">' + (correct ? "✓ Fully correct" : "✗ Not fully correct") + "</div>" +
+      '<div class="cfa-grade ' + (correct ? "ok" : "no") + '">' + (correct ? "\u2713 Fully correct" : "\u2717 Not fully correct") + "</div>" +
       '<ul class="cfa-breakdown">' +
-        "<li>Case judgments: A " + (aOK ? "✓" : "✗") + " · B " + (bOK ? "✓" : "✗") + "</li>" +
-        "<li>Decisive fact named: " + (fOK ? "✓" : "✗") + "</li>" +
+        "<li>Case judgments: A " + (aOK ? "\u2713" : "\u2717") + " \u00b7 B " + (bOK ? "\u2713" : "\u2717") + "</li>" +
+        "<li>Decisive phrase: " + hl.charAt(0).toUpperCase() + hl.slice(1) + " " + (hl === "correct" ? "\u2713" : "\u2717") + "</li>" +
       "</ul>" +
+      '<div class="cfa-hl-msg cfa-hl-' + hl + '">' + esc(messages[hl]) +
+        ' <span class="cfa-gold-phrase">' + esc(decisivePhrase) + "</span></div>" +
       '<div class="cfa-standard"><span class="cfa-badge">Governing Standard</span>' + esc(srcText("standard")) + "</div>" +
       '<div class="cfa-rationale">' + esc(srcText("rationale")) + "</div>";
     rv.hidden = false;
+
+    checkBtn.disabled = true;
+    checkBtn.style.display = "none";
+    hint.style.display = "none";
 
     root.dataset.correct = correct ? "1" : "0";
     root.querySelector("#cfa-record").hidden = false;

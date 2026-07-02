@@ -22,6 +22,12 @@ DECK_NAME = "CFA::Ethics Pairs"
 
 # Field order is significant: PairId is the sort field. These names are the contract the card
 # templates ({{PairId}}, {{VignetteA}}, ...) and the importer rely on.
+#
+# The review flow is an in-vignette HIGHLIGHT interaction: the learner highlights the decisive
+# phrase directly in the paragraph. ``DecisivePhrase`` is the EXACT verbatim substring of the
+# relevant vignette that flips the answer, and ``DecisivePhraseCase`` ("A"/"B") says which vignette
+# holds it. The legacy ``DecisiveFact``/``DistractorFact*`` fields are kept (additive-only) so
+# existing notes and the importer round-trip test stay valid.
 FIELDS = [
     "PairId",
     "ClusterTag",
@@ -30,6 +36,8 @@ FIELDS = [
     "AnswerA",
     "AnswerB",
     "DecisiveFact",
+    "DecisivePhrase",
+    "DecisivePhraseCase",
     "DistractorFact1",
     "DistractorFact2",
     "DistractorFact3",
@@ -59,7 +67,13 @@ def ensure_notetype(col):
     front, back, css = load_templates()
     existing = col.models.by_name(NOTETYPE_NAME)
     if existing is not None:
-        # Refresh presentation in place (field set is stable, so no note migration needed).
+        # Refresh presentation in place and additively add any fields missing from an older install
+        # (e.g. DecisivePhrase/DecisivePhraseCase). Adding fields is non-destructive: existing notes
+        # simply get the new fields empty until re-imported.
+        present = {f["name"] for f in existing["flds"]}
+        for name in FIELDS:
+            if name not in present:
+                col.models.add_field(existing, col.models.new_field(name))
         existing["css"] = css
         if existing["tmpls"]:
             existing["tmpls"][0]["qfmt"] = front

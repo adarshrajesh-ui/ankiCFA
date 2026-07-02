@@ -20,17 +20,29 @@ new Rust**, so it ships to AnkiMobile / AnkiDroid automatically through the shar
 
 1. **Judge each case** — Conforms / Violates, one click per vignette (both are co-presented on one
    screen, in the same session — never split across days).
-2. **Name the decisive fact** — a 4-option multiple-choice: which single difference flips the answer.
-   This step is **mandatory**, not optional.
-3. **Reveal** — only _after_ the attempt is submitted does the card reveal which **Standard** governs
-   (e.g. `I(C) Misrepresentation`) and a short rationale for _why_ the flip happens. The governing
-   Standard is never shown before the attempt.
+2. **Highlight the decisive phrase** — in the vignette that makes it a violation, tap the **first
+   word** then the **last word** of the deciding phrase (or drag across it). This step is
+   **mandatory**, not optional. It works with touch on AnkiDroid because it does **not** rely on
+   native text selection — every word is rendered as its own tappable token.
+3. **Reveal** — only _after_ the attempt is submitted does the card grade the highlight, reveal the
+   **exact gold phrase**, and show which **Standard** governs (e.g. `I(C) Misrepresentation`) plus a
+   short rationale for _why_ the flip happens. The governing Standard is never shown before the attempt.
 
 ## Deterministic scoring
 
-A pair attempt is **fully correct only if all three sub-answers are right**: both conform/violate
-judgments _and_ the named decisive fact. Getting the two judgments right but naming the wrong
-decisive fact does **not** count. See [`ethics_scoring.py`](ethics_scoring.py) (`grade_attempt`).
+A pair attempt is **fully correct only if** both conform/violate judgments are right **and** the
+highlight of the decisive phrase grades **`correct`**. The highlight is graded by **word-span
+overlap** against a stored gold phrase, in three tiers. A single tunable constant
+`HIGHLIGHT_CAP_SLACK` (default **5**) sets the width allowance; the cap is `len(gold) + slack`:
+
+- **`correct`** — selection contains **every** gold word **and** is no wider than the cap → _"Correct — you found it."_
+- **`somewhat`** — selection contains every gold word **but** is wider than the cap → _"Close — right region, but you only needed these words."_ (does **not** count as fully correct)
+- **`wrong`** — selection misses a gold word, is in the wrong vignette, or is empty → _"Not the deciding phrase — here it is."_
+
+The **exact gold phrase is always revealed** after grading. Tokenization + grading live once in
+[`ethics_scoring.py`](ethics_scoring.py) (`grade_highlight`) and are mirrored byte-for-byte in the
+card template JS; [`tests/test_highlight.py`](tests/test_highlight.py) enforces both the copy match
+and a Python↔JS agreement cross-check, so grades are identical on desktop Anki and AnkiDroid.
 
 The card auto-rates itself in Anki — **Good** (fully correct) or **Again** (not) — so the review log
 faithfully records discrimination. Because the review log syncs, this works across devices.
@@ -75,10 +87,16 @@ Each JSONL record maps to the note type's fields:
 
 | JSONL key                   | Note field                  |   | JSONL key           | Note field           |
 | --------------------------- | --------------------------- | - | ------------------- | -------------------- |
-| `pair_id`                   | `PairId`                    |   | `decisive_fact`     | `DecisiveFact`       |
-| `cluster`                   | `ClusterTag` (`cluster::…`) |   | `distractors[0..2]` | `DistractorFact1..3` |
-| `vignette_a` / `vignette_b` | `VignetteA` / `VignetteB`   |   | `standard`          | `Standard`           |
-| `answer_a` / `answer_b`     | `AnswerA` / `AnswerB`       |   | `rationale`         | `Rationale`          |
+| `pair_id`                   | `PairId`                    |   | `decisive_fact`         | `DecisiveFact`         |
+| `cluster`                   | `ClusterTag` (`cluster::…`) |   | `decisive_phrase`       | `DecisivePhrase`       |
+| `vignette_a` / `vignette_b` | `VignetteA` / `VignetteB`   |   | `decisive_phrase_case`  | `DecisivePhraseCase`   |
+| `answer_a` / `answer_b`     | `AnswerA` / `AnswerB`       |   | `distractors[0..2]`     | `DistractorFact1..3`   |
+| `standard`                  | `Standard`                  |   | `rationale`             | `Rationale`            |
+
+`decisive_phrase` is an **exact verbatim substring** of the vignette named by `decisive_phrase_case`
+(`A`/`B`, always the violating vignette) — the importer rejects the bank if it is not, or if it is
+not locatable by whitespace tokenization. The legacy `decisive_fact`/`distractors` fields are kept
+(additive-only) so older notes and the round-trip test stay valid.
 
 Each note is tagged with its `los::ethics::…` learning-objective tag, its `cluster::…` tag, and
 `ethics::minimal-pair`.
@@ -107,8 +125,9 @@ Linux `~/.local/share/Anki2`, Windows `%APPDATA%\Anki2`.
 1. `just run`, open **CFA::Ethics Pairs**, and open _Tools ▸ CFA Ethics: Discrimination Dashboard_
    (it will read **“Not enough data”** for every cluster).
 2. Study a pair. Read both vignettes, judge each, and — to show the honest failure mode —
-   **deliberately pick a wrong decisive fact**. Submit. The card reveals ✗ _Not fully correct_, the
-   governing Standard, and the rationale; it records **Again**.
+   **deliberately highlight the wrong phrase** (or the right region but far too many words). Submit.
+   The card reveals ✗ _Not fully correct_, the true gold phrase, the governing Standard, and the
+   rationale; it records **Again**.
 3. Study a few more pairs correctly. Watch the dashboard tick up from _Not enough data_ to a real
    percentage **with a confidence interval** the moment a cluster crosses the minimum-attempts
    threshold — updating live, separate from the FSRS memory graph.
@@ -120,10 +139,11 @@ Linux `~/.local/share/Anki2`, Windows `%APPDATA%\Anki2`.
 | `pairs.jsonl`                                        | the 30-pair starter bank (auditable)                                          |
 | `import_pairs.py`                                    | CLI: jsonl → note type + `CFA::Ethics Pairs` deck + notes (idempotent)        |
 | `ethics_notetype.py`                                 | note-type definition + template installer                                     |
-| `templates/{front,back}.html`, `templates/style.css` | the interactive review flow (desktop + mobile)                                |
-| `ethics_scoring.py`                                  | **pure** deterministic scoring rule + per-cluster aggregation (no `anki` dep) |
+| `templates/{front,back}.html`, `templates/style.css` | the interactive tap-to-highlight review flow (desktop + mobile)                |
+| `ethics_scoring.py`                                  | **pure** scoring: tokenize / `find_gold_indices` / `grade_highlight` / `grade_attempt` + aggregation (no `anki` dep) |
 | `ethics_revlog.py`                                   | reads pair attempts from the review log                                       |
 | `ethics_dashboard.py`                                | discrimination dashboard renderer + offline report CLI                        |
 | `__init__.py` + `manifest.json`                      | the in-app dashboard add-on                                                   |
-| `tests/`                                             | unit tests (scoring, aggregation, dashboard) + jsonl→notes round-trip         |
+| `tests/`                                             | unit tests (scoring, highlight grading, aggregation, dashboard), jsonl→notes round-trip |
+| `tests/js/`                                          | standalone copy of the template's highlight logic + Node harness for the Python↔JS parity test |
 | `../../ts/tests/e2e/ethics_pairs_flow.test.ts`       | Playwright flow test (both vignettes; no reveal before attempt)               |

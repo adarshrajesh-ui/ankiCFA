@@ -74,6 +74,17 @@ def test_jsonl_to_notes_roundtrip():
                 assert note["DecisiveFact"] == html.escape(
                     p["decisive_fact"], quote=False
                 )
+                assert note["DecisivePhrase"] == html.escape(
+                    p["decisive_phrase"], quote=False
+                )
+                assert note["DecisivePhraseCase"] == p["decisive_phrase_case"]
+                # the imported decisive phrase is a verbatim substring of its vignette
+                _vign = (
+                    p["vignette_a"]
+                    if p["decisive_phrase_case"] == "A"
+                    else p["vignette_b"]
+                )
+                assert p["decisive_phrase"] in _vign
                 assert note["DistractorFact1"] == html.escape(
                     p["distractors"][0], quote=False
                 )
@@ -116,6 +127,8 @@ def test_load_pairs_rejects_equal_answers():
             "vignette_b": "b",
             "answer_b": "violate",
             "decisive_fact": "d",
+            "decisive_phrase": "a",
+            "decisive_phrase_case": "A",
             "distractors": ["1", "2", "3"],
             "rationale": "r",
             "standard": "I(C)",

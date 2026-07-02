@@ -1,0 +1,67 @@
+Feature 3 — CFA Ethics Minimal-Pairs: tap-to-highlight decisive phrase
+======================================================================
+
+Brought in additively from branch cfa/ethics-highlight-05-560b5501 (only the
+cfa/ethics_pairs/ subtree — the branch's doc/proof/rslib reverts were NOT
+applied, preserving Features 1 & 2 and main's exam queue).
+
+WHAT CHANGED (interaction)
+--------------------------
+The old multiple-choice "name the decisive fact" step is replaced by an
+in-vignette tap-to-highlight: the learner taps the first + last word (or drags)
+of the decisive phrase in the vignette they judge a VIOLATION. Grading is by
+word-span overlap between the contiguous SELECTION and the authored GOLD phrase:
+
+  CORRECT  : selection contains EVERY gold word AND |selection| <= cap
+  SOMEWHAT : selection contains EVERY gold word BUT |selection| >  cap
+  WRONG    : empty selection, or a gold word is missing
+  cap = len(gold) + HIGHLIGHT_CAP_SLACK,  HIGHLIGHT_CAP_SLACK = 5
+
+A pair is fully "correct" only when BOTH conform/violate judgments are right
+AND the highlight grades "correct" (a "somewhat" highlight does NOT count), and
+only when the highlight is made in the vignette that actually holds the phrase.
+
+The tokenize / normalized_tokens / find_gold_indices / grade_highlight logic is
+mirrored BYTE-FOR-BYTE across three places:
+  - cfa/ethics_pairs/ethics_scoring.py            (Python scorer)
+  - cfa/ethics_pairs/templates/front.html         (card template JS)
+  - cfa/ethics_pairs/tests/js/highlight_logic.js  (Node copy for the cross-check)
+test_highlight.py enforces both the JS<->JS copy match and the Python<->JS
+behavioural agreement (run_matrix.js feeds a case matrix through the JS copy and
+compares grades to the Python implementation).
+
+TESTS (43 passing, run with a built pylib)
+------------------------------------------
+$ PYTHONPATH=out/pylib:cfa/ethics_pairs ANKI_TEST_MODE=1 out/pyenv/bin/python \
+      -m pytest cfa/ethics_pairs/tests -q
+...........................................                              [100%]
+43 passed in 0.42s
+
+(Without a built pylib the 2 collection round-trip tests skip: 41 passed, 2 skipped.)
+Node is on PATH so the Python<->JS cross-check runs and passes.
+
+E2E TEST UPDATED
+----------------
+ts/tests/e2e/ethics_pairs_flow.test.ts rewritten to the highlight flow:
+  1. both vignettes co-presented as tokenized, tappable paragraphs
+  2. governing Standard hidden before the attempt
+  3. Check stays disabled until BOTH judgments AND an in-vignette highlight exist
+  4. tapping the gold phrase's first+last word then Check reveals "Fully correct",
+     the gold phrase, and the governing Standard.
+
+Verified passing in real Playwright driving the installed Chrome (offline: the
+out/playwright-browsers download is unavailable, so the test was run against a
+temp config with use.channel="chrome"):
+  ✓  ts/tests/e2e/ethics_pairs_flow.test.ts › minimal-pair co-presents both
+     vignettes and hides the Standard until judgments + highlight are complete
+  1 passed
+
+VISUAL PROOF
+------------
+proof/gnhf/feature3-ethics-highlight.png — the REAL front.html (first pair)
+rendered in Chrome and driven through the exact flow the e2e test asserts:
+two co-presented cases, the gold phrase "exact unreleased quarterly earnings
+figure" highlighted green, "✓ Fully correct", and Standard II(A) revealed.
+DOM-level verification (chrome-devtools-axi eval) confirmed:
+  checkDisabledBeforeHighlight=true, checkDisabledAfterHighlight=false,
+  selCount==goldLen==5, revealVisible=true, revealText startsWith "✓ Fully correct".

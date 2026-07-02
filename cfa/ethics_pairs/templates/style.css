@@ -48,8 +48,8 @@
 .cfa-case-label { font-weight: 700; font-size: .8rem; text-transform: uppercase; letter-spacing: .04em; color: #888; }
 .cfa-vignette { margin: 8px 0 12px; }
 
-.cfa-judge { display: flex; gap: 8px; }
-.cfa-judge-btn, .cfa-opt {
+.cfa-judge { display: flex; gap: 8px; margin-top: 10px; }
+.cfa-judge-btn {
   cursor: pointer;
   border: 1px solid #c7c7d1;
   background: #fff;
@@ -57,27 +57,50 @@
   padding: 8px 12px;
   font-size: .92rem;
   color: inherit;
+  flex: 1;
+  font-weight: 600;
 }
-.nightMode .cfa-judge-btn, .nightMode .cfa-opt { background: #2c2d34; border-color: #474853; }
-.cfa-judge-btn { flex: 1; font-weight: 600; }
+.nightMode .cfa-judge-btn { background: #2c2d34; border-color: #474853; }
 .cfa-judge-btn.sel { border-color: #3b6fe0; background: #e8f0ff; color: #123a8f; }
 .nightMode .cfa-judge-btn.sel { background: #21335c; color: #cfe0ff; border-color: #4d78d6; }
 
-/* MCQ */
-.cfa-mcq h3 { font-size: 1rem; margin: 0 0 10px; }
-#cfa-options { display: grid; gap: 8px; }
-.cfa-opt { text-align: left; }
-.cfa-opt.sel { border-color: #3b6fe0; background: #e8f0ff; color: #123a8f; }
-.nightMode .cfa-opt.sel { background: #21335c; color: #cfe0ff; border-color: #4d78d6; }
+/* tap-to-highlight word tokens inside each vignette */
+.cfa-vignette { -webkit-user-select: none; user-select: none; }
+.cfa-tok {
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 1px 1px;
+  transition: background-color .05s ease;
+}
+.cfa-tok:hover { background: #eef2fb; }
+.nightMode .cfa-tok:hover { background: #2b3550; }
+.cfa-tok.sel { background: #ffe08a; color: #3a2e00; }
+.nightMode .cfa-tok.sel { background: #7a5f12; color: #fff4d6; }
+.cfa-tok.locked { cursor: default; }
+.cfa-tok.locked:hover { background: transparent; }
+
+/* the in-vignette highlight step */
+.cfa-highlight-step { margin: 6px 0 12px; }
+.cfa-highlight-step h3 { font-size: 1rem; margin: 0 0 6px; }
+.cfa-highlight-instr { margin: 0; color: #6a6a72; font-size: .88rem; }
+.nightMode .cfa-highlight-instr { color: #a9a9b3; }
 
 /* post-attempt marks */
 .cfa-case.correct { border-color: #2e9e5b; box-shadow: 0 0 0 1px #2e9e5b inset; }
 .cfa-case.wrong { border-color: #d1453b; box-shadow: 0 0 0 1px #d1453b inset; }
 .cfa-verdict { margin-top: 8px; font-weight: 600; font-size: .85rem; }
-.cfa-opt.correct { border-color: #2e9e5b; background: #eafaf0; color: #14663a; }
-.cfa-opt.wrong { border-color: #d1453b; background: #fcecea; color: #8f201a; }
-.nightMode .cfa-opt.correct { background: #16351f; color: #7fe0a6; }
-.nightMode .cfa-opt.wrong { background: #3a1c1a; color: #f0a49d; }
+
+/* the learner's picked span, recolored by grade tier after Check */
+.cfa-tok.pick { background: #ffe08a; color: #3a2e00; }
+.cfa-tok.pick-correct { background: #bff0cf; color: #14663a; }
+.cfa-tok.pick-somewhat { background: #ffe08a; color: #5a4300; }
+.cfa-tok.pick-wrong { background: #f6c9c4; color: #8f201a; }
+.nightMode .cfa-tok.pick-correct { background: #1f5133; color: #bdf3d1; }
+.nightMode .cfa-tok.pick-somewhat { background: #6b5310; color: #ffe9b0; }
+.nightMode .cfa-tok.pick-wrong { background: #5a221d; color: #f4b3ab; }
+/* the true gold phrase, always revealed in a distinct green outline */
+.cfa-tok.gold { box-shadow: 0 0 0 2px #2e9e5b inset; }
+.nightMode .cfa-tok.gold { box-shadow: 0 0 0 2px #56c98a inset; }
 
 .cfa-actions { margin: 8px 0; }
 #cfa-check, #cfa-record-btn {
@@ -99,6 +122,17 @@
 .cfa-grade.no { color: #d1453b; }
 .cfa-breakdown { margin: 0 0 12px; padding-left: 18px; font-size: .9rem; color: #555; }
 .nightMode .cfa-breakdown { color: #b6b6bf; }
+
+/* highlight-grade message + the always-revealed gold phrase */
+.cfa-hl-msg { font-size: .95rem; margin: 0 0 12px; padding: 10px 12px; border-radius: 8px; }
+.cfa-hl-correct { background: #eafaf0; color: #14663a; border: 1px solid #b7e6c8; }
+.cfa-hl-somewhat { background: #fff6df; color: #7a5b12; border: 1px solid #f0d69a; }
+.cfa-hl-wrong { background: #fcecea; color: #8f201a; border: 1px solid #f0c3bd; }
+.nightMode .cfa-hl-correct { background: #16351f; color: #7fe0a6; border-color: #2c5b3c; }
+.nightMode .cfa-hl-somewhat { background: #3b300f; color: #ffdf9c; border-color: #5c4a1a; }
+.nightMode .cfa-hl-wrong { background: #3a1c1a; color: #f0a49d; border-color: #5c2b27; }
+.cfa-gold-phrase { font-weight: 700; background: #d7f2e1; color: #14663a; padding: 1px 6px; border-radius: 4px; }
+.nightMode .cfa-gold-phrase { background: #1f5133; color: #bdf3d1; }
 .cfa-standard { font-size: 1.05rem; font-weight: 600; margin-bottom: 8px; }
 .cfa-badge {
   font: 700 .68rem/1 ui-monospace, Menlo, monospace;

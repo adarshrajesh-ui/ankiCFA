@@ -25,6 +25,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import ethics_notetype as nt  # noqa: E402
+from ethics_scoring import find_gold_indices  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DEFAULT_PAIRS = os.path.join(HERE, "pairs.jsonl")
@@ -37,6 +38,8 @@ _FIELD_MAP = {
     "answer_a": "AnswerA",
     "answer_b": "AnswerB",
     "decisive_fact": "DecisiveFact",
+    "decisive_phrase": "DecisivePhrase",
+    "decisive_phrase_case": "DecisivePhraseCase",
     "standard": "Standard",
     "rationale": "Rationale",
 }
@@ -72,8 +75,38 @@ def load_pairs(path: str = DEFAULT_PAIRS) -> list[dict]:
                 raise ValueError(f"{path}:{lineno}: need exactly 3 distractors")
             if not p["los_tags"]:
                 raise ValueError(f"{path}:{lineno}: need at least one los:: tag")
+            _validate_decisive_phrase(p, path, lineno)
             pairs.append(p)
     return pairs
+
+
+def _validate_decisive_phrase(p: dict, path: str, lineno: int) -> None:
+    """The highlight target must be a verbatim, token-locatable phrase in the violating vignette."""
+    case = p["decisive_phrase_case"]
+    if case not in ("A", "B"):
+        raise ValueError(f"{path}:{lineno}: decisive_phrase_case must be 'A' or 'B'")
+    # The decisive phrase is the phrase that makes the case a VIOLATION, so it must live in the
+    # vignette whose answer is "violate".
+    violate_case = "A" if p["answer_a"] == "violate" else "B"
+    if case != violate_case:
+        raise ValueError(
+            f"{path}:{lineno}: decisive_phrase_case ({case}) must be the violating "
+            f"vignette ({violate_case})"
+        )
+    vignette = p["vignette_a"] if case == "A" else p["vignette_b"]
+    phrase = p["decisive_phrase"]
+    if not isinstance(phrase, str) or not phrase.strip():
+        raise ValueError(f"{path}:{lineno}: decisive_phrase must be a non-empty string")
+    if phrase not in vignette:
+        raise ValueError(
+            f"{path}:{lineno}: decisive_phrase is not a verbatim substring of "
+            f"vignette_{case.lower()}"
+        )
+    if not find_gold_indices(vignette, phrase):
+        raise ValueError(
+            f"{path}:{lineno}: decisive_phrase is not locatable by whitespace tokenization "
+            f"in vignette_{case.lower()} (must align to word boundaries)"
+        )
 
 
 def _tags_for(pair: dict) -> list[str]:

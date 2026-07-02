@@ -21,55 +21,84 @@ from ethics_scoring import (  # noqa: E402
 )
 
 
-def _attempt(judged_a, judged_b, chosen_fact, *, decisive="THE decisive fact"):
-    """Build a PairAttempt whose correct answers are A=violate, B=conform, decisive=`decisive`."""
+def _attempt(
+    judged_a,
+    judged_b,
+    *,
+    selection_case="A",
+    selection=(3, 4, 5),
+    gold=(3, 4, 5),
+    cap=None,
+):
+    """Build a PairAttempt whose correct answers are A=violate, B=conform, gold in vignette A."""
     return PairAttempt(
         judged_a=judged_a,
         judged_b=judged_b,
-        chosen_fact=chosen_fact,
         answer_a=VIOLATE,
         answer_b=CONFORM,
-        decisive_fact=decisive,
+        selection_case=selection_case,
+        selection_indices=selection,
+        decisive_case="A",
+        gold_indices=gold,
+        cap=cap,
     )
 
 
 # ---------------------------------------------------------------- scoring rule
 
 
-def test_fully_correct_requires_all_three():
-    res = grade_attempt(_attempt(VIOLATE, CONFORM, "THE decisive fact"))
+def test_fully_correct_requires_both_judgments_and_correct_highlight():
+    res = grade_attempt(_attempt(VIOLATE, CONFORM, selection=(3, 4, 5), gold=(3, 4, 5)))
     assert res["correct"] is True
-    assert (
-        res["judgment_a_correct"]
-        and res["judgment_b_correct"]
-        and res["decisive_fact_correct"]
-    )
+    assert res["judgment_a_correct"] and res["judgment_b_correct"]
+    assert res["highlight"] == "correct" and res["highlight_correct"] is True
 
 
 def test_wrong_judgment_a_fails_even_if_rest_right():
-    res = grade_attempt(_attempt(CONFORM, CONFORM, "THE decisive fact"))
+    res = grade_attempt(_attempt(CONFORM, CONFORM))
     assert res["judgment_a_correct"] is False
     assert res["correct"] is False
 
 
 def test_wrong_judgment_b_fails_even_if_rest_right():
-    res = grade_attempt(_attempt(VIOLATE, VIOLATE, "THE decisive fact"))
+    res = grade_attempt(_attempt(VIOLATE, VIOLATE))
     assert res["judgment_b_correct"] is False
     assert res["correct"] is False
 
 
-def test_wrong_decisive_fact_fails_even_if_both_judgments_right():
-    # This is the crucial rule: naming the wrong decisive fact is NOT correct.
-    res = grade_attempt(_attempt(VIOLATE, CONFORM, "a plausible but wrong distractor"))
+def test_somewhat_highlight_is_not_fully_correct():
+    # Contains all gold words but is far too wide -> "somewhat", which does NOT count as correct.
+    res = grade_attempt(
+        _attempt(VIOLATE, CONFORM, selection=tuple(range(0, 20)), gold=(3, 4, 5))
+    )
     assert res["judgment_a_correct"] and res["judgment_b_correct"]
-    assert res["decisive_fact_correct"] is False
+    assert res["highlight"] == "somewhat"
+    assert res["highlight_correct"] is False
     assert res["correct"] is False
 
 
-def test_decisive_fact_match_is_whitespace_and_case_insensitive():
-    res = grade_attempt(_attempt(VIOLATE, CONFORM, "  the  DECISIVE   Fact  "))
-    assert res["decisive_fact_correct"] is True
-    assert res["correct"] is True
+def test_wrong_highlight_fails_even_if_both_judgments_right():
+    res = grade_attempt(_attempt(VIOLATE, CONFORM, selection=(10, 11), gold=(3, 4, 5)))
+    assert res["judgment_a_correct"] and res["judgment_b_correct"]
+    assert res["highlight"] == "wrong"
+    assert res["correct"] is False
+
+
+def test_highlight_in_the_wrong_vignette_does_not_count():
+    # Even a perfect span in the WRONG case is treated as no selection -> wrong.
+    res = grade_attempt(
+        _attempt(
+            VIOLATE, CONFORM, selection_case="B", selection=(3, 4, 5), gold=(3, 4, 5)
+        )
+    )
+    assert res["highlight"] == "wrong"
+    assert res["correct"] is False
+
+
+def test_empty_selection_is_wrong():
+    res = grade_attempt(_attempt(VIOLATE, CONFORM, selection=(), gold=(3, 4, 5)))
+    assert res["highlight"] == "wrong"
+    assert res["correct"] is False
 
 
 # --------------------------------------------------------- cluster aggregation
