@@ -62,6 +62,68 @@ def los_prefix(los_tag: str) -> str:
     return "::".join(los_tag.split("::")[:2])
 
 
+# --- Content-type classification (Brainlift POV3) -----------------------------
+# Every card is tagged with exactly one ``type::<kind>`` tag from this closed
+# set. The exam-queue engine multiplies a card's score by a per-type interval
+# multiplier (see anki.cfa.DEFAULT_TYPE_MULTIPLIERS), so equally-weak cards of
+# different item types are prioritized differently. Classification is a
+# deterministic keyword heuristic over the authored front/back text.
+ITEM_TYPES = (
+    "formula",
+    "ethics-rule",
+    "conceptual",
+    "multi-step-calc",
+    "case-application",
+)
+
+_CALC_CUES = ("calculate", "compute", "solve for", "how much", "work out")
+_FORMULA_CUES = (
+    "write the",
+    "write out",
+    "express",
+    "formula",
+    "equation",
+    "state the",
+    "notation",
+)
+_CASE_CUES = (
+    "an analyst",
+    "an investor",
+    "a portfolio manager",
+    "a firm",
+    "a company",
+    "suppose",
+    "scenario",
+    "given that",
+    "consider a",
+)
+
+
+def classify_item_type(item: dict[str, str]) -> str:
+    """Return the ``type::<kind>`` content type for an authored item.
+
+    Deterministic keyword heuristic, evaluated in priority order so each item
+    maps to exactly one of :data:`ITEM_TYPES`:
+
+    1. ``ethics-rule``      — any Ethics/Standards topic (needs frequent reinforcement)
+    2. ``multi-step-calc``  — asks to calculate/compute/solve a value
+    3. ``formula``          — asks to state/write an equation, or the answer is one
+    4. ``case-application`` — an actor/scenario the candidate must reason about
+    5. ``conceptual``       — everything else (definitions, distinctions)
+    """
+    front = item["front"].lower()
+
+    if los_prefix(item["los_tag"]) == "los::ethics":
+        return "ethics-rule"
+    if any(cue in front for cue in _CALC_CUES):
+        return "multi-step-calc"
+    if any(cue in front for cue in _FORMULA_CUES) or ("=" in item["back"]):
+        return "formula"
+    if any(cue in front for cue in _CASE_CUES):
+        return "case-application"
+    return "conceptual"
+
+
 def load_items(deck_dir: str = DECK_DIR) -> list[dict[str, str]]:
     """Load and de-duplicate all authored items from ``deck_dir/*.jsonl``.
 
@@ -135,7 +197,7 @@ def add_deck_notes(col, deck_dir: str = DECK_DIR) -> dict:
         note = col.new_note(notetype)
         note["Front"] = item["front"]
         note["Back"] = item["back"]
-        note.tags = [item["los_tag"]]
+        note.tags = [item["los_tag"], f"type::{classify_item_type(item)}"]
         col.add_note(note, deck_id)
         added += 1
 

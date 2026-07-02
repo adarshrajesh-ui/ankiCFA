@@ -62,6 +62,51 @@ def test_topic_weights_renormalize_to_one():
     assert present.issubset(set(weights))
 
 
+def test_classify_item_type_is_deterministic_and_closed():
+    # Every authored item maps to exactly one of the closed type set.
+    items = build_cfa_deck.load_items(DECK_DIR)
+    types = {build_cfa_deck.classify_item_type(i) for i in items}
+    assert types, "expected classified types"
+    assert types.issubset(set(build_cfa_deck.ITEM_TYPES))
+    # Deterministic: same item classifies the same way twice.
+    for i in items[:20]:
+        assert build_cfa_deck.classify_item_type(i) == build_cfa_deck.classify_item_type(i)
+
+
+def test_classify_item_type_examples():
+    def item(front, back, los_tag):
+        return {"front": front, "back": back, "los_tag": los_tag}
+
+    # Ethics topic -> ethics-rule regardless of wording.
+    assert (
+        build_cfa_deck.classify_item_type(
+            item("Define material nonpublic information.", "info that ...", "los::ethics::mnpi")
+        )
+        == "ethics-rule"
+    )
+    # A calculation prompt -> multi-step-calc.
+    assert (
+        build_cfa_deck.classify_item_type(
+            item("Calculate the firm's WACC.", "WACC = 8.4%", "los::corp::wacc")
+        )
+        == "multi-step-calc"
+    )
+    # An equation-answer or "write the ..." prompt -> formula.
+    assert (
+        build_cfa_deck.classify_item_type(
+            item("Write the Cobb-Douglas production function.", "Y = A*K^a*L^(1-a)", "los::econ::growth")
+        )
+        == "formula"
+    )
+    # A definitional prompt with no cues -> conceptual.
+    assert (
+        build_cfa_deck.classify_item_type(
+            item("What is intrinsic value?", "The value given full understanding.", "los::equity::val")
+        )
+        == "conceptual"
+    )
+
+
 def test_bad_row_raises(tmp_path):
     bad = tmp_path / "items-bad.jsonl"
     bad.write_text('{"front": "q", "back": "a"}\n', encoding="utf-8")
@@ -87,10 +132,13 @@ def test_build_into_collection():
         deck_id = col.decks.id("CFA Level II")
         cids = col.decks.cids(deck_id)
         assert len(cids) > 200
-        # every card's note carries a los:: tag
+        # every card's note carries a los:: tag AND a type:: content-type tag
         for cid in cids[:50]:
             note = col.get_card(cid).note()
             assert any(t.startswith("los::") for t in note.tags)
+            type_tags = [t for t in note.tags if t.startswith("type::")]
+            assert len(type_tags) == 1
+            assert type_tags[0].split("::", 1)[1] in build_cfa_deck.ITEM_TYPES
     finally:
         col.close()
         if os.path.exists(tmp):

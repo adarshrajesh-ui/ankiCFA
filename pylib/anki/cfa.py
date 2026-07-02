@@ -27,7 +27,25 @@ import anki.collection
 from anki.decks import DeckId
 
 TOPIC_PREFIX = "los::"
+TYPE_PREFIX = "type::"
 EXAM_CONFIG_KEY = "cfa_exam_config"
+
+# Content-type-aware interval multipliers (Brainlift POV3). Different CFA item
+# types decay at different rates, so equally-weak cards of different types
+# deserve different exam-queue priority. Multipliers are relative to 1.0
+# (conceptual baseline); a card with no ``type::`` tag is scored at 1.0.
+#   - formula: once memorized a formula tends to stick -> lower priority
+#   - ethics-rule: nuanced, easy to confuse the specifics -> higher priority
+#   - conceptual: baseline
+#   - multi-step-calc: procedural, needs repeated practice -> higher
+#   - case-application: integrative vignette reasoning -> higher
+DEFAULT_TYPE_MULTIPLIERS: dict[str, float] = {
+    "type::formula": 0.85,
+    "type::ethics-rule": 1.30,
+    "type::conceptual": 1.00,
+    "type::multi-step-calc": 1.20,
+    "type::case-application": 1.15,
+}
 
 # --- Give-up rule (enforced) -------------------------------------------------
 # No score is shown until BOTH of these hold; below either threshold the app
@@ -83,19 +101,27 @@ def build_exam_queue(
     deck_id: DeckId | int,
     today: Optional[date] = None,
     fetch_limit: int = 0,
+    type_multipliers: Optional[dict[str, float]] = None,
 ) -> Any:
     """Convenience wrapper: build the exam queue using the persisted exam date
-    and topic weights. Delegates to the read-only Rust ``BuildExamQueue`` RPC."""
+    and topic weights. Delegates to the read-only Rust ``BuildExamQueue`` RPC.
+
+    ``type_multipliers`` (Brainlift POV3) defaults to
+    :data:`DEFAULT_TYPE_MULTIPLIERS` so content-type-aware weighting is on by
+    default; pass ``{}`` to disable it (all cards scored at 1.0)."""
     from anki.scheduler.v3 import Scheduler as V3Scheduler
 
     cfg = get_exam_config(col) or {}
     weights = cfg.get("topic_weights", {})
     dte = days_to_exam(col, today=today)
+    if type_multipliers is None:
+        type_multipliers = DEFAULT_TYPE_MULTIPLIERS
     return cast(V3Scheduler, col.sched).build_exam_queue(
         deck_id=int(deck_id),
         days_to_exam=dte if dte is not None else 0,
         topic_weights=weights,
         fetch_limit=fetch_limit,
+        type_multipliers=type_multipliers,
     )
 
 

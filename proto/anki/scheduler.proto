@@ -181,6 +181,13 @@ message BuildExamQueueRequest {
   map<string, float> topic_weights = 3;
   // Maximum number of cards to return. 0 means "no limit".
   uint32 fetch_limit = 4;
+  // Content-type-aware interval multipliers (Brainlift POV3): maps a content
+  // type tag (e.g. "type::formula", "type::ethics-rule") to a multiplier that
+  // scales that card's exam score. A card's multiplier is the value for its
+  // `type::` tag; a card with no matching type (or an empty map) uses 1.0.
+  // Different item types decay differently, so equally-weak cards of different
+  // types are prioritized differently. Read-only: does not touch FSRS/undo.
+  map<string, float> type_multipliers = 5;
 }
 
 // CFA fork. Parallel arrays: card_ids[i] has exam score scores[i], sorted by

@@ -484,8 +484,11 @@ impl Collection {
     /// Gathers the studyable cards for a deck and its subdecks — due
     /// review/learning cards *and* new (never-reviewed) cards — *without*
     /// mutating any card, queue, or scheduling state, scores each by
-    /// `topic_weight * (1 - retrievability) * deadline_urgency`, and returns
-    /// the card ids with their parallel scores sorted by score descending.
+    /// `topic_weight * (1 - retrievability) * deadline_urgency * type_multiplier`,
+    /// and returns the card ids with their parallel scores sorted by score
+    /// descending. The content-type multiplier (Brainlift POV3) lets equally-weak
+    /// cards of different item types (formula vs ethics-rule vs multi-step-calc,
+    /// …) be prioritized differently; it defaults to 1.0 when unset.
     /// New cards carry no FSRS memory state, so they are treated as maximally
     /// weak (R = 0) and naturally rise toward the top. Because it never writes,
     /// FSRS scheduling and the undo history stay valid.
@@ -522,12 +525,15 @@ impl Collection {
         let mut scored: Vec<(CardId, f32)> = cards
             .iter()
             .map(|card| {
-                let weight = tags_by_note
-                    .get(&card.note_id)
+                let tags = tags_by_note.get(&card.note_id);
+                let weight = tags
                     .map(|tags| topic_weight_for_tags(tags, &input.topic_weights))
                     .unwrap_or(0.0);
+                let type_mult = tags
+                    .map(|tags| type_multiplier_for_tags(tags, &input.type_multipliers))
+                    .unwrap_or(1.0);
                 let weakness = 1.0 - card_retrievability(&fsrs, card, &timing);
-                (card.id, weight * weakness * urgency)
+                (card.id, weight * weakness * urgency * type_mult)
             })
             .collect();
 
@@ -592,6 +598,23 @@ fn topic_weight_for_tags(tags: &str, weights: &HashMap<String, f32>) -> f32 {
         }
     }
     best.map_or(0.0, |(_, weight)| weight)
+}
+
+/// Content-type-aware interval multiplier (Brainlift POV3). Returns the
+/// multiplier for the first of the note's `type::` tags that has an entry in
+/// the map, or 1.0 when the map is empty or no type tag matches. Type tags are
+/// matched exactly (e.g. `type::formula`), unlike the longest-prefix `los::`
+/// topic match, since content types are a flat, closed set.
+fn type_multiplier_for_tags(tags: &str, multipliers: &HashMap<String, f32>) -> f32 {
+    if multipliers.is_empty() {
+        return 1.0;
+    }
+    for tag in split_tags(tags) {
+        if let Some(&mult) = multipliers.get(tag) {
+            return mult;
+        }
+    }
+    1.0
 }
 
 #[cfg(test)]
@@ -680,6 +703,7 @@ mod tests {
                 days_to_exam,
                 topic_weights,
                 fetch_limit: 0,
+                type_multipliers: HashMap::new(),
             },
         )
         .unwrap();
@@ -785,6 +809,76 @@ mod tests {
     }
 
     #[test]
+    fn exam_queue_type_multiplier_differentiates_equal_weakness_cards() {
+        // Brainlift POV3: two brand-new cards, identical topic (same weight) and
+        // identical weakness (R = 0), differing ONLY in content type. With a
+        // per-type multiplier, they must receive DIFFERENT scores and order by
+        // multiplier — an ethics rule (needs frequent reinforcement) outranks a
+        // formula (sticks once learned) at equal weakness.
+        let mut col = Collection::new();
+        let formula = add_new_card(&mut col, DeckId(1), &["los::quant::r1", "type::formula"]);
+        let ethics = add_new_card(
+            &mut col,
+            DeckId(1),
+            &["los::quant::r1", "type::ethics-rule"],
+        );
+        let resp = SchedulerService::build_exam_queue(
+            &mut col,
+            BuildExamQueueRequest {
+                deck_id: DeckId(1).0,
+                days_to_exam: 30,
+                topic_weights: weights(&[("los::quant", 0.5)]),
+                fetch_limit: 0,
+                type_multipliers: weights(&[("type::formula", 0.85), ("type::ethics-rule", 1.30)]),
+            },
+        )
+        .unwrap();
+        assert_eq!(resp.card_ids.len(), 2);
+        assert_eq!(
+            resp.card_ids,
+            vec![ethics.0, formula.0],
+            "higher-multiplier type ranks first at equal weakness/weight"
+        );
+        assert!(
+            resp.scores[0] > resp.scores[1],
+            "equal-weakness cards of different types get different scores: {:?}",
+            resp.scores
+        );
+        // The score gap reflects exactly the multiplier ratio (1.30 / 0.85).
+        let ratio = resp.scores[0] / resp.scores[1];
+        assert!(
+            (ratio - (1.30 / 0.85)).abs() < 1e-4,
+            "score ratio {ratio} should equal the multiplier ratio"
+        );
+    }
+
+    #[test]
+    fn exam_queue_untyped_card_defaults_to_unit_multiplier() {
+        // A card with no `type::` tag (or an empty multiplier map) is scored with
+        // a 1.0 multiplier — i.e. unchanged from the pre-POV3 behavior.
+        let mut col = Collection::new();
+        let untyped = add_new_card(&mut col, DeckId(1), &["los::quant::r1"]);
+        let with_empty = exam_queue(&mut col, DeckId(1), 30, weights(&[("los::quant", 0.5)]));
+        let resp = SchedulerService::build_exam_queue(
+            &mut col,
+            BuildExamQueueRequest {
+                deck_id: DeckId(1).0,
+                days_to_exam: 30,
+                topic_weights: weights(&[("los::quant", 0.5)]),
+                fetch_limit: 0,
+                type_multipliers: weights(&[("type::formula", 0.85)]),
+            },
+        )
+        .unwrap();
+        assert_eq!(resp.card_ids, vec![untyped.0]);
+        assert_eq!(with_empty.0, vec![untyped.0]);
+        assert!(
+            (resp.scores[0] - with_empty.1[0]).abs() < 1e-6,
+            "untyped card unaffected by the type-multiplier map"
+        );
+    }
+
+    #[test]
     fn exam_queue_zero_weight_topic_sinks_to_bottom() {
         let mut col = Collection::new();
         let weighted = add_due_card(&mut col, DeckId(1), &["los::quant::r1"], None, 0);
@@ -846,6 +940,7 @@ mod tests {
                 days_to_exam: 10,
                 topic_weights: weights(&[("los::quant", 1.0)]),
                 fetch_limit: 0,
+                type_multipliers: HashMap::new(),
             },
         )
         .unwrap();

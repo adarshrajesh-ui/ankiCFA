@@ -66,15 +66,20 @@ class Scheduler(SchedulerBaseWithLegacy):
         days_to_exam: int,
         topic_weights: dict[str, float],
         fetch_limit: int = 0,
+        type_multipliers: dict[str, float] | None = None,
     ) -> scheduler_pb2.BuildExamQueueResponse:
         """CFA fork. Read-only exam-prep queue for a deck (and subdecks).
 
         Returns the studyable cards (due review/learning cards plus new,
         never-reviewed cards) reordered by
-        ``topic_weight * (1 - retrievability) * deadline_urgency`` as parallel
-        ``card_ids`` / ``scores`` arrays (score descending). ``topic_weights``
-        maps a hierarchical tag prefix (e.g. ``los::ethics``) to its weight;
-        a card whose ``los::`` topic has no entry sinks to the bottom. Smaller
+        ``topic_weight * (1 - retrievability) * deadline_urgency *
+        type_multiplier`` as parallel ``card_ids`` / ``scores`` arrays (score
+        descending). ``topic_weights`` maps a hierarchical tag prefix (e.g.
+        ``los::ethics``) to its weight; a card whose ``los::`` topic has no
+        entry sinks to the bottom. ``type_multipliers`` (Brainlift POV3) maps a
+        content-type tag (e.g. ``type::formula``) to an interval multiplier so
+        equally-weak cards of different item types are prioritized differently;
+        a card with no matching ``type::`` tag uses 1.0. Smaller
         ``days_to_exam`` raises urgency. ``fetch_limit`` of 0 means no limit.
 
         This call never mutates card/queue/scheduling state, so FSRS scheduling
@@ -85,6 +90,7 @@ class Scheduler(SchedulerBaseWithLegacy):
             days_to_exam=days_to_exam,
             topic_weights=topic_weights,
             fetch_limit=fetch_limit,
+            type_multipliers=type_multipliers or {},
         )
 
     def describe_next_states(self, next_states: SchedulingStates) -> Sequence[str]:

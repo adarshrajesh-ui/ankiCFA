@@ -88,6 +88,55 @@ def test_build_exam_queue_orders_by_weight():
     col.close()
 
 
+def test_build_exam_queue_content_type_multiplier():
+    # Brainlift POV3: two equally-weak, equally-weighted new cards differing
+    # only in content type must get DIFFERENT scores and order by multiplier.
+    col = getEmptyCol()
+    nt = col.models.by_name("Basic")
+    deck = col.decks.id("CFA")
+    formula = _add_card(col, deck, nt, "q-formula", ["los::quant::r1", "type::formula"])
+    ethics = _add_card(
+        col, deck, nt, "q-ethics", ["los::quant::r1", "type::ethics-rule"]
+    )
+
+    resp = col.sched.build_exam_queue(
+        deck_id=deck,
+        days_to_exam=30,
+        topic_weights={"los::quant": 0.5},
+        type_multipliers={"type::formula": 0.85, "type::ethics-rule": 1.30},
+    )
+    assert list(resp.card_ids) == [ethics, formula], "higher-multiplier type first"
+    assert resp.scores[0] > resp.scores[1], "different types -> different scores"
+    ratio = resp.scores[0] / resp.scores[1]
+    assert abs(ratio - (1.30 / 0.85)) < 1e-4, "gap equals the multiplier ratio"
+
+    # An empty multiplier map (or the convenience wrapper's default) leaves the
+    # two cards tied on weight/weakness -> deterministic id order, equal scores.
+    resp2 = col.sched.build_exam_queue(
+        deck_id=deck,
+        days_to_exam=30,
+        topic_weights={"los::quant": 0.5},
+        type_multipliers={},
+    )
+    assert abs(resp2.scores[0] - resp2.scores[1]) < 1e-6, "no multiplier -> equal"
+    col.close()
+
+
+def test_default_type_multipliers_are_distinct_and_present():
+    # The shipped default table must cover every classifier type with distinct,
+    # positive multipliers so equal-weakness cards of different types differ.
+    mults = cfa.DEFAULT_TYPE_MULTIPLIERS
+    assert set(mults) == {
+        "type::formula",
+        "type::ethics-rule",
+        "type::conceptual",
+        "type::multi-step-calc",
+        "type::case-application",
+    }
+    assert all(v > 0 for v in mults.values())
+    assert len(set(mults.values())) == len(mults), "multipliers must be distinct"
+
+
 def test_build_exam_queue_zero_weight_and_empty_deck():
     col = getEmptyCol()
     nt = col.models.by_name("Basic")

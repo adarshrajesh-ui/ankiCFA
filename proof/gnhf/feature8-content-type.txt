@@ -1,0 +1,39 @@
+===================================================================
+Feature 8 — Content-type-aware weighting (Brainlift POV3)
+  branch: gnhf/resuming-after-a-cra-9d3f67   eeb155f34
+  date:   2026-07-02
+===================================================================
+
+WHAT: each card is tagged type::<formula|ethics-rule|conceptual|
+      multi-step-calc|case-application>; BuildExamQueue now scores
+      topic_weight * (1-R) * urgency * TYPE_MULTIPLIER so equally-weak
+      cards of different item types are prioritized differently.
+      Read-only RPC: FSRS scheduling + undo stay valid.
+
+----- just cfa-types-test -----
+Build succeeded in 0.12s.
+2 passed, 5 deselected in 0.01s
+9 passed in 0.17s
+
+----- Rust: new scoring tests (cargo test -p anki) -----
+test scheduler::service::tests::exam_queue_untyped_card_defaults_to_unit_multiplier ... ok
+test scheduler::service::tests::exam_queue_type_multiplier_differentiates_equal_weakness_cards ... ok
+test result: ok. 54 passed; 0 failed; 0 ignored; 0 measured; 487 filtered out; finished in 0.21s
+
+----- Live demo (real 630-item deck) -----
+Content-type distribution over 630 authored items:
+  type::formula          124   x0.85
+  type::ethics-rule       46   x1.30
+  type::conceptual       422   x1.00
+  type::multi-step-calc   23   x1.20
+  type::case-application  15   x1.15
+
+Exam-queue scores for 5 identical-weakness cards (only content type differs):
+  type::ethics-rule        score=0.02167  (x1.30)
+  type::multi-step-calc    score=0.02000  (x1.20)
+  type::case-application   score=0.01917  (x1.15)
+  type::conceptual         score=0.01667  (x1.00)
+  type::formula            score=0.01417  (x0.85)
+
+OK: five equal-weakness cards of different types get five DISTINCT scores,
+    ordered by their content-type interval multiplier. FSRS/undo untouched (read-only).

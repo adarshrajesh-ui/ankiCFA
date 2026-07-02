@@ -118,6 +118,12 @@ cfa-eval-leakage:
 cfa-eval-test:
     {{ py }} -m pytest cfa/eval/tests -q
 
+# Feature 8: content-type-aware weighting — equal-weakness cards of different item types get different exam-queue multipliers
+cfa-types-test:
+    {{ ninja }} pylib
+    {{ cfa_env }} {{ py }} -m pytest tools/cfa/tests/test_build_cfa_deck.py -k classify -q
+    PYTHONPATH="out/pylib:pylib" {{ py }} -m pytest pylib/tests/test_cfa.py -q
+
 # Feature 5: boot straight into a freshly-seeded CFA collection (own profile base under /tmp)
 cfa *args:
     ANKI_BASE="${ANKI_BASE:-/tmp/gnhf-cfa-seed/ankibase}" {{ run_script }} {{ args }}
