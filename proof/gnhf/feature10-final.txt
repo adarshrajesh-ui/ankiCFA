@@ -1,0 +1,33 @@
+=== Feature 10: Final consolidation — full CFA gate (baseline main d5867e5b5) ===
+date: Thu Jul 2 14:59:04 2026 -0500
+
+-- stdlib validators --
+deck-validate : 630 authored CFA Level II items, all valid
+eval-leakage  : LEAKAGE CLEAN (30 concepts / 60 questions vs 630 deck fronts)
+
+-- Python / Qt test suites (out/pyenv) --
+deck (tools/cfa/tests)             7 passed
+ethics (cfa/ethics_pairs)          43 passed (incl. Py<->JS)
+menu (qt/tests/test_cfa_menu)      3 passed (asserts 4 actions)
+seed (test_cfa_seed)               3 passed
+scores (test_cfa_scores)           10 passed
+queue+types (test_cfa)             9 passed
+deadline (test_cfa_deadline)       7 passed
+sync (test_cfa_sync)               6 passed
+eval (cfa/eval/tests)              6 passed
+                                   ---------
+                                   94 py/qt tests GREEN
+
+-- Rust test suites (cargo -p anki --lib) --
+cfa_deadline                       10 passed
+exam (queue + type multiplier)     15 passed
+
+-- End-to-end reachability (ANKI_BASE=/tmp/cfaFinal) --
+SEED: main_seeded=True ethics_seeded=True notes_added=630 ethics_added=30 config_set=True
+CFA Level II: 630 cards   CFA::Ethics Pairs: 30 cards
+build_exam_queue -> 5 cards; type-mult wired: True
+deadline_retention -> read-only RPC OK
+memory/performance/readiness -> ranges, abstain on zero-review deck (give-up rule)
+CFA menu setup_menu -> 4 actions
+
+ALL 10 FEATURES GREEN + REACHABLE.
