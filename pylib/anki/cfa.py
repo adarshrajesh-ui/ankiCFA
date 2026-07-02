@@ -16,6 +16,7 @@ same join key the Rust ``BuildExamQueue`` engine uses.
 
 from __future__ import annotations
 
+import math
 import statistics
 import time
 from dataclasses import asdict, dataclass, field
@@ -174,6 +175,39 @@ def _range(values: list[float]) -> tuple[float, float, float]:
     return point, max(0.0, point - spread), min(1.0, point + spread)
 
 
+def _weighted_range(pairs: list[tuple[float, float]]) -> tuple[float, float, float]:
+    """(point, low, high) = weighted mean +/- weighted stdev, clamped to [0, 1].
+
+    Each pair is ``(value, weight)``. The overall memory score is weighted by
+    each topic's exam weight so a high-weight topic you know well cannot be
+    masked by a low-weight topic you know poorly (and vice versa) — this is the
+    weighted-mean-by-topic-weight fix. Falls back to an equal-weight mean when
+    every weight is zero (e.g. topics were derived, not configured)."""
+    total_w = sum(w for _v, w in pairs)
+    if total_w <= 0:
+        return _range([v for v, _w in pairs])
+    point = sum(v * w for v, w in pairs) / total_w
+    if len(pairs) > 1:
+        var = sum(w * (v - point) ** 2 for v, w in pairs) / total_w
+        spread = math.sqrt(var)
+    else:
+        spread = 0.0
+    return point, max(0.0, point - spread), min(1.0, point + spread)
+
+
+def _wilson(successes: int, n: int, z: float = 1.96) -> tuple[float, float, float]:
+    """(point, low, high) Wilson score interval for a binomial proportion.
+
+    Point is the raw success rate; low/high are the two-sided ``z`` (default
+    95%) Wilson bounds, which stay inside [0, 1] and widen honestly when the
+    sample is small — the right shape for "how sure are we about this rate"."""
+    phat = successes / n
+    denom = 1.0 + z * z / n
+    center = (phat + z * z / (2 * n)) / denom
+    margin = z * math.sqrt(phat * (1.0 - phat) / n + z * z / (4 * n * n)) / denom
+    return phat, max(0.0, center - margin), min(1.0, center + margin)
+
+
 def _build_topic_scores(
     rows: list[Any],
     review_counts: dict[int, int],
@@ -321,9 +355,15 @@ def memory_score(
     coverage_pct = (topics_covered / topics_total) if topics_total else 0.0
 
     reason = _giveup_reason(topics, total_reviews, coverage_pct, weights)
-    covered_means = [t.avg_r for t in topics if t.covered and t.avg_r is not None]
-    if reason is None and covered_means:
-        point, low, high = _range([m for m in covered_means if m is not None])
+    # Weighted-mean-by-topic-weight fix: the overall recall is the exam-weighted
+    # mean of covered topics' retrievability, not a flat average, so high-weight
+    # topics drive the headline number. Topics with no configured weight fall
+    # back to equal weighting inside _weighted_range.
+    covered = [t for t in topics if t.covered and t.avg_r is not None]
+    if reason is None and covered:
+        point, low, high = _weighted_range(
+            [(t.avg_r, t.weight) for t in covered if t.avg_r is not None]
+        )
     else:
         point = low = high = None
 
@@ -340,4 +380,215 @@ def memory_score(
         last_review_at=last_review_at,
         computed_at=computed_at,
         topics=topics,
+    )
+
+
+# =============================================================================
+# Honest performance score — P(correct on a NEW question)
+# =============================================================================
+#
+# "New question" is proxied by the FIRST graded review of each card: the one
+# time you answered a prompt with no recent study of it. The success rate on
+# those first exposures is the most defensible estimate we have of how you would
+# do on an unseen exam item, reported as a Wilson interval (never a bare number).
+
+# Anki ease scale: 1=Again (lapse/incorrect), 2=Hard, 3=Good, 4=Easy. Anything
+# other than Again counts as a successful recall.
+_CORRECT_EASE = 2
+# Give-up rule: below this many first exposures the sample is too thin to quote.
+MIN_FIRST_EXPOSURES = 30
+
+
+@dataclass
+class PerformanceScore:
+    abstain: bool
+    reason: str
+    # P(correct on a new question), as a RANGE. None when abstaining.
+    point: Optional[float]
+    range_low: Optional[float]
+    range_high: Optional[float]
+    # Evidence.
+    first_exposures: int
+    correct: int
+    computed_at: str
+
+    def as_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+def performance_score(
+    col: anki.collection.Collection,
+    *,
+    deck_id: Optional[DeckId | int] = None,
+    now_ts: Optional[int] = None,
+) -> PerformanceScore:
+    """Estimate P(correct on a new question) from first-exposure accuracy.
+
+    For every card in scope we take its earliest graded review (``ease > 0``)
+    and count it correct when ``ease >= 2`` (anything but *Again*). The rate is
+    reported as a Wilson 95% interval; below ``MIN_FIRST_EXPOSURES`` first
+    exposures the give-up rule fires and no number is shown."""
+    now_ts = now_ts if now_ts is not None else int(time.time())
+    computed_at = datetime.fromtimestamp(now_ts).isoformat(timespec="seconds")
+
+    if deck_id is not None:
+        did_list = col.decks.deck_and_child_ids(DeckId(int(deck_id)))
+        deck_filter = "c.did in (%s)" % ",".join(str(int(d)) for d in did_list)
+    else:
+        deck_filter = "1"
+
+    # First graded review per card (min revlog id == earliest), with its ease.
+    rows: list[Any] = col.db.all(
+        f"""
+        select r.ease
+        from revlog r
+        join cards c on r.cid = c.id
+        join (
+            select cid, min(id) as mid from revlog where ease > 0 group by cid
+        ) first on first.cid = r.cid and first.mid = r.id
+        where {deck_filter}
+        """
+    )
+    first_exposures = len(rows)
+    correct = sum(1 for (ease,) in rows if ease >= _CORRECT_EASE)
+
+    if first_exposures < MIN_FIRST_EXPOSURES:
+        return PerformanceScore(
+            abstain=True,
+            reason=(
+                "not enough data: "
+                f"{first_exposures} first-seen questions "
+                f"(need {MIN_FIRST_EXPOSURES})"
+            ),
+            point=None,
+            range_low=None,
+            range_high=None,
+            first_exposures=first_exposures,
+            correct=correct,
+            computed_at=computed_at,
+        )
+
+    point, low, high = _wilson(correct, first_exposures)
+    return PerformanceScore(
+        abstain=False,
+        reason="",
+        point=point,
+        range_low=low,
+        range_high=high,
+        first_exposures=first_exposures,
+        correct=correct,
+        computed_at=computed_at,
+    )
+
+
+# =============================================================================
+# Honest readiness score — P(pass), deliberately wide, uncalibrated
+# =============================================================================
+#
+# Readiness fuses memory (what you retain) and performance (how you do on fresh
+# questions) into a coarse P(pass). Uncovered syllabus is treated as guessing on
+# a 3-choice item. The band is widened well beyond the statistical intervals and
+# carries a standing caveat because it has never been checked against a real
+# CFA result — see READINESS_LABEL.
+
+READINESS_LABEL = "not validated against real exam data"
+# Rough fraction-correct needed to pass; NOT the official minimum passing score.
+_MPS = 0.65
+# Logistic steepness mapping estimated exam accuracy -> P(pass).
+_READINESS_K = 8.0
+# Guess rate on an unstudied 3-choice item.
+_GUESS_RATE = 1.0 / 3.0
+# Extra ± band added on top of the propagated statistical interval to reflect
+# model uncertainty (this is a heuristic, not a calibrated model).
+_READINESS_MARGIN = 0.15
+
+
+def _pass_prob(accuracy: float) -> float:
+    return 1.0 / (1.0 + math.exp(-_READINESS_K * (accuracy - _MPS)))
+
+
+@dataclass
+class ReadinessScore:
+    abstain: bool
+    reason: str
+    # P(pass) as a wide RANGE. None when abstaining.
+    point: Optional[float]
+    range_low: Optional[float]
+    range_high: Optional[float]
+    # Standing honesty caveat, always present.
+    label: str
+    # What it was built from (for transparency in the UI).
+    memory_point: Optional[float]
+    performance_point: Optional[float]
+    coverage_pct: float
+    computed_at: str
+
+    def as_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+def readiness_score(
+    col: anki.collection.Collection,
+    *,
+    deck_id: Optional[DeckId | int] = None,
+    now_ts: Optional[int] = None,
+) -> ReadinessScore:
+    """Combine memory + performance + coverage into a wide, uncalibrated P(pass).
+
+    Abstains (give-up rule) whenever either input score abstains — a readiness
+    number is only as trustworthy as the two scores beneath it."""
+    now_ts = now_ts if now_ts is not None else int(time.time())
+    computed_at = datetime.fromtimestamp(now_ts).isoformat(timespec="seconds")
+
+    mem = memory_score(col, deck_id=deck_id, now_ts=now_ts)
+    perf = performance_score(col, deck_id=deck_id, now_ts=now_ts)
+
+    if mem.abstain or perf.abstain:
+        why = []
+        if mem.abstain:
+            why.append(f"memory ({mem.reason})")
+        if perf.abstain:
+            why.append(f"performance ({perf.reason})")
+        return ReadinessScore(
+            abstain=True,
+            reason="not enough data to estimate readiness: " + "; ".join(why),
+            point=None,
+            range_low=None,
+            range_high=None,
+            label=READINESS_LABEL,
+            memory_point=mem.point,
+            performance_point=perf.point,
+            coverage_pct=mem.coverage_pct,
+            computed_at=computed_at,
+        )
+
+    cov = mem.coverage_pct
+
+    def _acc(m: float, p: float) -> float:
+        # Blend recall and fresh-question accuracy over covered syllabus; the
+        # uncovered fraction contributes a guess.
+        return cov * (0.5 * m + 0.5 * p) + (1.0 - cov) * _GUESS_RATE
+
+    assert mem.point is not None and perf.point is not None
+    assert mem.range_low is not None and perf.range_low is not None
+    assert mem.range_high is not None and perf.range_high is not None
+    acc_point = _acc(mem.point, perf.point)
+    acc_low = _acc(mem.range_low, perf.range_low)
+    acc_high = _acc(mem.range_high, perf.range_high)
+
+    point = _pass_prob(acc_point)
+    low = max(0.0, _pass_prob(acc_low) - _READINESS_MARGIN)
+    high = min(1.0, _pass_prob(acc_high) + _READINESS_MARGIN)
+
+    return ReadinessScore(
+        abstain=False,
+        reason="",
+        point=point,
+        range_low=low,
+        range_high=high,
+        label=READINESS_LABEL,
+        memory_point=mem.point,
+        performance_point=perf.point,
+        coverage_pct=cov,
+        computed_at=computed_at,
     )

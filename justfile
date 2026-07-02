@@ -101,6 +101,11 @@ cfa-seed-test:
     {{ ninja }} pylib
     PYTHONPATH="out/pylib:pylib" {{ py }} -m pytest pylib/tests/test_cfa_seed.py -q
 
+# Feature 6: the three honest CFA scores (Memory weighted / Performance / Readiness) are ranges with give-up rules
+cfa-scores-test:
+    {{ ninja }} pylib
+    PYTHONPATH="out/pylib:pylib" {{ py }} -m pytest pylib/tests/test_cfa_scores.py -q
+
 # Feature 5: boot straight into a freshly-seeded CFA collection (own profile base under /tmp)
 cfa *args:
     ANKI_BASE="${ANKI_BASE:-/tmp/gnhf-cfa-seed/ankibase}" {{ run_script }} {{ args }}

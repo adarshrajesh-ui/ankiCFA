@@ -1,0 +1,20 @@
+=== Feature 6: three honest CFA scores (each a RANGE + give-up rule) ===
+
+MEMORY (recall probability, EXAM-WEIGHTED across topics)
+  range 99%-100%  midpoint 100%
+  per-topic R: ethics(w=0.9)=100%  quant(w=0.1)=99%
+  flat mean would be 99%; weighted = 100% (tracks heavy topic)
+
+PERFORMANCE (P(correct on a NEW question); Wilson interval)
+  range 60%-86%  midpoint 75%
+  evidence: 30/40 first-exposures correct
+
+READINESS (P(pass); wide range, uncalibrated)
+  range 61%-100%  midpoint 86%
+  label: not validated against real exam data
+  built from memory=100%, performance=75%, coverage=100%
+
+GIVE-UP RULE (abstain when evidence is thin):
+  memory     -> abstain=True  (not enough data: 0 graded reviews (need 200), 0% topic coverage (need 50%))
+  performance-> abstain=True  (not enough data: 0 first-seen questions (need 30))
+  readiness  -> abstain=True  (not enough data to estimate readiness: memory (not enough data: 0 graded reviews (need 200), 0% topic coverage (need 50%)); performance (not enough data: 0 first-seen questions (need 30)))

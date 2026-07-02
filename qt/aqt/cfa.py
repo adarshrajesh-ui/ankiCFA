@@ -209,41 +209,78 @@ def _pct(x: float | None) -> str:
     return "—" if x is None else f"{x * 100:.0f}%"
 
 
+def _band_html(
+    name: str, meaning: str, abstain: bool, reason: str, low, high, point
+) -> str:
+    """Render one honest score as a labelled RANGE (never a bare number)."""
+    if abstain:
+        return (
+            f"<p style='margin:4px 0'><b>{name}</b> "
+            f"<span style='color:#666'>— {meaning}</span><br>"
+            f"<span style='color:#b45309'><b>Not enough data</b></span> "
+            f"<span style='color:#666'>· {reason}</span></p>"
+        )
+    return (
+        f"<p style='margin:4px 0'><b>{name}</b> "
+        f"<span style='color:#666'>— {meaning}</span><br>"
+        f"<span style='font-size:15px'><b>{_pct(low)}–{_pct(high)}</b></span> "
+        f"<span style='color:#666'>(midpoint {_pct(point)})</span></p>"
+    )
+
+
 class ExamReadinessDialog(QDialog):
     def __init__(self, mw: AnkiQt, deck_id: DeckId) -> None:
         super().__init__(mw)
         col = mw.col
         assert col is not None
         self.setWindowTitle("CFA — Exam Readiness")
-        self.resize(640, 460)
+        self.resize(640, 520)
         layout = QVBoxLayout(self)
 
         score = cfa.memory_score(col, deck_id=deck_id)
+        perf = cfa.performance_score(col, deck_id=deck_id)
+        ready = cfa.readiness_score(col, deck_id=deck_id)
         deck_name = col.decks.name(deck_id)
 
         header = QLabel()
         header.setTextFormat(Qt.TextFormat.RichText)
-        if score.abstain:
-            header.setText(
-                f"<h2>{deck_name}</h2>"
-                "<p style='color:#b45309;font-size:15px'><b>Not enough data</b></p>"
-                f"<p>{score.reason}</p>"
-                f"<p>Coverage {_pct(score.coverage_pct)} "
-                f"({score.topics_covered}/{score.topics_total} topics) · "
-                f"{score.graded_reviews} graded reviews</p>"
+        header.setText(
+            f"<h2>{deck_name}</h2>"
+            + _band_html(
+                "Memory",
+                "recall probability, exam-weighted across topics",
+                score.abstain,
+                score.reason,
+                score.range_low,
+                score.range_high,
+                score.point,
             )
-        else:
-            header.setText(
-                f"<h2>{deck_name}</h2>"
-                "<p style='font-size:15px'>Recall probability "
-                "(unweighted mean across covered topics): "
-                f"<b>{_pct(score.range_low)}–{_pct(score.range_high)}</b> "
-                f"<span style='color:#666'>(midpoint {_pct(score.point)})</span></p>"
-                f"<p>Coverage {_pct(score.coverage_pct)} "
+            + _band_html(
+                "Performance",
+                "P(correct on a new question), first-exposure accuracy",
+                perf.abstain,
+                perf.reason,
+                perf.range_low,
+                perf.range_high,
+                perf.point,
+            )
+            + _band_html(
+                f"Readiness — {ready.label}",
+                "P(pass); wide range, uncalibrated",
+                ready.abstain,
+                ready.reason,
+                ready.range_low,
+                ready.range_high,
+                ready.point,
+            )
+            + (
+                f"<p style='color:#666'>Coverage {_pct(score.coverage_pct)} "
                 f"({score.topics_covered}/{score.topics_total} topics) · "
                 f"{score.graded_reviews} graded reviews · "
+                f"{perf.first_exposures} first-seen · "
                 f"as of {score.last_review_at or '—'}</p>"
             )
+        )
         header.setWordWrap(True)
         layout.addWidget(header)
 
@@ -274,9 +311,13 @@ class ExamReadinessDialog(QDialog):
         layout.addWidget(table)
 
         footer = QLabel(
-            "Score shown only after ≥200 graded reviews AND ≥50% topic coverage; "
-            "abstains if a high-weight topic is skipped. Range = mean ± spread of "
-            "per-topic FSRS retrievability. No AI — pure spaced-repetition stats."
+            "Three honest scores, each a RANGE with a give-up rule — never a bare "
+            "number. Memory = exam-weighted mean ± spread of per-topic FSRS "
+            "retrievability (needs ≥200 graded reviews, ≥50% coverage, no skipped "
+            "high-weight topic). Performance = Wilson interval on first-exposure "
+            "accuracy (needs ≥30 first-seen questions). Readiness = P(pass) fused "
+            "from both, deliberately wide and NOT validated against real exam "
+            "data. No AI — pure spaced-repetition stats."
         )
         footer.setWordWrap(True)
         footer.setStyleSheet("color:#666;font-size:11px")
