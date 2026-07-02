@@ -106,6 +106,18 @@ cfa-scores-test:
     {{ ninja }} pylib
     PYTHONPATH="out/pylib:pylib" {{ py }} -m pytest pylib/tests/test_cfa_scores.py -q
 
+# Feature 7: held-out eval harness — seeded, re-runnable, prints accuracy/AUC/ECE (stdlib only, no build)
+cfa-eval *args:
+    {{ py }} cfa/eval/run_eval.py {{ args }}
+
+# Feature 7: verify the held-out set never leaked into the training deck (exits non-zero on any overlap)
+cfa-eval-leakage:
+    {{ py }} cfa/eval/leakage_check.py
+
+# Feature 7: run the eval harness test suite (eval runs, deterministic, leakage clean)
+cfa-eval-test:
+    {{ py }} -m pytest cfa/eval/tests -q
+
 # Feature 5: boot straight into a freshly-seeded CFA collection (own profile base under /tmp)
 cfa *args:
     ANKI_BASE="${ANKI_BASE:-/tmp/gnhf-cfa-seed/ankibase}" {{ run_script }} {{ args }}

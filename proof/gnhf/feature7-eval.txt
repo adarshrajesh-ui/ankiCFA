@@ -1,0 +1,37 @@
+=== Feature 7: Held-out eval harness — proof ===
+Thu Jul  2 14:38:05 CDT 2026
+
+--- just cfa-eval-leakage ---
+out/pyenv/bin/python cfa/eval/leakage_check.py
+held-out concepts: 30  questions: 60
+deck fronts checked: 630
+leak threshold (Jaccard): 0.6
+LEAKAGE CLEAN: no held-out question overlaps training deck
+
+--- just cfa-eval-test ---
+out/pyenv/bin/python -m pytest cfa/eval/tests -q
+......                                                                   [100%]
+6 passed in 0.07s
+
+--- just cfa-eval --seed 0 ---
+out/pyenv/bin/python cfa/eval/run_eval.py --seed 0
+CFA held-out eval (simulation — not validated against real exam data)
+--------------------------------------------------------------------
+seed                : 0
+learners            : 200
+held-out concepts   : 30  (x2 paraphrases = 60 questions)
+predictions scored  : 12000
+
+accuracy   @0.5     : 0.6860
+AUC (ROC)           : 0.7628
+ECE (10-bin)        : 0.0784
+paraphrase gap mean : 0.0496
+paraphrase gap max  : 0.1171
+
+--- reproducibility (same seed twice, JSON) ---
+  "accuracy": 0.686,
+  "auc": 0.7628279040072674,
+  "ece": 0.07836687720496854,
+  "accuracy": 0.686,
+  "auc": 0.7628279040072674,
+  "ece": 0.07836687720496854,
