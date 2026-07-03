@@ -1,0 +1,37 @@
+=== ITEM 6 (MEDIUM #9) — REGRESSION SUITES (no ninja prefix) ===
+date: 2026-07-03T22:09:27Z  base sha: 73bfea57be6595bc471c48c8bb36ca6d5e9a6b54
+
+### cfa_tab_fill ###
+.......................                                                  [100%]
+23 passed in 0.17s
+exit: 0
+
+### F0b ###
+...........                                                              [100%]
+11 passed in 1.31s
+exit: 0
+
+### F4 (pylib) ###
+...................                                                      [100%]
+19 passed in 0.28s
+exit: 0
+
+### F4 (qt dialog) ###
+.......                                                                  [100%]
+7 passed in 0.45s
+exit: 0
+
+### F5 style ###
+.............                                                            [100%]
+13 passed in 0.34s
+exit: 0
+
+### menu ###
+....                                                                     [100%]
+4 passed in 0.18s
+exit: 0
+
+### scores ###
+..........                                                               [100%]
+10 passed in 0.23s
+exit: 0

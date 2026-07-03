@@ -10,6 +10,8 @@ webview, or network is needed. The AI-off path uses the real default client
 note — the deterministic-safe contract.
 """
 
+import re
+
 import pytest
 
 pytest.importorskip("aqt")
@@ -22,6 +24,18 @@ from aqt.cfa_tab_fill import (  # noqa: E402
     find_field_indices,
     register,
 )
+
+
+def _button_tag(html: str) -> str:
+    """Return the opening ``<button ...>`` tag from a button HTML fragment."""
+    m = re.search(r"<button\b[^>]*>", html)
+    assert m, f"no <button> found in {html!r}"
+    return m.group(0)
+
+
+def _has_class(tag: str, cls: str) -> bool:
+    m = re.search(r'class="([^"]*)"', tag)
+    return bool(m) and cls in m.group(1).split()
 
 
 class FakeNote:
@@ -210,6 +224,87 @@ def test_button_enabled_uses_addButton(monkeypatch):
     assert seen["keys"] == tf.FILL_SHORTCUT
     assert seen["func"] is tf._fill_back_action
     assert buttons == ["<button>AI Back</button>"]
+
+
+# --- AI-off button: visibly disabled + working tooltip (MEDIUM #9) -----------
+
+
+def test_button_html_disabled_carries_perm_class():
+    """AI-off button must carry ``perm`` so it stays visibly disabled.
+
+    Anki's editor JS re-enables every ``button.linkb:not(.perm)`` when a field
+    gains focus, so without ``perm`` the ``disabled`` attribute is stripped and
+    the button no longer looks or behaves disabled.
+    """
+    import aqt.cfa_tab_fill as tf
+
+    tag = _button_tag(tf._button_html(enabled=False))
+    assert "disabled" in tag, tag
+    assert _has_class(tag, "linkb"), tag
+    assert _has_class(tag, "perm"), tag
+
+
+def test_button_html_disabled_tooltip_lives_on_wrapper_span():
+    """A ``title`` on a disabled ``<button>`` never tooltips; a wrapper span does.
+
+    Browsers suppress pointer/hover events (and thus the native title tooltip)
+    on disabled controls, so the explanatory hover text must ride on an enabled
+    ``<span>`` wrapping the disabled button.
+    """
+    import aqt.cfa_tab_fill as tf
+
+    html = tf._button_html(enabled=False).strip()
+    assert html.startswith("<span"), html
+    assert html.endswith("</span>"), html
+    span_open = re.search(r"<span\b[^>]*>", html).group(0)  # type: ignore[union-attr]
+    assert "title=" in span_open, span_open
+    assert "OPENAI_API_KEY" in span_open, span_open
+    # the disabled button is nested inside that span
+    assert "<button" in html and "disabled" in html
+
+
+def test_button_html_enabled_is_plain_and_has_no_perm():
+    import aqt.cfa_tab_fill as tf
+
+    html = tf._button_html(enabled=True)
+    tag = _button_tag(html)
+    assert "disabled" not in tag, tag
+    assert not _has_class(tag, "perm"), tag
+    assert "<span" not in html, html
+    assert tf._BUTTON_LABEL in html
+
+
+def test_on_init_buttons_ai_off_is_disabled_with_perm_and_tooltip(monkeypatch):
+    import aqt.cfa_tab_fill as tf
+
+    monkeypatch.setattr(tf, "_ai_enabled", lambda: False)
+    buttons: list = []
+    tf._on_init_buttons(buttons, object())
+    assert len(buttons) == 1
+    html = buttons[0].strip()
+    tag = _button_tag(html)
+    assert "disabled" in tag and _has_class(tag, "perm"), tag
+    assert html.startswith("<span") and "title=" in html
+    assert "OPENAI_API_KEY" in html
+
+
+def test_on_init_buttons_ai_on_is_enabled_without_perm(monkeypatch):
+    import aqt.cfa_tab_fill as tf
+
+    monkeypatch.setattr(tf, "_ai_enabled", lambda: True)
+
+    class FakeEditor:
+        def addButton(self, **kw):
+            # mirror aqt.editor._addButton's enabled (non-perm) markup
+            return (
+                '<button class="anki-addon-button linkb" type="button">AI Back</button>'
+            )
+
+    buttons: list = []
+    tf._on_init_buttons(buttons, FakeEditor())
+    assert len(buttons) == 1
+    assert "perm" not in buttons[0]
+    assert "disabled" not in buttons[0]
 
 
 def test_register_is_idempotent():

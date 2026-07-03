@@ -1,0 +1,20 @@
+=== ITEM 6 (MEDIUM #9) — AFTER: fixed _button_html() ===
+date: 2026-07-03T22:09:19Z
+branch: fix/desktop-item6  base sha: 73bfea57be6595bc471c48c8bb36ca6d5e9a6b54
+
+--- Raw fixed AI-off button HTML (_button_html(enabled=False)) ---
+<span class="cfa-ai-back-off" title="AI is off — set OPENAI_API_KEY to enable"><button tabindex=-1 class="anki-addon-button linkb perm" type="button" disabled title="AI is off — set OPENAI_API_KEY to enable" data-command="cfaTabFillDisabled">AI Back</button></span>
+
+--- Raw enabled button HTML (_button_html(enabled=True)) ---
+<button tabindex=-1 class="anki-addon-button linkb" type="button" title="Draft the back with AI (Ctrl+Alt+F)" data-command="cfaTabFill">AI Back</button>
+
+--- Fix summary (AI-off: perm + wrapper-span title; AI-on: plain, no perm) ---
+disabled <button> present : True
+button has perm class     : True
+wrapped in <span> w/ title: True
+enabled has NO perm       : True
+enabled NOT disabled      : True
+
+--- pytest qt/tests/test_cfa_tab_fill.py (all GREEN) ---
+.......................                                                  [100%]
+23 passed in 0.17s
