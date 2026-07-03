@@ -131,6 +131,15 @@ cfa-f5-test:
     {{ ninja }} pylib
     QT_QPA_PLATFORM=offscreen PYTHONPATH="out/pylib:pylib:qt:out/qt" {{ py }} -m pytest qt/tests/test_cfa_f5_style.py -q
 
+# Feature F7: bundle both CFA decks (Level II + Ethics Passages) into one importable .apkg for the phone (+ re-import round-trip)
+cfa-f7-test:
+    {{ ninja }} pylib
+    {{ cfa_env }} {{ py }} -m pytest tools/cfa/tests/test_build_mobile_package.py -q
+
+# Feature F7: build the mobile CFA study .apkg (both decks). Pass apkg=/path/out.apkg (default /tmp/cfa-mobile.apkg)
+cfa-mobile-package apkg="/tmp/cfa-mobile.apkg":
+    {{ cfa_env }} {{ py }} tools/cfa/build_mobile_package.py --apkg "{{ apkg }}"
+
 # Feature 7: held-out eval harness — seeded, re-runnable, prints accuracy/AUC/ECE (stdlib only, no build)
 cfa-eval *args:
     {{ py }} cfa/eval/run_eval.py {{ args }}

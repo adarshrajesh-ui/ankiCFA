@@ -1,0 +1,94 @@
+# Copyright: Ankitects Pty Ltd and contributors
+# License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
+
+"""Feature F7 — tests for the CFA mobile study package builder.
+
+``build_mobile_package.build_package`` bundles the two CFA study decks the phone
+ships with (``CFA Level II`` + ``CFA::Ethics Passages``) into a single importable
+``.apkg`` (whole-collection export). These tests require a built pylib (they open
+a real Collection), so they are guarded by ``importorskip("anki")``.
+"""
+
+from __future__ import annotations
+
+import importlib.util
+import os
+import zipfile
+
+import pytest
+
+REPO = os.path.dirname(
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+)
+TOOLS_CFA = os.path.join(REPO, "tools", "cfa")
+
+
+def _load(name: str, path: str):
+    spec = importlib.util.spec_from_file_location(name, path)
+    assert spec and spec.loader
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+build_mobile_package = _load(
+    "cfa_build_mobile_package", os.path.join(TOOLS_CFA, "build_mobile_package.py")
+)
+
+
+@pytest.fixture()
+def built_apkg(tmp_path):
+    pytest.importorskip("anki")
+    col = str(tmp_path / "mobile.anki2")
+    apkg = str(tmp_path / "cfa-mobile.apkg")
+    summary = build_mobile_package.build_package(col, apkg)
+    return apkg, summary
+
+
+def test_package_bundles_both_decks(built_apkg):
+    apkg, summary = built_apkg
+    assert os.path.exists(apkg)
+    # The authored CFA Level II deck is large; ethics is exactly the 30 passages.
+    assert summary["cfa_notes"] > 200
+    assert summary["ethics_passages"] == 30
+    assert summary["ethics_deck"] == "CFA::Ethics Passages"
+    assert summary["topics"] >= 1
+
+
+def test_apkg_is_a_valid_anki_package(built_apkg):
+    apkg, _ = built_apkg
+    # A whole-collection .apkg must contain a collection db + media manifest.
+    with zipfile.ZipFile(apkg) as zf:
+        names = set(zf.namelist())
+    assert "media" in names, f"missing media manifest; got {sorted(names)[:8]}"
+    assert any(
+        n.startswith("collection.anki2") or n == "collection.anki21b" for n in names
+    ), f"missing collection db; got {sorted(names)[:8]}"
+
+
+def test_reimport_roundtrip_contains_both_decks(built_apkg, tmp_path):
+    """Import the built package into a fresh collection and assert both decks land.
+
+    This mirrors what the phone does on first launch (importAnkiPackage), so it is
+    the desktop-side proof that the bundled package yields both study decks.
+    """
+    pytest.importorskip("anki")
+    apkg, summary = built_apkg
+
+    from anki.collection import Collection
+
+    dest = str(tmp_path / "dest.anki2")
+    col = Collection(dest)
+    try:
+        # Import through the Rust backend — the exact code path the phone uses
+        # on first launch (importAnkiPackage), not the legacy Python importer.
+        opts = col._backend.get_import_anki_package_presets()
+        col._backend.import_anki_package(package_path=apkg, options=opts)
+        deck_names = {d.name for d in col.decks.all_names_and_ids()}
+        assert "CFA Level II" in deck_names
+        assert "CFA::Ethics Passages" in deck_names
+        # Every bundled note made it across.
+        total = summary["cfa_notes"] + summary["ethics_passages"]
+        assert col.card_count() >= total
+    finally:
+        col.close()

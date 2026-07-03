@@ -1,0 +1,2 @@
+07-03 03:55:55.126  7076  7076 I CfaBootstrapKt: CFA bootstrap: imported bundled CFA decks from asset
+   169356  01-01-1981 01:01   assets/cfa/cfa-bootstrap.apkg
