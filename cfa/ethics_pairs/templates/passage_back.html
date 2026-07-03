@@ -1,24 +1,36 @@
 <!-- CFA Ethics One-Passage — BACK (answer) template (F1 redesign).
-     This side deliberately contains NO Standard/Rationale text, so pressing Anki's built-in
-     "Show Answer" before completing the attempt can never leak the answer. Its only job is to commit
-     the deterministic grade the front computed: it reads the grade the front stashed in localStorage
-     and, on desktop (pycmd present), auto-rates the card Good (fully correct) or Again (not). On
-     mobile it shows the recommended rating and the learner taps it. -->
+     This side still contains NO answer-key fields in its markup, so pressing Anki's built-in
+     "Show Answer" BEFORE completing the attempt can never leak the answer. Its job is to commit the
+     deterministic grade the front computed (read from localStorage) and — once the attempt is
+     genuinely complete — to REVEAL the governing Standard + rationale (the same learning payload the
+     checked front shows). This closes the reflexive-path dead-end where the prominent "Show answer"
+     used to say "Attempt not completed" even after a complete attempt. On desktop (pycmd present) it
+     auto-rates Good/Again; on mobile it shows the recommended rating and the learner taps it. -->
 
-<div class="cfa-commit" id="cfa-commit">
+<div class="cfa-commit" id="cfa-commit" data-itemid="{{ItemId}}">
   <div class="big muted" id="cfa-commit-title">Recording…</div>
   <div class="muted" id="cfa-commit-sub"></div>
+  <div class="cfa-commit-reveal" id="cfa-commit-reveal" hidden></div>
 </div>
 
 <script>
 (function () {
+  var root = document.getElementById("cfa-commit");
   var title = document.getElementById("cfa-commit-title");
   var sub = document.getElementById("cfa-commit-sub");
+  var payload = document.getElementById("cfa-commit-reveal");
+  var backItemId = (root && root.dataset.itemid ? root.dataset.itemid : "").trim();
   var pending = null;
   try { pending = JSON.parse(localStorage.getItem("cfaEthics:pending") || "null"); } catch (e) {}
 
-  if (!pending) {
-    // Reached the answer side without completing the attempt (e.g. built-in Show Answer).
+  // Only honor a pending grade that marks a genuinely completed attempt for THIS card. A missing
+  // grade (built-in Show Answer before completing) or a stale grade from another card is withheld,
+  // exactly as before — the Standard is never shown without a real attempt.
+  var completed = !!(pending && pending.completed &&
+    (!pending.itemId || !backItemId || pending.itemId === backItemId));
+
+  if (!completed) {
+    // Reached the answer side without completing the attempt (e.g. built-in Show Answer up front).
     title.className = "big no";
     title.textContent = "Attempt not completed";
     sub.textContent =
@@ -31,11 +43,59 @@
   title.className = "big " + (correct ? "ok" : "no");
   title.textContent = correct ? "✓ Recorded: fully correct" : "✗ Recorded: not fully correct";
 
+  // The learning payload — reveal the governing Standard + rationale (and the per-span evidence
+  // breakdown) so the reflexive "Show answer" is never a dead-end. Mirrors the checked front reveal.
+  payload.innerHTML = buildPayloadHtml(pending);
+  payload.hidden = false;
+
   if (typeof pycmd !== "undefined") {
     sub.textContent = "Scheduling…";
     setTimeout(function () { pycmd(correct ? "ease3" : "ease1"); }, 350);
   } else {
     sub.textContent = "Rate " + (correct ? "Good" : "Again") + " to record this attempt.";
+  }
+
+  function esc(s) {
+    return (s == null ? "" : String(s)).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+  function cap(s) { s = (s || "").toString(); return s.charAt(0).toUpperCase() + s.slice(1); }
+
+  function buildPayloadHtml(p) {
+    var html = "";
+    // Verdict + evidence summary (mirrors the front reveal breakdown, incl. Item 2 near matches).
+    if (p.answerVerdict) {
+      html += '<ul class="cfa-breakdown">' +
+        "<li>Verdict: correct answer is <b>" + esc(p.answerVerdict) + "</b> — your call " +
+        (p.verdictOK ? "\u2713" : "\u2717") + "</li>";
+      if (typeof p.found === "number" && typeof p.total === "number") {
+        html += "<li>Evidence spans: " + p.found + " of " + p.total + " found" +
+          (p.near ? " (+" + p.near + " near)" : "") +
+          (p.highlight ? " \u00b7 " + esc(cap(p.highlight)) : "") + "</li>";
+      }
+      html += "</ul>";
+    }
+    // Per-span evidence breakdown: ✓ full match, ~ near (materially-overlapping) match, ✗ missed.
+    if (p.spans && p.spans.length) {
+      html += '<ul class="cfa-span-detail">';
+      for (var i = 0; i < p.spans.length; i++) {
+        var sp = p.spans[i] || {};
+        var tier = sp.tier || (sp.matched ? "full" : "none");
+        var mk = tier === "full" ? "\u2713" : (tier === "near" ? "~" : "\u2717");
+        var cls = tier === "full" ? "found" : (tier === "near" ? "near" : "missed");
+        html += '<li><span class="' + cls + '">' + mk + "</span> " +
+          '<span class="cfa-span-quote">' + esc(sp.phrase) + "</span>" +
+          (sp.rationale ? " \u2014 " + esc(sp.rationale) : "") + "</li>";
+      }
+      html += "</ul>";
+    }
+    // The governing Standard + overall rationale — the core learning payload.
+    if (p.standard) {
+      html += '<div class="cfa-standard"><span class="cfa-badge">Governing Standard</span>' + esc(p.standard) + "</div>";
+    }
+    if (p.rationale) {
+      html += '<div class="cfa-rationale">' + esc(p.rationale) + "</div>";
+    }
+    return html;
   }
 })();
 </script>

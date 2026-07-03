@@ -31,7 +31,9 @@ from ethics_scoring import (  # noqa: E402
     find_gold_spans,
     grade_passage_attempt,
     grade_spans,
+    grade_spans_tolerant,
     span_cap,
+    span_tier,
 )
 
 FRONT = os.path.join(PKG, "templates", "passage_front.html")
@@ -94,6 +96,95 @@ def test_span_cap_scales_with_number_of_spans():
 def test_custom_cap_overrides_default():
     assert grade_spans([1, 2, 3, 4], [[1, 2], [3, 4]], cap=4)["grade"] == "correct"
     assert grade_spans([0, 1, 2, 3, 4], [[1, 2], [3, 4]], cap=4)["grade"] == "somewhat"
+
+
+# ------------------------------------------------- Item 2: partial-credit tolerant grader tiers
+
+
+def test_span_tier_full_near_none():
+    assert span_tier({1, 2, 3}, [1, 2, 3]) == "full"
+    assert span_tier({1, 2, 3, 4}, [1, 2, 3]) == "full"  # a superset still counts as full
+    assert span_tier({1, 2}, [1, 2, 3]) == "near"  # 2 of 3 (>= half)
+    assert span_tier({1, 2}, [1, 2, 3, 4]) == "near"  # 2 of 4 (exactly half)
+    assert span_tier({1}, [1, 2]) == "near"  # 1 of 2 (exactly half)
+    assert span_tier({1}, [1, 2, 3]) == "none"  # 1 of 3 (below half)
+    assert span_tier({9}, [1, 2, 3]) == "none"  # no overlap
+    assert span_tier(set(), []) == "none"
+
+
+def test_tolerant_all_full_within_cap_is_correct():
+    res = grade_spans_tolerant([1, 2, 5, 6], [[1, 2], [5, 6]])
+    assert res["grade"] == "correct" and res["found"] == 2 and res["near"] == 0
+    assert res["per_span"] == ["full", "full"]
+
+
+def test_tolerant_all_full_but_too_wide_is_somewhat():
+    res = grade_spans_tolerant(list(range(0, 15)), [[1, 2], [5, 6]])
+    assert res["grade"] == "somewhat" and res["found"] == 2
+
+
+def test_tolerant_all_matched_but_some_near_is_somewhat():
+    # span A fully covered, span B only overlapping (2 of 3) -> all matched, not all full -> somewhat
+    res = grade_spans_tolerant([1, 2, 5, 6], [[1, 2], [5, 6, 7]])
+    assert res["per_span"] == ["full", "near"]
+    assert res["grade"] == "somewhat" and res["found"] == 1 and res["near"] == 1
+
+
+def test_tolerant_one_span_missed_is_partial():
+    res = grade_spans_tolerant([1, 2], [[1, 2], [5, 6]])
+    assert res["grade"] == "partial" and res["found"] == 1 and res["near"] == 0
+    assert res["per_span"] == ["full", "none"]
+
+
+def test_tolerant_near_only_still_partial_not_wrong():
+    # selection materially overlaps span A (2 of 3) but nothing of span B -> partial, not wrong
+    res = grade_spans_tolerant([1, 2], [[1, 2, 3], [5, 6]])
+    assert res["per_span"] == ["near", "none"]
+    assert res["grade"] == "partial" and res["found"] == 0 and res["near"] == 1
+
+
+def test_tolerant_no_material_overlap_is_wrong():
+    assert grade_spans_tolerant([90, 91], [[1, 2], [5, 6]])["grade"] == "wrong"
+    # a single token of a 3-token span is below the half threshold -> not credited
+    assert grade_spans_tolerant([1], [[1, 2, 3], [5, 6]])["grade"] == "wrong"
+
+
+def test_tolerant_empty_selection_is_wrong():
+    assert grade_spans_tolerant([], [[1, 2], [5, 6]])["grade"] == "wrong"
+
+
+def test_tolerant_never_downgrades_a_strict_correct():
+    # Any selection the strict grader calls fully correct must also be tolerant-correct.
+    for sel, gold in ([1, 2, 5, 6], [[1, 2], [5, 6]]), ([3, 4, 5], [[3, 4, 5]]):
+        assert grade_spans(sel, gold)["grade"] == "correct"
+        assert grade_spans_tolerant(sel, gold)["grade"] == "correct"
+
+
+def test_tolerant_psg01_unreleased_quarterly_earnings_is_partial_not_wrong():
+    # The Item 2 symptom, verbatim: highlighting "unreleased quarterly earnings" on the Priya/MNPI
+    # passage (gold span 1 is "exact unreleased quarterly earnings figure") scored a flat "wrong"
+    # under the strict grader; the tolerant grader gives partial credit for the materially-correct
+    # (3-of-5-token) highlight.
+    rows = {r["item_id"]: r for r in _load_raw()}
+    p = rows["PSG-01"]
+    phrases = [g["phrase"] for g in p["gold_spans"]]
+    runs = find_gold_spans(p["passage"], phrases)
+    sel = find_gold_spans(p["passage"], ["unreleased quarterly earnings"])[0]
+    assert sel, "sanity: the learner's near-miss phrase is token-locatable"
+    assert grade_spans(sel, runs)["grade"] == "wrong"  # the old harsh behavior
+    tol = grade_spans_tolerant(sel, runs)
+    assert tol["grade"] == "partial"  # Item 2 fix: materially-correct -> partial credit
+    assert tol["per_span"][0] == "near" and tol["per_span"][1] == "none"
+    assert tol["found"] == 0 and tol["near"] == 1
+
+
+def test_tolerant_bank_perfect_selection_still_correct():
+    # The authored answer key (perfect selection) must remain fully correct under tolerance too.
+    for r in _load_raw():
+        phrases = [g["phrase"] for g in r["gold_spans"]]
+        runs = find_gold_spans(r["passage"], phrases)
+        perfect = [i for run in runs for i in run]
+        assert grade_spans_tolerant(perfect, runs)["grade"] == "correct", r["item_id"]
 
 
 # -------------------------------------------------------------------- find_gold_spans
@@ -401,8 +492,15 @@ def test_python_js_multispan_agree():
     py_grade = [
         grade_spans(c["selection"], c["gold_spans"], c["cap"]) for c in grade_cases
     ]
+    py_grade_tolerant = [
+        grade_spans_tolerant(c["selection"], c["gold_spans"], c["cap"])
+        for c in grade_cases
+    ]
 
     assert js["spans"] == py_spans
     # Compare the full grade dicts (grade, found, total, per_span, width_ok, cap) structurally.
     assert js["grade"] == py_grade
+    # Item 2: the tolerant grader (grade, found, near, matched, total, per_span, ...) must agree too,
+    # so mobile's partial-credit grade is byte-identical to the desktop card's shared JS.
+    assert js["grade_tolerant"] == py_grade_tolerant
     assert len(py_grade) == len(grade_cases) and len(py_spans) == len(span_cases)

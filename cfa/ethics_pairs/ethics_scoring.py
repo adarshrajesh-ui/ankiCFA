@@ -214,6 +214,96 @@ def grade_spans(
     }
 
 
+# --- Item 2: deterministic partial-credit tolerance (the AI-off / mobile grade) ------------------
+#
+# grade_spans above is exact but brittle: it credits a gold span only when EVERY one of its tokens is
+# selected, so a materially-correct highlight with different boundaries (e.g. "unreleased quarterly
+# earnings" for the gold "exact unreleased quarterly earnings figure") scores a flat "wrong".
+# span_tier / grade_spans_tolerant add DETERMINISTIC tolerance (no network, no LLM): a span is "full"
+# when every gold token is covered (a superset still counts), "near" when the selection overlaps at
+# least half the gold tokens (right idea, boundaries off), else "none"; grade_spans_tolerant then
+# awards partial-credit tiers. This mirrors the desktop F2 grader's tolerance while staying offline
+# and deterministic, and is mirrored CHARACTER-FOR-CHARACTER by cfaSpanTier / cfaGradeSpansTolerant
+# in the passage card template JS and tests/js/passage_logic.js. tests/test_passages.py enforces the
+# copy match and the Python<->JS behavioural agreement. Keep the three copies in sync.
+
+
+def span_tier(selection: set, span: Sequence[int]) -> str:
+    """Tolerant per-span match tier: ``"full"`` | ``"near"`` | ``"none"``.
+
+    ``"full"`` = every gold token in the span is selected (a superset still counts). ``"near"`` = the
+    selection overlaps at least half the span's gold tokens (right idea, boundaries off). Otherwise
+    ``"none"``. Identical logic to the template JS ``cfaSpanTier``.
+    """
+    s = set(span)
+    if not s:
+        return "none"
+    inter = len(s & selection)
+    if inter == len(s):
+        return "full"
+    if inter > 0 and inter * 2 >= len(s):
+        return "near"
+    return "none"
+
+
+def grade_spans_tolerant(
+    selection_indices: Sequence[int],
+    gold_spans: Sequence[Sequence[int]],
+    cap: int | None = None,
+) -> dict:
+    """Grade a multi-span highlight with partial-credit tolerance (deterministic AI-off/mobile grade).
+
+    Like :func:`grade_spans` but a gold span counts when the learner's selection materially overlaps
+    it, not only when it is fully covered. Grades:
+
+    - ``"correct"``  -- every gold span is FULLY covered AND ``|selection| <= cap``.
+    - ``"somewhat"`` -- every gold span is matched (full or near) but at least one is only near, OR
+      all are full but ``|selection| > cap`` (right regions, imperfect boundaries / over-wide).
+    - ``"partial"``  -- at least one but NOT all gold spans are matched (full or near).
+    - ``"wrong"``    -- no gold span is matched, or the selection is empty.
+
+    ``per_span`` is a list of tier strings (``"full"`` / ``"near"`` / ``"none"``); ``found`` counts
+    FULL matches and ``near`` counts near matches. Only ``"correct"`` counts as a fully-correct
+    highlight. Identical logic to the template JS ``cfaGradeSpansTolerant``.
+    """
+    selection = set(selection_indices)
+    per_span: list[str] = []
+    all_gold: set[int] = set()
+    full = 0
+    near = 0
+    for span in gold_spans:
+        all_gold |= set(span)
+        tier = span_tier(selection, span)
+        per_span.append(tier)
+        if tier == "full":
+            full += 1
+        elif tier == "near":
+            near += 1
+    total = len(gold_spans)
+    matched = full + near
+    if cap is None:
+        cap = span_cap(len(all_gold), total)
+    width_ok = len(selection) <= cap
+    if not selection or matched == 0:
+        grade = "wrong"
+    elif matched < total:
+        grade = "partial"
+    elif full == total and width_ok:
+        grade = "correct"
+    else:
+        grade = "somewhat"
+    return {
+        "grade": grade,
+        "found": full,
+        "near": near,
+        "matched": matched,
+        "total": total,
+        "per_span": per_span,
+        "width_ok": width_ok,
+        "cap": cap,
+    }
+
+
 @dataclass(frozen=True)
 class PassageAttempt:
     """One learner attempt at a single one-passage item, with the answer key to grade against.
