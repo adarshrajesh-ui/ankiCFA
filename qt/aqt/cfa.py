@@ -324,6 +324,39 @@ def _band_html(
     return cfa_style.band(name=name, meaning=meaning, value_html=value, abstain=abstain)
 
 
+def _readiness_abstain_html(reason: str) -> str:
+    """F4 hero when we are BELOW the give-up threshold: abstain, don't call.
+
+    Composed inline (deliberately NOT via ``cfa_style.hero``) so it renders NO
+    ``p=`` probability and NO accuracy "95% CI" lead line — with too little
+    graded evidence a confident pass/fail call would be dishonest, so the hero
+    matches the give-up-gated Memory/Performance/Readiness bands and simply says
+    to keep studying. Reuses cfa_style's public tokens/helpers read-only so it
+    keeps the shared chrome. ``reason`` is the give-up reason from
+    :func:`anki.cfa.memory_score`.
+    """
+    t = cfa_style.TOKENS
+    color = cfa_style.WARN
+    # accent_soft is the warm soft that pairs with WARN (== accent) in the token
+    # table — the abstain analogue of hero's pass_soft/fail_soft backgrounds.
+    soft = t["accent_soft"]
+    return (
+        f"<div style='background:{soft};border:1px solid {color};"
+        f"border-left:4px solid {color};border-radius:10px;"
+        f"padding:12px 16px;margin:0 0 14px'>"
+        f"<div style='font-size:{t['fs_hero']}px;font-weight:800;"
+        f"color:{color};line-height:1.1'>Not enough data — keep studying</div>"
+        f"<div style='font-size:{t['fs_body']}px;color:{cfa_style.INK};"
+        f"margin-top:6px'>No pass/fail call yet — the estimate stays hidden "
+        f"until there is enough graded review evidence to be honest. It appears "
+        f"here once the give-up threshold is met.</div>"
+        f"<div style='font-size:{t['fs_meta']}px;color:{color};"
+        f"margin-top:6px'>{cfa_style.value_abstain(reason)} · {cfa.READINESS_LABEL}"
+        f"</div>"
+        f"</div>"
+    )
+
+
 def _readiness_call_html(r) -> str:
     """F4 hero block: the exam-accuracy 95% credible band + the pass/fail call.
 
@@ -376,11 +409,22 @@ class ExamReadinessDialog(QDialog):
         ready = cfa.readiness_score(col, deck_id=deck_id)
         deck_name = col.decks.name(deck_id)
 
+        # F4 hero: the Bayesian pass/fail call — but ABSTAIN when we are below
+        # the give-up threshold (reuse memory_score's give-up outcome, which
+        # gates on graded reviews, topic coverage and skipped high-weight
+        # topics), so the hero never prints a confident "p=xx" from the flat
+        # Beta(1,1) prior while the scores beneath it honestly abstain.
+        hero_html = (
+            _readiness_abstain_html(score.reason)
+            if score.abstain
+            else _readiness_call_html(bayes)
+        )
+
         header = QLabel()
         header.setTextFormat(Qt.TextFormat.RichText)
         header.setText(
             cfa_style.page_heading("Exam Readiness", deck_name)
-            + _readiness_call_html(bayes)
+            + hero_html
             + cfa_style.section("Honest scores")
             + _band_html(
                 "Memory",

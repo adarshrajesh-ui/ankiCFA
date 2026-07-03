@@ -258,3 +258,132 @@ def test_readiness_reports_recall_with_sm2_fallback_when_r_null():
     assert r.recall is not None
     assert 0.0 <= r.recall <= 1.0
     col.close()
+
+
+# =============================================================================
+# item3 sub-bug 3B — canonical topic accounting for bayesian_readiness
+# =============================================================================
+#
+# The topic total must be the fixed canonical CFA syllabus (the eight authored
+# topics), consistent across deck scopes. When no exam weights are configured
+# the scores fall back to that canonical list instead of deriving a variable,
+# deck-scoped list from the cards in scope — which used to make topics_total vary
+# (1, 2, ...) and, for the four-column readiness query, crash outright.
+
+
+def test_canonical_topics_are_the_eight_authored_areas():
+    assert cfa.CANONICAL_TOPICS == [
+        "los::altinv",
+        "los::corp",
+        "los::econ",
+        "los::equity",
+        "los::ethics",
+        "los::fra",
+        "los::portmgmt",
+        "los::quant",
+    ]
+    assert len(cfa.CANONICAL_TOPICS) == 8
+    assert len(set(cfa.CANONICAL_TOPICS)) == 8  # no duplicates
+    assert all(t.startswith("los::") for t in cfa.CANONICAL_TOPICS)
+
+
+def test_readiness_topic_prefixes_prefers_config_else_canonical():
+    # Configured weights are authoritative (the seeded product state).
+    assert cfa.readiness_topic_prefixes({"los::quant": 0.6, "los::ethics": 0.4}) == [
+        "los::ethics",
+        "los::quant",
+    ]
+    # No weights -> the canonical list, returned as a fresh copy (never the
+    # module constant, so callers cannot mutate it).
+    fallback = cfa.readiness_topic_prefixes({})
+    assert fallback == cfa.CANONICAL_TOPICS
+    assert fallback is not cfa.CANONICAL_TOPICS
+
+
+def test_bayesian_readiness_no_config_uses_canonical_and_never_crashes():
+    # Regression guard: the old _derive_topics fallback unpacked 3 columns while
+    # the bayesian query selects 4 -> ValueError. With no exam config it must now
+    # return the canonical 8-topic total, still make a call, and not crash.
+    col = getEmptyCol()
+    nt = col.models.by_name("Basic")
+    deck = col.decks.id("CFA")
+    _seed_topic(
+        col,
+        deck,
+        nt,
+        "los::ethics",
+        4,
+        stability=100.0,
+        reviews_each=3,
+        first_ease=[3, 3, 3, 1],
+        now=int(time.time()),
+    )
+    assert cfa.get_exam_config(col) is None  # exercise the fallback path
+    r = cfa.bayesian_readiness(col, deck_id=deck)
+    assert r.topics_total == 8
+    assert len(r.topics) == 8
+    assert r.topics_covered == 1  # only ethics has first-exposure trials
+    by = {t.topic: t for t in r.topics}
+    assert by["los::ethics"].covered
+    # An uncovered canonical topic sits at the uniform prior (mean 0.5).
+    assert not by["los::quant"].covered
+    assert abs(by["los::quant"].mean - 0.5) < 1e-9
+    assert r.call in ("likely pass", "likely fail")
+    col.close()
+
+
+def test_bayesian_readiness_topic_total_is_deck_independent_without_config():
+    col = getEmptyCol()
+    nt = col.models.by_name("Basic")
+    now = int(time.time())
+    ethics_deck = col.decks.id("CFA::EthicsOnly")
+    quant_deck = col.decks.id("CFA::QuantOnly")
+    for d, topic in ((ethics_deck, "los::ethics"), (quant_deck, "los::quant")):
+        _seed_topic(
+            col,
+            d,
+            nt,
+            topic,
+            3,
+            stability=100.0,
+            reviews_each=2,
+            first_ease=[3, 3, 3],
+            now=now,
+        )
+    parent = col.decks.id("CFA")
+    # The canonical total does not depend on which deck is scoped.
+    assert cfa.bayesian_readiness(col, deck_id=parent).topics_total == 8
+    assert cfa.bayesian_readiness(col, deck_id=ethics_deck).topics_total == 8
+    # Covered subset does vary with scope, though.
+    assert cfa.bayesian_readiness(col, deck_id=parent).topics_covered == 2
+    assert cfa.bayesian_readiness(col, deck_id=ethics_deck).topics_covered == 1
+    col.close()
+
+
+def test_bayesian_readiness_with_full_canonical_config_totals_eight():
+    # The seeded product configures a weight per authored topic; topics_total
+    # then equals the configured (== canonical) count.
+    col = getEmptyCol()
+    nt = col.models.by_name("Basic")
+    deck = col.decks.id("CFA")
+    _seed_topic(
+        col,
+        deck,
+        nt,
+        "los::ethics",
+        4,
+        stability=100.0,
+        reviews_each=3,
+        first_ease=[3, 3, 3, 3],
+        now=int(time.time()),
+    )
+    cfa.set_exam_config(
+        col,
+        exam_date="2026-12-01",
+        topic_weights={t: 1.0 / 8 for t in cfa.CANONICAL_TOPICS},
+    )
+    r = cfa.bayesian_readiness(col, deck_id=deck)
+    assert r.topics_total == 8
+    assert len(r.topics) == 8
+    assert r.topics_covered == 1
+    col.close()
