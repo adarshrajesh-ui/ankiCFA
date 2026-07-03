@@ -90,5 +90,5 @@ topic areas and stores the exam date + per-topic weights in the collection confi
   give-up rule.
 - **Exam queue:** `col.sched.build_exam_queue(deck_id=…, days_to_exam=…,
   topic_weights=…)` (or `anki.cfa.build_exam_queue(col, deck_id=…)` using the stored
-  config) returns due cards reordered for exam prep — read-only, so FSRS and undo
-  are unaffected.
+  config) returns the deck's studyable cards (due plus new, never-reviewed)
+  reordered for exam prep — read-only, so FSRS and undo are unaffected.

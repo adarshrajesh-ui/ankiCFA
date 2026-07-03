@@ -36,7 +36,8 @@ is built from a separate **AnkiDroid** fork and shares the same Rust engine — 
 ## What this fork adds
 
 - **Exam queue (Rust engine).** A **read-only** backend RPC,
-  `SchedulerService.BuildExamQueue`, reorders a deck's due cards by
+  `SchedulerService.BuildExamQueue`, reorders a deck's studyable cards — due
+  plus new, never-reviewed cards (treated as maximally weak, `R = 0`) — by
   `topic_weight × (1 − retrievability) × deadline_urgency`, using FSRS
   retrievability and hierarchical `los::topic::reading` tags. Because it never
   writes, FSRS scheduling and undo history stay valid. Implemented once in the
@@ -180,8 +181,9 @@ and merge-difficulty analysis.
 
 - **Exam queue:** `col.sched.build_exam_queue(deck_id=…, days_to_exam=…,
   topic_weights=…)`, or `anki.cfa.build_exam_queue(col, deck_id=…)` to use the exam
-  date and weights stored in the collection config. Returns due cards reordered for
-  exam prep; read-only, so FSRS state and undo are unaffected.
+  date and weights stored in the collection config. Returns the deck's studyable
+  cards (due plus new, never-reviewed) reordered for exam prep; read-only, so FSRS
+  state and undo are unaffected.
 - **Exam Readiness:** menu **CFA → Exam Readiness…** shows the honest memory score
   (per-topic recall range, coverage %, freshness) or "not enough data" per the
   give-up rule.
