@@ -1,0 +1,95 @@
+=== ITEM 6 (MEDIUM #9) — BEFORE: unmodified _button_html() ===
+date: 2026-07-03T22:06:25Z
+branch: fix/desktop-item6  sha: 73bfea57be6595bc471c48c8bb36ca6d5e9a6b54
+
+--- Raw current AI-off button HTML (_button_html(enabled=False)) ---
+'<button tabindex=-1 class="anki-addon-button linkb" type="button" disabled title="AI is off — set OPENAI_API_KEY to enable" data-command="cfaTabFillDisabled">AI Back</button>'
+
+--- Defect summary ---
+disabled <button> present : True
+button has perm class     : False
+wrapped in <span> w/ title: False
+
+--- pytest qt/tests/test_cfa_tab_fill.py (NEW MEDIUM #9 tests must FAIL here) ---
+.................FFFF..                                                  [100%]
+=================================== FAILURES ===================================
+_________________ test_button_html_disabled_carries_perm_class _________________
+
+    def test_button_html_disabled_carries_perm_class():
+        """AI-off button must carry ``perm`` so it stays visibly disabled.
+    
+        Anki's editor JS re-enables every ``button.linkb:not(.perm)`` when a field
+        gains focus, so without ``perm`` the ``disabled`` attribute is stripped and
+        the button no longer looks or behaves disabled.
+        """
+        import aqt.cfa_tab_fill as tf
+    
+        tag = _button_tag(tf._button_html(enabled=False))
+        assert "disabled" in tag, tag
+        assert _has_class(tag, "linkb"), tag
+>       assert _has_class(tag, "perm"), tag
+E       AssertionError: <button tabindex=-1 class="anki-addon-button linkb" type="button" disabled title="AI is off — set OPENAI_API_KEY to enable" data-command="cfaTabFillDisabled">
+E       assert False
+E        +  where False = _has_class('<button tabindex=-1 class="anki-addon-button linkb" type="button" disabled title="AI is off — set OPENAI_API_KEY to enable" data-command="cfaTabFillDisabled">', 'perm')
+
+qt/tests/test_cfa_tab_fill.py:244: AssertionError
+___________ test_button_html_disabled_tooltip_lives_on_wrapper_span ____________
+
+    def test_button_html_disabled_tooltip_lives_on_wrapper_span():
+        """A ``title`` on a disabled ``<button>`` never tooltips; a wrapper span does.
+    
+        Browsers suppress pointer/hover events (and thus the native title tooltip)
+        on disabled controls, so the explanatory hover text must ride on an enabled
+        ``<span>`` wrapping the disabled button.
+        """
+        import aqt.cfa_tab_fill as tf
+    
+        html = tf._button_html(enabled=False).strip()
+>       assert html.startswith("<span"), html
+E       AssertionError: <button tabindex=-1 class="anki-addon-button linkb" type="button" disabled title="AI is off — set OPENAI_API_KEY to enable" data-command="cfaTabFillDisabled">AI Back</button>
+E       assert False
+E        +  where False = <built-in method startswith of str object at 0x105b89f10>('<span')
+E        +    where <built-in method startswith of str object at 0x105b89f10> = '<button tabindex=-1 class="anki-addon-button linkb" type="button" disabled title="AI is off — set OPENAI_API_KEY to enable" data-command="cfaTabFillDisabled">AI Back</button>'.startswith
+
+qt/tests/test_cfa_tab_fill.py:257: AssertionError
+______________ test_button_html_enabled_is_plain_and_has_no_perm _______________
+
+    def test_button_html_enabled_is_plain_and_has_no_perm():
+        import aqt.cfa_tab_fill as tf
+    
+        html = tf._button_html(enabled=True)
+        tag = _button_tag(html)
+>       assert "disabled" not in tag, tag
+E       AssertionError: <button tabindex=-1 class="anki-addon-button linkb" type="button" disabled title="AI is off — set OPENAI_API_KEY to enable" data-command="cfaTabFillDisabled">
+E       assert 'disabled' not in '<button tab...llDisabled">'
+E         
+E         'disabled' is contained here:
+E           ="button" disabled title="AI is off — set OPENAI_API_KEY to enable" data-command="cfaTabFillDisabled">
+E         ?           ++++++++
+
+qt/tests/test_cfa_tab_fill.py:271: AssertionError
+________ test_on_init_buttons_ai_off_is_disabled_with_perm_and_tooltip _________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x114daae70>
+
+    def test_on_init_buttons_ai_off_is_disabled_with_perm_and_tooltip(monkeypatch):
+        import aqt.cfa_tab_fill as tf
+    
+        monkeypatch.setattr(tf, "_ai_enabled", lambda: False)
+        buttons: list = []
+        tf._on_init_buttons(buttons, object())
+        assert len(buttons) == 1
+        html = buttons[0].strip()
+        tag = _button_tag(html)
+>       assert "disabled" in tag and _has_class(tag, "perm"), tag
+E       AssertionError: <button tabindex=-1 class="anki-addon-button linkb" type="button" disabled title="AI is off — set OPENAI_API_KEY to enable" data-command="cfaTabFillDisabled">
+E       assert ('disabled' in '<button tabindex=-1 class="anki-addon-button linkb" type="button" disabled title="AI is off — set OPENAI_API_KEY to enable" data-command="cfaTabFillDisabled">' and False)
+E        +  where False = _has_class('<button tabindex=-1 class="anki-addon-button linkb" type="button" disabled title="AI is off — set OPENAI_API_KEY to enable" data-command="cfaTabFillDisabled">', 'perm')
+
+qt/tests/test_cfa_tab_fill.py:286: AssertionError
+=========================== short test summary info ============================
+FAILED qt/tests/test_cfa_tab_fill.py::test_button_html_disabled_carries_perm_class
+FAILED qt/tests/test_cfa_tab_fill.py::test_button_html_disabled_tooltip_lives_on_wrapper_span
+FAILED qt/tests/test_cfa_tab_fill.py::test_button_html_enabled_is_plain_and_has_no_perm
+FAILED qt/tests/test_cfa_tab_fill.py::test_on_init_buttons_ai_off_is_disabled_with_perm_and_tooltip
+4 failed, 19 passed in 0.22s

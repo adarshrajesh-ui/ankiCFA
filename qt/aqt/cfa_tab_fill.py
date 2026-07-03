@@ -327,11 +327,39 @@ def _fill_back_action(editor: Any) -> None:
 
 
 def _button_html(enabled: bool) -> str:
-    """Disabled button HTML for AI-off; the enabled button comes from addButton."""
+    """Toolbar markup for the AI Back button.
+
+    In the running editor the *enabled* button is created by ``editor.addButton``
+    (it needs its JS command wired to :func:`_fill_back_action`); this helper
+    renders the **AI-off** fallback appended by :func:`_on_init_buttons` when no
+    ``OPENAI_API_KEY`` is present. Two things are load-bearing for the AI-off
+    state to actually read as disabled with an explanation:
+
+    * the disabled ``<button>`` carries the ``perm`` class. Anki's editor JS
+      re-enables every ``button.linkb:not(.perm)`` when a field gains focus, so
+      without ``perm`` the ``disabled`` attribute is stripped moments later and
+      the button stops looking or behaving disabled.
+    * the button is wrapped in a ``<span>`` that carries the ``title``. Browsers
+      suppress hover/pointer events on disabled controls, so a ``title`` on the
+      disabled ``<button>`` never yields a tooltip — the enabled wrapper span is
+      what surfaces the explanatory hover text.
+
+    ``enabled`` is honoured so the helper is a complete, unit-testable pure
+    function: it returns the plain (non-``perm``, non-disabled) markup that
+    mirrors an enabled add-on button.
+    """
+    if enabled:
+        return (
+            f'<button tabindex=-1 class="anki-addon-button linkb" type="button" '
+            f'title="Draft the back with AI ({FILL_SHORTCUT})" '
+            f'data-command="{FILL_CMD}">{_BUTTON_LABEL}</button>'
+        )
     tip = "AI is off — set OPENAI_API_KEY to enable"
     return (
-        f'<button tabindex=-1 class="anki-addon-button linkb" type="button" '
+        f'<span class="cfa-ai-back-off" title="{tip}">'
+        f'<button tabindex=-1 class="anki-addon-button linkb perm" type="button" '
         f'disabled title="{tip}" data-command="{FILL_CMD}Disabled">{_BUTTON_LABEL}</button>'
+        f"</span>"
     )
 
 

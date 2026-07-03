@@ -315,3 +315,87 @@ Before the fix these ERROR (import of `ensure_ethics_passages_deck` fails) / FAI
 - Fix commit SHA: _(recorded below after commit)_.
 - no-mistakes outcome: _(recorded below after the axi gate run)_.
 - PR link / merge confirmation / `origin/main` SHA after merge: _(recorded below after merge)_.
+
+---
+
+## Item 6 (MEDIUM #9) — F3 "AI Back" editor button has no visible AI-off state
+
+**Symptom.** With no `OPENAI_API_KEY`, the F3 "AI Back" editor button was supposed to
+render *visibly disabled with an explanatory tooltip*, but it did neither: it looked/behaved
+enabled and hovering showed nothing.
+
+### Root cause (two concrete defects in `_button_html()` in `qt/aqt/cfa_tab_fill.py`)
+
+1. **Missing `perm` class.** The disabled button was emitted as
+   `class="anki-addon-button linkb"` — no `perm`. Anki's editor JS
+   (`ts/editor/NoteEditor.svelte::setAddonButtonsDisabled`) re-enables every
+   `button.linkb:not(.perm)` whenever a field gains focus, so the `disabled` attribute was
+   stripped moments after render and the button stopped looking/acting disabled. (Anki's own
+   `editor._addButton` adds `perm` for non-disabling buttons for exactly this reason.)
+2. **Tooltip on a disabled `<button>` never shows.** Browsers suppress hover/pointer events
+   on disabled controls, so the `title` attribute on the disabled `<button>` produced no
+   tooltip.
+
+### Fix (additive, in-scope — `qt/aqt/cfa_tab_fill.py` only)
+
+- Add `perm` to the disabled button's class list (`anki-addon-button linkb perm`) so the
+  editor JS leaves it disabled.
+- Wrap the disabled button in an **enabled `<span>` that carries the `title`**, so the
+  explanatory hover text actually surfaces.
+- `_button_html(enabled)` now honours `enabled` and is a complete pure function: `enabled=True`
+  returns the plain (non-`perm`, non-disabled) markup; `enabled=False` returns the wrapped,
+  `perm`, disabled markup with the tooltip. The **AI-on path is unchanged in behavior** — it
+  still comes from `editor.addButton(...)` in `_on_init_buttons` (no `perm`), never from this
+  helper.
+
+AI-off HTML after the fix:
+`<span class="cfa-ai-back-off" title="AI is off — set OPENAI_API_KEY to enable"><button tabindex=-1 class="anki-addon-button linkb perm" type="button" disabled title="…" data-command="cfaTabFillDisabled">AI Back</button></span>`
+
+### Regression tests (fail without the fix, pass with it) — `qt/tests/test_cfa_tab_fill.py`
+
+- `test_button_html_disabled_carries_perm_class` — the disabled `<button>` carries `perm`.
+- `test_button_html_disabled_tooltip_lives_on_wrapper_span` — output is a `<span … title=…>`
+  wrapping the disabled button (tooltip on the enabled wrapper, not the disabled control).
+- `test_button_html_enabled_is_plain_and_has_no_perm` — `enabled=True` markup is plain: no
+  `perm`, not `disabled`, no wrapper span.
+- `test_on_init_buttons_ai_off_is_disabled_with_perm_and_tooltip` — via `_on_init_buttons`
+  with `_ai_enabled` monkeypatched **False**: disabled + `perm` + wrapper-span tooltip.
+- `test_on_init_buttons_ai_on_is_enabled_without_perm` — with `_ai_enabled` **True**: enabled
+  path (`addButton`), no `perm`, not disabled.
+
+Verified red→green: on unmodified code 4 of these fail (see `item6-before.txt`); after the fix
+all **23** pass (see `item6-after.txt`).
+
+### Before / after proof
+
+- `proof/fixes/p1/item6-before.txt` — unmodified `_button_html`: raw HTML has no `perm`, no
+  wrapper span; defect summary (`perm=False`, `wrapped-in-span=False`); pytest **4 failed, 19 passed**.
+- `proof/fixes/p1/item6-after.txt` — fixed: raw AI-off HTML (span+title+perm+disabled) and
+  AI-on HTML (plain, no perm); fix summary all `True`; pytest **23 passed**.
+- `proof/fixes/p1/item6-regressions.txt` — the F0b/F4/F5/menu/scores + tab-fill suites.
+- `proof/fixes/p1/item6-f9.txt` — `F9 REACHABILITY: PASS`.
+- `proof/fixes/p1/item6-typecheck.txt` — mypy/ruff on the two touched files.
+
+### Tests run (raw pytest against the single `just build`; no ninja prefix, AI-OFF)
+
+- `qt/tests/test_cfa_tab_fill.py` — **23 passed** (was 18; +5 new).
+- `qt/tests/test_cfa_f0b.py` — **11 passed**; `pylib/tests/test_cfa_f4.py` — **19 passed**;
+  `qt/tests/test_cfa_f4_dialog.py` — **7 passed**.
+- `qt/tests/test_cfa_f5_style.py` — **13 passed**; `qt/tests/test_cfa_menu.py` — **4 passed**;
+  `pylib/tests/test_cfa_scores.py` — **10 passed**.
+- `python tools/cfa/f9_reachability.py` (AI-OFF, no `OPENAI_API_KEY`) — **F9 REACHABILITY: PASS**.
+- mypy on touched files (`qt/aqt/cfa_tab_fill.py`, `qt/tests/test_cfa_tab_fill.py`) — **0 errors
+  in the touched files**. The sole reported error is `cfa/ai/llm_client.py:229` (optional
+  `openai` import), OUT OF SCOPE and verified identical on pristine `origin/main` → pre-existing.
+- ruff check + ruff format --check on touched files — **clean**.
+
+### Branch / commit / no-mistakes / merge
+
+- Branch: `fix/desktop-item6` (off `origin/main` @ `73bfea57b`), isolated worktree
+  `ankicfa-wt-item6`.
+- Scope (edited): `qt/aqt/cfa_tab_fill.py`, `qt/tests/test_cfa_tab_fill.py`, `proof/fixes/p1/`.
+- Fix commit SHA: `bf83e034b` (branch `fix/desktop-item6`; fix + tests + proof).
+- no-mistakes: driven via a push to the local `no-mistakes` git proxy (the daemon
+  creates the run from the `post-receive` `push_received` event) then `axi run --yes
+  --skip document`. Outcome: _(recorded after the axi gate run)_.
+- PR link / merge confirmation / `origin/main` SHA after merge: _(recorded after merge)_.

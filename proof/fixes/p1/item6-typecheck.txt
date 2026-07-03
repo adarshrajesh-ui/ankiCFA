@@ -1,0 +1,18 @@
+=== ITEM 6 (MEDIUM #9) — TYPECHECK / LINT (touched files) ===
+date: 2026-07-03T22:09:57Z  base sha: 73bfea57be6595bc471c48c8bb36ca6d5e9a6b54
+touched: qt/aqt/cfa_tab_fill.py, qt/tests/test_cfa_tab_fill.py
+
+--- mypy (touched files) ---
+cfa/ai/llm_client.py:229: error: Cannot find implementation or library stub for module named "openai"  [import-not-found]
+cfa/ai/llm_client.py:229: note: See https://mypy.readthedocs.io/en/stable/running_mypy.html#missing-imports
+Found 1 error in 1 file (checked 2 source files)
+mypy: 0 errors in the two touched files. The ONLY reported error is
+cfa/ai/llm_client.py:229 (optional 'openai' import) — OUT OF SCOPE (cfa/ai/**),
+reached only transitively, verified IDENTICAL on pristine origin/main =>
+pre-existing, not from this fix. Build check:mypy folders exclude cfa/.
+
+--- ruff check (touched files) ---
+All checks passed!
+
+--- ruff format --check (touched files) ---
+2 files already formatted
