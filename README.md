@@ -50,7 +50,7 @@ is built from a separate **AnkiDroid** fork and shares the same Rust engine — 
   enough data"), and it **abstains outright if a high-weight topic has been
   skipped**. Implemented in [`pylib/anki/cfa.py`](./pylib/anki/cfa.py) with the UI
   in [`qt/aqt/cfa.py`](./qt/aqt/cfa.py).
-- **CFA Level II deck.** Hand-authored content spanning the eight topic areas, tagged
+- **CFA Level II deck.** Hand-authored content spanning the ten topic areas, tagged
   `los::<topic>::<reading>`. Build it with
   [`tools/cfa/build_cfa_deck.py`](./tools/cfa/build_cfa_deck.py).
 - **Stock review loop.** Standard Anki review runs unchanged on the deck.
