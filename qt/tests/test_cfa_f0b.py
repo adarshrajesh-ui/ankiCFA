@@ -260,3 +260,109 @@ def test_study_by_exam_priority_includes_new_cards(monkeypatch) -> None:
         assert "30" in msg and "new" in msg.lower(), msg
     finally:
         col.close()
+
+
+# ---------------------------------------------------------------------------
+# item2 (P1 fix): "Study by Exam Priority" never dead-ends on a FRESH profile.
+#
+# Regression guard for the fresh-profile dead-end: the first-launch seeder
+# creates the CFA decks but never SELECTS one, so the current deck stays the
+# empty built-in "Default" deck. "Study by Exam Priority" scoped the exam queue
+# to that current deck, so `build_exam_queue` returned 0 card_ids and the action
+# dead-ended with the "no studyable cards" modal — even though hundreds of NEW
+# CFA cards (treated as maximally weak, R=0) were waiting in the CFA decks. The
+# fix widens the scope to the whole collection when the current deck has nothing
+# studyable, so the NEW cards are reached and review is entered. This test FAILS
+# without the fix (dead-end modal, never enters review) and PASSES with it.
+# ---------------------------------------------------------------------------
+
+
+def test_study_by_exam_priority_from_empty_default_deck_no_dead_end(
+    monkeypatch,
+) -> None:
+    col = _empty_col()
+    mw = _StandInMW(col)
+    try:
+        # 30 NEW ethics cards live in CFA::Ethics Pairs, a sibling of Default.
+        added = ensure_ethics_deck(col)
+        assert added == 30
+        anki_cfa.set_exam_config(
+            col, exam_date="2026-08-25", topic_weights={"los::ethics": 1.0}
+        )
+
+        # Reproduce the fresh-profile precondition EXACTLY: do NOT select a CFA
+        # deck. The current deck is the empty built-in "Default" deck.
+        cur = col.decks.get_current_id()
+        assert col.decks.name(cur) == "Default"
+        assert len(col.find_cards('deck:"Default" is:new')) == 0
+
+        tips: list[str] = []
+        monkeypatch.setattr(cfa, "tooltip", lambda *a, **k: tips.append(a[0]))
+        monkeypatch.setattr(
+            cfa, "showInfo", lambda *a, **k: tips.append("INFO:" + a[0])
+        )
+
+        cfa.study_by_exam_priority(mw)  # type: ignore[arg-type]
+
+        # Must NOT dead-end: the widened scope reaches the 30 NEW cards and
+        # enters review, reporting the new count honestly.
+        assert "review" in mw.states, f"exam-priority dead-ended: {tips}"
+        assert not any(t.startswith("INFO:") for t in tips), (
+            f"dead-end modal fired: {tips}"
+        )
+        assert tips, "expected an honest exam-priority tooltip"
+        msg = tips[0]
+        assert "30" in msg and "new" in msg.lower(), msg
+
+        # The filtered study deck was actually populated with the 30 new cards.
+        prio = col.decks.id_for_name(cfa.EXAM_PRIORITY_DECK_NAME)
+        assert prio is not None
+        assert col.decks.card_count(prio, include_subdecks=False) == 30
+    finally:
+        col.close()
+
+
+# The collection-wide fallback is gated to the built-in "Default" deck so it
+# only bootstraps a fresh profile. A user who deliberately selected a specific
+# (non-Default) deck and then finished/emptied it must be told THAT deck is
+# done, not silently hijacked into a queue spanning unrelated decks.
+
+
+def test_study_by_exam_priority_non_default_empty_deck_does_not_hijack(
+    monkeypatch,
+) -> None:
+    col = _empty_col()
+    mw = _StandInMW(col)
+    try:
+        # 30 studyable NEW cards live in CFA::Ethics Pairs.
+        added = ensure_ethics_deck(col)
+        assert added == 30
+        anki_cfa.set_exam_config(
+            col, exam_date="2026-08-25", topic_weights={"los::ethics": 1.0}
+        )
+
+        # Select a DIFFERENT, non-Default deck that has nothing studyable.
+        empty_did = col.decks.id("CFA::Finished")
+        assert empty_did is not None
+        col.decks.set_current(empty_did)
+        cur = col.decks.get_current_id()
+        assert col.decks.name(cur) != "Default"
+        assert col.decks.card_count(cur, include_subdecks=True) == 0
+
+        tips: list[str] = []
+        monkeypatch.setattr(cfa, "tooltip", lambda *a, **k: tips.append(a[0]))
+        monkeypatch.setattr(
+            cfa, "showInfo", lambda *a, **k: tips.append("INFO:" + a[0])
+        )
+
+        cfa.study_by_exam_priority(mw)  # type: ignore[arg-type]
+
+        # Must NOT enter review on the unrelated CFA::Ethics Pairs cards, and
+        # must surface a deck-scoped "this deck is done" modal instead.
+        assert "review" not in mw.states, f"exam-priority hijacked: {tips}"
+        assert any(t.startswith("INFO:") for t in tips), (
+            f"expected deck-scoped modal, got: {tips}"
+        )
+        assert col.decks.id_for_name(cfa.EXAM_PRIORITY_DECK_NAME) is None
+    finally:
+        col.close()

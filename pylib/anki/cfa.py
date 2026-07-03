@@ -125,6 +125,81 @@ def build_exam_queue(
     )
 
 
+@dataclass
+class ExamQueue:
+    """A merged, weakest-first exam-priority queue.
+
+    Mirrors the read-only ``BuildExamQueue`` RPC response shape (parallel
+    ``card_ids`` and ``scores``) so callers can treat it interchangeably.
+    """
+
+    card_ids: list[int]
+    scores: list[float]
+
+
+def _top_level_deck_ids(col: anki.collection.Collection) -> list[DeckId]:
+    """Ids of the top-level, non-filtered decks.
+
+    Each top-level deck rolls up all of its subdecks (the RPC gathers with
+    children), and every card belongs to exactly one top-level deck, so this is
+    the right granularity to score the whole collection without double-counting.
+    """
+    return [
+        DeckId(entry.id)
+        for entry in col.decks.all_names_and_ids(
+            skip_empty_default=False, include_filtered=False
+        )
+        if "::" not in entry.name
+    ]
+
+
+def build_exam_queue_all_decks(
+    col: anki.collection.Collection,
+    *,
+    today: Optional[date] = None,
+    fetch_limit: int = 0,
+    type_multipliers: Optional[dict[str, float]] = None,
+) -> ExamQueue:
+    """Collection-wide exam-priority queue, merged across every top-level deck.
+
+    This is the fallback for when the *current* deck has no studyable cards —
+    e.g. a freshly seeded profile whose selected deck is still the empty
+    built-in "Default" deck while every NEW CFA card lives in the CFA decks. It
+    calls the read-only :func:`build_exam_queue` once per top-level deck (with
+    its subdecks), so every studyable card — due *and* NEW (treated as maximally
+    weak, R=0) — that lives in a regular deck is scored exactly once, then merges
+    the per-deck results into a single weakest-first ordering (score descending,
+    ties broken by ascending card id, matching the RPC's own ordering). Read-only
+    throughout.
+
+    Cards *currently* sitting in a filtered deck are excluded: filtered decks are
+    skipped as scoring roots and the RPC matches on a card's home deck (``c.did``,
+    which is the filtered deck while the card is pulled), so they belong to no
+    top-level regular deck here. A fresh profile is therefore never a dead-end
+    while studyable cards exist in the regular decks — the common case — but the
+    queue can still be empty if every remaining card is off in a filtered deck.
+    """
+    merged: list[tuple[int, float]] = []
+    for did in _top_level_deck_ids(col):
+        resp = build_exam_queue(
+            col,
+            deck_id=did,
+            today=today,
+            fetch_limit=0,
+            type_multipliers=type_multipliers,
+        )
+        merged.extend(
+            zip((int(c) for c in resp.card_ids), (float(s) for s in resp.scores))
+        )
+    merged.sort(key=lambda cs: (-cs[1], cs[0]))
+    if fetch_limit:
+        merged = merged[: int(fetch_limit)]
+    return ExamQueue(
+        card_ids=[cid for cid, _ in merged],
+        scores=[score for _, score in merged],
+    )
+
+
 # =============================================================================
 # Honest memory score
 # =============================================================================

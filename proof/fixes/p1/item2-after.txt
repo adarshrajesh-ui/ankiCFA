@@ -1,0 +1,29 @@
+=== item2 AFTER: exam-priority widens scope, no dead-end ===
+date: 2026-07-03T18:56:33Z
+branch: fix/desktop-item2
+
+--- Faithful reproduction via study_by_exam_priority (stand-in MW), WITH fix ---
+
+=== A: full seed, current deck as-is (fresh profile default) ===
+current_deck='Default' new_in_current=0 has_config=True
+states=['review'] msgs=[('tip', 'Exam-priority queue: 200 cards weakest-first (including 200 new).')]
+RESULT: ENTERED REVIEW
+
+=== B: full seed, main deck selected ===
+current_deck='CFA Level II' new_in_current=630 has_config=True
+states=['review'] msgs=[('tip', 'Exam-priority queue: 200 cards weakest-first (including 200 new).')]
+RESULT: ENTERED REVIEW
+
+=== C: main deck selected, NO exam config ===
+current_deck='CFA Level II' new_in_current=630 has_config=False
+states=['review'] msgs=[('tip', 'Exam-priority queue: 200 cards weakest-first (including 200 new).')]
+RESULT: ENTERED REVIEW
+
+--- Regression tests WITH fix ---
+[qt] test_study_by_exam_priority_from_empty_default_deck_no_dead_end
+.                                                                        [100%]
+1 passed in 0.27s
+
+[pylib] test_build_exam_queue_all_decks_merges_new_cards_across_decks
+.                                                                        [100%]
+1 passed in 0.08s
