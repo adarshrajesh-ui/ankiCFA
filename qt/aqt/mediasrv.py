@@ -839,14 +839,17 @@ def get_cfa_exam_readiness() -> bytes:
 
 
 def _cfa_deadline_payload(col: Collection, deck_id: int) -> dict[str, Any]:
-    from anki import cfa, cfa_deadline
-    from aqt.cfa import _default_exam_date
+    from anki import cfa
+    from aqt.cfa import _sanitized_exam_date
 
     cfg = cfa.get_exam_config(col) or {}
-    exam_date = cfg.get("exam_date") or _default_exam_date()
+    # Self-heal an absurd/stale persisted exam date back to the canonical default
+    # (mirrors the old Qt dialog's _initial_date heal), and rank due AND new cards
+    # so a fresh all-new deck is never a dead-end — both preserved from #17.
+    exam_date = _sanitized_exam_date(cfg.get("exam_date"))
     topic_weights = cfg.get("topic_weights", {})
 
-    result = cfa_deadline.deadline_retention(
+    result = cfa.deadline_retention_with_new(
         col, deck_id=deck_id, exam_date=exam_date, fetch_limit=50
     )
     recalls = list(result.predicted_recall)

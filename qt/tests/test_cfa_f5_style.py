@@ -188,7 +188,14 @@ def test_card_no_longer_uses_the_old_ad_hoc_blue():
 
 
 # --------------------------------------------------------------------------
-# The real dialogs adopt the shared chrome.
+# The readiness/deadline surfaces feed the SHARED design system.
+#
+# Those two surfaces are now the shared SvelteKit pages (ts/lib/cfa) embedded in
+# aqt.cfa.{ExamReadinessDialog,DeadlineDialog} via an AnkiWebView, so the shared
+# chrome is enforced in TS-land. The Python side's remaining job is to hand the
+# shared components the honest-score data through the mediasrv payload builders,
+# so here we assert those payloads carry the exact shape the shared design system
+# consumes (the backend <-> components contract).
 # --------------------------------------------------------------------------
 
 
@@ -201,50 +208,43 @@ def col(tmp_path):
     c.close()
 
 
-def _make_mw(col):
-    from aqt.qt import QWidget
+def test_readiness_payload_matches_shared_component_shape(col):
+    from aqt.mediasrv import _cfa_exam_readiness_payload
 
-    class _MW(QWidget):
-        def __init__(self):
-            super().__init__()
-            self.col = col
-
-        def reset(self):
-            pass
-
-        def moveToState(self, s):
-            pass
-
-    return _MW()
-
-
-def test_exam_readiness_dialog_applies_shared_style(col):
-    from aqt import cfa as aqt_cfa
-    from aqt.qt import QApplication
-
-    app = QApplication.instance() or QApplication(["test"])
-    assert app is not None
-    aqt_cfa.tooltip = lambda *a, **k: None  # type: ignore[assignment]
     deck = col.decks.get_current_id()
-    mw = _make_mw(col)  # keep a reference so the parent isn't GC'd
-    dlg = aqt_cfa.ExamReadinessDialog(mw, deck)  # type: ignore[arg-type]
-    try:
-        assert cfa_style.PRIMARY in dlg.styleSheet()
-        assert "QTableWidget" in dlg.styleSheet()
-    finally:
-        dlg.close()
+    payload = _cfa_exam_readiness_payload(col, int(deck))
+
+    # The keys the shared CfaReadinessPage / $lib/cfa components read.
+    for key in (
+        "deckName",
+        "heroMode",
+        "memory",
+        "performance",
+        "readiness",
+        "caption",
+        "topics",
+        "footerText",
+    ):
+        assert key in payload, key
+    # Each honest-score band exposes the name/meaning/abstain the shared StatCard
+    # renders (the ScoreBand contract).
+    for band in ("memory", "performance", "readiness"):
+        assert {"name", "meaning", "abstain"} <= payload[band].keys(), band
 
 
-def test_deadline_dialog_applies_shared_style(col):
-    from aqt import cfa as aqt_cfa
-    from aqt.qt import QApplication
+def test_deadline_payload_matches_shared_component_shape(col):
+    from aqt.mediasrv import _cfa_deadline_payload
 
-    app = QApplication.instance() or QApplication(["test"])
-    assert app is not None
-    aqt_cfa.tooltip = lambda *a, **k: None  # type: ignore[assignment]
-    mw = _make_mw(col)  # keep a reference so the parent isn't GC'd
-    dlg = aqt_cfa.DeadlineDialog(mw)  # type: ignore[arg-type]
-    try:
-        assert cfa_style.PRIMARY in dlg.styleSheet()
-    finally:
-        dlg.close()
+    deck = col.decks.get_current_id()
+    payload = _cfa_deadline_payload(col, int(deck))
+
+    # The keys the shared CfaDeadlinePage / $lib/cfa components read.
+    for key in (
+        "examDate",
+        "cardCount",
+        "dataSource",
+        "headerMode",
+        "rows",
+        "footerText",
+    ):
+        assert key in payload, key
