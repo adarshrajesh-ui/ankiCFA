@@ -1,7 +1,7 @@
 # Copyright: Ankitects Pty Ltd and contributors
 # License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
 
-"""Feature 4: the CFA desktop menu exposes four study actions.
+"""Feature 4: the CFA desktop menu exposes its study actions.
 
 Builds the real ``aqt.cfa`` menu against a lightweight QWidget stand-in for the
 main window and asserts the menu wiring, without needing a full AnkiQt/profile.
@@ -37,10 +37,10 @@ def _make_menu() -> "tuple[QWidget, object]":
     return mw, mw._cfa_menu  # type: ignore[attr-defined]
 
 
-def test_cfa_menu_has_four_actions() -> None:
+def test_cfa_menu_has_five_actions() -> None:
     _mw, menu = _make_menu()
     actions = menu.actions()
-    assert len(actions) == 4
+    assert len(actions) == 5
 
 
 def test_cfa_menu_action_labels() -> None:
@@ -49,9 +49,17 @@ def test_cfa_menu_action_labels() -> None:
     assert labels == [
         "Exam Readiness…",
         "Study Ethics Minimal-Pairs",
+        "Study Ethics (One-Passage)",
         "Study by Exam Priority",
         "Peak-on-Exam-Day (Deadline)…",
     ]
+
+
+def test_cfa_menu_has_one_passage_action() -> None:
+    # The F1 one-passage flagship must have a dedicated, reachable menu entry.
+    _mw, menu = _make_menu()
+    labels = [a.text() for a in menu.actions()]
+    assert "Study Ethics (One-Passage)" in labels
 
 
 def test_cfa_menu_handlers_exist() -> None:
@@ -59,6 +67,7 @@ def test_cfa_menu_handlers_exist() -> None:
     for name in (
         "show_exam_readiness",
         "study_ethics_pairs",
+        "study_ethics_passages",
         "study_by_exam_priority",
         "show_deadline",
     ):
