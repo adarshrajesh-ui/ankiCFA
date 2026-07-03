@@ -1,0 +1,7 @@
+07-03 03:36:39.631  6541  6541 D AnkiDroidApp: executed makeBackendUsable in 96.583us
+07-03 03:36:39.645  6541  6541 D AnkiDroidApp: executed setupAnkiBackend in 388.916us
+07-03 03:36:39.741  6541  6541 I AnkiDroidApp$onCreate: Backend Version = 0.1.64-anki25.09.2 (26.05b1 d5867e5b5327dc5466b44b589fc1a5c06c386047)  
+07-03 03:36:39.980  6541  6541 D DeckPickerViewModel: handleStartup: Continuing after permission granted
+07-03 03:36:39.989  6541  6613 D Backend : Opening rust backend with lang=[en-US]
+07-03 03:36:39.993  6541  6613 I rsdroid : rsdroid::logging: rsdroid logging enabled
+07-03 03:36:40.173  6541  6541 D DeckPicker: onStartupResponse: Success

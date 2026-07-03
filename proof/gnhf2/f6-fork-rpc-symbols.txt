@@ -1,0 +1,7 @@
+=== fork-only RPC symbols present in on-device librsdroid.so ===
+## jni/arm64-v8a/librsdroid.so ( 46M)
+BuildExamQueueRequest
+days_to_exam
+deadline
+fetch_limit
+topic_weights
