@@ -1,0 +1,20 @@
+======================================================================
+item1 AFTER-FIX EVIDENCE — 'Study Ethics Minimal-Pairs' now reliably
+RE-ENTERS review on every invocation; the false modal never fires.
+Captured: 2026-07-03T17:39:11Z  commit: 557a7cc82 (working tree, fix applied)
+======================================================================
+
+### (1) Explicit symptom probe (real Collection, 30 ethics cards exist):
+seeded ethics pairs         : 30
+after call #1 review states : ['review']
+after call #1 study-deck cnt: 30
+after call #2 review states : ['review', 'review']   <-- FIXED: re-entered review
+after call #2 study-deck cnt: 30 (re-gathered in place)
+after call #2 showInfo modal: []   <-- FIXED: no false modal
+after call #3 review states : ['review', 'review', 'review']
+after call #3 showInfo modal: []
+ethics source deck count    : 30
+
+### (2) Regression test PASSES with the fix:
+.                                                                        [100%]
+1 passed in 0.29s
