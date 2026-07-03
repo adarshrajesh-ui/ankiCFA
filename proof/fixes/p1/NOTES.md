@@ -3,12 +3,14 @@
 ## item1 — "Study Ethics Minimal-Pairs" dead-ends with a false "not available in this build" modal
 
 ### Symptom
-CFA menu → **Study Ethics Minimal-Pairs** dead-ended on a *repeat* invocation with a
-"No cards to study" tooltip and a false modal — *"The CFA::Ethics Pairs deck is not
-available in this build, so there is nothing to study yet."* — even though the 30
+
+CFA menu → **Study Ethics Minimal-Pairs** dead-ended on a _repeat_ invocation with a
+"No cards to study" tooltip and a false modal — _"The CFA::Ethics Pairs deck is not
+available in this build, so there is nothing to study yet."_ — even though the 30
 shipped ethics cards clearly exist.
 
 ### Root cause
+
 `_study_filtered_deck` (qt/aqt/cfa.py) always called
 `col.sched.get_or_create_filtered_deck(deck_id=DeckId(0))`, i.e. it always created a
 **brand-new** filtered deck named `CFA::Study — Ethics Minimal-Pairs`. On a repeat
@@ -20,6 +22,7 @@ the new build gathered **0** cards → `SearchReturnedNoCards` (`FilteredDeckErr
 build" modal.
 
 ### Fix (additive, backward-compatible; qt/aqt/cfa.py only)
+
 1. `_study_filtered_deck`: before building, look up an existing filtered deck of the same
    name (`col.decks.id_for_name(name)` + `col.decks.is_filtered(...)`) and, if present,
    pass its id to `get_or_create_filtered_deck`. `add_or_update_filtered_deck` then
@@ -36,11 +39,13 @@ build" modal.
    `ExamReadinessDialog`.
 
 ### Regression test (fails without the fix, passes with it)
+
 `qt/tests/test_cfa_f0b.py::test_study_ethics_pairs_is_reentrant_no_false_modal`
 Seeds the 30 ethics cards, invokes `study_ethics_pairs` twice, and asserts the second
 invocation re-enters review with the 30 cards AND that the false modal never fires.
 
 ### Before / after proof
+
 - `proof/fixes/p1/item1-before.txt` — symptom probe (call #2 does not re-enter review;
   false modal fires; source deck still has 30 cards) + regression test FAILING.
 - `proof/fixes/p1/item1-after.txt` — same probe now re-enters review on calls #2 and #3
@@ -48,6 +53,7 @@ invocation re-enters review with the 30 cards AND that the false modal never fir
 - `proof/fixes/p1/item1-verify.txt` — full regression battery (see below).
 
 ### Tests run (raw pytest against the single `just build`; results)
+
 - `qt/tests/test_cfa_f0b.py` — **6 passed** (incl. new regression test)
 - `qt/tests/test_cfa_menu.py` — **3 passed**
 - `qt/tests/test_cfa_f5_style.py` — **13 passed**
@@ -63,6 +69,7 @@ environment has a gitignored `.env` key that auto-loads, so F9 was run with the 
 neutralized (`OPENAI_API_KEY=""`, never printed); it then prints `F9 REACHABILITY: PASS`.
 
 ### Branch / commit / no-mistakes / merge
+
 - Branch: `fix/desktop-item1` (off `origin/main`).
 - Fix commit SHA: `b03d3467e` (scoped: `qt/aqt/cfa.py`, `qt/tests/test_cfa_f0b.py`, `proof/fixes/p1/`).
 - no-mistakes gate had to be repaired first: pushes were failing with
