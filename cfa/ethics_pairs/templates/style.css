@@ -1,6 +1,27 @@
 /* CFA Ethics Minimal-Pair — shared card styling.
    Self-contained; works in Anki desktop/mobile webviews and standalone (for the flow test).
-   Night-mode aware via Anki's `.nightMode` body class. */
+   Night-mode aware via Anki's `.nightMode` body class.
+
+   F5 design system: the CFA fork shares ONE calm finance-education palette across
+   the desktop dialogs (qt/aqt/cfa_style.py TOKENS) and this card. These :root
+   tokens mirror that table so the card and the dialogs read as one product —
+   deep-slate ink, a calm navy brand accent, a warm gold evidence highlight, and
+   the pass / fail / caution triad. */
+:root {
+  --cfa-ink: #1e293b;
+  --cfa-muted: #64748b;
+  --cfa-faint: #94a3b8;
+  --cfa-line: #e2e8f0;
+  --cfa-surface: #f8fafc;
+  --cfa-primary: #0f4c81;
+  --cfa-primary-soft: #e8f0f8;
+  --cfa-pass: #15803d;
+  --cfa-pass-soft: #f0fdf4;
+  --cfa-fail: #b91c1c;
+  --cfa-fail-soft: #fef2f2;
+  --cfa-accent: #b45309;       /* warm evidence-highlight ink */
+  --cfa-accent-soft: #fef3c7;  /* warm evidence-highlight fill */
+}
 
 .card { font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif; }
 
@@ -8,8 +29,8 @@
   max-width: 900px;
   margin: 0 auto;
   text-align: left;
-  color: #1a1a1a;
-  line-height: 1.45;
+  color: var(--cfa-ink);
+  line-height: 1.5;
 }
 .nightMode .cfa-pair { color: #e8e8e8; }
 
@@ -19,15 +40,16 @@
 .cfa-header h2 { font-size: 1.15rem; margin: 6px 0 0; }
 .cfa-cluster {
   display: inline-block;
-  font: 600 0.72rem/1 ui-monospace, Menlo, monospace;
-  letter-spacing: .02em;
-  color: #5a4b8a;
-  background: #efeafc;
-  border: 1px solid #d8ccf5;
-  padding: 4px 8px;
+  font: 700 0.68rem/1 ui-monospace, Menlo, monospace;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--cfa-primary);
+  background: var(--cfa-primary-soft);
+  border: 1px solid #cfe0f0;
+  padding: 4px 9px;
   border-radius: 999px;
 }
-.nightMode .cfa-cluster { color: #cbb8ff; background: #2a2440; border-color: #43396b; }
+.nightMode .cfa-cluster { color: #9dc2e8; background: #16283b; border-color: #2b4258; }
 
 /* two co-presented cases, side by side (stacks on narrow screens) */
 .cfa-cases {
@@ -61,7 +83,7 @@
   font-weight: 600;
 }
 .nightMode .cfa-judge-btn { background: #2c2d34; border-color: #474853; }
-.cfa-judge-btn.sel { border-color: #3b6fe0; background: #e8f0ff; color: #123a8f; }
+.cfa-judge-btn.sel { border-color: var(--cfa-primary); background: var(--cfa-primary-soft); color: var(--cfa-primary); }
 .nightMode .cfa-judge-btn.sel { background: #21335c; color: #cfe0ff; border-color: #4d78d6; }
 
 /* tap-to-highlight word tokens inside each vignette */
@@ -72,9 +94,9 @@
   padding: 1px 1px;
   transition: background-color .05s ease;
 }
-.cfa-tok:hover { background: #eef2fb; }
+.cfa-tok:hover { background: var(--cfa-primary-soft); }
 .nightMode .cfa-tok:hover { background: #2b3550; }
-.cfa-tok.sel { background: #ffe08a; color: #3a2e00; }
+.cfa-tok.sel { background: var(--cfa-accent-soft); color: var(--cfa-accent); }
 .nightMode .cfa-tok.sel { background: #7a5f12; color: #fff4d6; }
 .cfa-tok.locked { cursor: default; }
 .cfa-tok.locked:hover { background: transparent; }
@@ -82,7 +104,7 @@
 /* the in-vignette highlight step */
 .cfa-highlight-step { margin: 6px 0 12px; }
 .cfa-highlight-step h3 { font-size: 1rem; margin: 0 0 6px; }
-.cfa-highlight-instr { margin: 0; color: #6a6a72; font-size: .88rem; }
+.cfa-highlight-instr { margin: 0; color: var(--cfa-muted); font-size: .88rem; }
 .nightMode .cfa-highlight-instr { color: #a9a9b3; }
 
 /* post-attempt marks */
@@ -91,7 +113,7 @@
 .cfa-verdict { margin-top: 8px; font-weight: 600; font-size: .85rem; }
 
 /* the learner's picked span, recolored by grade tier after Check */
-.cfa-tok.pick { background: #ffe08a; color: #3a2e00; }
+.cfa-tok.pick { background: var(--cfa-accent-soft); color: var(--cfa-accent); }
 .cfa-tok.pick-correct { background: #bff0cf; color: #14663a; }
 .cfa-tok.pick-somewhat { background: #ffe08a; color: #5a4300; }
 .cfa-tok.pick-wrong { background: #f6c9c4; color: #8f201a; }
@@ -106,9 +128,10 @@
 #cfa-check, #cfa-record-btn {
   cursor: pointer; font-weight: 700; font-size: .95rem;
   border: none; border-radius: 9px; padding: 11px 20px;
-  background: #3b6fe0; color: #fff;
+  background: var(--cfa-primary); color: #fff;
 }
-#cfa-check:disabled { background: #b9c2d6; cursor: not-allowed; }
+#cfa-check:hover, #cfa-record-btn:hover { background: #0c3d68; }
+#cfa-check:disabled { background: var(--cfa-faint); cursor: not-allowed; }
 .cfa-hint { color: #8a8a93; font-size: .85rem; margin: 8px 0 0; }
 
 /* reveal panel — hidden until the attempt is checked */
@@ -118,8 +141,8 @@
   padding-top: 16px;
 }
 .cfa-grade { font-size: 1.2rem; font-weight: 800; margin-bottom: 10px; }
-.cfa-grade.ok { color: #2e9e5b; }
-.cfa-grade.no { color: #d1453b; }
+.cfa-grade.ok { color: var(--cfa-pass); }
+.cfa-grade.no { color: var(--cfa-fail); }
 .cfa-breakdown { margin: 0 0 12px; padding-left: 18px; font-size: .9rem; color: #555; }
 .nightMode .cfa-breakdown { color: #b6b6bf; }
 
@@ -137,7 +160,7 @@
 .cfa-badge {
   font: 700 .68rem/1 ui-monospace, Menlo, monospace;
   text-transform: uppercase; letter-spacing: .05em;
-  color: #fff; background: #5a4b8a; padding: 4px 7px; border-radius: 6px; margin-right: 6px;
+  color: #fff; background: var(--cfa-primary); padding: 4px 7px; border-radius: 6px; margin-right: 6px;
 }
 .cfa-rationale { color: #333; }
 .nightMode .cfa-rationale { color: #d0d0d8; }
@@ -146,11 +169,12 @@
 
 /* --- F1 one-passage multi-span redesign (additive) --- */
 .cfa-passage-wrap {
-  border: 1px solid #dcdce3;
+  border: 1px solid var(--cfa-line);
   border-radius: 12px;
-  padding: 16px 18px;
-  background: #fbfbfd;
-  margin: 10px 0 16px;
+  padding: 18px 20px;
+  background: var(--cfa-surface);
+  margin: 12px 0 18px;
+  font-size: 1.02rem;
 }
 .nightMode .cfa-passage-wrap { background: #23242a; border-color: #3a3b44; }
 .cfa-passage { margin: 0; -webkit-user-select: none; user-select: none; }
@@ -158,26 +182,28 @@
 .cfa-verdict-btns { display: flex; gap: 10px; margin: 4px 0 14px; }
 .cfa-verdict-btn {
   cursor: pointer; flex: 1; font-weight: 700; font-size: .95rem;
-  border: 1px solid #c7c7d1; background: #fff; color: inherit;
-  border-radius: 9px; padding: 10px 14px;
+  border: 1px solid var(--cfa-line); background: #fff; color: var(--cfa-ink);
+  border-radius: 9px; padding: 11px 14px;
+  transition: border-color .1s ease, background-color .1s ease;
 }
+.cfa-verdict-btn:hover { border-color: var(--cfa-primary); }
 .nightMode .cfa-verdict-btn { background: #2c2d34; border-color: #474853; }
-.cfa-verdict-btn.sel { border-color: #3b6fe0; background: #e8f0ff; color: #123a8f; }
+.cfa-verdict-btn.sel { border-color: var(--cfa-primary); background: var(--cfa-primary-soft); color: var(--cfa-primary); }
 .nightMode .cfa-verdict-btn.sel { background: #21335c; color: #cfe0ff; border-color: #4d78d6; }
-.cfa-verdict-btn[data-v="ethical"].sel { border-color: #2e9e5b; background: #eafaf0; color: #14663a; }
-.cfa-verdict-btn[data-v="unethical"].sel { border-color: #d1453b; background: #fcecea; color: #8f201a; }
+.cfa-verdict-btn[data-v="ethical"].sel { border-color: var(--cfa-pass); background: var(--cfa-pass-soft); color: var(--cfa-pass); }
+.cfa-verdict-btn[data-v="unethical"].sel { border-color: var(--cfa-fail); background: var(--cfa-fail-soft); color: var(--cfa-fail); }
 
 /* committed multi-span chips + controls */
 .cfa-span-controls { display: flex; align-items: center; gap: 10px; margin: 4px 0 10px; flex-wrap: wrap; }
-.cfa-span-count { font-size: .85rem; color: #6a6a72; }
+.cfa-span-count { font-size: .85rem; color: var(--cfa-muted); }
 .nightMode .cfa-span-count { color: #a9a9b3; }
 #cfa-clear-spans {
   cursor: pointer; font-size: .82rem; font-weight: 600;
-  border: 1px solid #c7c7d1; background: #fff; color: inherit;
+  border: 1px solid var(--cfa-line); background: #fff; color: var(--cfa-ink);
   border-radius: 7px; padding: 5px 10px;
 }
 .nightMode #cfa-clear-spans { background: #2c2d34; border-color: #474853; }
-.cfa-tok.committed { background: #ffe08a; color: #3a2e00; }
+.cfa-tok.committed { background: var(--cfa-accent-soft); color: var(--cfa-accent); }
 .nightMode .cfa-tok.committed { background: #7a5f12; color: #fff4d6; }
 
 /* multi-span partial-credit grade tiers */
@@ -201,11 +227,11 @@
 /* F2: semantic AI-feedback block (desktop only; shown when the LLM graded) */
 .cfa-ai {
   margin-top: 14px; padding: 12px 14px;
-  border: 1px solid #cbdcff; border-radius: 10px;
-  background: #f2f7ff;
+  border: 1px solid #cfe0f0; border-radius: 10px;
+  background: var(--cfa-primary-soft);
 }
 .nightMode .cfa-ai { border-color: #34456b; background: #1b2333; }
 .cfa-ai-head { font-size: .95rem; margin-bottom: 6px; }
-.cfa-ai-badge { background: #3b6fe0; color: #fff; }
+.cfa-ai-badge { background: var(--cfa-primary); color: #fff; }
 .cfa-ai-explain { font-size: .92rem; line-height: 1.45; }
 .cfa-ai-spans { margin-top: 8px; }

@@ -23,6 +23,7 @@ from typing import TYPE_CHECKING
 
 from anki import cfa, cfa_deadline
 from anki.decks import DeckId
+from aqt import cfa_style
 from aqt.qt import (
     QAbstractItemView,
     QColor,
@@ -262,19 +263,12 @@ def _band_html(
     name: str, meaning: str, abstain: bool, reason: str, low, high, point
 ) -> str:
     """Render one honest score as a labelled RANGE (never a bare number)."""
-    if abstain:
-        return (
-            f"<p style='margin:4px 0'><b>{name}</b> "
-            f"<span style='color:#666'>— {meaning}</span><br>"
-            f"<span style='color:#b45309'><b>Not enough data</b></span> "
-            f"<span style='color:#666'>· {reason}</span></p>"
-        )
-    return (
-        f"<p style='margin:4px 0'><b>{name}</b> "
-        f"<span style='color:#666'>— {meaning}</span><br>"
-        f"<span style='font-size:15px'><b>{_pct(low)}–{_pct(high)}</b></span> "
-        f"<span style='color:#666'>(midpoint {_pct(point)})</span></p>"
+    value = (
+        cfa_style.value_abstain(reason)
+        if abstain
+        else cfa_style.value_range(_pct(low), _pct(high), _pct(point))
     )
+    return cfa_style.band(name=name, meaning=meaning, value_html=value, abstain=abstain)
 
 
 def _readiness_call_html(r) -> str:
@@ -283,31 +277,31 @@ def _readiness_call_html(r) -> str:
     Never abstains — with little data the band is just wide. The call is
     ``P(exam accuracy >= MPS)`` under the aggregate Bayesian posterior, and the
     standing "not validated" caveat is always shown."""
-    pass_call = r.call == "likely pass"
-    color = "#15803d" if pass_call else "#b91c1c"
-    bg = "#f0fdf4" if pass_call else "#fef2f2"
     recall = (
         ""
         if r.recall is None
         else (
-            f" · est. recall {_pct(r.recall)} <span style='color:#666'>"
-            f"(FSRS R, SM-2 fallback where needed)</span>"
+            f" · est. recall <b>{_pct(r.recall)}</b> "
+            f"<span style='color:{cfa_style.MUTED}'>(FSRS R, SM-2 fallback)</span>"
         )
     )
-    return (
-        f"<div style='border:1px solid {color};background:{bg};"
-        f"border-radius:8px;padding:10px 12px;margin:2px 0 10px 0'>"
-        f"<div style='font-size:20px;color:{color}'><b>{r.call}</b>, "
-        f"p={r.call_prob:.2f}</div>"
-        f"<div style='font-size:13px;margin-top:3px'>Estimated exam accuracy "
-        f"<b>{_pct(r.accuracy)}</b> "
-        f"<span style='color:#444'>(95% CI {_pct(r.ci_low)}–{_pct(r.ci_high)})</span>"
-        f" vs ~{_pct(r.mps)} MPS proxy{recall}</div>"
-        f"<div style='font-size:11px;color:#b45309;margin-top:4px'>"
-        f"Bayesian — band starts wide and narrows as reviews accrue "
+    lead = (
+        f"Estimated exam accuracy <b>{_pct(r.accuracy)}</b> "
+        f"<span style='color:{cfa_style.MUTED}'>(95% CI "
+        f"{_pct(r.ci_low)}–{_pct(r.ci_high)})</span> vs ~{_pct(r.mps)} "
+        f"MPS proxy{recall}"
+    )
+    note = (
+        f"Bayesian — the band starts wide and narrows as reviews accrue "
         f"({r.first_exposures} first-seen · {r.topics_covered}/{r.topics_total} "
-        f"topics studied). {r.label}.</div>"
-        f"</div>"
+        f"topics studied). {r.label}."
+    )
+    return cfa_style.hero(
+        call=r.call,
+        call_prob=r.call_prob,
+        passed=(r.call == "likely pass"),
+        lead_html=lead,
+        note_html=note,
     )
 
 
@@ -318,7 +312,10 @@ class ExamReadinessDialog(QDialog):
         assert col is not None
         self.setWindowTitle("CFA — Exam Readiness")
         self.resize(640, 560)
+        cfa_style.apply(self)
         layout = QVBoxLayout(self)
+        layout.setContentsMargins(20, 18, 20, 16)
+        layout.setSpacing(10)
 
         bayes = cfa.bayesian_readiness(col, deck_id=deck_id)
         score = cfa.memory_score(col, deck_id=deck_id)
@@ -329,8 +326,9 @@ class ExamReadinessDialog(QDialog):
         header = QLabel()
         header.setTextFormat(Qt.TextFormat.RichText)
         header.setText(
-            f"<h2>{deck_name}</h2>"
+            cfa_style.page_heading("Exam Readiness", deck_name)
             + _readiness_call_html(bayes)
+            + cfa_style.section("Honest scores")
             + _band_html(
                 "Memory",
                 "recall probability, exam-weighted across topics",
@@ -358,24 +356,36 @@ class ExamReadinessDialog(QDialog):
                 ready.range_high,
                 ready.point,
             )
-            + (
-                f"<p style='color:#666'>Coverage {_pct(score.coverage_pct)} "
+            + "<div style='margin-top:8px'>"
+            + cfa_style.caption(
+                f"Coverage {_pct(score.coverage_pct)} "
                 f"({score.topics_covered}/{score.topics_total} topics) · "
                 f"{score.graded_reviews} graded reviews · "
                 f"{perf.first_exposures} first-seen · "
-                f"as of {score.last_review_at or '—'}</p>"
+                f"as of {score.last_review_at or '—'}"
             )
+            + "</div>"
         )
         header.setWordWrap(True)
         layout.addWidget(header)
+
+        by_topic = QLabel()
+        by_topic.setTextFormat(Qt.TextFormat.RichText)
+        by_topic.setText(cfa_style.section("Per-topic recall"))
+        layout.addWidget(by_topic)
 
         table = QTableWidget(len(score.topics), 5, self)
         table.setHorizontalHeaderLabels(
             ["Topic", "Weight", "Reviewed", "Graded", "Recall R (range)"]
         )
         table.verticalHeader().setVisible(False)
+        table.setAlternatingRowColors(True)
+        table.setShowGrid(False)
         table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
-        table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
+        thead = table.horizontalHeader()
+        for col in range(1, 5):
+            thead.setSectionResizeMode(col, QHeaderView.ResizeMode.ResizeToContents)
+        thead.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
         for row, t in enumerate(sorted(score.topics, key=lambda x: -x.weight)):
             if t.avg_r is None:
                 r_text = "no data"
@@ -391,7 +401,7 @@ class ExamReadinessDialog(QDialog):
             for column, val in enumerate(values):
                 item = QTableWidgetItem(val)
                 if not t.covered and column == 4:
-                    item.setForeground(QColor("gray"))
+                    item.setForeground(QColor(cfa_style.FAINT))
                 table.setItem(row, column, item)
         layout.addWidget(table)
 
@@ -408,7 +418,9 @@ class ExamReadinessDialog(QDialog):
             "stats."
         )
         footer.setWordWrap(True)
-        footer.setStyleSheet("color:#666;font-size:11px")
+        footer.setStyleSheet(
+            f"color:{cfa_style.MUTED};font-size:{cfa_style.TOKENS['fs_meta']}px"
+        )
         layout.addWidget(footer)
 
 
@@ -425,11 +437,21 @@ class DeadlineDialog(QDialog):
         self.mw = mw
         self.setWindowTitle("CFA — Peak-on-Exam-Day (Deadline)")
         self.resize(560, 500)
+        cfa_style.apply(self)
         layout = QVBoxLayout(self)
+        layout.setContentsMargins(20, 18, 20, 16)
+        layout.setSpacing(10)
+
+        heading = QLabel()
+        heading.setTextFormat(Qt.TextFormat.RichText)
+        heading.setText(cfa_style.page_heading("Peak on exam day", "Deadline planner"))
+        layout.addWidget(heading)
 
         # --- Exam-date picker row ------------------------------------------
         picker = QHBoxLayout()
-        picker.addWidget(QLabel("Exam date:"))
+        date_lbl = QLabel("Exam date:")
+        date_lbl.setStyleSheet(f"color:{cfa_style.MUTED}")
+        picker.addWidget(date_lbl)
         self.date_edit = QDateEdit(self)
         self.date_edit.setCalendarPopup(True)
         self.date_edit.setDisplayFormat("yyyy-MM-dd")
@@ -451,10 +473,13 @@ class DeadlineDialog(QDialog):
             ["Card ID", "Predicted recall @ exam", "Capped interval (days)"]
         )
         self._table.verticalHeader().setVisible(False)
+        self._table.setAlternatingRowColors(True)
+        self._table.setShowGrid(False)
         self._table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
-        self._table.horizontalHeader().setSectionResizeMode(
-            1, QHeaderView.ResizeMode.Stretch
-        )
+        dthead = self._table.horizontalHeader()
+        dthead.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
+        dthead.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
+        dthead.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
         layout.addWidget(self._table)
 
         footer = QLabel(
@@ -462,7 +487,9 @@ class DeadlineDialog(QDialog):
             "exam date. Read-only — FSRS scheduling and undo stay valid. No AI."
         )
         footer.setWordWrap(True)
-        footer.setStyleSheet("color:#666;font-size:11px")
+        footer.setStyleSheet(
+            f"color:{cfa_style.MUTED};font-size:{cfa_style.TOKENS['fs_meta']}px"
+        )
         layout.addWidget(footer)
 
         self._reload()
@@ -497,19 +524,27 @@ class DeadlineDialog(QDialog):
         source = "Rust RPC" if result.used_rpc else "read-only fallback"
         if not len(result):
             self._header.setText(
-                "<h2>Peak-on-Exam-Day</h2>"
-                f"<p>Exam date: <b>{exam_date}</b></p>"
-                "<p style='color:#b45309'><b>No due cards to rank yet.</b></p>"
-                "<p style='color:#666'>Once this deck has scheduled reviews, "
-                "the weakest-on-the-day cards will appear here.</p>"
+                cfa_style.caption(f"Exam date: <b>{exam_date}</b>")
+                + cfa_style.notice("No due cards to rank yet.", tone="warn")
+                + "<div>"
+                + cfa_style.caption(
+                    "Once this deck has scheduled reviews, the "
+                    "weakest-on-the-day cards will appear here."
+                )
+                + "</div>"
             )
         else:
             self._header.setText(
-                "<h2>Peak-on-Exam-Day</h2>"
-                f"<p>Exam date: <b>{exam_date}</b> · "
-                f"{len(result)} cards ranked weakest-first ({source})</p>"
-                "<p style='color:#666'>Predicted FSRS recall AT the exam date; "
-                "each interval is capped so no review lands after the exam.</p>"
+                cfa_style.caption(
+                    f"Exam date: <b>{exam_date}</b> · "
+                    f"{len(result)} cards ranked weakest-first ({source})"
+                )
+                + "<div style='margin-top:2px'>"
+                + cfa_style.caption(
+                    "Predicted FSRS recall AT the exam date; each interval is "
+                    "capped so no review lands after the exam."
+                )
+                + "</div>"
             )
 
         self._table.setRowCount(len(result))
@@ -523,5 +558,5 @@ class DeadlineDialog(QDialog):
             for column, val in enumerate(values):
                 item = QTableWidgetItem(val)
                 if column == 1 and recall < 0.85:
-                    item.setForeground(QColor("#b45309"))
+                    item.setForeground(QColor(cfa_style.WARN))
                 self._table.setItem(row, column, item)

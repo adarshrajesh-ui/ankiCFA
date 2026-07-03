@@ -126,6 +126,11 @@ cfa-f4-test:
     PYTHONPATH="out/pylib:pylib" {{ py }} -m pytest pylib/tests/test_cfa_f4.py -q
     QT_QPA_PLATFORM=offscreen PYTHONPATH="out/pylib:pylib:qt:out/qt" {{ py }} -m pytest qt/tests/test_cfa_f4_dialog.py -q
 
+# Feature F5: shared CFA design system — tokens, QSS/HTML builders, card<->dialog palette parity, dialogs adopt the chrome
+cfa-f5-test:
+    {{ ninja }} pylib
+    QT_QPA_PLATFORM=offscreen PYTHONPATH="out/pylib:pylib:qt:out/qt" {{ py }} -m pytest qt/tests/test_cfa_f5_style.py -q
+
 # Feature 7: held-out eval harness — seeded, re-runnable, prints accuracy/AUC/ECE (stdlib only, no build)
 cfa-eval *args:
     {{ py }} cfa/eval/run_eval.py {{ args }}
