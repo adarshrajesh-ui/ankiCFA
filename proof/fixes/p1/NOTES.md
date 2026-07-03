@@ -143,6 +143,7 @@ Worse, opening the dialog with **no exam config crashed** with
 
 `memory_score`/`bayesian_readiness` derived `topic_prefixes = sorted(weights.keys()) if
 weights else _derive_topics(rows)`. The `_derive_topics(rows)` fallback:
+
 1. builds a **deck-scoped** list from whatever `los::` tags are in scope → variable totals,
    not the fixed syllabus; and
 2. unpacked **3** columns per row, but `bayesian_readiness`'s query selects **4**
