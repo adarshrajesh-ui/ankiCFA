@@ -394,6 +394,8 @@ all **23** pass (see `item6-after.txt`).
 - Branch: `fix/desktop-item6` (off `origin/main` @ `73bfea57b`), isolated worktree
   `ankicfa-wt-item6`.
 - Scope (edited): `qt/aqt/cfa_tab_fill.py`, `qt/tests/test_cfa_tab_fill.py`, `proof/fixes/p1/`.
-- Fix commit SHA: _(recorded after commit)_.
-- no-mistakes outcome: _(recorded after the axi gate run)_.
+- Fix commit SHA: `bf83e034b` (branch `fix/desktop-item6`; fix + tests + proof).
+- no-mistakes: driven via a push to the local `no-mistakes` git proxy (the daemon
+  creates the run from the `post-receive` `push_received` event) then `axi run --yes
+  --skip document`. Outcome: _(recorded after the axi gate run)_.
 - PR link / merge confirmation / `origin/main` SHA after merge: _(recorded after merge)_.
