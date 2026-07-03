@@ -2,8 +2,9 @@
 
 The CFA fork ships one calm, finance-education visual language — modelled on the
 _learning_ aesthetic of Mark Meldrum's lessons (restrained type scale, generous
-spacing, a quiet slate/navy palette, understated card + table chrome, **no**
-marketing chrome) — shared across every CFA surface so they read as one product.
+spacing, a structural navy palette with a warm orange accent, understated card +
+table chrome, **no** marketing chrome) — shared across every CFA surface so they
+read as one product.
 
 ## Single source of truth
 
@@ -47,6 +48,7 @@ triad is intentionally preserved.
 | `bg`                     | `#ffffff`             | page background (`--bb-content-background-color`)           |
 | `primary`                | `#122B46`             | structural navy — coincides with `ink` on the real site     |
 | `primary_soft`           | `#F3F6F8`             | soft navy/slate tint fill (selected, AI block)              |
+| `primary_hover`          | `#0E2238`             | navy button hover (derived — darker `primary`)              |
 | `pass` / `pass_soft`     | `#15803d` / `#f0fdf4` | "likely pass" (semantic triad — **kept**)                   |
 | `fail` / `fail_soft`     | `#b91c1c` / `#fef2f2` | "likely fail" (semantic triad — **kept**)                   |
 | `warn`                   | `#b45309`             | caution / caveats (semantic triad — **kept**)               |
