@@ -28,9 +28,9 @@ There is NO AI here — pure spaced-repetition statistics.
 from __future__ import annotations
 
 import time
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from datetime import date, datetime
-from typing import Optional, Union
+from typing import Any, Optional, Union
 
 import anki.collection
 from anki.decks import DeckId
@@ -55,6 +55,10 @@ class DeadlineRetention:
 
     def __len__(self) -> int:
         return len(self.card_ids)
+
+    def as_dict(self) -> dict[str, Any]:
+        """Faithful JSON-serialisable view of the parallel-array result."""
+        return asdict(self)
 
 
 def exam_timestamp(exam_date: ExamDate) -> int:
