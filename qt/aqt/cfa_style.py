@@ -24,33 +24,36 @@ from __future__ import annotations
 # Kept in sync with the ``:root`` block in the ethics card stylesheet.
 # ---------------------------------------------------------------------------
 TOKENS: dict[str, str] = {
-    # Neutrals (slate ramp) — text, borders, quiet surfaces.
-    "ink": "#1e293b",  # primary text (deep slate)
-    "muted": "#64748b",  # secondary text
-    "faint": "#94a3b8",  # captions / disabled
-    "line": "#e2e8f0",  # hairline borders
-    "surface": "#f8fafc",  # panels / table stripes
+    # Neutrals (navy-tinted ramp) — text, borders, quiet surfaces. Sourced from
+    # the real markmeldrum.com BuddyBoss brand (see cfa/ui/reference/BRAND.md).
+    "ink": "#122B46",  # primary text (brand navy — --bb-headings-color)
+    "muted": "#4D5C6D",  # secondary text (--bb-body-text-color)
+    "faint": "#939597",  # captions / disabled (--bb-alternate-text-color)
+    "line": "#E7E9EC",  # hairline borders (--bb-content-border-color)
+    "surface": "#F3F6F8",  # panels / table stripes (cool section band)
     "bg": "#ffffff",  # page background
-    # Brand — a calm finance navy, used for structure not decoration.
-    "primary": "#0f4c81",
-    "primary_soft": "#e8f0f8",
+    # Brand — the calm structural navy (coincides with ink on the real site).
+    "primary": "#122B46",
+    "primary_soft": "#F3F6F8",
     # Semantic — the pass / fail / caution triad.
     "pass": "#15803d",
     "pass_soft": "#f0fdf4",
     "fail": "#b91c1c",
     "fail_soft": "#fef2f2",
     "warn": "#b45309",
-    # Warm evidence-highlight accent (mirrors the card's span colour).
-    "accent": "#b45309",
-    "accent_soft": "#fef3c7",
+    # Warm CTA accent — the site's --bb-primary-color orange (soft = derived tint).
+    "accent": "#DA5C01",
+    "accent_soft": "#FCEBDA",
     # Type scale (px).
     "fs_title": "22",
-    "fs_hero": "26",
-    "fs_lead": "15",
-    "fs_body": "14",
+    "fs_hero": "28",
+    "fs_lead": "16",
+    "fs_body": "15",
     "fs_meta": "12",
     "fs_eyebrow": "11",
-    "font": '-apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+    "font": '"IBM Plex Sans", -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+    # Serif display face for headings — the calm MM "learning" feel.
+    "font_heading": '"Source Serif 4", Georgia, "Times New Roman", serif',
 }
 
 # Convenience aliases so callers read cleanly.
@@ -138,7 +141,8 @@ def apply(dialog) -> None:
 def eyebrow(text: str) -> str:
     """A small uppercase brand eyebrow label (the Meldrum 'lesson' cue)."""
     return (
-        f"<div style='font-size:{TOKENS['fs_eyebrow']}px;font-weight:700;"
+        f"<div style='font-family:{TOKENS['font']};"
+        f"font-size:{TOKENS['fs_eyebrow']}px;font-weight:700;"
         f"letter-spacing:.08em;text-transform:uppercase;color:{PRIMARY};"
         f"margin:0 0 2px'>{text}</div>"
     )
@@ -146,14 +150,23 @@ def eyebrow(text: str) -> str:
 
 def title(text: str) -> str:
     return (
-        f"<div style='font-size:{TOKENS['fs_title']}px;font-weight:700;"
+        f"<div style='font-family:{TOKENS['font_heading']};"
+        f"font-size:{TOKENS['fs_title']}px;font-weight:700;"
         f"color:{INK};margin:0 0 12px'>{text}</div>"
     )
 
 
 def page_heading(eyebrow_text: str, title_text: str) -> str:
-    """Eyebrow + title as a single heading block."""
-    return f"<div style='margin:0 0 12px'>{eyebrow(eyebrow_text)}{title(text=title_text)}</div>"
+    """Eyebrow + title as a single heading block.
+
+    The wrapper carries the serif heading face so the title reads as the calm
+    MM serif display; the eyebrow re-declares the sans body font so it stays a
+    quiet uppercase over-line.
+    """
+    return (
+        f"<div style='font-family:{TOKENS['font_heading']};margin:0 0 12px'>"
+        f"{eyebrow(eyebrow_text)}{title(text=title_text)}</div>"
+    )
 
 
 def hero(
@@ -173,7 +186,8 @@ def hero(
         f"<div style='background:{soft};border:1px solid {color};"
         f"border-left:4px solid {color};border-radius:10px;"
         f"padding:12px 16px;margin:0 0 14px'>"
-        f"<div style='font-size:{TOKENS['fs_hero']}px;font-weight:800;"
+        f"<div style='font-family:{TOKENS['font_heading']};"
+        f"font-size:{TOKENS['fs_hero']}px;font-weight:800;"
         f"color:{color};line-height:1.1'>{call} "
         f"<span style='font-size:{TOKENS['fs_lead']}px;font-weight:600'>"
         f"p={call_prob:.2f}</span></div>"

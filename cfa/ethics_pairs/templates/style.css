@@ -5,22 +5,23 @@
    F5 design system: the CFA fork shares ONE calm finance-education palette across
    the desktop dialogs (qt/aqt/cfa_style.py TOKENS) and this card. These :root
    tokens mirror that table so the card and the dialogs read as one product —
-   deep-slate ink, a calm navy brand accent, a warm gold evidence highlight, and
-   the pass / fail / caution triad. */
+   sourced from the real markmeldrum.com brand (cfa/ui/reference/BRAND.md): a
+   structural brand navy, a warm orange CTA accent, and the pass / fail / caution
+   triad. */
 :root {
-  --cfa-ink: #1e293b;
-  --cfa-muted: #64748b;
-  --cfa-faint: #94a3b8;
-  --cfa-line: #e2e8f0;
-  --cfa-surface: #f8fafc;
-  --cfa-primary: #0f4c81;
-  --cfa-primary-soft: #e8f0f8;
+  --cfa-ink: #122B46;          /* brand navy — --bb-headings-color */
+  --cfa-muted: #4D5C6D;        /* --bb-body-text-color */
+  --cfa-faint: #939597;        /* --bb-alternate-text-color */
+  --cfa-line: #E7E9EC;         /* --bb-content-border-color */
+  --cfa-surface: #F3F6F8;      /* cool section band */
+  --cfa-primary: #122B46;      /* structural navy (coincides with ink) */
+  --cfa-primary-soft: #F3F6F8;
   --cfa-pass: #15803d;
   --cfa-pass-soft: #f0fdf4;
   --cfa-fail: #b91c1c;
   --cfa-fail-soft: #fef2f2;
-  --cfa-accent: #b45309;       /* warm evidence-highlight ink */
-  --cfa-accent-soft: #fef3c7;  /* warm evidence-highlight fill */
+  --cfa-accent: #DA5C01;       /* warm CTA accent — --bb-primary-color */
+  --cfa-accent-soft: #FCEBDA;  /* soft orange tint (derived) */
 }
 
 .card { font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif; }
