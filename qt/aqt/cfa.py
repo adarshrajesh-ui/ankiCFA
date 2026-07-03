@@ -698,10 +698,23 @@ class DeadlineDialog(QDialog):
         self._reload()
 
     def _initial_date(self) -> QDate:
+        from datetime import date as _date
+
         cfg = cfa.get_exam_config(self.mw.col) or {}
+        raw = cfg.get("exam_date")
         # Self-heal an absurd/invalid persisted exam date (e.g. stale far-future
         # config) back to the canonical default instead of trusting it verbatim.
-        iso = _sanitized_exam_date(cfg.get("exam_date"))
+        iso = _sanitized_exam_date(raw)
+        # A *parseable* saved date that the heal overrode is a candidate for a
+        # deliberate far-future pick, not just missing/garbage config. Record it
+        # so the reload can tell the user rather than silently swapping it.
+        self._healed_from: str | None = None
+        if raw and iso != raw:
+            try:
+                _date.fromisoformat(raw)
+                self._healed_from = raw
+            except ValueError:
+                self._healed_from = None
         parsed = QDate.fromString(iso, "yyyy-MM-dd")
         return parsed if parsed.isValid() else QDate.currentDate().addDays(120)
 
@@ -714,6 +727,8 @@ class DeadlineDialog(QDialog):
         cfa.set_exam_config(
             col, exam_date=iso, topic_weights=cfg.get("topic_weights", {})
         )
+        # The user just made a deliberate choice; drop any stale heal notice.
+        self._healed_from = None
         tooltip(f"Exam date set to {iso}.", parent=self)
         self._reload()
 
@@ -728,10 +743,20 @@ class DeadlineDialog(QDialog):
             col, deck_id=deck_id, exam_date=exam_date, fetch_limit=50
         )
 
+        heal_notice = ""
+        if self._healed_from:
+            heal_notice = cfa_style.notice(
+                f"Your saved exam date ({self._healed_from}) is far in the "
+                f"future, so the planner is showing {exam_date} instead. Pick a "
+                "date and click “Set exam date” to change it.",
+                tone="warn",
+            )
+
         source = "Rust RPC" if result.used_rpc else "read-only fallback"
         if not len(result):
             self._header.setText(
-                cfa_style.caption(f"Exam date: <b>{exam_date}</b>")
+                heal_notice
+                + cfa_style.caption(f"Exam date: <b>{exam_date}</b>")
                 + cfa_style.notice("No cards to rank yet.", tone="warn")
                 + "<div>"
                 + cfa_style.caption(
@@ -742,7 +767,8 @@ class DeadlineDialog(QDialog):
             )
         else:
             self._header.setText(
-                cfa_style.caption(
+                heal_notice
+                + cfa_style.caption(
                     f"Exam date: <b>{exam_date}</b> · "
                     f"{len(result)} cards ranked weakest-first ({source})"
                 )

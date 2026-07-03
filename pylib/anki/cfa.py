@@ -266,9 +266,13 @@ def deadline_retention_with_new(
 
     New cards carry no schedule yet, so their deadline-capped next interval is 0.
     The merged rows are re-sorted by (predicted recall ascending, card id
-    ascending) — identical to the engine's own ordering — and ``fetch_limit`` is
-    applied to the combined set. ``used_rpc`` mirrors the underlying due-card
-    engine. Never mutates the collection, so FSRS scheduling and undo stay valid.
+    ascending) — identical to the engine's own ordering. When ``fetch_limit`` is
+    set, at least half of the slots are reserved for DUE cards so a large
+    new-card backlog cannot crowd the genuinely-weak scheduled cards out of the
+    capped view (new cards still fill every slot the due cards leave unused, so a
+    fresh all-new deck is unaffected). ``used_rpc`` mirrors the underlying
+    due-card engine. Never mutates the collection, so FSRS scheduling and undo
+    stay valid.
     """
     from anki import cfa_deadline
 
@@ -281,14 +285,14 @@ def deadline_retention_with_new(
     # anything already ranked as due so a card is never counted twice.
     ranked = set(due.card_ids)
     deck_name = col.decks.name(DeckId(int(deck_id)))
-    escaped = deck_name.replace("\\", "\\\\").replace('"', '\\"')
+    escaped = cfa_deadline._escape_deck_name(deck_name)
     new_cids = [
         int(cid)
         for cid in col.find_cards(f'deck:"{escaped}" is:new')
         if int(cid) not in ranked
     ]
 
-    merged: list[tuple[int, float, int]] = list(
+    due_rows: list[tuple[int, float, int]] = list(
         zip(
             (int(c) for c in due.card_ids),
             (float(r) for r in due.predicted_recall),
@@ -296,11 +300,20 @@ def deadline_retention_with_new(
         )
     )
     # New cards: recall 0.0 (weakest possible), no scheduled interval yet.
-    merged.extend((cid, 0.0, 0) for cid in new_cids)
+    new_rows: list[tuple[int, float, int]] = [(cid, 0.0, 0) for cid in new_cids]
+
+    if fetch_limit:
+        limit = int(fetch_limit)
+        # New cards all share recall 0.0, so a naive weakest-first cut would let
+        # a new-card backlog crowd genuinely-weak DUE cards out of the capped
+        # view. Reserve at least half the slots for due cards; new cards take
+        # every slot the due cards leave unused.
+        due_take = min(len(due_rows), max(limit // 2, limit - len(new_rows)))
+        merged = due_rows[:due_take] + new_rows[: limit - due_take]
+    else:
+        merged = due_rows + new_rows
     # Weakest predicted exam-day recall first; ties broken by ascending card id.
     merged.sort(key=lambda row: (row[1], row[0]))
-    if fetch_limit:
-        merged = merged[: int(fetch_limit)]
 
     return cfa_deadline.DeadlineRetention(
         card_ids=[c for c, _, _ in merged],

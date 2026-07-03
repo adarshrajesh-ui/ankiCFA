@@ -327,6 +327,37 @@ def test_wrapper_fetch_limit_applies_to_combined_set():
     col.close()
 
 
+def test_wrapper_reserves_slots_for_due_cards():
+    # A new-card backlog far larger than the fetch limit must NOT crowd the
+    # genuinely-weak DUE cards out of the capped view: at least half the slots
+    # are reserved for due cards so the feature keeps surfacing weak scheduled
+    # cards on a real study deck.
+    col = getEmptyCol()
+    now = int(time.time())
+    nt = col.models.by_name("Basic")
+    deck = col.decks.id("CFA")
+    due_ids = [
+        _add_review_card(col, deck, nt, f"due-{i}", stability=3.0, interval=20, now=now)
+        for i in range(4)
+    ]
+    for i in range(40):
+        _add_card(col, deck, nt, f"new-{i}")
+
+    res = cfa.deadline_retention_with_new(
+        col, deck_id=deck, exam_date=_seconds(now, 14), fetch_limit=10, now=now
+    )
+    assert len(res) == 10, "the capped view is full"
+    surfaced_due = [c for c in res.card_ids if c in set(due_ids)]
+    # With 4 due cards and a limit of 10 (>= 5 reserved for due), every due card
+    # survives the cut rather than being crowded out by the 40 new cards.
+    assert set(surfaced_due) == set(due_ids), "due cards are not crowded out"
+    # Every due card present ranks with a real (>0) predicted recall.
+    for c, r in zip(res.card_ids, res.predicted_recall):
+        if c in set(due_ids):
+            assert r > 0.0
+    col.close()
+
+
 def test_wrapper_only_ranks_requested_deck():
     # New cards in a sibling deck must not leak into another deck's ranking.
     col = getEmptyCol()
