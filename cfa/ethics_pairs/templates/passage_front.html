@@ -67,6 +67,10 @@
   if (!root || root.dataset.cfaInit) return;
   root.dataset.cfaInit = "1";
 
+  // A fresh front render is a new attempt: discard any grade a previous Check persisted but never
+  // Recorded, so only an in-session Check on THIS card can satisfy the back's completion gate.
+  try { localStorage.removeItem("cfaEthics:pending"); } catch (e) {}
+
   // === CFA-SPAN-SHARED-START ===
   // Mirrored byte-for-byte (ignoring indentation) in cfa/ethics_pairs/tests/js/passage_logic.js and
   // (in Python) in ethics_scoring.py. tests/test_passages.py enforces the copy match and the
@@ -189,7 +193,7 @@
     return el ? el.textContent.trim() : "";
   }
 
-  var itemId = root.dataset.itemid || "ITEM";
+  var itemId = (root.dataset.itemid || "").trim();
   var cluster = srcText("cluster");
   var answerVerdict = srcText("verdict").toLowerCase();
   var passage = srcText("passage");
