@@ -37,12 +37,47 @@ def _repo_root() -> str | None:
     return None
 
 
+def ensure_ethics_deck(col: object) -> int:
+    """Idempotently preload the ``CFA::Ethics Pairs`` deck from the shipped bank.
+
+    This is the fork's single most important preload: it guarantees the 30 CFA
+    ethics minimal-pairs are present before the learner opens the ethics study
+    flow. Returns the number of pairs imported — ``0`` when the deck already has
+    cards (idempotent no-op) or when the deck sources are unavailable in this
+    build. Never raises; a seeding hiccup must not break the study action.
+    """
+    repo = _repo_root()
+    if not repo:
+        return 0
+    ethics_dir = os.path.join(repo, "cfa", "ethics_pairs")
+    if ethics_dir not in sys.path:
+        sys.path.insert(0, ethics_dir)
+    try:
+        import import_pairs  # cfa/ethics_pairs
+
+        deck_name = import_pairs.nt.DECK_NAME
+        did = col.decks.id_for_name(deck_name)  # type: ignore[attr-defined]
+        if did is not None and col.decks.card_count(  # type: ignore[attr-defined]
+            did, include_subdecks=True
+        ):
+            return 0  # already preloaded — nothing to do
+        stats = import_pairs.import_pairs(col, import_pairs.load_pairs())
+        return int(stats.get("total", 0))
+    except Exception as exc:  # pragma: no cover - defensive; never break study
+        print(f"CFA ethics on-demand seeding skipped: {exc}", file=sys.stderr)
+        return 0
+
+
 def maybe_seed(mw: AnkiQt) -> None:
     """Seed the CFA decks on first load of a fresh collection.
 
     Safe and idempotent: a no-op once ``cfa_seeded`` is set, and even if forced
     the underlying seeder skips decks that already hold cards. Any failure is
     swallowed (logged) so a seeding hiccup never blocks opening the profile.
+
+    The ethics minimal-pairs deck is the priority preload, so if the full
+    seeder fails (e.g. a build whose main-deck sources are incomplete) we still
+    fall back to preloading the ethics deck on its own.
     """
     col = mw.col
     if not col:
@@ -60,14 +95,14 @@ def maybe_seed(mw: AnkiQt) -> None:
     if tools_cfa not in sys.path:
         sys.path.insert(0, tools_cfa)
 
+    from aqt.utils import tooltip
+
     try:
         import seed_collection
 
         summary = seed_collection.seed_collection(col, repo_root=repo)
         col.set_config(SEEDED_CONFIG_KEY, True)
         if summary.get("main_seeded") or summary.get("ethics_seeded"):
-            from aqt.utils import tooltip
-
             tooltip(
                 "CFA decks loaded: "
                 f"+{summary.get('notes_added', 0)} CFA Level II cards, "
@@ -75,4 +110,10 @@ def maybe_seed(mw: AnkiQt) -> None:
                 parent=mw,
             )
     except Exception as exc:  # pragma: no cover - defensive; never block launch
-        print(f"CFA first-launch seeding skipped: {exc}", file=sys.stderr)
+        # The full seeder failed — still guarantee the priority ethics preload.
+        print(f"CFA first-launch seeding degraded: {exc}", file=sys.stderr)
+        added = ensure_ethics_deck(col)
+        # Leave cfa_seeded unset so the main deck is retried on a later launch,
+        # but confirm the ethics preload that did succeed.
+        if added:
+            tooltip(f"CFA Ethics deck loaded: +{added} ethics pairs.", parent=mw)

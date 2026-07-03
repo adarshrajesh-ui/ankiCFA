@@ -96,6 +96,11 @@ cfa-menu-test:
     {{ ninja }} pylib
     QT_QPA_PLATFORM=offscreen PYTHONPATH="out/pylib:pylib:qt:out/qt" {{ py }} -m pytest qt/tests/test_cfa_menu.py -q
 
+# F0b: visible desktop fixes — on-demand ethics preload, no dead-ends, exam-date picker, new cards in the priority queue
+cfa-f0b-test:
+    {{ ninja }} pylib
+    QT_QPA_PLATFORM=offscreen PYTHONPATH="out/pylib:pylib:qt:out/qt:cfa/ethics_pairs" {{ py }} -m pytest qt/tests/test_cfa_f0b.py -q
+
 # Feature 5: a fresh collection seeded via the shared seeder gets both CFA decks + exam config (idempotent)
 cfa-seed-test:
     {{ ninja }} pylib
