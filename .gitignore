@@ -21,6 +21,8 @@ ts/.svelte-kit
 .claude/settings.local.json
 .claude/user.md
 .venv
+# CFA AI features load secrets (OPENAI_API_KEY) from a local .env; never commit it.
+.env
 docs/_build/
 docs/autoapi/
 .complexipy_cache

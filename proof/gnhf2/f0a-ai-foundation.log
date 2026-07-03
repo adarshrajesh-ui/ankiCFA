@@ -1,0 +1,32 @@
+# F0a AI Foundation — proof (generated 2026-07-03 07:13 UTC)
+
+## just cfa-ai-smoke (verbose)
+```
+============================= test session starts ==============================
+platform darwin -- Python 3.13.13, pytest-8.4.1, pluggy-1.6.0 -- /Users/adarshrajesh/AlphaWeek2/ankiCFA/out/pyenv/bin/python
+cachedir: .pytest_cache
+rootdir: /Users/adarshrajesh/AlphaWeek2/ankiCFA
+configfile: pyproject.toml
+plugins: mock-3.15.1, anyio-4.13.0
+collecting ... collected 9 items
+
+cfa/ai/tests/test_llm_client.py::test_no_key_returns_graceful_ok_false PASSED [ 11%]
+cfa/ai/tests/test_llm_client.py::test_result_shape_is_stable PASSED      [ 22%]
+cfa/ai/tests/test_llm_client.py::test_model_override PASSED              [ 33%]
+cfa/ai/tests/test_llm_client.py::test_cost_cap_blocks_before_calling PASSED [ 44%]
+cfa/ai/tests/test_llm_client.py::test_success_path_tracks_usage_and_strips_text PASSED [ 55%]
+cfa/ai/tests/test_llm_client.py::test_retries_transient_then_succeeds PASSED [ 66%]
+cfa/ai/tests/test_llm_client.py::test_non_retryable_error_classified PASSED [ 77%]
+cfa/ai/tests/test_llm_client.py::test_key_never_leaks_into_result PASSED [ 88%]
+cfa/ai/tests/test_llm_client.py::test_with_key_real_tiny_call SKIPPED    [100%]
+
+========================= 8 passed, 1 skipped in 0.17s =========================
+```
+
+## AI-off contract demo (no OPENAI_API_KEY present)
+```
+result : {'ok': False, 'text': '', 'model': 'gpt-4o-mini', 'usage': {'prompt_tokens': 0, 'completion_tokens': 0, 'total_tokens': 0}, 'error': 'no_api_key', 'purpose': 'grade_ethics'}
+ok     : False (caller uses deterministic fallback)
+error  : no_api_key
+usage  : {'tokens': 0, 'cost_usd': 0.0}
+```

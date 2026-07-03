@@ -1,0 +1,4 @@
+# Dependencies for the CFA exam-prep AI features (cfa/ai).
+# Install into the dev pyenv, e.g.:
+#   out/pyenv/bin/python -m pip install -r cfa/ai/requirements.txt
+openai>=1.40,<3

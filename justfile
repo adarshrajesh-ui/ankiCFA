@@ -134,6 +134,11 @@ cfa-sync:
     {{ ninja }} pylib
     {{ py }} tools/cfa/sync_roundtrip.py
 
+# F0a: AI foundation smoke test — covers no-key (graceful ok:False) and, when
+# OPENAI_API_KEY is configured, one tiny real call (ok:True); real call skipped otherwise.
+cfa-ai-smoke:
+    {{ py }} -m pytest cfa/ai/tests -q
+
 # Feature 5: boot straight into a freshly-seeded CFA collection (own profile base under /tmp)
 cfa *args:
     ANKI_BASE="${ANKI_BASE:-/tmp/gnhf-cfa-seed/ankibase}" {{ run_script }} {{ args }}
