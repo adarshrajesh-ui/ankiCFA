@@ -41,7 +41,8 @@ Type scale (px): title 22 · hero 26 · lead 15 · body 14 · meta 12 · eyebrow
 ## Surfaces restyled
 
 - **Exam Readiness dialog** — eyebrow + title heading, a coloured hero verdict
-  card (pass/fail palette), quiet `HONEST SCORES` / `PER-TOPIC RECALL` section
+  card (pass/fail palette, or the warn/accent palette when it abstains below the
+  give-up threshold), quiet `HONEST SCORES` / `PER-TOPIC RECALL` section
   labels, and a clean gridless striped table with a full-width topic column.
 - **Deadline planner dialog** — matching heading, a styled date picker + navy
   action button, and the same table chrome.

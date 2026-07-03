@@ -78,7 +78,7 @@ out/pyenv/bin/python tools/cfa/build_cfa_deck.py --path /path/to/cfa.anki2 \
     --apkg /path/to/CFA-Level-II.apkg
 ```
 
-Creates the "CFA Level II" deck with `los::<topic>::<reading>` tags across the ten
+Creates the "CFA Level II" deck with `los::<topic>::<reading>` tags across the eight
 topic areas and stores the exam date + per-topic weights in the collection config
 (which syncs natively). Import the `.apkg` into an existing collection via
 **File → Import**.
