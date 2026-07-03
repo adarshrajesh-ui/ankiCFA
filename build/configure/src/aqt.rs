@@ -368,6 +368,8 @@ fn check_python(build: &mut Build) -> Result<()> {
                 "$builddir/pylib",
                 "$builddir/qt",
                 "$builddir/qt/tools",
+                // repo root, so first-party `cfa.*` packages resolve under the gate
+                ".",
             ],
             deps: inputs![":pylib:anki", ":qt:aqt", glob!["qt/tests/**"]],
         },

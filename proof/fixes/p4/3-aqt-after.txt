@@ -1,0 +1,127 @@
+========================================================================
+P4 — Item 3: aqt TEST HARNESS WIRING — AFTER evidence
+========================================================================
+Branch:  p4/03-aqt
+Fix:     build/configure/src/aqt.rs — added "." (repo root) to the
+         check:pytest:aqt `python_path` array.
+
+Change (git diff):
+    @@ build/configure/src/aqt.rs (fn check_python, target check:pytest:aqt)
+                 "$builddir/pylib",
+                 "$builddir/qt",
+                 "$builddir/qt/tools",
+    +            // repo root, so first-party `cfa.*` packages resolve under the gate
+    +            ".",
+             ],
+
+========================================================================
+A) REGENERATION WAS AUTOMATIC — `just test-py` (== ninja check:pytest)
+   recompiled the configure binary and regenerated the ninja graph.
+========================================================================
+$ just test-py 2>&1 | tee /tmp/aqt-after.txt
+just _test-py
+./ninja check:pytest
+    Finished `release` profile [optimized] target(s) in 0.31s
+[1/2; 1 active; 1.004s] build:configure_bin
+   Compiling configure v0.0.0 (.../ankiCFA-p4/build/configure)   <-- picks up aqt.rs
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.95s
+[2/2; 1 active; 1.271s] build:configure                          <-- regenerates build.ninja
+...
+[4/5; 2 active; 4.270s] check:pytest:aqt
+  .../out/rust/release/runner run --stamp=... \
+    --env="PYTHONPATH=pylib:.../out/pylib:.../out/qt:.../out/qt/tools:." \   <-- NOTE trailing ':.'
+    --env="ANKI_TEST_MODE=1" \
+    .../out/pyenv/bin/pytest -p no:cacheprovider qt/tests
+
+  => The regenerated gate command now ends the PYTHONPATH with ':.' (repo
+     root). No manual `configure` step was needed — ninja rebuilt the
+     generator (build:configure_bin) and re-ran build:configure itself.
+
+========================================================================
+B) REGENERATION PERSISTED — the generated out/build.ninja rule for
+   check:pytest:aqt now carries the repo root (still the console script).
+========================================================================
+$ rg -n -B4 'pythonpath = pylib' out/build.ninja
+  666  description = check:pytest:aqt
+  667  folder = qt/tests
+  668  pytest = $builddir/pyenv/bin/pytest                                   <-- console script (as before)
+  669  pythonpath = pylib:$builddir/pylib:$builddir/qt:$builddir/qt/tools:.  <-- repo root now present
+
+========================================================================
+C) THE GLOBAL GATE RESULT (from the `just test-py` run above)
+   check:pytest:aqt runs pytest over qt/tests:
+========================================================================
+qt/tests/test_addons.py ...........                                      [  9%]
+qt/tests/test_cfa_ethics_ai.py .......                                   [ 14%]
+qt/tests/test_cfa_f0b.py .....                                           [ 18%]
+qt/tests/test_cfa_f4_dialog.py ...                                       [ 21%]
+qt/tests/test_cfa_f5_style.py .............                              [ 31%]
+qt/tests/test_cfa_menu.py ...                                            [ 34%]
+qt/tests/test_cfa_tab_fill.py ..................                         [ 49%]   <-- 18/18 PASS (was 1 failed)
+qt/tests/test_i18n.py ..                                                 [ 50%]
+qt/tests/test_installer.py .........F................F                   [ 72%]   <-- 2 pre-existing briefcase fails
+qt/tests/test_mediasrv.py .................................              [100%]
+======================== 2 failed, 120 passed in 3.66s =========================
+
+  => test_cfa_tab_fill.py (incl. test_fill_note_back_ai_off_leaves_note_untouched)
+     PASSES under the REAL regenerated global gate. The only 2 failures are the
+     pre-existing/environmental Briefcase installer tests (see section F).
+
+Sibling suites in the same `just test-py` run (unaffected by this change):
+  check:pytest:tools  -> 4 passed
+  check:pytest:pylib  -> 173 passed, 2 warnings in 26.86s
+
+========================================================================
+D) CRISP TARGETED CONFIRMATION — new gate PYTHONPATH (repo root present),
+   console-script pytest (mirror of the BEFORE(a) failing repro)
+========================================================================
+$ QT_QPA_PLATFORM=offscreen \
+  PYTHONPATH="pylib:out/pylib:out/qt:out/qt/tools:." ANKI_TEST_MODE=1 \
+  out/pyenv/bin/pytest -p no:cacheprovider qt/tests/test_cfa_tab_fill.py -q
+..................                                                       [100%]
+18 passed in 0.21s
+
+$ ... out/pyenv/bin/pytest -p no:cacheprovider \
+      qt/tests/test_cfa_tab_fill.py::test_fill_note_back_ai_off_leaves_note_untouched -q
+.                                                                        [100%]
+1 passed in 0.17s
+
+========================================================================
+E) NO NEW REGRESSIONS — full aqt suite (qt/tests) before vs after.
+   Same command, only the repo-root path entry differs.
+========================================================================
+BEFORE (OLD gate path, NO repo root):
+  PYTHONPATH="pylib:out/pylib:out/qt:out/qt/tools" ... pytest qt/tests -q
+  FAILED qt/tests/test_cfa_tab_fill.py::test_fill_note_back_ai_off_leaves_note_untouched
+  FAILED qt/tests/test_installer.py::test_compile_fails_loudly - subprocess.Cal...
+  FAILED qt/tests/test_installer.py::test_build_and_package - subprocess.Called...
+  3 failed, 119 passed in 2.03s
+
+AFTER (regenerated gate, repo root added):
+  2 failed, 120 passed in 3.66s
+
+  => DELTA = exactly +1 fixed (test_fill_note_back_ai_off_leaves_note_untouched).
+     No other test changed state. Zero regressions introduced.
+
+========================================================================
+F) THE 2 REMAINING FAILURES ARE PRE-EXISTING / ENVIRONMENTAL (NOT MINE)
+   test_installer.py::{test_compile_fails_loudly, test_build_and_package}
+   fail because Briefcase cannot clone the mac app template in this env:
+     "Unable to clone application template; is the template path
+      '.../qt/installer/mac-template' correct?"  (briefcase exit 200)
+   This is a git/briefcase template-clone issue, entirely unrelated to
+   Python module resolution / PYTHONPATH.
+========================================================================
+PROOF they are PYTHONPATH-INDEPENDENT — run under the OLD gate path
+(NO repo root); they still fail identically, so this fix neither causes
+nor affects them:
+$ PYTHONPATH="pylib:out/pylib:out/qt:out/qt/tools" ... pytest \
+    qt/tests/test_installer.py::test_compile_fails_loudly \
+    qt/tests/test_installer.py::test_build_and_package -q
+  Unable to clone application template; is the template path '.../qt/installer/mac-template' correct?
+  Unable to clone application template; is the template path '.../qt/installer/mac-template' correct?
+  2 failed in 1.30s
+
+  => Identical failure with or without the repo-root entry. Documented as
+     pre-existing/upstream and out of scope for this item (P4 owns only the
+     aqt test PYTHONPATH wiring in build/configure/src/aqt.rs).
