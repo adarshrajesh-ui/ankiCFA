@@ -80,6 +80,16 @@ def setup_menu(mw: AnkiQt) -> None:
     except Exception:
         pass
 
+    # F3: register the editor "AI Back" tab-to-fill button + shortcut. Safe to
+    # call unconditionally — with AI off the button renders disabled with a
+    # tooltip, and registration never raises.
+    try:
+        from aqt.cfa_tab_fill import register as _register_tab_fill
+
+        _register_tab_fill()
+    except Exception:
+        pass
+
 
 def show_exam_readiness(mw: AnkiQt) -> None:
     if not mw.col:

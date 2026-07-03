@@ -165,6 +165,12 @@ cfa-ai-grade-test:
 cfa-ethics-eval *args:
     {{ py }} cfa/ethics_pairs/eval_ai_grading.py {{ args }}
 
+# F3: AI "tab-to-fill" card backs — pure draft/fill logic with a mocked client,
+# provenance tagging, overwrite guard, and the AI-off (no-key) safe path. No network.
+cfa-tab-fill-test:
+    {{ ninja }} pylib
+    QT_QPA_PLATFORM=offscreen PYTHONPATH="out/pylib:pylib:qt:out/qt:." {{ py }} -m pytest qt/tests/test_cfa_tab_fill.py -q
+
 # Feature 5: boot straight into a freshly-seeded CFA collection (own profile base under /tmp)
 cfa *args:
     ANKI_BASE="${ANKI_BASE:-/tmp/gnhf-cfa-seed/ankibase}" {{ run_script }} {{ args }}

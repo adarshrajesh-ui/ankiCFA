@@ -136,6 +136,17 @@ def _model() -> str:
     return os.environ.get("CFA_LLM_MODEL", DEFAULT_MODEL)
 
 
+def ai_enabled() -> bool:
+    """Return True when an OpenAI key is available (AI ON), else False.
+
+    This lets a UI decide up front whether to offer an AI action or show a
+    disabled control, *without* making a network call. It reflects only key
+    presence — a live call may still fail (and fall back) for other reasons.
+    The key itself is never returned or logged.
+    """
+    return _get_api_key() is not None
+
+
 def _int_env(name: str, default: int) -> int:
     try:
         return int(os.environ[name])
@@ -289,6 +300,7 @@ def _classify_error(exc: Exception) -> str:
 
 __all__ = [
     "complete",
+    "ai_enabled",
     "usage_so_far",
     "reset_usage",
     "CompletionResult",
