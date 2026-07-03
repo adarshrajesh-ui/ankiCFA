@@ -30,9 +30,10 @@ from PyQt6.QtWidgets import QApplication, QWidget
 from anki import cfa as anki_cfa
 from anki.collection import Collection
 from aqt import cfa
-from aqt.cfa_seed import ensure_ethics_deck
+from aqt.cfa_seed import ensure_ethics_deck, ensure_ethics_passages_deck
 
 ETHICS_DECK = "CFA::Ethics Pairs"
+PASSAGES_DECK = "CFA::Ethics Passages"
 
 # Hold a module-level reference so the QApplication is not garbage-collected.
 _APP: QApplication | None = None
@@ -364,5 +365,96 @@ def test_study_by_exam_priority_non_default_empty_deck_does_not_hijack(
             f"expected deck-scoped modal, got: {tips}"
         )
         assert col.decks.id_for_name(cfa.EXAM_PRIORITY_DECK_NAME) is None
+    finally:
+        col.close()
+
+
+# ---------------------------------------------------------------------------
+# item4 (P1 fix): the F1 one-passage flagship "CFA::Ethics Passages" is
+# REACHABLE on desktop via a dedicated "Study Ethics (One-Passage)" action.
+#
+# Root cause: the passages deck is intentionally NOT part of the first-launch
+# seeder (it is a sibling of the minimal-pairs deck), and it had NO desktop
+# CFA-menu entry, so it was unreachable on desktop. The new action seeds it on
+# demand (idempotently) and enters review on it as a NORMAL (non-filtered) deck:
+# seed-if-missing -> select the deck -> move Anki into review. It is re-entrant
+# (a repeat invocation neither errors nor duplicates the deck/cards) and never
+# shows the false "not available in this build" modal when the deck exists.
+# These tests FAIL without the fix (ensure_ethics_passages_deck /
+# study_ethics_passages do not exist) and PASS with it.
+# ---------------------------------------------------------------------------
+
+
+def test_ensure_ethics_passages_deck_seeds_then_idempotent() -> None:
+    col = _empty_col()
+    try:
+        assert _card_count(col, PASSAGES_DECK) == 0
+
+        added = ensure_ethics_passages_deck(col)
+        assert added == 30, f"expected the 30 shipped passages, got {added}"
+        assert _card_count(col, PASSAGES_DECK) == 30
+
+        # Second call is a no-op — never re-imports or clobbers.
+        again = ensure_ethics_passages_deck(col)
+        assert again == 0
+        assert _card_count(col, PASSAGES_DECK) == 30
+    finally:
+        col.close()
+
+
+def test_study_ethics_passages_seeds_on_demand_and_enters_review(monkeypatch) -> None:
+    col = _empty_col()
+    mw = _StandInMW(col)
+    try:
+        info_calls: list[str] = []
+        warn_calls: list[str] = []
+        monkeypatch.setattr(cfa, "showInfo", lambda *a, **k: info_calls.append(a[0]))
+        monkeypatch.setattr(cfa, "showWarning", lambda *a, **k: warn_calls.append(a[0]))
+        monkeypatch.setattr(cfa, "tooltip", lambda *a, **k: None)
+
+        # The passages deck does not exist on a fresh profile (not seeded at
+        # first launch) — the exact precondition that made it unreachable.
+        assert _card_count(col, PASSAGES_DECK) == 0
+        cfa.study_ethics_passages(mw)  # type: ignore[arg-type]
+
+        # The 30 passages were preloaded on demand, the deck was selected, and
+        # we entered the reviewer — no dead-end, no false modal.
+        assert _card_count(col, PASSAGES_DECK) == 30
+        assert "review" in mw.states
+        assert col.decks.name(col.decks.get_current_id()) == PASSAGES_DECK
+        assert info_calls == [], f"unexpected dead-end dialog: {info_calls}"
+        assert warn_calls == [], f"unexpected warning: {warn_calls}"
+    finally:
+        col.close()
+
+
+def test_study_ethics_passages_is_reentrant_no_false_modal(monkeypatch) -> None:
+    col = _empty_col()
+    mw = _StandInMW(col)
+    try:
+        info_calls: list[str] = []
+        warn_calls: list[str] = []
+        monkeypatch.setattr(cfa, "showInfo", lambda *a, **k: info_calls.append(a[0]))
+        monkeypatch.setattr(cfa, "showWarning", lambda *a, **k: warn_calls.append(a[0]))
+        monkeypatch.setattr(cfa, "tooltip", lambda *a, **k: None)
+
+        # First invocation seeds the 30 passages and enters review.
+        cfa.study_ethics_passages(mw)  # type: ignore[arg-type]
+        assert mw.states.count("review") == 1
+        assert _card_count(col, PASSAGES_DECK) == 30
+
+        # Second invocation is the re-entrancy case: it must RE-ENTER review with
+        # the SAME 30 cards — no duplication, no error, and (critically) NO false
+        # "not available in this build" modal now that the deck demonstrably
+        # exists with cards.
+        cfa.study_ethics_passages(mw)  # type: ignore[arg-type]
+        assert mw.states.count("review") == 2, (
+            "repeat invocation must re-enter the reviewer"
+        )
+        assert _card_count(col, PASSAGES_DECK) == 30, (
+            "repeat invocation must not duplicate the deck or its cards"
+        )
+        assert info_calls == [], f"false dead-end modal fired: {info_calls}"
+        assert warn_calls == [], f"unexpected warning: {warn_calls}"
     finally:
         col.close()

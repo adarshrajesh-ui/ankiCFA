@@ -53,7 +53,7 @@ def ensure_ethics_deck(col: object) -> int:
     if ethics_dir not in sys.path:
         sys.path.insert(0, ethics_dir)
     try:
-        import import_pairs  # cfa/ethics_pairs
+        import import_pairs  # type: ignore[import-not-found]  # cfa/ethics_pairs
 
         deck_name = import_pairs.nt.DECK_NAME
         did = col.decks.id_for_name(deck_name)  # type: ignore[attr-defined]
@@ -65,6 +65,39 @@ def ensure_ethics_deck(col: object) -> int:
         return int(stats.get("total", 0))
     except Exception as exc:  # pragma: no cover - defensive; never break study
         print(f"CFA ethics on-demand seeding skipped: {exc}", file=sys.stderr)
+        return 0
+
+
+def ensure_ethics_passages_deck(col: object) -> int:
+    """Idempotently preload the ``CFA::Ethics Passages`` one-passage deck.
+
+    Sibling of :func:`ensure_ethics_deck` for the F1 one-passage flagship: it
+    guarantees the shipped ethics passages are present before the learner opens
+    the one-passage study flow, so that deck is reachable on demand from the
+    desktop CFA menu (it is intentionally NOT part of the first-launch seeder).
+    Returns the number of passages imported — ``0`` when the deck already has
+    cards (idempotent no-op) or when the deck sources are unavailable in this
+    build. Never raises; a seeding hiccup must not break the study action.
+    """
+    repo = _repo_root()
+    if not repo:
+        return 0
+    ethics_dir = os.path.join(repo, "cfa", "ethics_pairs")
+    if ethics_dir not in sys.path:
+        sys.path.insert(0, ethics_dir)
+    try:
+        import passages  # type: ignore[import-not-found]  # cfa/ethics_pairs
+
+        deck_name = passages.DECK_NAME
+        did = col.decks.id_for_name(deck_name)  # type: ignore[attr-defined]
+        if did is not None and col.decks.card_count(  # type: ignore[attr-defined]
+            did, include_subdecks=True
+        ):
+            return 0  # already preloaded — nothing to do
+        stats = passages.import_passages(col, passages.load_passages())
+        return int(stats.get("total", 0))
+    except Exception as exc:  # pragma: no cover - defensive; never break study
+        print(f"CFA ethics passages on-demand seeding skipped: {exc}", file=sys.stderr)
         return 0
 
 
@@ -98,7 +131,7 @@ def maybe_seed(mw: AnkiQt) -> None:
     from aqt.utils import tooltip
 
     try:
-        import seed_collection
+        import seed_collection  # type: ignore[import-not-found]
 
         summary = seed_collection.seed_collection(col, repo_root=repo)
         col.set_config(SEEDED_CONFIG_KEY, True)

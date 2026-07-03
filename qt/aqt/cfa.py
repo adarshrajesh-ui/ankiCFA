@@ -9,6 +9,9 @@ Adds a "CFA" menu with:
   (never a bare number) and enforces the give-up rule ("not enough data").
 * "Study Ethics Minimal-Pairs" — filters to the ``CFA::Ethics Pairs`` deck and
   opens the reviewer.
+* "Study Ethics (One-Passage)" — seeds the ``CFA::Ethics Passages`` F1
+  one-passage flagship deck on demand and enters review on it (a normal,
+  non-filtered deck), so the flagship is reachable on desktop.
 * "Study by Exam Priority" — builds the read-only exam-priority queue
   (``build_exam_queue``) and opens a filtered deck ordered by that priority.
 * "Peak-on-Exam-Day (Deadline)…" — ranks the current deck's due cards by
@@ -48,6 +51,7 @@ if TYPE_CHECKING:
 
 # Deck names used by the CFA fork.
 ETHICS_DECK_NAME = "CFA::Ethics Pairs"
+ETHICS_PASSAGES_DECK_NAME = "CFA::Ethics Passages"
 EXAM_PRIORITY_DECK_NAME = "CFA::Exam Priority"
 
 
@@ -60,6 +64,9 @@ def setup_menu(mw: AnkiQt) -> None:
 
     ethics = menu.addAction("Study Ethics Minimal-Pairs")
     qconnect(ethics.triggered, lambda: study_ethics_pairs(mw))
+
+    passages = menu.addAction("Study Ethics (One-Passage)")
+    qconnect(passages.triggered, lambda: study_ethics_passages(mw))
 
     priority = menu.addAction("Study by Exam Priority")
     qconnect(priority.triggered, lambda: study_by_exam_priority(mw))
@@ -209,6 +216,64 @@ def study_ethics_pairs(mw: AnkiQt) -> None:
             )
     except Exception as exc:  # pragma: no cover - surfaced to the user, no crash
         showWarning(f"Could not start ethics study: {exc}", parent=mw)
+
+
+def study_ethics_passages(mw: AnkiQt) -> None:
+    """Seed the ``CFA::Ethics Passages`` one-passage deck on demand and study it.
+
+    This makes the F1 one-passage flagship reachable on desktop. Unlike the
+    minimal-pairs sibling (which studies via a *filtered* deck), the passages
+    deck is a NORMAL deck, so entering review is Anki's own study path: ensure
+    the deck exists (seed if missing) → select it → move into the reviewer.
+
+    Re-entrant by construction:
+
+    * ``ensure_ethics_passages_deck`` is idempotent (a no-op once the passages
+      are present), so a repeat invocation never duplicates the deck or cards.
+    * Re-selecting an already-selected deck and re-entering review is harmless.
+
+    The "not available in this build" modal is only shown when the passages
+    genuinely cannot be seeded (deck sources absent in this build) — never when
+    the deck already exists with cards, so there is no false dead-end.
+    """
+    col = mw.col
+    if not col:
+        return
+    try:
+        # Seed on demand if the deck is missing/empty. Idempotent: once the
+        # passages are present this returns 0 and changes nothing, so calling
+        # the action twice never duplicates the deck or its cards.
+        from aqt.cfa_seed import ensure_ethics_passages_deck
+
+        added = ensure_ethics_passages_deck(col)
+        if added:
+            tooltip(f"Loaded {added} CFA Ethics passages — starting review.", parent=mw)
+            mw.reset()
+
+        did = col.decks.id_for_name(ETHICS_PASSAGES_DECK_NAME)
+        have_cards = did is not None and bool(
+            col.decks.card_count(did, include_subdecks=True)
+        )
+        if did is None or not have_cards:
+            # Only claim "not available in this build" when the passages truly
+            # cannot be seeded (sources missing) — never when the deck exists
+            # with cards. This keeps the message honest and rules out the false
+            # dead-end modal the sibling action was recently fixed to avoid.
+            showInfo(
+                "The CFA::Ethics Passages deck is not available in this build, so "
+                "there is nothing to study yet.",
+                parent=mw,
+            )
+            return
+
+        # Normal (non-filtered) deck: select it and move Anki into the reviewer,
+        # the same entry point as the overview "Study" button. reset() refreshes
+        # the scheduler queues so freshly-seeded NEW cards are picked up.
+        col.decks.select(did)
+        mw.reset()
+        mw.moveToState("review")
+    except Exception as exc:  # pragma: no cover - surfaced to the user, no crash
+        showWarning(f"Could not start ethics passages study: {exc}", parent=mw)
 
 
 def study_by_exam_priority(mw: AnkiQt) -> None:

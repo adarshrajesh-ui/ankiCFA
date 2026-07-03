@@ -1,0 +1,99 @@
+############################################################
+# item4 BEFORE - F1 one-passage flagship unreachable on desktop
+# (source fix stashed; running against origin/main @ dd09fb41c)
+############################################################
+
+===== PROBE: proof/fixes/p1/item4_repro.py =====
+CFA menu actions: ['Exam Readiness…', 'Study Ethics Minimal-Pairs', 'Study by Exam Priority', 'Peak-on-Exam-Day (Deadline)…']
+  VERDICT: BUG — 'Study Ethics (One-Passage)' MISSING (passages deck unreachable on desktop)
+cfa_seed.ensure_ethics_passages_deck: MISSING
+  VERDICT: BUG — no on-demand seeder for the passages deck
+cfa.study_ethics_passages: MISSING
+  VERDICT: BUG — no handler to enter review on the passages deck
+fresh profile: 'CFA::Ethics Passages' cards = 0
+  VERDICT: BUG — no desktop entry point can reach the passages deck
+
+ITEM4 REPRO: 4 BUG(S) REPRODUCED
+
+===== PYTEST: qt/tests/test_cfa_menu.py (new one-passage assertions FAIL) =====
+FFFF                                                                     [100%]
+=================================== FAILURES ===================================
+________________________ test_cfa_menu_has_five_actions ________________________
+
+    def test_cfa_menu_has_five_actions() -> None:
+        _mw, menu = _make_menu()
+        actions = menu.actions()
+>       assert len(actions) == 5
+E       assert 4 == 5
+E        +  where 4 = len([<PyQt6.QtGui.QAction object at 0x11b66fcf0>, <PyQt6.QtGui.QAction object at 0x11b66fe30>, <PyQt6.QtGui.QAction object at 0x11b66ff70>, <PyQt6.QtGui.QAction object at 0x11b6880f0>])
+
+qt/tests/test_cfa_menu.py:43: AssertionError
+_________________________ test_cfa_menu_action_labels __________________________
+
+    def test_cfa_menu_action_labels() -> None:
+        _mw, menu = _make_menu()
+        labels = [a.text() for a in menu.actions()]
+>       assert labels == [
+            "Exam Readiness…",
+            "Study Ethics Minimal-Pairs",
+            "Study Ethics (One-Passage)",
+            "Study by Exam Priority",
+            "Peak-on-Exam-Day (Deadline)…",
+        ]
+E       AssertionError: assert ['Exam Readin... (Deadline)…'] == ['Exam Readin... (Deadline)…']
+E         
+E         At index 2 diff: 'Study by Exam Priority' != 'Study Ethics (One-Passage)'
+E         Right contains one more item: 'Peak-on-Exam-Day (Deadline)…'
+E         Use -v to get more diff
+
+qt/tests/test_cfa_menu.py:49: AssertionError
+_____________________ test_cfa_menu_has_one_passage_action _____________________
+
+    def test_cfa_menu_has_one_passage_action() -> None:
+        # The F1 one-passage flagship must have a dedicated, reachable menu entry.
+        _mw, menu = _make_menu()
+        labels = [a.text() for a in menu.actions()]
+>       assert "Study Ethics (One-Passage)" in labels
+E       AssertionError: assert 'Study Ethics (One-Passage)' in ['Exam Readiness…', 'Study Ethics Minimal-Pairs', 'Study by Exam Priority', 'Peak-on-Exam-Day (Deadline)…']
+
+qt/tests/test_cfa_menu.py:62: AssertionError
+_________________________ test_cfa_menu_handlers_exist _________________________
+
+    def test_cfa_menu_handlers_exist() -> None:
+        # Every advertised action maps to a real, callable handler.
+        for name in (
+            "show_exam_readiness",
+            "study_ethics_pairs",
+            "study_ethics_passages",
+            "study_by_exam_priority",
+            "show_deadline",
+        ):
+>           assert callable(getattr(cfa, name))
+                            ^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'aqt.cfa' has no attribute 'study_ethics_passages'. Did you mean: 'study_ethics_pairs'?
+
+qt/tests/test_cfa_menu.py:74: AttributeError
+=========================== short test summary info ============================
+FAILED qt/tests/test_cfa_menu.py::test_cfa_menu_has_five_actions - assert 4 == 5
+FAILED qt/tests/test_cfa_menu.py::test_cfa_menu_action_labels - AssertionErro...
+FAILED qt/tests/test_cfa_menu.py::test_cfa_menu_has_one_passage_action - Asse...
+FAILED qt/tests/test_cfa_menu.py::test_cfa_menu_handlers_exist - AttributeErr...
+4 failed in 0.21s
+
+===== PYTEST: qt/tests/test_cfa_f0b.py (new item4 tests error: symbol missing) =====
+
+==================================== ERRORS ====================================
+____________________ ERROR collecting tests/test_cfa_f0b.py ____________________
+ImportError while importing test module '/Users/adarshrajesh/AlphaWeek2/ankicfa-wt-item4/qt/tests/test_cfa_f0b.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+../../.local/share/uv/python/cpython-3.13.13-macos-aarch64-none/lib/python3.13/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+qt/tests/test_cfa_f0b.py:33: in <module>
+    from aqt.cfa_seed import ensure_ethics_deck, ensure_ethics_passages_deck
+E   ImportError: cannot import name 'ensure_ethics_passages_deck' from 'aqt.cfa_seed' (/Users/adarshrajesh/AlphaWeek2/ankicfa-wt-item4/qt/aqt/cfa_seed.py)
+=========================== short test summary info ============================
+ERROR qt/tests/test_cfa_f0b.py
+!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+1 error in 0.23s

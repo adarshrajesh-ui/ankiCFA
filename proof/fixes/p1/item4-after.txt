@@ -1,0 +1,76 @@
+############################################################
+# item4 AFTER - Study Ethics (One-Passage) reachable on desktop
+# (fix applied on branch fix/desktop-item4, base dd09fb41c)
+# tests run raw against a single `just build` (no ninja prefix)
+############################################################
+
+===== PROBE: proof/fixes/p1/item4_repro.py (all checks OK) =====
+CFA menu actions: ['Exam Readiness…', 'Study Ethics Minimal-Pairs', 'Study Ethics (One-Passage)', 'Study by Exam Priority', 'Peak-on-Exam-Day (Deadline)…']
+  VERDICT: OK — 'Study Ethics (One-Passage)' present
+cfa_seed.ensure_ethics_passages_deck: present
+  VERDICT: OK
+cfa.study_ethics_passages: present
+  VERDICT: OK
+fresh profile: 'CFA::Ethics Passages' cards = 0
+after study action: cards = 30, states = ['review']
+  VERDICT: OK — seeded on demand + entered review, no false modal
+
+ITEM4 REPRO: ALL OK (fixed)
+repro_rc=0
+
+===== NEW/UPDATED TESTS: test_cfa_menu.py + test_cfa_f0b.py =====
+...............                                                          [100%]
+15 passed in 1.26s
+pytest_rc=0
+
+===== REGRESSION: pylib/tests/test_cfa_f4.py =====
+...................                                                      [100%]
+19 passed in 0.32s
+===== REGRESSION: qt/tests/test_cfa_f4_dialog.py =====
+.......                                                                  [100%]
+7 passed in 0.51s
+===== REGRESSION: qt/tests/test_cfa_f5_style.py =====
+.............                                                            [100%]
+13 passed in 0.35s
+===== REGRESSION: pylib/tests/test_cfa_scores.py =====
+..........                                                               [100%]
+10 passed in 0.24s
+
+===== F9 REACHABILITY (AI-OFF; OPENAI_API_KEY neutralized, never printed) =====
+F0b seed          : {'main_deck': 'CFA Level II', 'ethics_deck': 'CFA::Ethics Pairs', 'main_seeded': True, 'ethics_seeded': True, 'notes_added': 630, 'ethics_added': 30, 'config_set': True}
+                    CFA Level II cards=630 ethics cards=30
+F0b exam config   : {'exam_date': '2026-08-25'}
+F0a llm_client    : ai_enabled=False ok=False error=no_api_key
+F1 grader         : passages=30 spans=73 perfect_attempt_correct=True
+F2 semantic grade : source=fallback correct=True
+F3 tab-fill AIoff : ok=False (AI off -> no draft, back untouched)
+F4 readiness      : call=likely fail p_pass=0.07 acc=0.50 CI=[0.30,0.70]
+F5 design tokens  : primary=#0f4c81 keys=22
+F6/F7/F8 engine   : build_exam_queue -> 5 cards (shared Rust engine, on-device via fork librsdroid.so)
+
+F9 REACHABILITY: PASS
+f9_rc=0
+
+===== MYPY: touched source files (file-level) =====
+Success: no issues found in 2 source files
+file_rc=0
+
+===== MYPY: official folder-level (16 remaining = pre-existing baseline, NONE in owned files) =====
+tools/cfa/render_f2_ai_grade.py:38: error: Cannot find implementation or library stub for module named "ai_grading"  [import-not-found]
+tools/cfa/render_f2_ai_grade.py:39: error: Cannot find implementation or library stub for module named "ethics_scoring"  [import-not-found]
+tools/cfa/render_f1_passage.py:28: error: Cannot find implementation or library stub for module named "ethics_scoring"  [import-not-found]
+cfa/ai/llm_client.py:229: error: Cannot find implementation or library stub for module named "openai"  [import-not-found]
+tools/cfa/sync_roundtrip.py:53: error: Argument 1 to "get_card" of "Collection" has incompatible type "int"; expected "CardId | None"  [arg-type]
+tools/cfa/sync_roundtrip.py:55: error: Argument 2 to "answerCard" of "Scheduler" has incompatible type "int"; expected "Literal[1, 2, 3, 4]"  [arg-type]
+tools/cfa/seed_collection.py:56: error: Cannot find implementation or library stub for module named "build_cfa_deck"  [import-not-found]
+tools/cfa/seed_collection.py:57: error: Cannot find implementation or library stub for module named "import_pairs"  [import-not-found]
+tools/cfa/f8_persistence_proof.py:30: error: Cannot find implementation or library stub for module named "passages"  [import-not-found]
+tools/cfa/build_mobile_package.py:54: error: Cannot find implementation or library stub for module named "build_cfa_deck"  [import-not-found]
+tools/cfa/build_mobile_package.py:55: error: Cannot find implementation or library stub for module named "passages"  [import-not-found]
+pylib/tests/test_cfa_seed.py:27: error: Cannot find implementation or library stub for module named "seed_collection"  [import-not-found]
+pylib/tests/test_cfa_f8_persistence.py:51: error: Cannot find implementation or library stub for module named "passages"  [import-not-found]
+pylib/tests/test_cfa_f8_persistence.py:51: note: See https://mypy.readthedocs.io/en/stable/running_mypy.html#missing-imports
+qt/aqt/cfa_ethics_ai.py:58: error: Cannot find implementation or library stub for module named "ai_grading"  [import-not-found]
+tools/cfa/f9_reachability.py:76: error: Cannot find implementation or library stub for module named "ethics_scoring"  [import-not-found]
+tools/cfa/f9_reachability.py:99: error: Cannot find implementation or library stub for module named "ai_grading"  [import-not-found]
+Found 16 errors in 11 files (checked 325 source files)

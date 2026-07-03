@@ -222,3 +222,96 @@ and keep asserting the pylib fn still returns a call.
 - Committed as a single commit on `fix/desktop-item3b`. Deliberately **not** pushed, **not**
   run through no-mistakes, and **not** merged — this attempt is one half of a best-of-N pair
   left for finalization.
+
+## item4 — the F1 one-passage flagship "CFA::Ethics Passages" is unreachable on desktop
+
+### Symptom
+
+The F1 one-passage flagship deck **`CFA::Ethics Passages`** (30 multi-span ethics items,
+note type `CFA Ethics One-Passage`) has **no** desktop CFA-menu entry, and it is
+intentionally **not** part of the first-launch seeder (only `CFA Level II` and
+`CFA::Ethics Pairs` are seeded). On desktop there is therefore **no way to reach it** — a
+fresh profile has 0 passage cards and the CFA menu offers no action to seed or study them.
+
+### Root cause
+
+`aqt.cfa.setup_menu` wired four actions (Exam Readiness, Study Ethics Minimal-Pairs, Study
+by Exam Priority, Peak-on-Exam-Day) and none targeted the passages deck. `aqt.cfa_seed`
+had an on-demand seeder for the minimal-pairs deck (`ensure_ethics_deck`) but **no**
+equivalent for the passages deck, so nothing could preload it either.
+
+### Fix (additive, backward-compatible; scope: `qt/aqt/cfa_seed.py` + `qt/aqt/cfa.py`)
+
+1. **Seeder** — new `ensure_ethics_passages_deck(col)` in `qt/aqt/cfa_seed.py`, a direct
+   sibling of `ensure_ethics_deck`: it imports the shipped `cfa/ethics_pairs/passages.py`
+   bank (`load_passages` + `import_passages`, idempotent by ItemId) and preloads the 30
+   passages, returning the number imported (**0** when the deck already has cards or the
+   sources are unavailable). Never raises.
+2. **Menu action + handler** — new `"Study Ethics (One-Passage)"` action in `setup_menu`
+   (placed right after "Study Ethics Minimal-Pairs" to group the two ethics actions), wired
+   to a new `study_ethics_passages(mw)` handler.
+3. **Entering review the *normal-deck* way.** `CFA::Ethics Passages` is a NORMAL
+   (non-filtered) deck, so — unlike the minimal-pairs sibling which uses `_study_filtered_deck`
+   — the handler follows Anki's own overview "Study" path: seed-if-missing → `decks.select(did)`
+   → `mw.reset()` → `mw.moveToState("review")`.
+4. **Re-entrant, no false modal.** `ensure_ethics_passages_deck` is idempotent (a repeat
+   call returns 0 and duplicates nothing), and re-selecting the already-selected deck +
+   re-entering review is harmless — so calling the action twice never errors or duplicates
+   the deck/cards. The `"…not available in this build…"` modal fires **only** when the deck
+   genuinely cannot be seeded (`did is None or not have_cards`), never when it exists with
+   cards — matching the item1 fix that removed the sibling action's false dead-end.
+5. **Type-clean.** Made `qt/aqt/cfa_seed.py` fully mypy-clean by adding
+   `# type: ignore[import-not-found]` to the three dynamic (sys.path-inserted) CFA imports
+   (`import_pairs`, the new `passages`, `seed_collection`) — mypy cannot resolve those
+   runtime-only imports. Net effect: my change adds **zero** new mypy errors and removes the
+   two pre-existing `cfa_seed.py` ones.
+
+### Regression tests (fail without the fix, pass with it)
+
+- `qt/tests/test_cfa_menu.py` — count is now **5** (`test_cfa_menu_has_five_actions`), the
+  label list includes `"Study Ethics (One-Passage)"` at index 2, a dedicated
+  `test_cfa_menu_has_one_passage_action`, and `study_ethics_passages` is asserted callable.
+- `qt/tests/test_cfa_f0b.py` — three new behavioral tests:
+  - `test_ensure_ethics_passages_deck_seeds_then_idempotent` — seeds 30, second call is a 0
+    no-op (no re-import/clobber).
+  - `test_study_ethics_passages_seeds_on_demand_and_enters_review` — fresh profile (0 cards)
+    → action seeds 30, selects the deck, enters review, **no** dead-end dialog/warning.
+  - `test_study_ethics_passages_is_reentrant_no_false_modal` — two invocations both re-enter
+    review with the same 30 cards, no duplication, and the false modal never fires.
+
+Before the fix these ERROR (import of `ensure_ethics_passages_deck` fails) / FAIL (menu has
+4 not 5, no one-passage label/handler); after, all pass.
+
+### Before / after proof
+
+- `proof/fixes/p1/item4_repro.py` — offscreen-Qt + real-Collection probe (per-check
+  `VERDICT: OK/BUG`).
+- `proof/fixes/p1/item4-before.txt` — fix stashed: probe reports **4 BUG(S) REPRODUCED**
+  (menu action missing, seeder missing, handler missing, deck unreachable) + the new menu
+  tests FAIL and the new f0b tests ERROR on the missing symbol.
+- `proof/fixes/p1/item4-after.txt` — fix applied: probe **ALL OK (fixed)**, new tests
+  **15 passed**, full regression battery + F9 + mypy (below).
+
+### Tests run (raw pytest against the single `just build`; no ninja prefix)
+
+- `qt/tests/test_cfa_menu.py` — **4 passed** (was 3; renamed + 1 new).
+- `qt/tests/test_cfa_f0b.py` — **11 passed** (was 8; +3 new).
+- `pylib/tests/test_cfa_f4.py` — **19 passed**; `qt/tests/test_cfa_f4_dialog.py` — **7 passed**.
+- `qt/tests/test_cfa_f5_style.py` — **13 passed**; `pylib/tests/test_cfa_scores.py` — **10 passed**.
+- `python tools/cfa/f9_reachability.py` (AI-OFF, `OPENAI_API_KEY` neutralized, never printed) —
+  **F9 REACHABILITY: PASS**.
+- mypy on touched source (`qt/aqt/cfa.py`, `qt/aqt/cfa_seed.py`) — **Success: no issues found
+  in 2 source files**. Official folder-level mypy: 16 remaining errors, all pre-existing
+  baseline in files I do not own (tools/cfa/*, cfa/ai/*, pylib/tests/*, qt/aqt/cfa_ethics_ai.py);
+  **none** in my touched files.
+- ruff check + ruff format --check on touched files — **clean**.
+
+### Branch / commit / no-mistakes / merge
+
+- Branch: `fix/desktop-item4` (off `origin/main` @ `dd09fb41c`), isolated worktree
+  `ankicfa-wt-item4`.
+- Scope (edited): `qt/aqt/cfa.py`, `qt/aqt/cfa_seed.py`, `qt/tests/test_cfa_menu.py`,
+  `qt/tests/test_cfa_f0b.py`, `proof/fixes/p1/`.
+- Fix commit SHA: _(recorded below after commit)_.
+- no-mistakes outcome: _(recorded below after the axi gate run)_.
+- PR link / merge confirmation / `origin/main` SHA after merge: _(recorded below after merge)_.
