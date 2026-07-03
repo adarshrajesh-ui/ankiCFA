@@ -103,7 +103,9 @@ def test_custom_cap_overrides_default():
 
 def test_span_tier_full_near_none():
     assert span_tier({1, 2, 3}, [1, 2, 3]) == "full"
-    assert span_tier({1, 2, 3, 4}, [1, 2, 3]) == "full"  # a superset still counts as full
+    assert (
+        span_tier({1, 2, 3, 4}, [1, 2, 3]) == "full"
+    )  # a superset still counts as full
     assert span_tier({1, 2}, [1, 2, 3]) == "near"  # 2 of 3 (>= half)
     assert span_tier({1, 2}, [1, 2, 3, 4]) == "near"  # 2 of 4 (exactly half)
     assert span_tier({1}, [1, 2]) == "near"  # 1 of 2 (exactly half)

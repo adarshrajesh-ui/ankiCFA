@@ -136,7 +136,7 @@ pipeline above is untouched). Instead of two vignettes, the learner reads **one 
   so pressing Anki's built-in **Show Answer** on the back reveals the same governing Standard +
   rationale (and per-span breakdown, including `near` matches) as the front reveal — never the
   "Attempt not completed" dead-end. The back still carries **no** answer-key text in its markup, so a
-  reflexive Show Answer *before* completing an attempt still cannot leak the answer.
+  reflexive Show Answer _before_ completing an attempt still cannot leak the answer.
 - **Validation + import:** [`passages.py`](passages.py) validates the bank (verbatim,
   token-locatable, non-overlapping spans; the union of spans must itself grade `correct`) and imports
   it into a sibling deck **`CFA::Ethics Passages`** with note type **`CFA Ethics One-Passage`**.
