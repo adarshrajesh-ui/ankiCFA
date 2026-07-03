@@ -13,7 +13,7 @@ no OpenAI key is committed, printed, or required to run the suite.
 ```bash
 # AI foundation + visible desktop fixes
 just cfa-ai-smoke                                   # F0a (8 pass, 1 skip = with-key)
-just cfa-f0b-test                                   # F0b (5 pass)
+just cfa-f0b-test                                   # F0b (6 pass)
 # Ethics one-passage multi-span + semantic grading
 just cfa-passages-test  cfa-passages-validate       # F1 (29 pass · 30 passages/73 spans)
 just cfa-ai-grade-test  cfa-ethics-eval             # F2 (20 pass · eval agreement 0.733 AI-off)
@@ -49,7 +49,7 @@ QT_QPA_PLATFORM=offscreen PYTHONPATH="out/pylib:pylib:qt:out/qt:cfa/ethics_pairs
 | #   | Feature                                                                                                 | Gate recipe(s)                                | Result                        | Proof                                                                             | Branch SHA       |
 | --- | ------------------------------------------------------------------------------------------------------- | --------------------------------------------- | ----------------------------- | --------------------------------------------------------------------------------- | ---------------- |
 | F0a | AI foundation — reusable AI-off-safe OpenAI client                                                      | `cfa-ai-smoke`                                | 8 pass · 1 skip (with-key)    | `proof/gnhf2/f0a-ai-foundation.log`                                               | `326b2229b`      |
-| F0b | Visible desktop fixes — on-demand ethics preload, no dead-ends, exam-date picker, honest new-card queue | `cfa-f0b-test`                                | 5 pass                        | `f0b-deadline-{default,picked}.png`                                               | `9049d92a3`      |
+| F0b | Visible desktop fixes — on-demand ethics preload, no dead-ends, exam-date picker, honest new-card queue | `cfa-f0b-test`                                | 6 pass                        | `f0b-deadline-{default,picked}.png`                                               | `9049d92a3`      |
 | F1  | Ethics one-passage multi-span redesign (30 passages, 73 spans) + deterministic grader Py↔JS             | `cfa-passages-test` / `cfa-passages-validate` | 29 pass · bank valid          | `f1-psg17-fullycorrect.png`, `f1-psg04-partial.png`                               | `0b8ef5d37`      |
 | F2  | Semantic AI grading of ethics highlights + AI-off fallback + 30-item eval                               | `cfa-ai-grade-test` / `cfa-ethics-eval`       | 20 pass · agreement 0.733     | `f2-psg01-ai.png`, `f2-psg01-aioff.png`, `f2-eval-report.txt`                     | `03177a29c`      |
 | F3  | AI tab-to-fill card backs (provenance tag, overwrite guard, AI-off disabled)                            | `cfa-tab-fill-test`                           | 18 pass                       | `f3-tab-fill.png`                                                                 | `683d63314`      |
