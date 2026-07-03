@@ -35,6 +35,13 @@ is built from a separate **AnkiDroid** fork and shares the same Rust engine — 
 
 ## What this fork adds
 
+Every feature below is **additive** and maps to one of the three theses in
+[Brainlift.md](./Brainlift.md): teach ethics as recall through **near-miss
+pairs**, schedule for **peak recall on the exam date** rather than indefinite
+retention, and **weight cards by topic yield**. The optional AI layer is **OFF by
+default** and every AI path has a deterministic fallback, so the app runs fully
+without an API key.
+
 - **Exam queue (Rust engine).** A **read-only** backend RPC,
   `SchedulerService.BuildExamQueue`, reorders a deck's due cards by
   `topic_weight × (1 − retrievability) × deadline_urgency`, using FSRS
@@ -50,6 +57,26 @@ is built from a separate **AnkiDroid** fork and shares the same Rust engine — 
   enough data"), and it **abstains outright if a high-weight topic has been
   skipped**. Implemented in [`pylib/anki/cfa.py`](./pylib/anki/cfa.py) with the UI
   in [`qt/aqt/cfa.py`](./qt/aqt/cfa.py).
+- **Ethics minimal-pairs & one-passage cards.** Hand-authored ethics items that
+  force the learner to pick a verdict, **highlight the governing evidence**, and
+  name the controlling CFA Standard — teaching the *boundary* between confusable
+  Standards, not just the label. Highlights are scored by a deterministic
+  span-matching grader with tolerant partial-credit tiers, and the Python and JS
+  graders are kept in parity so desktop and mobile grade identically.
+- **Optional AI layer (OFF by default).** With an `OPENAI_API_KEY` present, ethics
+  highlights can be graded semantically and card backs drafted from the front in
+  the editor ("AI Back"). With **no key**, semantic grading falls back to the
+  deterministic grader and the AI editor button renders **disabled with a
+  tooltip** — no network calls, identical study experience.
+- **CFA study menu & Peak-on-Exam-Day planner.** The desktop **CFA** menu wires the
+  flagship flows end-to-end with no dead-ends — *Study Ethics Minimal-Pairs*,
+  *Study Ethics (One-Passage)*, *Study by Exam Priority*, *Exam Readiness…*, and a
+  **Peak-on-Exam-Day** deadline view that ranks which cards to prioritize
+  (including new cards) so recall peaks on your configured exam date. Each action
+  seeds its deck on demand and enters review.
+- **UI overhaul.** A shared CFA design system (calm, finance-desk aesthetic
+  inspired by markmeldrum.com) restyles the ethics card and the
+  readiness/deadline surfaces through SvelteKit web views.
 - **CFA Level II deck.** Hand-authored content spanning the ten topic areas, tagged
   `los::<topic>::<reading>`. Build it with
   [`tools/cfa/build_cfa_deck.py`](./tools/cfa/build_cfa_deck.py).
