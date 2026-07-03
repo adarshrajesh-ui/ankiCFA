@@ -89,3 +89,105 @@ neutralized (`OPENAI_API_KEY=""`, never printed); it then prints `F9 REACHABILIT
 
 _(This NOTES finalization was landed via a follow-up gate run from an isolated worktree
 so the concurrent agents' live working tree was never disturbed.)_
+
+## item2 — "Study by Exam Priority" dead-ends on a fresh profile with NEW cards
+
+### Symptom
+
+CFA menu → **Study by Exam Priority** dead-ended with a "no studyable cards" modal on a
+fresh profile, even though the collection has 20+20 NEW (never-studied) CFA cards. It
+should enter the read-only Rust exam-priority queue (`BuildExamQueue`) ordered
+weakest-first INCLUDING new cards (treated as maximally weak, R=0), so a fresh profile is
+never a dead-end.
+
+### Root cause (confirmed by reproduction, not assumed)
+
+`study_by_exam_priority` (qt/aqt/cfa.py) scoped `build_exam_queue` to the **current** deck
+via `col.decks.get_current_id()`. On a fresh profile the first-launch seeder
+(`aqt.cfa_seed` → `tools/cfa/seed_collection`) creates the CFA decks but never **selects**
+one, so the current deck stays the empty built-in **"Default"** deck. The deck-scoped RPC
+therefore returns 0 `card_ids` and the empty-guard shows the modal — even though hundreds
+of NEW CFA cards sit in `CFA Level II` / `CFA::Ethics Pairs`.
+
+Item 1's hypothesis ("new cards excluded by the RPC and/or the filtered deck") was **ruled
+out empirically**: with a CFA deck selected, the RPC returns the new cards (R=0) and the
+filtered deck gathers them, entering review normally. The bug was the deck **scope**, not
+new-card exclusion. (See `item2-before.txt` for the mechanism probe.)
+
+### Fix (additive, backward-compatible; pylib/anki/cfa.py + qt/aqt/cfa.py; NO rslib changes)
+
+1. `pylib/anki/cfa.py`: add `ExamQueue` (a small result type) and
+   `build_exam_queue_all_decks`, which calls the existing read-only `build_exam_queue` once
+   per **top-level** deck (each with its subdecks, so every studyable card is scored exactly
+   once) and merges the per-deck results into one weakest-first ordering (score desc, ties by
+   ascending card id — matching the RPC), including NEW cards.
+2. `qt/aqt/cfa.py` `study_by_exam_priority`: when the current-deck queue is empty, fall back
+   to `build_exam_queue_all_decks` so the collection's NEW cards are reached and review is
+   entered; the honest count (including new) is still reported.
+3. Gate refinement (no-mistakes review step, commit `2954d71b`): the collection-wide fallback
+   is **gated to the built-in "Default" deck** (`deck_id == DEFAULT_DECK_ID`) so it only
+   bootstraps a fresh profile and never silently hijacks a user who deliberately selected and
+   then finished a specific non-Default deck; that case now shows a deck-scoped "switch decks"
+   modal. A matching regression test was added by the gate.
+
+### Regression tests (fail without the fix, pass with it)
+
+- `qt/tests/test_cfa_f0b.py::test_study_by_exam_priority_from_empty_default_deck_no_dead_end`
+  — a freshly seeded all-NEW profile whose current deck is the empty Default deck now enters
+  a non-empty weakest-first exam-priority review and populates the filtered study deck (30
+  cards), with no dead-end modal.
+- `qt/tests/test_cfa_f0b.py::test_study_by_exam_priority_non_default_empty_deck_does_not_hijack`
+  (added by the gate) — a deliberately-selected empty non-Default deck is NOT hijacked into the
+  collection-wide queue; it surfaces a deck-scoped modal instead.
+- `pylib/tests/test_cfa.py::test_build_exam_queue_all_decks_merges_new_cards_across_decks`
+  — `build_exam_queue_all_decks` merges NEW cards across two sibling top-level decks
+  weakest-first (higher-weight topic first) and honors `fetch_limit`, while a deck-scoped
+  queue on the empty Default deck is empty.
+
+### Before / after proof
+
+- `proof/fixes/p1/item2-before.txt` — faithful `study_by_exam_priority` reproduction
+  (scenario A: current deck = Default → DEAD-END) + the mechanism probe (RPC + filtered
+  gather DO include new cards when a CFA deck is selected) + both new regression tests
+  FAILING against origin/main source.
+- `proof/fixes/p1/item2-after.txt` — the same reproduction now ENTERS REVIEW (200 cards,
+  200 new) + both regression tests PASSING.
+- `proof/fixes/p1/item2-verify.txt` — the full regression battery (below).
+
+### Tests run (raw pytest against the single `just build`; results)
+
+- `qt/tests/test_cfa_f0b.py` — **8 passed** (incl. 2 new regression tests)
+- `qt/tests/test_cfa_menu.py` — **3 passed**
+- `pylib/tests/test_cfa.py` — **10 passed** (incl. new merge test)
+- `pylib/tests/test_cfa_scores.py` — **10 passed**
+- `pylib/tests/test_cfa_f4.py` — **14 passed**
+- `qt/tests/test_cfa_f4_dialog.py` — **3 passed**
+- `qt/tests/test_cfa_f5_style.py` — **13 passed**
+- F9 reachability (AI-OFF, key neutralized via `env -u OPENAI_API_KEY`) — **F9 REACHABILITY: PASS**
+- mypy on `pylib/anki/cfa.py qt/aqt/cfa.py` (`.mypy.ini`) — **Success: no issues found in 2 source files**
+- ruff check + ruff format --check on touched files — **clean**
+
+### Branch / commit / no-mistakes / merge
+
+- Worktree: `/Users/adarshrajesh/AlphaWeek2/ankicfa-wt-item2` (branch `fix/desktop-item2` off
+  `origin/main` @ `efb9fabd2`), to avoid disturbing the concurrent agents' live main tree.
+- Fix commit SHA: `d3cdf787e` (scoped: `pylib/anki/cfa.py`, `qt/aqt/cfa.py`,
+  `pylib/tests/test_cfa.py`, `qt/tests/test_cfa_f0b.py`, `proof/fixes/p1/`).
+- no-mistakes outcome: **checks-passed** (CI green), run id `01KWMNJQXK4C5PB53H8THCX637`
+  (intent skipped · rebase · review · test · document · lint · push · pr · ci green).
+- Gate-produced fixes (all reviewed, in-scope, honest):
+  - review `2954d71b` — gate the fallback to the Default deck + expand a docstring (see above),
+    with an added regression test.
+  - document `94c17a3f` — trivial doc syncs: `SUBMISSION-CHECKLIST.md` F0b 6 → 8,
+    `docs/cfa/UPSTREAM_FILES.md` test count 7 → 10, and a `study_by_exam_priority` docstring
+    note. (No substantive README/Brainlift edits.)
+  - document `5c0b4b81` — regenerated the `item2-*.txt` proof battery for the 8-test F0b count
+    (independently re-verified: F0b 8, test_cfa 10, F9 PASS, mypy clean).
+- PR: https://github.com/adarshrajesh-ui/ankiCFA/pull/4 (**MERGED**, squash).
+- Merge confirmation: `origin/main` advanced `efb9fabd2` → **`442d69c25`**
+  ("fix(cfa): fall back to collection-wide exam-priority queue on empty Default deck (#4)");
+  `origin/main:pylib/anki/cfa.py` has `build_exam_queue_all_decks` and
+  `origin/main:qt/aqt/cfa.py` has the `on_default_deck` fallback.
+
+_(This item2 NOTES entry was landed via a follow-up gate run from the isolated worktree so
+the concurrent agents' live working tree was never disturbed.)_
