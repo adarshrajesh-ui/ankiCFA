@@ -277,15 +277,50 @@ def _band_html(
     )
 
 
+def _readiness_call_html(r) -> str:
+    """F4 hero block: the exam-accuracy 95% credible band + the pass/fail call.
+
+    Never abstains — with little data the band is just wide. The call is
+    ``P(exam accuracy >= MPS)`` under the aggregate Bayesian posterior, and the
+    standing "not validated" caveat is always shown."""
+    pass_call = r.call == "likely pass"
+    color = "#15803d" if pass_call else "#b91c1c"
+    bg = "#f0fdf4" if pass_call else "#fef2f2"
+    recall = (
+        ""
+        if r.recall is None
+        else (
+            f" · est. recall {_pct(r.recall)} <span style='color:#666'>"
+            f"(FSRS R, SM-2 fallback where needed)</span>"
+        )
+    )
+    return (
+        f"<div style='border:1px solid {color};background:{bg};"
+        f"border-radius:8px;padding:10px 12px;margin:2px 0 10px 0'>"
+        f"<div style='font-size:20px;color:{color}'><b>{r.call}</b>, "
+        f"p={r.call_prob:.2f}</div>"
+        f"<div style='font-size:13px;margin-top:3px'>Estimated exam accuracy "
+        f"<b>{_pct(r.accuracy)}</b> "
+        f"<span style='color:#444'>(95% CI {_pct(r.ci_low)}–{_pct(r.ci_high)})</span>"
+        f" vs ~{_pct(r.mps)} MPS proxy{recall}</div>"
+        f"<div style='font-size:11px;color:#b45309;margin-top:4px'>"
+        f"Bayesian — band starts wide and narrows as reviews accrue "
+        f"({r.first_exposures} first-seen · {r.topics_covered}/{r.topics_total} "
+        f"topics studied). {r.label}.</div>"
+        f"</div>"
+    )
+
+
 class ExamReadinessDialog(QDialog):
     def __init__(self, mw: AnkiQt, deck_id: DeckId) -> None:
         super().__init__(mw)
         col = mw.col
         assert col is not None
         self.setWindowTitle("CFA — Exam Readiness")
-        self.resize(640, 520)
+        self.resize(640, 560)
         layout = QVBoxLayout(self)
 
+        bayes = cfa.bayesian_readiness(col, deck_id=deck_id)
         score = cfa.memory_score(col, deck_id=deck_id)
         perf = cfa.performance_score(col, deck_id=deck_id)
         ready = cfa.readiness_score(col, deck_id=deck_id)
@@ -295,6 +330,7 @@ class ExamReadinessDialog(QDialog):
         header.setTextFormat(Qt.TextFormat.RichText)
         header.setText(
             f"<h2>{deck_name}</h2>"
+            + _readiness_call_html(bayes)
             + _band_html(
                 "Memory",
                 "recall probability, exam-weighted across topics",
@@ -360,13 +396,16 @@ class ExamReadinessDialog(QDialog):
         layout.addWidget(table)
 
         footer = QLabel(
-            "Three honest scores, each a RANGE with a give-up rule — never a bare "
-            "number. Memory = exam-weighted mean ± spread of per-topic FSRS "
-            "retrievability (needs ≥200 graded reviews, ≥50% coverage, no skipped "
-            "high-weight topic). Performance = Wilson interval on first-exposure "
-            "accuracy (needs ≥30 first-seen questions). Readiness = P(pass) fused "
-            "from both, deliberately wide and NOT validated against real exam "
-            "data. No AI — pure spaced-repetition stats."
+            "The headline is a Bayesian call: exam-weighted accuracy as a 95% "
+            "credible band (per-topic Beta posterior on first-exposure "
+            "correctness) that starts wide and narrows as reviews accrue — no "
+            "give-up wall. Recall uses FSRS R, falling back to an SM-2 forgetting "
+            "curve so a number appears from the first review. Below it, the three "
+            "give-up-gated scores: Memory (exam-weighted per-topic FSRS "
+            "retrievability), Performance (Wilson interval on first-exposure "
+            "accuracy) and Readiness (fused P(pass)). The pass/fail call is NOT "
+            "validated against real exam data. No AI — pure spaced-repetition "
+            "stats."
         )
         footer.setWordWrap(True)
         footer.setStyleSheet("color:#666;font-size:11px")

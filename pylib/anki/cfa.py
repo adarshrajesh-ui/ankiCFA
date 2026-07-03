@@ -618,3 +618,287 @@ def readiness_score(
         coverage_pct=cov,
         computed_at=computed_at,
     )
+
+
+# =============================================================================
+# F4 — Bayesian readiness: a number from the first review, no give-up wall
+# =============================================================================
+#
+# The Feature-6 scores above abstain ("not enough data") until a hard evidence
+# threshold is met. F4 replaces that wall with an *honest uncertainty band*:
+#
+#   1. SM-2 fallback — when FSRS retrievability R is NULL (SM-2-scheduled cards,
+#      or FSRS not yet run), estimate per-card recall from the card's own review
+#      history via a forgetting curve, so a recall number appears from the very
+#      first review instead of "no data".
+#
+#   2. Bayesian CI — model each topic's correctness as a Beta-Bernoulli. With no
+#      reviews the posterior is the uniform prior Beta(1,1) (mean 0.5, maximal
+#      variance), so the exam-weighted accuracy band spans almost the whole exam.
+#      As reviews accrue the posterior concentrates and the 95% band NARROWS.
+#      Uncovered topics keep their wide prior, so the band stays honest about
+#      syllabus you have not touched — no abstention, just wide uncertainty.
+#
+#   3. Explicit call — a pass/fail verdict with a probability computed against
+#      the ~65% MPS proxy: P(exam accuracy >= MPS) under the aggregate posterior.
+#      The standing "not validated against real exam data" caveat still applies.
+
+# Beta prior for a topic with no evidence: uniform over [0, 1].
+_PRIOR_A = 1.0
+_PRIOR_B = 1.0
+# Two-sided z for the 95% credible band.
+_BAND_Z = 1.959963984540054
+
+
+def estimate_recall(
+    r: Optional[float],
+    ivl_days: Optional[float],
+    elapsed_days: Optional[float],
+    successes: int,
+    total: int,
+) -> Optional[float]:
+    """Per-card recall probability, with an SM-2 fallback when FSRS R is NULL.
+
+    When ``r`` (FSRS retrievability) is available it is authoritative and used
+    verbatim. When it is NULL — the SM-2 "no data" bug — we estimate recall from
+    the card's own review history: an SM-2-style forgetting curve
+    ``0.9 ** (elapsed / interval)`` (SM-2 targets ~90% retention at the scheduled
+    interval) blended equally with the card's empirical success rate, so a
+    chronically-lapsing card is not credited full recall. Returns None only when
+    there is genuinely no history (never reviewed and no FSRS state)."""
+    if r is not None:
+        return max(0.0, min(1.0, float(r)))
+    if total <= 0:
+        return None
+    ivl = max(1.0, float(ivl_days or 1))
+    elapsed = max(0.0, float(elapsed_days or 0.0))
+    curve = 0.9 ** (elapsed / ivl)
+    empirical = successes / total
+    return max(0.0, min(1.0, 0.5 * curve + 0.5 * empirical))
+
+
+def _beta_posterior(successes: int, failures: int) -> tuple[float, float]:
+    """Beta posterior (a, b) from a uniform prior updated with observed data."""
+    return _PRIOR_A + successes, _PRIOR_B + failures
+
+
+def _beta_mean_var(a: float, b: float) -> tuple[float, float]:
+    """Mean and variance of Beta(a, b)."""
+    n = a + b
+    mean = a / n
+    var = (a * b) / (n * n * (n + 1.0))
+    return mean, var
+
+
+def _norm_cdf(x: float) -> float:
+    """Standard-normal CDF (via erf), used for the pass/fail probability."""
+    return 0.5 * (1.0 + math.erf(x / math.sqrt(2.0)))
+
+
+@dataclass
+class TopicPosterior:
+    topic: str
+    weight: float
+    successes: int
+    failures: int
+    # Beta posterior mean correctness and its 95% credible interval.
+    mean: float
+    ci_low: float
+    ci_high: float
+    # Recall (FSRS R, or SM-2 fallback); None only with no history at all.
+    recall: Optional[float]
+    covered: bool
+
+
+@dataclass
+class BayesianReadiness:
+    # Estimated exam accuracy (exam-weighted) as a point + 95% credible band.
+    accuracy: float
+    ci_low: float
+    ci_high: float
+    # Explicit pass/fail call against the MPS proxy.
+    call: str  # "likely pass" | "likely fail"
+    call_prob: float  # probability supporting the call (>= 0.5)
+    p_pass: float  # P(exam accuracy >= MPS) under the aggregate posterior
+    mps: float
+    # Exam-weighted recall (incl. SM-2 fallback); None only with zero history.
+    recall: Optional[float]
+    # Standing honesty caveat, always present.
+    label: str
+    # Evidence: first-exposure trials feeding the posterior (band width shrinks
+    # as these grow — never abstains).
+    first_exposures: int
+    topics_total: int
+    topics_covered: int
+    computed_at: str
+    topics: list[TopicPosterior] = field(default_factory=list)
+
+    def as_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+def bayesian_readiness(
+    col: anki.collection.Collection,
+    *,
+    deck_id: Optional[DeckId | int] = None,
+    now_ts: Optional[int] = None,
+) -> BayesianReadiness:
+    """Exam readiness as a Bayesian band + an explicit pass/fail call.
+
+    Unlike :func:`readiness_score`, this NEVER abstains: with little evidence the
+    95% credible band on estimated exam accuracy is very wide (the topics sit at
+    their uniform priors), and it narrows honestly as graded reviews accrue. Per
+    card, recall uses FSRS R when present and an SM-2 fallback otherwise so a
+    number appears from the first review."""
+    now_ts = now_ts if now_ts is not None else int(time.time())
+    computed_at = datetime.fromtimestamp(now_ts).isoformat(timespec="seconds")
+
+    if deck_id is not None:
+        did_list = col.decks.deck_and_child_ids(DeckId(int(deck_id)))
+        deck_filter = "c.did in (%s)" % ",".join(str(int(d)) for d in did_list)
+    else:
+        deck_filter = "1"
+
+    today = col.sched.today
+    next_day_at = col.sched.day_cutoff
+
+    # Per card: retrievability (NULL when no FSRS state), interval, tags.
+    rows: list[Any] = col.db.all(
+        f"""
+        select c.id, n.tags,
+          extract_fsrs_retrievability(
+            c.data,
+            case when c.odue != 0 then c.odue else c.due end,
+            c.ivl, ?, ?, ?),
+          c.ivl
+        from cards c join notes n on c.nid = n.id
+        where {deck_filter}
+        """,
+        today,
+        next_day_at,
+        now_ts,
+    )
+
+    # Per card: graded-review success/total counts and last-review timestamp
+    # (drive the SM-2 recall fallback), plus the ease of the FIRST graded review
+    # (the exam-like Bernoulli trial that feeds the correctness posterior).
+    stats: dict[int, tuple[int, int, int, Optional[int]]] = {}
+    for cid, total, succ, last_ms, first_ease in col.db.all(
+        f"""
+        select c.id, count(*),
+          sum(case when r.ease >= {_CORRECT_EASE} then 1 else 0 end),
+          max(r.id),
+          (select r2.ease from revlog r2
+             where r2.cid = c.id and r2.ease > 0 order by r2.id limit 1)
+        from revlog r join cards c on r.cid = c.id
+        where {deck_filter} and r.ease > 0
+        group by c.id
+        """
+    ):
+        stats[int(cid)] = (
+            int(total),
+            int(succ or 0),
+            int(last_ms or 0),
+            int(first_ease) if first_ease is not None else None,
+        )
+
+    cfg = get_exam_config(col) or {}
+    weights: dict[str, float] = cfg.get("topic_weights", {})
+    topic_prefixes = sorted(weights.keys()) if weights else _derive_topics(rows)
+
+    # Group per-topic correctness counts and recall estimates.
+    per_succ: dict[str, int] = {t: 0 for t in topic_prefixes}
+    per_fail: dict[str, int] = {t: 0 for t in topic_prefixes}
+    per_recall: dict[str, list[float]] = {t: [] for t in topic_prefixes}
+    for cid, tags, r, ivl in rows:
+        topic = _topic_of(tags or "", topic_prefixes)
+        if topic is None:
+            continue
+        total, succ, last_ms, first_ease = stats.get(int(cid), (0, 0, 0, None))
+        # Correctness posterior: one first-exposure Bernoulli trial per card.
+        if first_ease is not None:
+            if first_ease >= _CORRECT_EASE:
+                per_succ[topic] += 1
+            else:
+                per_fail[topic] += 1
+        elapsed = (now_ts - last_ms / 1000.0) / 86_400.0 if last_ms else 0.0
+        rec = estimate_recall(r, ivl, elapsed, succ, total)
+        if rec is not None:
+            per_recall[topic].append(rec)
+
+    z = _BAND_Z
+    topics: list[TopicPosterior] = []
+    for topic in topic_prefixes:
+        s, f = per_succ[topic], per_fail[topic]
+        a, b = _beta_posterior(s, f)
+        mean, var = _beta_mean_var(a, b)
+        std = math.sqrt(var)
+        recs = per_recall[topic]
+        topics.append(
+            TopicPosterior(
+                topic=topic,
+                weight=float(weights.get(topic, 0.0)),
+                successes=s,
+                failures=f,
+                mean=mean,
+                ci_low=max(0.0, mean - z * std),
+                ci_high=min(1.0, mean + z * std),
+                recall=(statistics.fmean(recs) if recs else None),
+                covered=(s + f) > 0,
+            )
+        )
+
+    # Exam-weighted aggregate. Normalise weights; fall back to equal weighting
+    # when no exam weights are configured (all-zero).
+    raw_w = [max(0.0, t.weight) for t in topics]
+    if sum(raw_w) <= 0:
+        raw_w = [1.0] * len(topics)
+    total_w = sum(raw_w) or 1.0
+    norm_w = [w / total_w for w in raw_w]
+
+    mu = 0.0
+    var_agg = 0.0
+    rec_num = 0.0
+    rec_den = 0.0
+    for t, w in zip(topics, norm_w):
+        a, b = _beta_posterior(t.successes, t.failures)
+        m, v = _beta_mean_var(a, b)
+        mu += w * m
+        var_agg += w * w * v
+        if t.recall is not None:
+            rec_num += w * t.recall
+            rec_den += w
+    std_agg = math.sqrt(var_agg)
+
+    accuracy = max(0.0, min(1.0, mu))
+    ci_low = max(0.0, mu - z * std_agg)
+    ci_high = min(1.0, mu + z * std_agg)
+
+    # P(exam accuracy >= MPS) under the normal approximation to the aggregate.
+    if std_agg > 0:
+        p_pass = 1.0 - _norm_cdf((_MPS - mu) / std_agg)
+    else:
+        p_pass = 1.0 if mu >= _MPS else 0.0
+    p_pass = max(0.0, min(1.0, p_pass))
+    if p_pass >= 0.5:
+        call, call_prob = "likely pass", p_pass
+    else:
+        call, call_prob = "likely fail", 1.0 - p_pass
+
+    first_exposures = sum(t.successes + t.failures for t in topics)
+    return BayesianReadiness(
+        accuracy=accuracy,
+        ci_low=ci_low,
+        ci_high=ci_high,
+        call=call,
+        call_prob=call_prob,
+        p_pass=p_pass,
+        mps=_MPS,
+        recall=(rec_num / rec_den if rec_den > 0 else None),
+        label=READINESS_LABEL,
+        first_exposures=first_exposures,
+        topics_total=len(topics),
+        topics_covered=sum(1 for t in topics if t.covered),
+        computed_at=computed_at,
+        topics=topics,
+    )

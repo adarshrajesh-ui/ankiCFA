@@ -120,6 +120,12 @@ cfa-scores-test:
     {{ ninja }} pylib
     PYTHONPATH="out/pylib:pylib" {{ py }} -m pytest pylib/tests/test_cfa_scores.py -q
 
+# Feature F4: Bayesian readiness — SM-2 recall fallback + 95% credible band + explicit pass/fail call (no give-up wall)
+cfa-f4-test:
+    {{ ninja }} pylib
+    PYTHONPATH="out/pylib:pylib" {{ py }} -m pytest pylib/tests/test_cfa_f4.py -q
+    QT_QPA_PLATFORM=offscreen PYTHONPATH="out/pylib:pylib:qt:out/qt" {{ py }} -m pytest qt/tests/test_cfa_f4_dialog.py -q
+
 # Feature 7: held-out eval harness — seeded, re-runnable, prints accuracy/AUC/ECE (stdlib only, no build)
 cfa-eval *args:
     {{ py }} cfa/eval/run_eval.py {{ args }}
