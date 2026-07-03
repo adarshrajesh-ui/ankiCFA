@@ -320,3 +320,49 @@ def test_study_by_exam_priority_from_empty_default_deck_no_dead_end(
         assert col.decks.card_count(prio, include_subdecks=False) == 30
     finally:
         col.close()
+
+
+# The collection-wide fallback is gated to the built-in "Default" deck so it
+# only bootstraps a fresh profile. A user who deliberately selected a specific
+# (non-Default) deck and then finished/emptied it must be told THAT deck is
+# done, not silently hijacked into a queue spanning unrelated decks.
+
+
+def test_study_by_exam_priority_non_default_empty_deck_does_not_hijack(
+    monkeypatch,
+) -> None:
+    col = _empty_col()
+    mw = _StandInMW(col)
+    try:
+        # 30 studyable NEW cards live in CFA::Ethics Pairs.
+        added = ensure_ethics_deck(col)
+        assert added == 30
+        anki_cfa.set_exam_config(
+            col, exam_date="2026-08-25", topic_weights={"los::ethics": 1.0}
+        )
+
+        # Select a DIFFERENT, non-Default deck that has nothing studyable.
+        empty_did = col.decks.id("CFA::Finished")
+        assert empty_did is not None
+        col.decks.set_current(empty_did)
+        cur = col.decks.get_current_id()
+        assert col.decks.name(cur) != "Default"
+        assert col.decks.card_count(cur, include_subdecks=True) == 0
+
+        tips: list[str] = []
+        monkeypatch.setattr(cfa, "tooltip", lambda *a, **k: tips.append(a[0]))
+        monkeypatch.setattr(
+            cfa, "showInfo", lambda *a, **k: tips.append("INFO:" + a[0])
+        )
+
+        cfa.study_by_exam_priority(mw)  # type: ignore[arg-type]
+
+        # Must NOT enter review on the unrelated CFA::Ethics Pairs cards, and
+        # must surface a deck-scoped "this deck is done" modal instead.
+        assert "review" not in mw.states, f"exam-priority hijacked: {tips}"
+        assert any(t.startswith("INFO:") for t in tips), (
+            f"expected deck-scoped modal, got: {tips}"
+        )
+        assert col.decks.id_for_name(cfa.EXAM_PRIORITY_DECK_NAME) is None
+    finally:
+        col.close()

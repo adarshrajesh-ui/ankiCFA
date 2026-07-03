@@ -22,7 +22,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from anki import cfa, cfa_deadline
-from anki.decks import DeckId
+from anki.decks import DEFAULT_DECK_ID, DeckId
 from aqt import cfa_style
 from aqt.qt import (
     QAbstractItemView,
@@ -220,23 +220,35 @@ def study_by_exam_priority(mw: AnkiQt) -> None:
         deck_id = col.decks.get_current_id()
         queue = cfa.build_exam_queue(col, deck_id=deck_id, fetch_limit=200)
         card_ids = list(getattr(queue, "card_ids", []))
-        if not card_ids:
-            # The current deck has nothing studyable. On a fresh profile the
-            # current deck is the empty built-in "Default" deck (the first-launch
-            # seeder creates the CFA decks but never selects one), so a
-            # deck-scoped queue is empty even though every NEW CFA card — treated
-            # as maximally weak (R=0) — is waiting in the CFA decks. Widen the
-            # scope to the whole collection so exam-priority never dead-ends
-            # while studyable cards exist somewhere.
+        on_default_deck = deck_id == DEFAULT_DECK_ID
+        if not card_ids and on_default_deck:
+            # Only the built-in "Default" deck falls back to the whole
+            # collection. On a fresh profile the current deck is that empty
+            # Default deck (the first-launch seeder creates the CFA decks but
+            # never selects one), so a deck-scoped queue is empty even though
+            # every NEW CFA card — treated as maximally weak (R=0) — is waiting
+            # in the CFA decks. Widening the scope only here lets exam-priority
+            # bootstrap a fresh profile without silently hijacking a user who
+            # deliberately selected and then finished a specific deck.
             queue = cfa.build_exam_queue_all_decks(col, fetch_limit=200)
             card_ids = list(getattr(queue, "card_ids", []))
         if not card_ids:
-            showInfo(
-                "There are no studyable cards for the exam-priority queue right "
-                "now — every card is suspended, buried, or already being studied "
-                "in a filtered deck.",
-                parent=mw,
-            )
+            if on_default_deck:
+                showInfo(
+                    "There are no studyable cards for the exam-priority queue "
+                    "right now — every card is suspended, buried, or already "
+                    "being studied in a filtered deck.",
+                    parent=mw,
+                )
+            else:
+                showInfo(
+                    "This deck has no studyable cards for the exam-priority "
+                    "queue — every card is either suspended, buried, or already "
+                    "being studied in a filtered deck. Switch to a deck with "
+                    "cards, or select the Default deck to span the whole "
+                    "collection.",
+                    parent=mw,
+                )
             return
         # Preserve the RPC's priority order via an explicit cid list; the
         # filtered deck keeps that order (order index 5 == "Order added").

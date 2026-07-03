@@ -167,10 +167,17 @@ def build_exam_queue_all_decks(
     built-in "Default" deck while every NEW CFA card lives in the CFA decks. It
     calls the read-only :func:`build_exam_queue` once per top-level deck (with
     its subdecks), so every studyable card — due *and* NEW (treated as maximally
-    weak, R=0) — is scored exactly once, then merges the per-deck results into a
-    single weakest-first ordering (score descending, ties broken by ascending
-    card id, matching the RPC's own ordering). Read-only throughout; a fresh
-    profile is therefore never a dead-end while studyable cards exist anywhere.
+    weak, R=0) — that lives in a regular deck is scored exactly once, then merges
+    the per-deck results into a single weakest-first ordering (score descending,
+    ties broken by ascending card id, matching the RPC's own ordering). Read-only
+    throughout.
+
+    Cards *currently* sitting in a filtered deck are excluded: filtered decks are
+    skipped as scoring roots and the RPC matches on a card's home deck (``c.did``,
+    which is the filtered deck while the card is pulled), so they belong to no
+    top-level regular deck here. A fresh profile is therefore never a dead-end
+    while studyable cards exist in the regular decks — the common case — but the
+    queue can still be empty if every remaining card is off in a filtered deck.
     """
     merged: list[tuple[int, float]] = []
     for did in _top_level_deck_ids(col):
