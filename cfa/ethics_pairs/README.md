@@ -112,15 +112,31 @@ pipeline above is untouched). Instead of two vignettes, the learner reads **one 
   `{item_id, cluster, standard, los_tags, verdict, passage, gold_spans[], rationale}`, where each
   `gold_span` is a verbatim `{phrase, token_range, rationale}`. Each Standard was analyzed to mark
   **all** evidence spans (73 spans total; 15 ethical / 15 unethical; every item is multi-span).
-- **Deterministic grader (AI-off fallback):** `ethics_scoring.find_gold_spans` / `grade_spans` /
-  `grade_passage_attempt`. A span is _found_ when every one of its tokens is selected; the grade is
-  `correct` (all spans found, within a per-span width cap), `somewhat` (all found but over-wide),
-  `partial` (some but not all found), or `wrong`. A passage attempt is fully correct only when the
-  verdict is right **and** the highlight grades `correct`.
+- **Deterministic grader (strict; AI-off fallback):** `ethics_scoring.find_gold_spans` /
+  `grade_spans` / `grade_passage_attempt`. A span is _found_ when every one of its tokens is
+  selected; the grade is `correct` (all spans found, within a per-span width cap), `somewhat` (all
+  found but over-wide), `partial` (some but not all found), or `wrong`. A passage attempt is fully
+  correct only when the verdict is right **and** the highlight grades `correct`. This strict grader
+  still backs `grade_passage_attempt` and the F2 AI-off fallback (below).
+- **Deterministic tolerant grader (the displayed card grade):** `ethics_scoring.span_tier` /
+  `grade_spans_tolerant` (JS `cfaSpanTier` / `cfaGradeSpansTolerant`). The card grades the highlight
+  with partial-credit tolerance so a materially-correct span with imperfect boundaries is not a flat
+  `wrong`. Each gold span gets a tier — `full` (every gold token selected; a superset still counts),
+  `near` (selection overlaps **≥ half** the gold tokens), or `none` — and the attempt grades
+  `correct` (all `full`, within the width cap), `somewhat` (all matched but at least one only `near`,
+  or all `full` but over-wide), `partial` (some but not all spans matched), or `wrong` (no span
+  matched, or empty). It is fully offline and deterministic (no LLM), mirrors the desktop F2
+  tolerance, and never downgrades a strict `correct`.
 - **Card:** [`templates/passage_front.html`](templates/passage_front.html) +
-  [`passage_back.html`](templates/passage_back.html). The tokenizer + multi-span grader are mirrored
-  byte-for-byte between the template JS, [`tests/js/passage_logic.js`](tests/js/passage_logic.js),
-  and Python, so grades are identical on desktop Anki and AnkiDroid.
+  [`passage_back.html`](templates/passage_back.html). The tokenizer + both multi-span graders (strict
+  and tolerant) are mirrored byte-for-byte between the template JS,
+  [`tests/js/passage_logic.js`](tests/js/passage_logic.js), and Python, so grades are identical on
+  desktop Anki and AnkiDroid. Once the attempt is complete (verdict picked, evidence highlighted,
+  **Check answer** pressed), the front persists the full completed-attempt payload to `localStorage`,
+  so pressing Anki's built-in **Show Answer** on the back reveals the same governing Standard +
+  rationale (and per-span breakdown, including `near` matches) as the front reveal — never the
+  "Attempt not completed" dead-end. The back still carries **no** answer-key text in its markup, so a
+  reflexive Show Answer *before* completing an attempt still cannot leak the answer.
 - **Validation + import:** [`passages.py`](passages.py) validates the bank (verbatim,
   token-locatable, non-overlapping spans; the union of spans must itself grade `correct`) and imports
   it into a sibling deck **`CFA::Ethics Passages`** with note type **`CFA Ethics One-Passage`**.
@@ -136,10 +152,12 @@ but only 2 of 3 spans → honest _partial_).
 
 ## F2 — semantic AI grading of the highlight (additive, AI-off safe)
 
-The deterministic F1 grader is exact but literal: a learner who highlights _"unreleased quarterly
-earnings figure"_ when the gold phrase is _"exact unreleased quarterly earnings figure"_ is
-semantically right but scores `partial`/`wrong` on the token overlap. F2 adds a **semantic** grade
-on top, with tolerance for paraphrase and different boundaries.
+The deterministic graders are literal token-overlap. The tolerant grader (F1, above) already gives
+**partial credit** for a different-boundary highlight — e.g. _"unreleased quarterly earnings"_ when
+the gold phrase is _"exact unreleased quarterly earnings figure"_ scores `partial` (a `near` match)
+rather than a flat `wrong` — but it still cannot recognize a genuine **paraphrase** or upgrade such
+an attempt to fully correct. F2 adds a **semantic** grade on top, with tolerance for paraphrase and
+different boundaries.
 
 - **Grader:** [`ai_grading.py`](ai_grading.py) — `grade_semantic(passage, answer_verdict,
   judged_verdict, gold_spans, learner_spans)` sends the attempt through
@@ -147,7 +165,8 @@ on top, with tolerance for paraphrase and different boundaries.
   margin, whether the learner's spans cover each gold piece of evidence. It returns
   `{grade, correct, explanation, per_span[]}` plus `source: "ai" | "fallback"`.
 - **AI-OFF contract:** no key, a network error, the cost cap, or an unparseable reply all mean
-  `grade_semantic` returns the **exact F1 deterministic grade** with `source == "fallback"`. It never
+  `grade_semantic` returns the **exact strict F1 deterministic grade** (`grade_spans`) with
+  `source == "fallback"`. It never
   raises, and the API key never enters the prompt or the result. The verdict correctness is always
   computed by string equality (never trusted to the model).
 - **Desktop bridge:** [`qt/aqt/cfa_ethics_ai.py`](../../qt/aqt/cfa_ethics_ai.py) registers a
