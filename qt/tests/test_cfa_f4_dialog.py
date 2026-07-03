@@ -1,12 +1,15 @@
 # Copyright: Ankitects Pty Ltd and contributors
 # License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
 
-"""F4 — ExamReadinessDialog shows the Bayesian CI + the explicit pass/fail call.
+"""F4 — the Exam Readiness payload carries the Bayesian CI + pass/fail call.
 
-Builds the real ``aqt.cfa.ExamReadinessDialog`` against a live collection with
-seeded reviews (offscreen Qt) and asserts the F4 hero block renders the call,
-the 95% credible band, and the "not validated" caveat — and that the dialog
-renders at all when there is essentially no data (no give-up wall).
+The Exam Readiness surface is now the shared SvelteKit page (``ts/lib/cfa``)
+embedded in ``aqt.cfa.ExamReadinessDialog`` via an ``AnkiWebView``. The honest
+scores it renders come from ``aqt.mediasrv._cfa_exam_readiness_payload`` — the
+SAME ``anki.cfa`` data the old Qt body rendered. These tests build that payload
+against a live collection with seeded reviews and assert the F4 hero carries the
+call, the 95% credible band and the "not validated" caveat — and that it
+ABSTAINS (no confident call, no CI) below the give-up threshold.
 """
 
 from __future__ import annotations
@@ -18,17 +21,19 @@ import time
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
-from PyQt6.QtWidgets import QApplication, QWidget
+from PyQt6.QtWidgets import QApplication
 
 from anki import cfa as anki_cfa
 from anki.collection import Collection
-from aqt import cfa
+from aqt.mediasrv import _cfa_exam_readiness_payload
 
 DAY = 86_400
 _APP: QApplication | None = None
 
 
 def _app() -> QApplication:
+    # Importing aqt pulls in Qt; keep a QApplication alive for parity with the
+    # other offscreen CFA tests even though the payload builder itself is pure.
     global _APP
     _APP = QApplication.instance() or QApplication(["test"])  # type: ignore[assignment]
     return _APP  # type: ignore[return-value]
@@ -39,13 +44,6 @@ def _empty_col() -> Collection:
     os.close(fd)
     os.unlink(path)
     return Collection(path)
-
-
-class _StandInMW(QWidget):
-    def __init__(self, col: Collection) -> None:
-        _app()
-        super().__init__()
-        self.col = col
 
 
 def _seed(
@@ -95,157 +93,110 @@ def _seed(
     return deck
 
 
-def test_dialog_renders_call_and_ci_for_strong_deck() -> None:
+def test_payload_renders_call_and_ci_for_strong_deck() -> None:
+    _app()
     col = _empty_col()
     deck = _seed(col, "los::topica", n_cards=40, reviews_each=8, frac_ok=0.95)
-    mw = _StandInMW(col)
-    dlg = cfa.ExamReadinessDialog(mw, deck)  # type: ignore[arg-type]
-    from PyQt6.QtWidgets import QLabel
+    try:
+        payload = _cfa_exam_readiness_payload(col, int(deck))
+        assert payload["heroMode"] == "bayesian_call"
+        hero = payload["heroBayesian"]
+        assert hero["call"] == "likely pass"
+        assert hero["passed"] is True
+        # The 95% credible band is present as a low/high pair.
+        assert hero["ciLow"] is not None and hero["ciHigh"] is not None
+        assert hero["ciLow"] <= hero["ciHigh"]
+        # The standing "not validated" caveat rides along on the call + band.
+        assert hero["label"] == "not validated against real exam data"
+        assert payload["readiness"]["label"] == "not validated against real exam data"
+    finally:
+        col.close()
 
-    text = " ".join(lbl.text() for lbl in dlg.findChildren(QLabel))
-    assert "likely pass" in text
-    assert "95% CI" in text
-    assert "not validated against real exam data" in text
-    dlg.close()
-    col.close()
 
-
-def test_dialog_hero_abstains_below_giveup_threshold() -> None:
-    # item3 sub-bug 3A (this test was previously
-    # ``test_dialog_renders_with_almost_no_data_no_giveup_wall``, which asserted
-    # the OPPOSITE). With only two graded reviews the give-up rule fires
-    # (memory_score.abstain), so the hero must ABSTAIN — "keep studying", NO
-    # confident "p=" call and NO accuracy "95% CI" lead — matching the honest
-    # Memory/Performance/Readiness bands beneath it instead of printing a
-    # confident verdict from the flat Beta(1,1) prior.
-    from PyQt6.QtWidgets import QLabel
-
+def test_payload_hero_abstains_below_giveup_threshold() -> None:
+    # item3 sub-bug 3A — with only two graded reviews the give-up rule fires
+    # (memory_score.abstain), so the hero must ABSTAIN — no confident call, no
+    # "p=" probability and no accuracy CI — matching the honest bands beneath it.
+    _app()
     col = _empty_col()
     deck = _seed(col, "los::topica", n_cards=2, reviews_each=1, frac_ok=1.0)
-    # Precondition: the give-up rule actually fires for this deck.
-    assert anki_cfa.memory_score(col, deck_id=deck).abstain
-    mw = _StandInMW(col)
-    dlg = cfa.ExamReadinessDialog(mw, deck)  # type: ignore[arg-type]
+    try:
+        # Precondition: the give-up rule actually fires for this deck.
+        assert anki_cfa.memory_score(col, deck_id=deck).abstain
 
-    text = " ".join(lbl.text() for lbl in dlg.findChildren(QLabel))
-    assert "keep studying" in text.lower()
-    assert "p=" not in text, "abstaining hero must not print a p= probability"
-    assert "likely pass" not in text and "likely fail" not in text
-    assert "95% CI" not in text, "abstaining hero must not show the accuracy CI"
-    # The honesty caveat is still present.
-    assert "not validated against real exam data" in text
-    dlg.close()
-    col.close()
+        payload = _cfa_exam_readiness_payload(col, int(deck))
+        assert payload["heroMode"] == "abstain"
+        # No confident Bayesian call block at all.
+        assert "heroBayesian" not in payload
+        abstain = payload["heroAbstain"]
+        assert abstain["reason"]
+        # The honesty caveat is still surfaced.
+        assert abstain["readinessLabel"] == "not validated against real exam data"
+    finally:
+        col.close()
 
 
-def test_dialog_hero_shows_call_above_giveup_threshold() -> None:
+def test_payload_hero_shows_call_above_giveup_threshold() -> None:
     # item3 sub-bug 3A — the complement: with enough graded reviews and coverage
     # the give-up rule does NOT fire, so the confident Bayesian call is shown
-    # exactly as before (p=, the 95% CI lead) and the abstain hero is absent.
-    from PyQt6.QtWidgets import QLabel
-
+    # exactly as before (a call, its probability, and the 95% CI band).
+    _app()
     col = _empty_col()
     deck = _seed(col, "los::topica", n_cards=40, reviews_each=6, frac_ok=0.95)
-    assert not anki_cfa.memory_score(col, deck_id=deck).abstain
-    mw = _StandInMW(col)
-    dlg = cfa.ExamReadinessDialog(mw, deck)  # type: ignore[arg-type]
+    try:
+        assert not anki_cfa.memory_score(col, deck_id=deck).abstain
 
-    text = " ".join(lbl.text() for lbl in dlg.findChildren(QLabel))
-    assert ("likely pass" in text) or ("likely fail" in text)
-    assert "p=" in text
-    assert "95% CI" in text
-    assert "keep studying" not in text.lower()
-    dlg.close()
-    col.close()
+        payload = _cfa_exam_readiness_payload(col, int(deck))
+        assert payload["heroMode"] == "bayesian_call"
+        hero = payload["heroBayesian"]
+        assert hero["call"] in ("likely pass", "likely fail")
+        assert 0.0 <= hero["callProb"] <= 1.0
+        assert hero["ciLow"] is not None and hero["ciHigh"] is not None
+    finally:
+        col.close()
 
 
-def test_dialog_hero_abstains_when_only_performance_gives_up() -> None:
+def test_payload_hero_abstains_when_only_performance_gives_up() -> None:
     # review-1 — the hero must abstain whenever ANY give-up-gated band does, not
     # just Memory. Here >=200 graded reviews spread over <30 distinct cards means
     # memory_score does NOT abstain (enough reviews, full coverage) but
     # performance_score DOES (first_exposures < MIN_FIRST_EXPOSURES=30). The hero
-    # must still abstain — no confident "p=" call, no accuracy "95% CI".
-    from PyQt6.QtWidgets import QLabel
-
+    # must still abstain — no confident call, no CI.
+    _app()
     col = _empty_col()
     deck = _seed(col, "los::topica", n_cards=20, reviews_each=12, frac_ok=0.95)
-    assert not anki_cfa.memory_score(col, deck_id=deck).abstain
-    perf = anki_cfa.performance_score(col, deck_id=deck)
-    assert perf.abstain and perf.first_exposures < anki_cfa.MIN_FIRST_EXPOSURES
-    mw = _StandInMW(col)
-    dlg = cfa.ExamReadinessDialog(mw, deck)  # type: ignore[arg-type]
+    try:
+        assert not anki_cfa.memory_score(col, deck_id=deck).abstain
+        perf = anki_cfa.performance_score(col, deck_id=deck)
+        assert perf.abstain and perf.first_exposures < anki_cfa.MIN_FIRST_EXPOSURES
 
-    text = " ".join(lbl.text() for lbl in dlg.findChildren(QLabel))
-    assert "keep studying" in text.lower()
-    assert "p=" not in text, "abstaining hero must not print a p= probability"
-    assert "likely pass" not in text and "likely fail" not in text
-    assert "95% CI" not in text, "abstaining hero must not show the accuracy CI"
-    assert "not validated against real exam data" in text
-    dlg.close()
-    col.close()
+        payload = _cfa_exam_readiness_payload(col, int(deck))
+        assert payload["heroMode"] == "abstain"
+        assert "heroBayesian" not in payload
+        assert payload["heroAbstain"]["reason"]
+    finally:
+        col.close()
 
 
-def test_dialog_topic_count_is_canonical_and_consistent() -> None:
-    # item3 sub-bug 3B — count == table rows == list == canonical 8. With no
-    # exam config the readiness scores fall back to the canonical topic list, so
-    # the per-topic table, the "N/total topics" caption and score.topics all
-    # resolve to the same eight authored CFA topics (and the dialog renders
-    # without the old no-config crash).
-    from PyQt6.QtWidgets import QLabel, QTableWidget
-
+def test_payload_topic_count_is_canonical_and_consistent() -> None:
+    # item3 sub-bug 3B — topic rows == caption total == canonical 8. With no exam
+    # config the readiness scores fall back to the canonical topic list, so the
+    # per-topic rows, the "N/total topics" caption and score.topics all resolve
+    # to the same eight authored CFA topics (and the payload builds without the
+    # old no-config crash).
+    _app()
     col = _empty_col()
     deck = _seed(
         col, "los::ethics", n_cards=5, reviews_each=3, frac_ok=0.8, configure=False
     )
-    assert anki_cfa.get_exam_config(col) is None
-    score = anki_cfa.memory_score(col, deck_id=deck)
-    assert score.topics_total == 8
-    assert len(score.topics) == 8
+    try:
+        assert anki_cfa.get_exam_config(col) is None
+        score = anki_cfa.memory_score(col, deck_id=deck)
+        assert score.topics_total == 8
+        assert len(score.topics) == 8
 
-    mw = _StandInMW(col)
-    dlg = cfa.ExamReadinessDialog(mw, deck)  # type: ignore[arg-type]
-    table = dlg.findChild(QTableWidget)
-    assert table is not None
-    assert table.rowCount() == 8, (
-        "per-topic table must have one row per canonical topic"
-    )
-
-    text = " ".join(lbl.text() for lbl in dlg.findChildren(QLabel))
-    assert "/8 topics" in text, "caption must count against the canonical 8"
-    dlg.close()
-    col.close()
-
-
-def test_readiness_abstain_html_pure() -> None:
-    html = cfa._readiness_abstain_html(
-        "not enough data: 2 graded reviews (need 200), 100% topic coverage (need 50%)"
-    )
-    assert "keep studying" in html.lower()
-    assert "p=" not in html
-    assert "95% CI" not in html
-    assert "not enough data" in html.lower()
-    # Give-up reason is surfaced and the standing caveat is kept.
-    assert "2 graded reviews" in html
-    assert "not validated against real exam data" in html
-
-
-def test_readiness_call_html_pure() -> None:
-    class _R:
-        call = "likely fail"
-        call_prob = 0.71
-        accuracy = 0.42
-        ci_low = 0.10
-        ci_high = 0.74
-        mps = 0.65
-        recall = 0.55
-        first_exposures = 12
-        topics_covered = 1
-        topics_total = 3
-        label = "not validated against real exam data"
-
-    html = cfa._readiness_call_html(_R())
-    assert "likely fail" in html
-    assert "p=0.71" in html
-    assert "95% CI" in html
-    assert "est. recall" in html
-    assert "not validated against real exam data" in html
+        payload = _cfa_exam_readiness_payload(col, int(deck))
+        assert len(payload["topics"]) == 8, "one row per canonical topic"
+        assert payload["caption"]["topicsTotal"] == 8
+    finally:
+        col.close()

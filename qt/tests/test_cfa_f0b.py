@@ -191,37 +191,61 @@ def test_study_ethics_pairs_is_reentrant_no_false_modal(monkeypatch) -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_deadline_dialog_renders_without_due_cards() -> None:
+def test_deadline_payload_defaults_without_due_cards() -> None:
+    # Fix 3 — with no exam config and no due cards the deadline view still
+    # renders honestly: it defaults to the sensible CFA exam day and shows the
+    # empty state (no rows) instead of dead-ending. The date picker + persistence
+    # now live in the SvelteKit page (aqt.cfa.DeadlineDialog just embeds it); the
+    # data that page renders is this mediasrv payload.
+    from aqt.mediasrv import _cfa_deadline_payload
+
     col = _empty_col()
-    mw = _StandInMW(col)
     try:
         assert anki_cfa.get_exam_config(col) is None
-        dlg = cfa.DeadlineDialog(mw)  # type: ignore[arg-type]
+        deck = col.decks.get_current_id()
+        payload = _cfa_deadline_payload(col, int(deck))
 
         # Defaults to the sensible CFA exam day even with no config and no cards.
-        assert dlg.date_edit.date().toString("yyyy-MM-dd") == cfa._default_exam_date()
-        # Renders cleanly (no crash) with an empty, honest table.
-        assert dlg._table.rowCount() == 0
-        assert "No cards to rank yet" in dlg._header.text()
+        assert payload["examDate"] == cfa._default_exam_date()
+        # Honest empty state — no rows, no crash.
+        assert payload["headerMode"] == "empty"
+        assert payload["cardCount"] == 0
+        assert payload["rows"] == []
     finally:
         col.close()
 
 
-def test_deadline_dialog_apply_persists_exam_date(monkeypatch) -> None:
+def test_deadline_set_exam_date_persists_preserving_weights() -> None:
+    # Fix 3 — committing a date persists it via set_exam_config, PRESERVING the
+    # configured topic weights. This is exactly what the SetCfaExamDate RPC does
+    # (mediasrv.set_cfa_exam_date), which the SvelteKit picker now drives; the
+    # deadline payload then re-ranks against the newly-persisted date.
+    from aqt.mediasrv import _cfa_deadline_payload
+
     col = _empty_col()
-    mw = _StandInMW(col)
     try:
-        monkeypatch.setattr(cfa, "tooltip", lambda *a, **k: None)
-        dlg = cfa.DeadlineDialog(mw)  # type: ignore[arg-type]
+        # Pre-existing config the persistence must not clobber.
+        anki_cfa.set_exam_config(
+            col, exam_date="2026-08-25", topic_weights={"los::ethics": 1.0}
+        )
+        cfg = anki_cfa.get_exam_config(col) or {}
 
-        from aqt.qt import QDate
+        # Replicate the RPC persistence: new date, existing weights preserved.
+        anki_cfa.set_exam_config(
+            col,
+            exam_date="2027-05-15",
+            topic_weights=cfg.get("topic_weights", {}),
+        )
 
-        dlg.date_edit.setDate(QDate(2027, 5, 15))
-        dlg._apply_date()
+        saved = anki_cfa.get_exam_config(col)
+        assert saved is not None
+        assert saved["exam_date"] == "2027-05-15"
+        assert saved["topic_weights"] == {"los::ethics": 1.0}
 
-        cfg = anki_cfa.get_exam_config(col)
-        assert cfg is not None
-        assert cfg["exam_date"] == "2027-05-15"
+        # And the deadline payload reflects the newly-persisted exam date.
+        deck = col.decks.get_current_id()
+        payload = _cfa_deadline_payload(col, int(deck))
+        assert payload["examDate"] == "2027-05-15"
     finally:
         col.close()
 

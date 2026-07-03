@@ -29,25 +29,14 @@ from typing import TYPE_CHECKING
 
 from anki import cfa
 from anki.decks import DEFAULT_DECK_ID, DeckId
-from aqt import cfa_style
 from aqt.qt import (
-    QAbstractItemView,
-    QColor,
-    QDate,
-    QDateEdit,
     QDialog,
-    QHBoxLayout,
-    QHeaderView,
-    QLabel,
     QMenu,
-    QPushButton,
-    Qt,
-    QTableWidget,
-    QTableWidgetItem,
     QVBoxLayout,
     qconnect,
 )
 from aqt.utils import showInfo, showWarning, tooltip
+from aqt.webview import AnkiWebView, AnkiWebViewKind
 
 if TYPE_CHECKING:
     from datetime import date
@@ -411,386 +400,69 @@ def show_deadline(mw: AnkiQt) -> None:
         showWarning(f"Could not open the deadline view: {exc}", parent=mw)
 
 
-def _pct(x: float | None) -> str:
-    return "—" if x is None else f"{x * 100:.0f}%"
-
-
-def _band_html(
-    name: str, meaning: str, abstain: bool, reason: str, low, high, point
-) -> str:
-    """Render one honest score as a labelled RANGE (never a bare number)."""
-    value = (
-        cfa_style.value_abstain(reason)
-        if abstain
-        else cfa_style.value_range(_pct(low), _pct(high), _pct(point))
-    )
-    return cfa_style.band(name=name, meaning=meaning, value_html=value, abstain=abstain)
-
-
-def _readiness_abstain_html(reason: str) -> str:
-    """F4 hero when we are BELOW the give-up threshold: abstain, don't call.
-
-    Composed inline (deliberately NOT via ``cfa_style.hero``) so it renders NO
-    ``p=`` probability and NO accuracy "95% CI" lead line — with too little
-    graded evidence a confident pass/fail call would be dishonest, so the hero
-    matches the give-up-gated Memory/Performance/Readiness bands and simply says
-    to keep studying. Reuses cfa_style's public tokens/helpers read-only so it
-    keeps the shared chrome. ``reason`` is the give-up reason from
-    :func:`anki.cfa.memory_score`.
-    """
-    t = cfa_style.TOKENS
-    color = cfa_style.WARN
-    # accent_soft is the warm soft that pairs with WARN (== accent) in the token
-    # table — the abstain analogue of hero's pass_soft/fail_soft backgrounds.
-    soft = t["accent_soft"]
-    return (
-        f"<div style='background:{soft};border:1px solid {color};"
-        f"border-left:4px solid {color};border-radius:10px;"
-        f"padding:12px 16px;margin:0 0 14px'>"
-        f"<div style='font-size:{t['fs_hero']}px;font-weight:800;"
-        f"color:{color};line-height:1.1'>Not enough data — keep studying</div>"
-        f"<div style='font-size:{t['fs_body']}px;color:{cfa_style.INK};"
-        f"margin-top:6px'>No pass/fail call yet — the estimate stays hidden "
-        f"until there is enough graded review evidence to be honest. It appears "
-        f"here once the give-up threshold is met.</div>"
-        f"<div style='font-size:{t['fs_meta']}px;color:{color};"
-        f"margin-top:6px'>{cfa_style.value_abstain(reason)} · {cfa.READINESS_LABEL}"
-        f"</div>"
-        f"</div>"
-    )
-
-
-def _readiness_call_html(r) -> str:
-    """F4 hero block: the exam-accuracy 95% credible band + the pass/fail call.
-
-    Never abstains — with little data the band is just wide. The call is
-    ``P(exam accuracy >= MPS)`` under the aggregate Bayesian posterior, and the
-    standing "not validated" caveat is always shown."""
-    recall = (
-        ""
-        if r.recall is None
-        else (
-            f" · est. recall <b>{_pct(r.recall)}</b> "
-            f"<span style='color:{cfa_style.MUTED}'>(FSRS R, SM-2 fallback)</span>"
-        )
-    )
-    lead = (
-        f"Estimated exam accuracy <b>{_pct(r.accuracy)}</b> "
-        f"<span style='color:{cfa_style.MUTED}'>(95% CI "
-        f"{_pct(r.ci_low)}–{_pct(r.ci_high)})</span> vs ~{_pct(r.mps)} "
-        f"MPS proxy{recall}"
-    )
-    note = (
-        f"Bayesian — the band starts wide and narrows as reviews accrue "
-        f"({r.first_exposures} first-seen · {r.topics_covered}/{r.topics_total} "
-        f"topics studied). {r.label}."
-    )
-    return cfa_style.hero(
-        call=r.call,
-        call_prob=r.call_prob,
-        passed=(r.call == "likely pass"),
-        lead_html=lead,
-        note_html=note,
-    )
-
-
 class ExamReadinessDialog(QDialog):
+    """Exam Readiness surface — a thin host for the SvelteKit page.
+
+    The honest-score presentation (the Bayesian pass/fail hero, the three
+    give-up-gated bands, the per-topic recall table) now lives in the shared
+    ``ts/lib/cfa`` design system and is served by mediasrv from the SAME
+    ``anki.cfa`` data the old Qt body rendered (see
+    ``mediasrv._cfa_exam_readiness_payload``). This dialog just embeds that page
+    for the given deck; the window title and size are unchanged.
+    """
+
     def __init__(self, mw: AnkiQt, deck_id: DeckId) -> None:
         super().__init__(mw)
-        col = mw.col
-        assert col is not None
+        assert mw.col is not None
         self.setWindowTitle("CFA — Exam Readiness")
         self.resize(640, 560)
-        cfa_style.apply(self)
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(20, 18, 20, 16)
-        layout.setSpacing(10)
+        self.web: AnkiWebView | None = AnkiWebView(kind=AnkiWebViewKind.CFA_READINESS)
+        self.web.load_sveltekit_page(f"cfa-readiness/{int(deck_id)}")
+        layout = QVBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.addWidget(self.web)
+        self.setLayout(layout)
 
-        bayes = cfa.bayesian_readiness(col, deck_id=deck_id)
-        score = cfa.memory_score(col, deck_id=deck_id)
-        perf = cfa.performance_score(col, deck_id=deck_id)
-        ready = cfa.readiness_score(col, deck_id=deck_id)
-        deck_name = col.decks.name(deck_id)
+    def _cleanup_web(self) -> None:
+        if self.web is not None:
+            self.web.cleanup()
+            self.web = None
 
-        # F4 hero: the Bayesian pass/fail call — but ABSTAIN when either the
-        # Memory or Performance score gives up (memory gates on graded reviews,
-        # topic coverage and skipped high-weight topics; performance gates on
-        # first-exposure count), so the hero never prints a confident "p=xx"
-        # from the flat Beta(1,1) prior while any band beneath it honestly
-        # abstains.
-        hero_abstain = score.abstain or perf.abstain
-        hero_reason = score.reason if score.abstain else perf.reason
-        hero_html = (
-            _readiness_abstain_html(hero_reason)
-            if hero_abstain
-            else _readiness_call_html(bayes)
-        )
-
-        header = QLabel()
-        header.setTextFormat(Qt.TextFormat.RichText)
-        header.setText(
-            cfa_style.page_heading("Exam Readiness", deck_name)
-            + hero_html
-            + cfa_style.section("Honest scores")
-            + _band_html(
-                "Memory",
-                "recall probability, exam-weighted across topics",
-                score.abstain,
-                score.reason,
-                score.range_low,
-                score.range_high,
-                score.point,
-            )
-            + _band_html(
-                "Performance",
-                "P(correct on a new question), first-exposure accuracy",
-                perf.abstain,
-                perf.reason,
-                perf.range_low,
-                perf.range_high,
-                perf.point,
-            )
-            + _band_html(
-                f"Readiness — {ready.label}",
-                "P(pass); wide range, uncalibrated",
-                ready.abstain,
-                ready.reason,
-                ready.range_low,
-                ready.range_high,
-                ready.point,
-            )
-            + "<div style='margin-top:8px'>"
-            + cfa_style.caption(
-                f"Coverage {_pct(score.coverage_pct)} "
-                f"({score.topics_covered}/{score.topics_total} topics) · "
-                f"{score.graded_reviews} graded reviews · "
-                f"{perf.first_exposures} first-seen · "
-                f"as of {score.last_review_at or '—'}"
-            )
-            + "</div>"
-        )
-        header.setWordWrap(True)
-        layout.addWidget(header)
-
-        by_topic = QLabel()
-        by_topic.setTextFormat(Qt.TextFormat.RichText)
-        by_topic.setText(cfa_style.section("Per-topic recall"))
-        layout.addWidget(by_topic)
-
-        table = QTableWidget(len(score.topics), 5, self)
-        table.setHorizontalHeaderLabels(
-            ["Topic", "Weight", "Reviewed", "Graded", "Recall R (range)"]
-        )
-        table.verticalHeader().setVisible(False)
-        table.setAlternatingRowColors(True)
-        table.setShowGrid(False)
-        table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
-        thead = table.horizontalHeader()
-        for col_idx in range(1, 5):
-            thead.setSectionResizeMode(col_idx, QHeaderView.ResizeMode.ResizeToContents)
-        thead.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
-        for row, t in enumerate(sorted(score.topics, key=lambda x: -x.weight)):
-            if t.avg_r is None:
-                r_text = "no data"
-            else:
-                r_text = f"{_pct(t.r_low)}–{_pct(t.r_high)}"
-            values = [
-                t.topic,
-                f"{t.weight:.2f}",
-                str(t.reviewed_cards),
-                str(t.graded_reviews),
-                r_text,
-            ]
-            for column, val in enumerate(values):
-                item = QTableWidgetItem(val)
-                if not t.covered and column == 4:
-                    item.setForeground(QColor(cfa_style.FAINT))
-                table.setItem(row, column, item)
-        layout.addWidget(table)
-
-        footer = QLabel(
-            "The headline is a Bayesian call: exam-weighted accuracy as a 95% "
-            "credible band (per-topic Beta posterior on first-exposure "
-            "correctness) that starts wide and narrows as reviews accrue — no "
-            "give-up wall. Recall uses FSRS R, falling back to an SM-2 forgetting "
-            "curve so a number appears from the first review. Below it, the three "
-            "give-up-gated scores: Memory (exam-weighted per-topic FSRS "
-            "retrievability), Performance (Wilson interval on first-exposure "
-            "accuracy) and Readiness (fused P(pass)). The pass/fail call is NOT "
-            "validated against real exam data. No AI — pure spaced-repetition "
-            "stats."
-        )
-        footer.setWordWrap(True)
-        footer.setStyleSheet(
-            f"color:{cfa_style.MUTED};font-size:{cfa_style.TOKENS['fs_meta']}px"
-        )
-        layout.addWidget(footer)
+    def reject(self) -> None:
+        self._cleanup_web()
+        super().reject()
 
 
 class DeadlineDialog(QDialog):
-    """Read-only view of the weakest cards by predicted recall AT the exam date.
+    """Peak-on-Exam-Day (Deadline) surface — a thin host for the SvelteKit page.
 
-    Carries a QDateEdit exam-date picker that persists the chosen date via
-    ``cfa.set_exam_config`` and re-ranks the cards live. Renders cleanly whether
-    or not the deck currently has any due cards.
+    The exam-date picker and the weakest-first ranking now live in the shared
+    ``ts/lib/cfa`` design system; committing a date persists it via the
+    ``SetCfaExamDate`` RPC and re-runs the ranking. The page is scoped to the
+    current deck — the same deck the old Qt body ranked (see
+    ``mediasrv._cfa_deadline_payload``). Window title and size are unchanged.
     """
 
     def __init__(self, mw: AnkiQt) -> None:
         super().__init__(mw)
         self.mw = mw
+        col = mw.col
+        assert col is not None
         self.setWindowTitle("CFA — Peak-on-Exam-Day (Deadline)")
         self.resize(560, 500)
-        cfa_style.apply(self)
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(20, 18, 20, 16)
-        layout.setSpacing(10)
-
-        heading = QLabel()
-        heading.setTextFormat(Qt.TextFormat.RichText)
-        heading.setText(cfa_style.page_heading("Peak on exam day", "Deadline planner"))
-        layout.addWidget(heading)
-
-        # --- Exam-date picker row ------------------------------------------
-        picker = QHBoxLayout()
-        date_lbl = QLabel("Exam date:")
-        date_lbl.setStyleSheet(f"color:{cfa_style.MUTED}")
-        picker.addWidget(date_lbl)
-        self.date_edit = QDateEdit(self)
-        self.date_edit.setCalendarPopup(True)
-        self.date_edit.setDisplayFormat("yyyy-MM-dd")
-        self.date_edit.setDate(self._initial_date())
-        picker.addWidget(self.date_edit)
-        apply_btn = QPushButton("Set exam date", self)
-        qconnect(apply_btn.clicked, self._apply_date)
-        picker.addWidget(apply_btn)
-        picker.addStretch(1)
-        layout.addLayout(picker)
-
-        self._header = QLabel()
-        self._header.setTextFormat(Qt.TextFormat.RichText)
-        self._header.setWordWrap(True)
-        layout.addWidget(self._header)
-
-        self._table = QTableWidget(0, 3, self)
-        self._table.setHorizontalHeaderLabels(
-            ["Card ID", "Predicted recall @ exam", "Capped interval (days)"]
-        )
-        self._table.verticalHeader().setVisible(False)
-        self._table.setAlternatingRowColors(True)
-        self._table.setShowGrid(False)
-        self._table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
-        dthead = self._table.horizontalHeader()
-        dthead.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
-        dthead.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
-        dthead.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
-        layout.addWidget(self._table)
-
-        footer = QLabel(
-            "Weakest cards on the day are shown first. Study these to peak on the "
-            "exam date. Read-only — FSRS scheduling and undo stay valid. No AI."
-        )
-        footer.setWordWrap(True)
-        footer.setStyleSheet(
-            f"color:{cfa_style.MUTED};font-size:{cfa_style.TOKENS['fs_meta']}px"
-        )
-        layout.addWidget(footer)
-
-        self._reload()
-
-    def _initial_date(self) -> QDate:
-        from datetime import date as _date
-
-        cfg = cfa.get_exam_config(self.mw.col) or {}
-        raw = cfg.get("exam_date")
-        # Self-heal an absurd/invalid persisted exam date (e.g. stale far-future
-        # config) back to the canonical default instead of trusting it verbatim.
-        iso = _sanitized_exam_date(raw)
-        # A *parseable* saved date that the heal overrode is a candidate for a
-        # deliberate far-future pick, not just missing/garbage config. Record it
-        # so the reload can tell the user rather than silently swapping it.
-        self._healed_from: str | None = None
-        if raw and iso != raw:
-            try:
-                _date.fromisoformat(raw)
-                self._healed_from = raw
-            except ValueError:
-                self._healed_from = None
-        parsed = QDate.fromString(iso, "yyyy-MM-dd")
-        return parsed if parsed.isValid() else QDate.currentDate().addDays(120)
-
-    def _apply_date(self) -> None:
-        """Persist the picked exam date (preserving weights) and re-rank."""
-        iso = self.date_edit.date().toString("yyyy-MM-dd")
-        col = self.mw.col
-        assert col is not None
-        cfg = cfa.get_exam_config(col) or {}
-        cfa.set_exam_config(
-            col, exam_date=iso, topic_weights=cfg.get("topic_weights", {})
-        )
-        # The user just made a deliberate choice; drop any stale heal notice.
-        self._healed_from = None
-        tooltip(f"Exam date set to {iso}.", parent=self)
-        self._reload()
-
-    def _reload(self) -> None:
-        col = self.mw.col
-        assert col is not None
-        exam_date = self.date_edit.date().toString("yyyy-MM-dd")
         deck_id = col.decks.get_current_id()
-        # Rank due AND new cards: new (unstudied) cards are treated as weakest
-        # (predicted recall 0.0), so a fresh all-new deck is never a dead-end.
-        result = cfa.deadline_retention_with_new(
-            col, deck_id=deck_id, exam_date=exam_date, fetch_limit=50
-        )
+        self.web: AnkiWebView | None = AnkiWebView(kind=AnkiWebViewKind.CFA_DEADLINE)
+        self.web.load_sveltekit_page(f"cfa-deadline/{int(deck_id)}")
+        layout = QVBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.addWidget(self.web)
+        self.setLayout(layout)
 
-        heal_notice = ""
-        if self._healed_from:
-            heal_notice = cfa_style.notice(
-                f"Your saved exam date ({self._healed_from}) is far in the "
-                f"future, so the planner is showing {exam_date} instead. Pick a "
-                "date and click “Set exam date” to change it.",
-                tone="warn",
-            )
+    def _cleanup_web(self) -> None:
+        if self.web is not None:
+            self.web.cleanup()
+            self.web = None
 
-        source = "Rust RPC" if result.used_rpc else "read-only fallback"
-        if not len(result):
-            self._header.setText(
-                heal_notice
-                + cfa_style.caption(f"Exam date: <b>{exam_date}</b>")
-                + cfa_style.notice("No cards to rank yet.", tone="warn")
-                + "<div>"
-                + cfa_style.caption(
-                    "Once this deck has cards, the weakest-on-the-day cards "
-                    "(new cards first) will appear here."
-                )
-                + "</div>"
-            )
-        else:
-            self._header.setText(
-                heal_notice
-                + cfa_style.caption(
-                    f"Exam date: <b>{exam_date}</b> · "
-                    f"{len(result)} cards ranked weakest-first ({source})"
-                )
-                + "<div style='margin-top:2px'>"
-                + cfa_style.caption(
-                    "Predicted FSRS recall AT the exam date; new (unstudied) "
-                    "cards are included and counted as weakest (recall 0.0). "
-                    "Each interval is capped so no review lands after the exam."
-                )
-                + "</div>"
-            )
-
-        self._table.setRowCount(len(result))
-        for row in range(len(result)):
-            recall = result.predicted_recall[row]
-            values = [
-                str(result.card_ids[row]),
-                _pct(recall),
-                str(result.suggested_interval_days[row]),
-            ]
-            for column, val in enumerate(values):
-                item = QTableWidgetItem(val)
-                if column == 1 and recall < 0.85:
-                    item.setForeground(QColor(cfa_style.WARN))
-                self._table.setItem(row, column, item)
+    def reject(self) -> None:
+        self._cleanup_web()
+        super().reject()
