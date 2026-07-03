@@ -63,8 +63,22 @@ environment has a gitignored `.env` key that auto-loads, so F9 was run with the 
 neutralized (`OPENAI_API_KEY=""`, never printed); it then prints `F9 REACHABILITY: PASS`.
 
 ### Branch / commit / no-mistakes / merge
-- Branch: `fix/desktop-item1` (off `origin/main`)
-- Commit SHA: _(filled after commit)_
-- no-mistakes outcome: _(filled after run)_
-- PR: _(filled after run)_
-- Merge confirmation (origin/main SHA): _(filled after merge)_
+- Branch: `fix/desktop-item1` (off `origin/main`).
+- Fix commit SHA: `b03d3467e` (scoped: `qt/aqt/cfa.py`, `qt/tests/test_cfa_f0b.py`, `proof/fixes/p1/`).
+- no-mistakes gate had to be repaired first: pushes were failing with
+  `push_received error="invalid gate path: ."` (a broken gate hook that had blocked
+  every branch for ~2 days). `no-mistakes init` refreshed the gate/hook and fixed it;
+  a delete + re-push then triggered the run.
+- no-mistakes outcome: **checks-passed** — all steps 0 findings
+  (intent skipped[author-mismatch] · rebase · review · test · document · lint · push · pr · ci green).
+  Run id `01KWMKA4Z54HN3VB45QCE9H8MQ`.
+- The no-mistakes **document** step auto-added commit `afdc1658` — a 2-line
+  `SUBMISSION-CHECKLIST.md` sync (F0b test count 5 → 6) reflecting the new regression
+  test. This is a gate-produced doc commit, not a manual edit.
+- PR: https://github.com/adarshrajesh-ui/ankiCFA/pull/2 (**MERGED**, squash).
+- Merge confirmation: `origin/main` advanced `557a7cc82` → **`8213f83a0`**
+  ("fix(cfa): re-enter review for Study Ethics Minimal-Pairs and drop false modal (#2)");
+  `origin/main:qt/aqt/cfa.py` contains the reuse/rebuild fix.
+
+_(This NOTES finalization was landed via a follow-up gate run from an isolated worktree
+so the concurrent agents' live working tree was never disturbed.)_
