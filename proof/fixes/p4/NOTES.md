@@ -42,3 +42,66 @@ Evidence:
 Verify (AI-off unaffected): no application code changed — only `.gitignore` + proof files.
 
 <!-- Subsequent items (2–5) append their entries below. -->
+
+---
+
+## Item 2 — mypy debt
+
+- Branch: `p4/02-mypy`
+- Commit SHA: `200c0a22e7bda331f292d38d0d3040ee96d69545`
+- Evidence — Before: `proof/fixes/p4/2-mypy-before.txt`
+- Evidence — After:  `proof/fixes/p4/2-mypy-after.txt`
+- Build: cold `just build` in the fresh worktree succeeded (needed for the generated
+  stubs under `out/pylib/anki` + `out/qt/_aqt` that mypy consumes).
+
+Mypy outcome (`check:mypy` = `mypy pylib qt/aqt qt/tools out/pylib/anki out/qt/_aqt python tools`):
+
+- **21 errors (13 files) → 3 errors (1 file).**
+- **Owned scope: 0 errors.** All 16 import-not-found cleared; the 2 genuine owned
+  errors in `tools/cfa/sync_roundtrip.py` fixed; `pylib/anki/cfa_sync.py` was already
+  clean (verified — no changes invented there); `cfa/**` (followed via
+  `cfa.ai.llm_client`) clean.
+
+Reality vs. the assumed diagnosis: the import-not-found errors were **not** `cfa.*`
+package imports but **bare-name** sibling imports (`import ethics_scoring`, `import
+build_cfa_deck`, …) resolved at RUNTIME via `sys.path.insert(0, …)` hacks, plus the
+optional third-party `openai`. The genuine `cfa.*` package imports (`cfa.ai.llm_client`)
+already resolved via mypy's implicit cwd base.
+
+What changed (config + type-annotation only; no runtime behavior change):
+
+- `.mypy.ini`: `mypy_path += .` (repo root) — makes `cfa.ai.llm_client` resolve
+  explicitly on the search path (mirrors the recipes' runtime `PYTHONPATH=…:.`).
+- `.mypy.ini`: targeted per-module `ignore_missing_imports` for `openai` /`openai.*`
+  (optional SDK, try/except ImportError, not in the type-check venv — matches
+  `[mypy-bs4]`) and for the bare first-party CFA modules `ethics_scoring`,
+  `ai_grading`, `passages`, `import_pairs`, `build_cfa_deck`, `seed_collection`.
+  Rooting their dirs was rejected empirically: adding `tools/cfa` triggers a fatal
+  `Source file found twice under different module names` (it is already checked as
+  the `tools.cfa.*` package), and rooting `cfa/ethics_pairs` widens the target's
+  scope, pulling the out-of-scope, non-owned proof script
+  `tools/cfa/render_f2_ai_grade.py` into the graph and surfacing 5 pre-existing
+  dict-typing errors there. The targeted ignores clear the noise without blanket
+  silencing and without changing the check's designed folder scope.
+- `tools/cfa/sync_roundtrip.py` (OWNED): `_add_card -> CardId`,
+  `_review(cid: CardId, ease: Literal[1, 2, 3, 4])`, + imports `Literal`/`CardId`
+  (`from __future__ import annotations` in effect → annotations never evaluated;
+  `CardId` is a `NewType == int`).
+
+P1-file errors flagged (in `qt/aqt/cfa.py` — NOT fixed here; P1 owns that file;
+pre-existing, present in the BEFORE run too):
+
+- `qt/aqt/cfa.py:135: [arg-type]` `order=<int>` passed to `SearchTerm(order=…)`, whose
+  protobuf field expects the enum `ValueType`.
+- `qt/aqt/cfa.py:386: [assignment]` `for col in range(1, 5):` rebinds `col`, which is
+  the `Collection` earlier in the function (loop-variable shadowing). Fix: rename the
+  loop index.
+- `qt/aqt/cfa.py:387: [call-overload]` `setSectionResizeMode(col, …)` — a knock-on of
+  the `:386` shadowing; resolved once the loop variable is renamed.
+
+Verify (AI-off unaffected): only `.mypy.ini` (config) and three type annotations in a
+demo/proof driver changed. `cfa/ai/llm_client.py` is untouched and its `openai` import
+is still guarded by try/except ImportError; `ruff check tools/cfa/sync_roundtrip.py`
+passes.
+
+Gate: DEFERRED — `no-mistakes` intentionally NOT run for this item.
