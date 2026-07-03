@@ -1,3 +1,5 @@
+// Copyright: Ankitects Pty Ltd and contributors
+// License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
 // capture_mobile.mjs
 // Station: MOBILE 390px reference capture of https://www.markmeldrum.com/
 // Drives the SYSTEM Google Chrome via Playwright ({ channel: 'chrome' }) so no
