@@ -1,0 +1,45 @@
+// Copyright: Ankitects Pty Ltd and contributors
+// License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
+
+// -----------------------------------------------------------------------------
+// CFA web theme — the ONE stylesheet a page agent imports to get the shared
+// design system: the brand @font-face rules, every `--cfa-*` custom property on
+// :root, and a calm page base. Import once per page/entry, e.g.
+//
+//   import "$lib/cfa/theme.scss";
+//
+// Individual components (Eyebrow, Hero, StatCard, DataTable, …) are already
+// self-contained (they compile the tokens into their scoped styles), so they
+// render correctly even without this — but importing it wires the real fonts
+// and gives the page the Meldrum background + body font.
+// -----------------------------------------------------------------------------
+
+@use "./fonts";
+@use "./tokens" as cfa;
+
+:root {
+    @include cfa.root;
+}
+
+// Calm page base. Applied to `.cfa-app` so a page agent can opt in by wrapping
+// its content (or adding the class to <body>) without the design system
+// silently restyling unrelated surfaces.
+.cfa-app {
+    box-sizing: border-box;
+    margin: 0;
+    background: cfa.$cfa-page;
+    color: cfa.$cfa-ink;
+    font-family: cfa.$cfa-font-body;
+    font-size: cfa.$cfa-fs-body;
+    font-weight: cfa.$cfa-weight-regular;
+    line-height: cfa.$cfa-lh-body;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizelegibility;
+
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box;
+    }
+}
