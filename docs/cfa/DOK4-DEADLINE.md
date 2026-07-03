@@ -91,42 +91,6 @@ particular:
 - **Whole-day rounding.** `days_to_exam` rounds toward zero; an exam today or in
   the past yields a 0-day cap (review now; schedule nothing beyond the deadline).
 
-## Desktop: new cards + exam-date self-heal
-
-The engine above ranks a deck's **due** cards. On a fresh profile every CFA card
-is still **new**, so the raw engine returns an empty ranking and the desktop view
-would dead-end on an empty table. The desktop path therefore does not call
-`cfa_deadline.deadline_retention` directly; it calls the read-only wrapper
-`anki.cfa.deadline_retention_with_new(col, *, deck_id, exam_date, fetch_limit=0,
-now=None)`, which:
-
-- takes the due-card ranking from `cfa_deadline.deadline_retention` **verbatim**
-  (the engine is not modified);
-- merges in the deck's **new** cards (found with the same search semantics,
-  `deck:… is:new`, subdecks included), treating each as maximally weak
-  (`predicted_recall = 0.0`, `suggested_interval_days = 0`, since a never-studied
-  card carries no schedule yet);
-- excludes any card already ranked as due (no double-count), re-sorts the merged
-  rows by `(predicted_recall asc, card id asc)` — identical to the engine's own
-  ordering — and, when `fetch_limit` is set, reserves at least half the slots for
-  due cards so a large new-card backlog cannot crowd genuinely-weak scheduled
-  cards out of the capped view (new cards still fill any slots the due cards leave
-  unused, so a fresh all-new deck is unaffected).
-
-It returns the engine's own `DeadlineRetention` dataclass (`used_rpc` mirrors the
-underlying due-card engine) and never mutates the collection, so FSRS scheduling
-and undo stay valid.
-
-The dialog also **self-heals an absurd persisted exam date**. The exam date lives
-in the synced collection config, so a stale/corrupt far-future value can be
-persisted and then trusted blindly. On read, `DeadlineDialog` sanitises it: a
-missing, unparseable, or unreasonably-far-future date (more than
-`_MAX_EXAM_HORIZON_DAYS` = 730 days / ~2 years ahead of today) falls back to the
-canonical `_default_exam_date()`, and — when the overridden value was a parseable
-deliberate-looking pick — the dialog shows a notice that it substituted the
-default. Any sane date is used untouched. The heal is on the **read** path only;
-clicking “Set exam date” persists the user's choice verbatim.
-
 ## Files
 
 New, fork-only files (no upstream merge surface):
@@ -145,8 +109,7 @@ Minimal additive edits to existing files:
 | `proto/anki/scheduler.proto`         | +1 rpc `DeadlineRetention` at the end of `SchedulerService`; +2 messages (`DeadlineRetentionRequest`, `DeadlineRetentionResponse`) at the end. Existing `BuildExamQueue` lines untouched.                                  |
 | `rslib/src/scheduler/mod.rs`         | +1 line: `mod cfa_deadline;`.                                                                                                                                                                                              |
 | `rslib/src/scheduler/service/mod.rs` | +1 thin trait delegate `deadline_retention` (mirrors the existing `build_exam_queue` delegate). Required because the generated `SchedulerService` trait has no default methods; all real logic lives in `cfa_deadline.rs`. |
-| `pylib/anki/cfa.py`                  | +`deadline_retention_with_new` — the read-only desktop wrapper that adds a deck's new cards (recall 0.0) to the due-card ranking so a fresh all-new deck still ranks.                                                        |
-| `qt/aqt/cfa.py`                      | +1 "Peak-on-Exam-Day…" menu action + `DeadlineDialog` (ranks due **and** new cards via `cfa.deadline_retention_with_new`; self-heals an absurd persisted exam date via `_sanitized_exam_date`).                             |
+| `qt/aqt/cfa.py`                      | +1 "Peak-on-Exam-Day…" menu action + `PeakOnExamDayDialog`.                                                                                                                                                                |
 
 Everything else (`_backend_generated.py`, the Rust service trait/dispatch,
 `scheduler_pb2.py`) is **generated** from the proto — no hand edits.
@@ -164,9 +127,7 @@ for cid, r, ivl in zip(res.card_ids, res.predicted_recall, res.suggested_interva
 ```
 
 Or via the desktop UI: **CFA → Peak-on-Exam-Day…** (uses the deck's configured
-exam date from `anki.cfa.set_exam_config`, self-healed if absurd, and ranks new
-cards alongside due ones via `anki.cfa.deadline_retention_with_new` — see
-[Desktop: new cards + exam-date self-heal](#desktop-new-cards--exam-date-self-heal)).
+exam date from `anki.cfa.set_exam_config`).
 
 ### Build note (RPC binding)
 
