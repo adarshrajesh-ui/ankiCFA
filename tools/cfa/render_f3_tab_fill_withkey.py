@@ -47,11 +47,11 @@ sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(REPO, "qt"))
 sys.path.insert(0, REPO)
 
-from aqt.cfa_tab_fill import AI_TAG, fill_note_back  # noqa: E402
-
 # Reuse the exact FRONT question, note stub, and enabled-button markup from the
 # offline renderer so the two proofs are directly comparable.
-from render_f3_tab_fill import FRONT, _ENABLED_BTN, _Note  # noqa: E402
+from render_f3_tab_fill import _ENABLED_BTN, FRONT, _Note  # noqa: E402
+
+from aqt.cfa_tab_fill import AI_TAG, fill_note_back  # noqa: E402
 
 FMT = "".join(f'<div class="fmt">{c}</div>' for c in ("B", "I", "U", "{}"))
 
@@ -152,12 +152,16 @@ def render_after(out_path: str) -> str:
 
 
 def main(argv=None) -> int:
-    ap = argparse.ArgumentParser(description="F3 with-key (real LLM) before/after proof")
-    ap.add_argument(
-        "--before", default=os.path.join(REPO, "proof", "fixes", "p4", "f3-withkey-before.html")
+    ap = argparse.ArgumentParser(
+        description="F3 with-key (real LLM) before/after proof"
     )
     ap.add_argument(
-        "--after", default=os.path.join(REPO, "proof", "fixes", "p4", "f3-withkey-after.html")
+        "--before",
+        default=os.path.join(REPO, "proof", "fixes", "p4", "f3-withkey-before.html"),
+    )
+    ap.add_argument(
+        "--after",
+        default=os.path.join(REPO, "proof", "fixes", "p4", "f3-withkey-after.html"),
     )
     args = ap.parse_args(argv)
 

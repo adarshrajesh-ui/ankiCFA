@@ -36,6 +36,7 @@ words that put the conduct on one side of the line — recall of the boundary, n
 recognition of a label.
 
 **Evidence**
+
 - Bank: `cfa/ethics_pairs/passages.jsonl` — 30 one-passage items (`wc -l` = 30).
 - With-key grader eval: `proof/fixes/p4/f2-withkey-eval.txt` — the real LLM
   grades all 30 attempts at **0.933** agreement (≥ 0.80 → PASS); deterministic
@@ -76,6 +77,7 @@ and **F4** (an exam-readiness call that scores against the exam date rather than
 indefinite retention).
 
 **Evidence**
+
 - Rust date-aware core: `rslib/src/scheduler/cfa_deadline.rs` — e.g.
   `capped_interval_is_min_of_fsrs_interval_and_days_to_exam`,
   `suggested_interval_is_capped_at_days_to_exam`,
@@ -116,6 +118,7 @@ per-type weight so equally-weak cards of different item types are scheduled
 differently.
 
 **Evidence**
+
 - Classifier: `tools/cfa/build_cfa_deck.py` — `classify_item_type()` returns the
   `type::<kind>` tag, applied as `note.tags = [item["los_tag"],
   f"type::{classify_item_type(item)}"]`.
@@ -133,7 +136,7 @@ differently.
 
 - **AI is OFF by default and every feature works fully without a key.** F2
   semantic grading falls back to the deterministic F1 grader, F3 tab-fill is
-  disabled, and the eval's LLM ≥0.80 assertion is *skipped* (never faked). The
+  disabled, and the eval's LLM ≥0.80 assertion is _skipped_ (never faked). The
   with-key numbers (F2 0.933; F3 real drafted back) are the opt-in path, proven
   in `proof/fixes/p4/f2-withkey-eval.txt` and `proof/fixes/p4/f3-withkey-after.png`.
 - **F4 readiness is not validated against real exam outcomes.** It is a Bayesian
@@ -142,8 +145,8 @@ differently.
 - **Mobile is the shared fork Rust engine + synced content, not a full port.**
   On Android the fork `BuildExamQueue` / `DeadlineRetention` engine runs
   on-device and the decks/ethics/exam-config reach the phone via bundled `.apkg`
-  + AnkiWeb sync; the AI editor button, LLM grading UI, and readiness dialog are
-  desktop-only (see `docs/cfa/PLATFORM-MATRIX.md`).
+  - AnkiWeb sync; the AI editor button, LLM grading UI, and readiness dialog are
+    desktop-only (see `docs/cfa/PLATFORM-MATRIX.md`).
 - **All authored items are original.** No copyrighted CFA Institute content; the
   leakage check confirms no held-out eval question overlaps a training front.
 

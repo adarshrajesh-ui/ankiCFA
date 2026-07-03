@@ -37,7 +37,7 @@ What was found / done (additive):
 Evidence:
 
 - Before: `proof/fixes/p4/1-keyhygiene-before.txt`
-- After:  `proof/fixes/p4/1-keyhygiene-after.txt`
+- After: `proof/fixes/p4/1-keyhygiene-after.txt`
 
 Verify (AI-off unaffected): no application code changed — only `.gitignore` + proof files.
 
@@ -50,7 +50,7 @@ Verify (AI-off unaffected): no application code changed — only `.gitignore` + 
 - Branch: `p4/02-mypy`
 - Commit SHA: `200c0a22e7bda331f292d38d0d3040ee96d69545`
 - Evidence — Before: `proof/fixes/p4/2-mypy-before.txt`
-- Evidence — After:  `proof/fixes/p4/2-mypy-after.txt`
+- Evidence — After: `proof/fixes/p4/2-mypy-after.txt`
 - Build: cold `just build` in the fresh worktree succeeded (needed for the generated
   stubs under `out/pylib/anki` + `out/qt/_aqt` that mypy consumes).
 
@@ -113,7 +113,7 @@ Gate: DEFERRED — `no-mistakes` intentionally NOT run for this item.
 - Branch: `p4/03-aqt` (stacked on `p4/02-mypy`, which contains items 1 + 2)
 - Commit SHA: `4af70d0f89dc8d540b3faaac3a2d66c58247f883`
 - Evidence — Before: `proof/fixes/p4/3-aqt-before.txt`
-- Evidence — After:  `proof/fixes/p4/3-aqt-after.txt`
+- Evidence — After: `proof/fixes/p4/3-aqt-after.txt`
 
 The bug: the global gate target `check:pytest:aqt` (defined in
 `build/configure/src/aqt.rs`) ran pytest with
