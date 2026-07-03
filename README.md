@@ -3,7 +3,6 @@
 > **Exam:** **CFA Level II.** ankiCFA is a fork of **[Anki](https://apps.ankiweb.net)**
 > (upstream source: <https://github.com/ankitects/anki>).
 > **License:** GNU **AGPL-3.0-or-later** — unchanged from Anki (see [LICENSE](./LICENSE)).
-> **No AI:** there are no AI features anywhere in this build — no model calls, no
 > generated content, no chatbot. Everything here is deterministic spaced repetition.
 
 **ankiCFA** adds a thin **exam-prep layer** on top of Anki's Rust scheduling engine
