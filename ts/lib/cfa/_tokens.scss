@@ -1,0 +1,232 @@
+// Copyright: Ankitects Pty Ltd and contributors
+// License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
+
+// =============================================================================
+// CFA shared web design tokens — the ONE palette + scales for the CFA web
+// surfaces, modelled on the calm, premium finance-education feel of
+// https://www.markmeldrum.com/ (see cfa/ui/reference/BRAND.md).
+//
+// PARITY: the colour palette below MIRRORS the Python token table in
+// qt/aqt/cfa_style.py `TOKENS` (which is itself mirrored into
+// cfa/ethics_pairs/templates/style.css `:root`). The parity-gated tokens
+// (ink, muted, faint, line, surface, primary, primary_soft, pass, fail, warn,
+// accent, accent_soft) MUST stay byte-for-byte identical to cfa_style.py so the
+// desktop dialogs, the ethics card and these web pages read as one product
+// (the "F5" design-system parity guard). If you change a value here, change it
+// in qt/aqt/cfa_style.py (and the ethics card `:root`) too.
+//
+// The type / radius / spacing scales are web-scaled (full pages, not a cramped
+// Qt dialog) but follow the same brand rhythm the site uses. `font` /
+// `font_heading` families mirror cfa_style.py; the web scale uses the real
+// site's larger display sizes (hero 40px, stats 55px) which the dialog scales
+// down (fs_hero 28) — both are calm weight-400 serif.
+// =============================================================================
+
+@use "sass:map";
+
+// ---------------------------------------------------------------------------
+// COLOUR — navy-tinted neutral ramp + calm brand + the pass/fail/warn triad.
+// (Parity-gated values are flagged; keep identical to qt/aqt/cfa_style.py.)
+// ---------------------------------------------------------------------------
+
+// Neutrals — text, borders, quiet surfaces (sourced from the BuddyBoss brand).
+$cfa-ink: #122b46; // [PARITY] primary text / brand navy (--bb-headings-color)
+$cfa-muted: #4d5c6d; // [PARITY] secondary text (--bb-body-text-color)
+$cfa-faint: #939597; // [PARITY] captions / disabled (--bb-alternate-text-color)
+$cfa-line: #e7e9ec; // [PARITY] hairline borders (--bb-content-border-color)
+$cfa-surface: #f3f6f8; // [PARITY] panels / table stripes (cool section band)
+$cfa-bg: #ffffff; // [PARITY] card / content background
+$cfa-page: #fafbfd; // page tint behind cards (--bb-body-background-color)
+$cfa-card-body: #6c7485; // body text inside a card (computed .card colour)
+
+// Brand — the calm structural navy (coincides with ink on the real site).
+$cfa-primary: #122b46; // [PARITY]
+$cfa-primary-soft: #f3f6f8; // [PARITY]
+$cfa-primary-hover: #0e2238; // darker navy for hover (derived from primary)
+
+// Warm CTA accent — the site's --bb-primary-color orange (soft = derived tint).
+$cfa-accent: #da5c01; // [PARITY] CTA / link orange
+$cfa-accent-soft: #fcebda; // [PARITY] derived soft tint of the accent
+$cfa-accent-hover: #c45301; // --bb-primary-button-background-hover
+
+// MM signature green. `mm-green` is the AA-safe green (5.1:1 on white) for
+// eyebrows / small text / CTAs; `brand-green` is the literal --mm-accent-color
+// (#009666, ~3.78:1) — reserve it for FILLS / RULES / decoration, never small
+// text. Neither is the semantic `pass` green.
+$cfa-mm-green: #007e56; // AA-safe eyebrow / CTA green (featureBandGreen)
+$cfa-brand-green: #009666; // literal MM accent — fills / rules only
+
+// Semantic — the pass / fail / caution triad (KEEP; do not calm these away).
+$cfa-pass: #15803d; // [PARITY]
+$cfa-pass-soft: #f0fdf4; // [PARITY]
+$cfa-fail: #b91c1c; // [PARITY]
+$cfa-fail-soft: #fef2f2; // [PARITY]
+$cfa-warn: #b45309; // [PARITY]
+$cfa-warn-soft: #fdf3e7; // derived soft tint for warn notices
+
+$cfa-colors: (
+    "ink": $cfa-ink,
+    "muted": $cfa-muted,
+    "faint": $cfa-faint,
+    "line": $cfa-line,
+    "surface": $cfa-surface,
+    "bg": $cfa-bg,
+    "page": $cfa-page,
+    "card-body": $cfa-card-body,
+    "primary": $cfa-primary,
+    "primary-soft": $cfa-primary-soft,
+    "primary-hover": $cfa-primary-hover,
+    "accent": $cfa-accent,
+    "accent-soft": $cfa-accent-soft,
+    "accent-hover": $cfa-accent-hover,
+    "mm-green": $cfa-mm-green,
+    "brand-green": $cfa-brand-green,
+    "pass": $cfa-pass,
+    "pass-soft": $cfa-pass-soft,
+    "fail": $cfa-fail,
+    "fail-soft": $cfa-fail-soft,
+    "warn": $cfa-warn,
+    "warn-soft": $cfa-warn-soft,
+);
+
+// ---------------------------------------------------------------------------
+// TYPOGRAPHY — families mirror cfa_style.py; the web scale uses the site's
+// real display sizes (hero 40/400, stats 55/400, h4 18/600, body 16/1.5).
+// Calm by design: weights stop at 600 — NEVER 700/800. NO monospace anywhere.
+// ---------------------------------------------------------------------------
+$cfa-font-body: "IBM Plex Sans", -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+$cfa-font-heading: "Source Serif 4", Georgia, "Times New Roman", serif;
+
+// Weights (calm — no bold display type).
+$cfa-weight-regular: 400;
+$cfa-weight-medium: 500;
+$cfa-weight-semibold: 600;
+
+// Font sizes (px). Names map to on-site roles; dialog-scale equivalents from
+// cfa_style.py noted where they differ.
+$cfa-fs-display: 55px; // stats display number (statsDisplay 55/400)
+$cfa-fs-hero: 40px; // hero H1 (heroH1 40/400; dialog fs_hero 28)
+$cfa-fs-stat: 40px; // StatCard value (big calm serif number)
+$cfa-fs-title: 28px; // page / section title (serif)
+$cfa-fs-subtitle: 22px; // secondary heading (dialog fs_title 22)
+$cfa-fs-h4: 18px; // card title (h4 18/600)
+$cfa-fs-lead: 18px; // lead paragraph
+$cfa-fs-body: 16px; // body copy (site body 16/1.5; dialog fs_body 15)
+$cfa-fs-small: 13px; // small text (WP preset small)
+$cfa-fs-meta: 12px; // meta / caption (dialog fs_meta 12)
+$cfa-fs-eyebrow: 12px; // uppercase over-line (dialog fs_eyebrow 11)
+
+// Line heights.
+$cfa-lh-tight: 1.1; // big display / hero
+$cfa-lh-heading: 1.2; // headings
+$cfa-lh-snug: 1.35; // sub-headings / dense rows
+$cfa-lh-body: 1.5; // body copy (site body leading)
+
+// Letter spacing.
+$cfa-ls-eyebrow: 0.1em; // premium tracking on small uppercase
+$cfa-ls-caps: 0.06em; // table headers / dividers
+
+$cfa-font-sizes: (
+    "display": $cfa-fs-display,
+    "hero": $cfa-fs-hero,
+    "stat": $cfa-fs-stat,
+    "title": $cfa-fs-title,
+    "subtitle": $cfa-fs-subtitle,
+    "h4": $cfa-fs-h4,
+    "lead": $cfa-fs-lead,
+    "body": $cfa-fs-body,
+    "small": $cfa-fs-small,
+    "meta": $cfa-fs-meta,
+    "eyebrow": $cfa-fs-eyebrow,
+);
+
+// ---------------------------------------------------------------------------
+// RADIUS — the site uses exactly two families: 4px blocks and 100px pills.
+// Do NOT introduce other radii (normalize everything to one of these).
+// ---------------------------------------------------------------------------
+$cfa-radius-block: 4px; // --bb-block-radius / --bb-input-radius
+$cfa-radius-pill: 100px; // --bb-button-radius (pill CTAs)
+
+// ---------------------------------------------------------------------------
+// SPACING — 8px base rhythm (mirrors the LearnDash fixed spacer scale the site
+// ships: 4,8,12,16,20,24,32,40,48,56,64,80,96,128). Use `space($step)`.
+// ---------------------------------------------------------------------------
+$cfa-space: (
+    0: 0,
+    1: 4px,
+    2: 8px,
+    3: 12px,
+    4: 16px,
+    5: 20px,
+    6: 24px,
+    7: 32px,
+    8: 40px,
+    9: 48px,
+    10: 56px,
+    11: 64px,
+    12: 80px,
+    13: 96px,
+    14: 128px,
+);
+
+@function space($step) {
+    @if not map.has-key($cfa-space, $step) {
+        @error "cfa space(): unknown step '#{$step}'. Use one of #{map.keys($cfa-space)}.";
+    }
+    @return map.get($cfa-space, $step);
+}
+
+@function color($name) {
+    @if not map.has-key($cfa-colors, $name) {
+        @error "cfa color(): unknown colour '#{$name}'.";
+    }
+    @return map.get($cfa-colors, $name);
+}
+
+// ---------------------------------------------------------------------------
+// LAYOUT — container widths + section rhythm from the real site.
+// ---------------------------------------------------------------------------
+$cfa-container: 1200px; // dominant content max-width
+$cfa-container-narrow: 540px; // inner text column
+$cfa-section-y: 80px; // section vertical padding (top)
+$cfa-section-y-tight: 64px; // symmetric section padding
+
+// ---------------------------------------------------------------------------
+// ROOT — emit every token as a `--cfa-*` custom property so page agents (and
+// raw HTML) can reference them at runtime. Include once via `theme.scss`, e.g.
+//   :root { @include cfa.root; }
+// Components in this folder use the SCSS variables directly (self-contained),
+// so they render correctly even without this mixin present.
+// ---------------------------------------------------------------------------
+@mixin root {
+    @each $name, $val in $cfa-colors {
+        --cfa-#{$name}: #{$val};
+    }
+    @each $name, $val in $cfa-font-sizes {
+        --cfa-fs-#{$name}: #{$val};
+    }
+    @each $step, $val in $cfa-space {
+        --cfa-space-#{$step}: #{$val};
+    }
+
+    --cfa-font-body: #{$cfa-font-body};
+    --cfa-font-heading: #{$cfa-font-heading};
+    --cfa-weight-regular: #{$cfa-weight-regular};
+    --cfa-weight-medium: #{$cfa-weight-medium};
+    --cfa-weight-semibold: #{$cfa-weight-semibold};
+
+    --cfa-lh-tight: #{$cfa-lh-tight};
+    --cfa-lh-heading: #{$cfa-lh-heading};
+    --cfa-lh-snug: #{$cfa-lh-snug};
+    --cfa-lh-body: #{$cfa-lh-body};
+    --cfa-ls-eyebrow: #{$cfa-ls-eyebrow};
+    --cfa-ls-caps: #{$cfa-ls-caps};
+
+    --cfa-radius-block: #{$cfa-radius-block};
+    --cfa-radius-pill: #{$cfa-radius-pill};
+
+    --cfa-container: #{$cfa-container};
+    --cfa-container-narrow: #{$cfa-container-narrow};
+    --cfa-section-y: #{$cfa-section-y};
+    --cfa-section-y-tight: #{$cfa-section-y-tight};
+}
