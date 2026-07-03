@@ -21,10 +21,13 @@ import statistics
 import time
 from dataclasses import asdict, dataclass, field
 from datetime import date, datetime
-from typing import Any, Optional, cast
+from typing import TYPE_CHECKING, Any, Optional, cast
 
 import anki.collection
 from anki.decks import DeckId
+
+if TYPE_CHECKING:
+    from anki import cfa_deadline
 
 TOPIC_PREFIX = "los::"
 TYPE_PREFIX = "type::"
@@ -234,6 +237,89 @@ def build_exam_queue_all_decks(
     return ExamQueue(
         card_ids=[cid for cid, _ in merged],
         scores=[score for _, score in merged],
+    )
+
+
+# =============================================================================
+# Deadline retention including NEW cards (fresh-profile-safe peak-on-exam-day)
+# =============================================================================
+
+
+def deadline_retention_with_new(
+    col: anki.collection.Collection,
+    *,
+    deck_id: DeckId | int,
+    exam_date: "cfa_deadline.ExamDate",
+    fetch_limit: int = 0,
+    now: Optional[int] = None,
+) -> "cfa_deadline.DeadlineRetention":
+    """Weakest-first exam-day ranking that ALSO includes brand-new cards.
+
+    :func:`anki.cfa_deadline.deadline_retention` ranks only a deck's DUE cards,
+    so on a fresh profile — where every CFA card is still NEW — it returns an
+    empty ranking and the desktop "Peak-on-Exam-Day" view dead-ends on "No due
+    cards to rank yet". This is a thin, read-only WRAPPER around that engine
+    (which it does not modify): it takes the due-card ranking verbatim and then
+    merges in the deck's NEW cards, whose predicted exam-day recall is treated as
+    0.0 (never studied => maximally weak), so they sort to the very top of the
+    weakest-first order and the table is non-empty out of the box.
+
+    New cards carry no schedule yet, so their deadline-capped next interval is 0.
+    The merged rows are re-sorted by (predicted recall ascending, card id
+    ascending) — identical to the engine's own ordering. When ``fetch_limit`` is
+    set, at least half of the slots are reserved for DUE cards so a large
+    new-card backlog cannot crowd the genuinely-weak scheduled cards out of the
+    capped view (new cards still fill every slot the due cards leave unused, so a
+    fresh all-new deck is unaffected). ``used_rpc`` mirrors the underlying
+    due-card engine. Never mutates the collection, so FSRS scheduling and undo
+    stay valid.
+    """
+    from anki import cfa_deadline
+
+    due = cfa_deadline.deadline_retention(
+        col, deck_id=deck_id, exam_date=exam_date, fetch_limit=0, now=now
+    )
+
+    # NEW cards in the deck (and subdecks), using the same search-engine
+    # semantics ("is:new") as the deadline module's due-card query. Exclude
+    # anything already ranked as due so a card is never counted twice.
+    ranked = set(due.card_ids)
+    deck_name = col.decks.name(DeckId(int(deck_id)))
+    escaped = cfa_deadline._escape_deck_name(deck_name)
+    new_cids = [
+        int(cid)
+        for cid in col.find_cards(f'deck:"{escaped}" is:new')
+        if int(cid) not in ranked
+    ]
+
+    due_rows: list[tuple[int, float, int]] = list(
+        zip(
+            (int(c) for c in due.card_ids),
+            (float(r) for r in due.predicted_recall),
+            (int(i) for i in due.suggested_interval_days),
+        )
+    )
+    # New cards: recall 0.0 (weakest possible), no scheduled interval yet.
+    new_rows: list[tuple[int, float, int]] = [(cid, 0.0, 0) for cid in new_cids]
+
+    if fetch_limit:
+        limit = int(fetch_limit)
+        # New cards all share recall 0.0, so a naive weakest-first cut would let
+        # a new-card backlog crowd genuinely-weak DUE cards out of the capped
+        # view. Reserve at least half the slots for due cards; new cards take
+        # every slot the due cards leave unused.
+        due_take = min(len(due_rows), max(limit // 2, limit - len(new_rows)))
+        merged = due_rows[:due_take] + new_rows[: limit - due_take]
+    else:
+        merged = due_rows + new_rows
+    # Weakest predicted exam-day recall first; ties broken by ascending card id.
+    merged.sort(key=lambda row: (row[1], row[0]))
+
+    return cfa_deadline.DeadlineRetention(
+        card_ids=[c for c, _, _ in merged],
+        predicted_recall=[r for _, r, _ in merged],
+        suggested_interval_days=[i for _, _, i in merged],
+        used_rpc=due.used_rpc,
     )
 
 

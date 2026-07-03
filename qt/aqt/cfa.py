@@ -14,8 +14,11 @@ Adds a "CFA" menu with:
   non-filtered deck), so the flagship is reachable on desktop.
 * "Study by Exam Priority" — builds the read-only exam-priority queue
   (``build_exam_queue``) and opens a filtered deck ordered by that priority.
-* "Peak-on-Exam-Day (Deadline)…" — ranks the current deck's due cards by
-  predicted FSRS recall AT the exam date (``cfa_deadline``), weakest first.
+* "Peak-on-Exam-Day (Deadline)…" — ranks the current deck's due AND new cards
+  by predicted FSRS recall AT the exam date (``cfa.deadline_retention_with_new``,
+  which wraps ``cfa_deadline``), weakest first — new cards count as recall 0.0 so
+  a fresh all-new deck still ranks. The persisted exam date is self-healed if it
+  is absurd/far-future.
 
 No AI — pure spaced-repetition statistics throughout.
 """
@@ -24,7 +27,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from anki import cfa, cfa_deadline
+from anki import cfa
 from anki.decks import DEFAULT_DECK_ID, DeckId
 from aqt import cfa_style
 from aqt.qt import (
@@ -47,6 +50,8 @@ from aqt.qt import (
 from aqt.utils import showInfo, showWarning, tooltip
 
 if TYPE_CHECKING:
+    from datetime import date
+
     from aqt.main import AnkiQt
 
 # Deck names used by the CFA fork.
@@ -358,6 +363,39 @@ def _default_exam_date() -> str:
     return target.isoformat()
 
 
+# A persisted exam date more than this many days in the future is treated as
+# runtime pollution (e.g. a stale/absurd far-future date) rather than a real
+# sitting, and self-healed back to the canonical default. Two years is a
+# generous ceiling — it keeps even a far-out real sitting a candidate might pick
+# while still flagging multi-year garbage like the observed 2028-08-23 date.
+_MAX_EXAM_HORIZON_DAYS = 730
+
+
+def _sanitized_exam_date(iso: str | None, *, today: date | None = None) -> str:
+    """Return a trustworthy ISO exam date, self-healing absurd persisted values.
+
+    The exam date lives in the synced collection config, so a stale or corrupt
+    value can be persisted and then trusted blindly — e.g. an observed
+    far-future ``2028-08-23`` that long predates this profile's real sitting.
+    This guards the read: a missing, unparseable, or unreasonably-far-future
+    date (more than ``_MAX_EXAM_HORIZON_DAYS`` ahead of ``today``) falls back to
+    the canonical :func:`_default_exam_date` (the fork's 2026-08-25 sitting);
+    any sane date is returned untouched.
+    """
+    from datetime import date as _date
+
+    if not iso:
+        return _default_exam_date()
+    try:
+        parsed = _date.fromisoformat(iso)
+    except ValueError:
+        return _default_exam_date()
+    reference = today or _date.today()
+    if (parsed - reference).days > _MAX_EXAM_HORIZON_DAYS:
+        return _default_exam_date()
+    return iso
+
+
 def show_deadline(mw: AnkiQt) -> None:
     """Open the Peak-on-Exam-Day view (with an exam-date picker).
 
@@ -660,8 +698,23 @@ class DeadlineDialog(QDialog):
         self._reload()
 
     def _initial_date(self) -> QDate:
+        from datetime import date as _date
+
         cfg = cfa.get_exam_config(self.mw.col) or {}
-        iso = cfg.get("exam_date") or _default_exam_date()
+        raw = cfg.get("exam_date")
+        # Self-heal an absurd/invalid persisted exam date (e.g. stale far-future
+        # config) back to the canonical default instead of trusting it verbatim.
+        iso = _sanitized_exam_date(raw)
+        # A *parseable* saved date that the heal overrode is a candidate for a
+        # deliberate far-future pick, not just missing/garbage config. Record it
+        # so the reload can tell the user rather than silently swapping it.
+        self._healed_from: str | None = None
+        if raw and iso != raw:
+            try:
+                _date.fromisoformat(raw)
+                self._healed_from = raw
+            except ValueError:
+                self._healed_from = None
         parsed = QDate.fromString(iso, "yyyy-MM-dd")
         return parsed if parsed.isValid() else QDate.currentDate().addDays(120)
 
@@ -674,6 +727,8 @@ class DeadlineDialog(QDialog):
         cfa.set_exam_config(
             col, exam_date=iso, topic_weights=cfg.get("topic_weights", {})
         )
+        # The user just made a deliberate choice; drop any stale heal notice.
+        self._healed_from = None
         tooltip(f"Exam date set to {iso}.", parent=self)
         self._reload()
 
@@ -682,32 +737,46 @@ class DeadlineDialog(QDialog):
         assert col is not None
         exam_date = self.date_edit.date().toString("yyyy-MM-dd")
         deck_id = col.decks.get_current_id()
-        result = cfa_deadline.deadline_retention(
+        # Rank due AND new cards: new (unstudied) cards are treated as weakest
+        # (predicted recall 0.0), so a fresh all-new deck is never a dead-end.
+        result = cfa.deadline_retention_with_new(
             col, deck_id=deck_id, exam_date=exam_date, fetch_limit=50
         )
+
+        heal_notice = ""
+        if self._healed_from:
+            heal_notice = cfa_style.notice(
+                f"Your saved exam date ({self._healed_from}) is far in the "
+                f"future, so the planner is showing {exam_date} instead. Pick a "
+                "date and click “Set exam date” to change it.",
+                tone="warn",
+            )
 
         source = "Rust RPC" if result.used_rpc else "read-only fallback"
         if not len(result):
             self._header.setText(
-                cfa_style.caption(f"Exam date: <b>{exam_date}</b>")
-                + cfa_style.notice("No due cards to rank yet.", tone="warn")
+                heal_notice
+                + cfa_style.caption(f"Exam date: <b>{exam_date}</b>")
+                + cfa_style.notice("No cards to rank yet.", tone="warn")
                 + "<div>"
                 + cfa_style.caption(
-                    "Once this deck has scheduled reviews, the "
-                    "weakest-on-the-day cards will appear here."
+                    "Once this deck has cards, the weakest-on-the-day cards "
+                    "(new cards first) will appear here."
                 )
                 + "</div>"
             )
         else:
             self._header.setText(
-                cfa_style.caption(
+                heal_notice
+                + cfa_style.caption(
                     f"Exam date: <b>{exam_date}</b> · "
                     f"{len(result)} cards ranked weakest-first ({source})"
                 )
                 + "<div style='margin-top:2px'>"
                 + cfa_style.caption(
-                    "Predicted FSRS recall AT the exam date; each interval is "
-                    "capped so no review lands after the exam."
+                    "Predicted FSRS recall AT the exam date; new (unstudied) "
+                    "cards are included and counted as weakest (recall 0.0). "
+                    "Each interval is capped so no review lands after the exam."
                 )
                 + "</div>"
             )
