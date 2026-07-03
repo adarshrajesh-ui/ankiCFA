@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import enum
+import json
 import logging
 import mimetypes
 import os
@@ -17,6 +18,7 @@ from dataclasses import dataclass
 from errno import EPROTOTYPE
 from http import HTTPStatus
 from pathlib import Path
+from typing import Any
 
 import flask
 import stringcase
@@ -27,9 +29,9 @@ from waitress.server import create_server
 import aqt
 import aqt.main
 import aqt.operations
-from anki import hooks
-from anki.collection import OpChangesOnly, Progress, SearchNode
-from anki.decks import UpdateDeckConfigs, UpdateDeckConfigsMode
+from anki import frontend_pb2, generic_pb2, hooks
+from anki.collection import Collection, OpChangesOnly, Progress, SearchNode
+from anki.decks import DeckId, UpdateDeckConfigs, UpdateDeckConfigsMode
 from anki.scheduler.v3 import SchedulingStatesWithContext, SetSchedulingStatesRequest
 from anki.utils import dev_mode
 from aqt.changenotetype import ChangeNotetypeDialog
@@ -422,6 +424,8 @@ def is_sveltekit_page(path: str) -> bool:
         "import-csv",
         "import-page",
         "image-occlusion",
+        "cfa-readiness",
+        "cfa-deadline",
     ]
 
 
@@ -704,6 +708,188 @@ def save_custom_colours() -> bytes:
     return b""
 
 
+# =============================================================================
+# CFA fork: JSON payloads for the SvelteKit Exam Readiness / Deadline pages.
+#
+# These mirror the desktop dialogs in aqt/cfa.py exactly — same pylib scores,
+# same abstain gate, same labels/thresholds — so the web pages present the SAME
+# honest data. There is NO logic/threshold change here; this layer only
+# serialises the existing scores into the JSON data contract that the shared web
+# components (ts/lib/cfa) consume.
+# =============================================================================
+
+_CFA_READINESS_FOOTER = (
+    "The headline is a Bayesian call: exam-weighted accuracy as a 95% credible "
+    "band (per-topic Beta posterior on first-exposure correctness) that starts "
+    "wide and narrows as reviews accrue — no give-up wall. Recall uses FSRS R, "
+    "falling back to an SM-2 forgetting curve so a number appears from the first "
+    "review. Below it, the three give-up-gated scores: Memory (exam-weighted "
+    "per-topic FSRS retrievability), Performance (Wilson interval on "
+    "first-exposure accuracy) and Readiness (fused P(pass)). The pass/fail call "
+    "is NOT validated against real exam data. No AI — pure spaced-repetition "
+    "stats."
+)
+
+_CFA_DEADLINE_FOOTER = (
+    "Weakest cards on the day are shown first. Study these to peak on the exam "
+    "date. Read-only — FSRS scheduling and undo stay valid. No AI."
+)
+
+# Predicted exam-day recall below this is flagged as a weak card (mirrors the
+# desktop deadline table's warn colour: recall < 0.85).
+_CFA_DEADLINE_WARN_RECALL = 0.85
+
+
+def _cfa_score_band(name: str, meaning: str, score: Any) -> dict[str, Any]:
+    """One honest score serialised as the shared ScoreBand contract."""
+    return {
+        "name": name,
+        "meaning": meaning,
+        "abstain": score.abstain,
+        "reason": score.reason,
+        "point": score.point,
+        "rangeLow": score.range_low,
+        "rangeHigh": score.range_high,
+    }
+
+
+def _cfa_exam_readiness_payload(col: Collection, deck_id: int) -> dict[str, Any]:
+    from anki import cfa
+
+    bayes = cfa.bayesian_readiness(col, deck_id=deck_id)
+    score = cfa.memory_score(col, deck_id=deck_id)
+    perf = cfa.performance_score(col, deck_id=deck_id)
+    ready = cfa.readiness_score(col, deck_id=deck_id)
+    deck_name = col.decks.name(DeckId(deck_id))
+
+    # Hero: the Bayesian pass/fail call, but ABSTAIN when either Memory or
+    # Performance gives up — identical gate to the desktop dialog
+    # (score.abstain || perf.abstain).
+    hero_abstain = score.abstain or perf.abstain
+
+    payload: dict[str, Any] = {
+        "deckName": deck_name,
+        "heroMode": "abstain" if hero_abstain else "bayesian_call",
+        "memory": _cfa_score_band(
+            "Memory",
+            "recall probability, exam-weighted across topics",
+            score,
+        ),
+        "performance": _cfa_score_band(
+            "Performance",
+            "P(correct on a new question), first-exposure accuracy",
+            perf,
+        ),
+        "readiness": {
+            **_cfa_score_band("Readiness", "P(pass); wide range, uncalibrated", ready),
+            "label": ready.label,
+        },
+        "caption": {
+            "coveragePct": score.coverage_pct,
+            "topicsCovered": score.topics_covered,
+            "topicsTotal": score.topics_total,
+            "gradedReviews": score.graded_reviews,
+            "firstExposures": perf.first_exposures,
+            "lastReviewAt": score.last_review_at,
+        },
+        "topics": [
+            {
+                "topic": t.topic,
+                "weight": t.weight,
+                "reviewedCards": t.reviewed_cards,
+                "gradedReviews": t.graded_reviews,
+                "recallRange": (
+                    {"low": t.r_low, "high": t.r_high} if t.avg_r is not None else None
+                ),
+                "covered": t.covered,
+            }
+            for t in sorted(score.topics, key=lambda x: -x.weight)
+        ],
+        "footerText": _CFA_READINESS_FOOTER,
+    }
+
+    if hero_abstain:
+        payload["heroAbstain"] = {
+            "reason": score.reason if score.abstain else perf.reason,
+            "readinessLabel": cfa.READINESS_LABEL,
+        }
+    else:
+        payload["heroBayesian"] = {
+            "call": bayes.call,
+            "callProb": bayes.call_prob,
+            "passed": bayes.call == "likely pass",
+            "accuracy": bayes.accuracy,
+            "ciLow": bayes.ci_low,
+            "ciHigh": bayes.ci_high,
+            "mps": bayes.mps,
+            "recall": bayes.recall,
+            "firstExposures": bayes.first_exposures,
+            "topicsCovered": bayes.topics_covered,
+            "topicsTotal": bayes.topics_total,
+            "label": bayes.label,
+        }
+    return payload
+
+
+def get_cfa_exam_readiness() -> bytes:
+    req = frontend_pb2.GetCfaExamReadinessRequest()
+    req.ParseFromString(request.data)
+    payload = _cfa_exam_readiness_payload(aqt.mw.col, req.deck_id)
+    return generic_pb2.Json(json=json.dumps(payload).encode()).SerializeToString()
+
+
+def _cfa_deadline_payload(col: Collection, deck_id: int) -> dict[str, Any]:
+    from anki import cfa, cfa_deadline
+    from aqt.cfa import _default_exam_date
+
+    cfg = cfa.get_exam_config(col) or {}
+    exam_date = cfg.get("exam_date") or _default_exam_date()
+    topic_weights = cfg.get("topic_weights", {})
+
+    result = cfa_deadline.deadline_retention(
+        col, deck_id=deck_id, exam_date=exam_date, fetch_limit=50
+    )
+    recalls = list(result.predicted_recall)
+
+    return {
+        "examDate": exam_date,
+        "topicWeights": dict(topic_weights),
+        "cardCount": len(result),
+        "dataSource": "Rust RPC" if result.used_rpc else "read-only fallback",
+        "headerMode": "ranked" if len(result) else "empty",
+        "rows": [
+            {
+                "cardId": result.card_ids[i],
+                "predictedRecall": recalls[i],
+                "suggestedIntervalDays": result.suggested_interval_days[i],
+                "warnLowRecall": recalls[i] < _CFA_DEADLINE_WARN_RECALL,
+            }
+            for i in range(len(result))
+        ],
+        "footerText": _CFA_DEADLINE_FOOTER,
+    }
+
+
+def get_cfa_deadline_view() -> bytes:
+    req = frontend_pb2.GetCfaDeadlineViewRequest()
+    req.ParseFromString(request.data)
+    payload = _cfa_deadline_payload(aqt.mw.col, req.deck_id)
+    return generic_pb2.Json(json=json.dumps(payload).encode()).SerializeToString()
+
+
+def set_cfa_exam_date() -> bytes:
+    from anki import cfa
+
+    req = frontend_pb2.SetCfaExamDateRequest()
+    req.ParseFromString(request.data)
+    col = aqt.mw.col
+    cfg = cfa.get_exam_config(col) or {}
+    cfa.set_exam_config(
+        col, exam_date=req.exam_date, topic_weights=cfg.get("topic_weights", {})
+    )
+    return b""
+
+
 post_handler_list = [
     congrats_info,
     get_deck_configs_for_update,
@@ -720,6 +906,9 @@ post_handler_list = [
     deck_options_require_close,
     deck_options_ready,
     save_custom_colours,
+    get_cfa_exam_readiness,
+    get_cfa_deadline_view,
+    set_cfa_exam_date,
 ]
 
 

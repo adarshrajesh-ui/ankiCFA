@@ -30,6 +30,14 @@ service FrontendService {
 
   // Save colour picker's custom colour palette
   rpc SaveCustomColours(generic.Empty) returns (generic.Empty);
+
+  // CFA fork: JSON payload for the SvelteKit Exam Readiness page (honest
+  // memory/performance/readiness scores + the Bayesian pass/fail call).
+  rpc GetCfaExamReadiness(GetCfaExamReadinessRequest) returns (generic.Json);
+  // CFA fork: JSON payload for the SvelteKit Deadline (peak-on-exam-day) page.
+  rpc GetCfaDeadlineView(GetCfaDeadlineViewRequest) returns (generic.Json);
+  // CFA fork: persist the configured exam date (preserving topic weights).
+  rpc SetCfaExamDate(SetCfaExamDateRequest) returns (generic.Empty);
 }
 
 service BackendFrontendService {}
@@ -42,4 +50,16 @@ message SchedulingStatesWithContext {
 message SetSchedulingStatesRequest {
   string key = 1;
   scheduler.SchedulingStates states = 2;
+}
+
+message GetCfaExamReadinessRequest {
+  int64 deck_id = 1;
+}
+
+message GetCfaDeadlineViewRequest {
+  int64 deck_id = 1;
+}
+
+message SetCfaExamDateRequest {
+  string exam_date = 1;
 }
