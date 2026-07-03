@@ -1,0 +1,12 @@
+F0b seed          : {'main_deck': 'CFA Level II', 'ethics_deck': 'CFA::Ethics Pairs', 'main_seeded': True, 'ethics_seeded': True, 'notes_added': 630, 'ethics_added': 30, 'config_set': True}
+                    CFA Level II cards=630 ethics cards=30
+F0b exam config   : {'exam_date': '2026-08-25'}
+F0a llm_client    : ai_enabled=False ok=False error=no_api_key
+F1 grader         : passages=30 spans=73 perfect_attempt_correct=True
+F2 semantic grade : source=fallback correct=True
+F3 tab-fill AIoff : ok=False (AI off -> no draft, back untouched)
+F4 readiness      : call=likely fail p_pass=0.07 acc=0.50 CI=[0.30,0.70]
+F5 design tokens  : primary=#0f4c81 keys=22
+F6/F7/F8 engine   : build_exam_queue -> 5 cards (shared Rust engine, on-device via fork librsdroid.so)
+
+F9 REACHABILITY: PASS

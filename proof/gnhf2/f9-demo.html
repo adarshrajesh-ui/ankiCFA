@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><style>
+  :root{--navy:#0f4c81;--ink:#1c2b3a;--muted:#6b7a8d;--line:#e2e8f0;--bg:#f7f9fc;}
+  *{box-sizing:border-box;margin:0;}
+  body{font-family:-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);padding:32px;width:1400px;}
+  .eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--navy);font-weight:700;}
+  h1{font-size:30px;font-weight:750;margin:4px 0 2px;color:var(--ink);}
+  .sub{color:var(--muted);font-size:14px;margin-bottom:24px;}
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;}
+  .card{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(15,76,129,.06);}
+  .card .cap{padding:10px 14px;border-bottom:1px solid var(--line);}
+  .card .tag{font-size:11px;font-weight:700;color:var(--navy);letter-spacing:.06em;}
+  .card .title{font-size:13px;color:var(--ink);margin-top:2px;line-height:1.3;}
+  .shot{width:100%;height:230px;object-fit:cover;object-position:top center;background:#eef2f7;display:block;}
+  .foot{margin-top:24px;color:var(--muted);font-size:12px;border-top:1px solid var(--line);padding-top:14px;}
+</style></head><body>
+  <div class="eyebrow">CFA Exam-Prep Pro Upgrade</div>
+  <h1>F9 Demo — every shipped surface, one contact sheet</h1>
+  <div class="sub">Real rendered / on-device screenshots (AI-off default). 203 py/qt + 21 Rust tests green · reachability PASS.</div>
+  <div class="grid">
+    <div class="card"><div class="cap"><div class="tag">F4 · SCORING</div><div class="title">Bayesian Exam Readiness — 95% credible band + pass/fail call</div></div><img class="shot" src="f4-readiness-strong.png"></div>
+    <div class="card"><div class="cap"><div class="tag">F0b · DESKTOP</div><div class="title">Peak-on-Exam-Day date picker (persists exam config)</div></div><img class="shot" src="f0b-deadline-picked.png"></div>
+    <div class="card"><div class="cap"><div class="tag">F1/F5 · ETHICS</div><div class="title">One-passage multi-span card, calm finance styling</div></div><img class="shot" src="f5-ethics-card-after.png"></div>
+    <div class="card"><div class="cap"><div class="tag">F2 · AI GRADING</div><div class="title">Semantic highlight grade + AI feedback (fallback-safe)</div></div><img class="shot" src="f2-psg01-ai.png"></div>
+    <div class="card"><div class="cap"><div class="tag">F3 · AI EDITOR</div><div class="title">Tab-to-fill card backs (before / after / AI-off)</div></div><img class="shot" src="f3-tab-fill.png"></div>
+    <div class="card"><div class="cap"><div class="tag">F6 · ANDROID</div><div class="title">Fork Rust engine running on-device</div></div><img class="shot" src="f6-ondevice-deckpicker.png"></div>
+    <div class="card"><div class="cap"><div class="tag">F7 · ANDROID</div><div class="title">Bundled CFA decks auto-imported on device</div></div><img class="shot" src="f7-ondevice-decklist.png"></div>
+    <div class="card"><div class="cap"><div class="tag">F7 · ANDROID</div><div class="title">Ethics multi-span highlight working on device</div></div><img class="shot" src="f7-ondevice-multispan.png"></div>
+  </div>
+  <div class="foot">Every AI feature works fully with AI OFF via a deterministic fallback · scoring carries a standing "not validated against real exam data" caveat · mobile = shared Rust engine + synced content (see docs/cfa/PLATFORM-MATRIX.md).</div>
+</body></html>

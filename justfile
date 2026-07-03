@@ -168,6 +168,11 @@ cfa-f8-test:
     {{ ninja }} pylib
     PYTHONPATH="out/pylib:pylib:." {{ py }} -m pytest pylib/tests/test_cfa_f8_persistence.py -q
 
+# Feature F9: final-gate reachability — seed a fresh collection and exercise every shipped feature (F0a-F8) AI-off
+cfa-f9-gate:
+    {{ ninja }} pylib
+    QT_QPA_PLATFORM=offscreen PYTHONPATH="out/pylib:pylib:qt:out/qt:cfa/ethics_pairs:." {{ py }} tools/cfa/f9_reachability.py
+
 # Feature 9: run the live desktop<->phone sync demo (stands up anki-sync-server, prints a narrated round-trip)
 cfa-sync:
     {{ ninja }} pylib

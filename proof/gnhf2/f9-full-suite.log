@@ -1,0 +1,285 @@
+=================================================================
+### F0a cfa-ai-smoke
+=================================================================
+out/pyenv/bin/python -m pytest cfa/ai/tests -q
+........s                                                                [100%]
+8 passed, 1 skipped in 0.26s
+
+=================================================================
+### F0b cfa-f0b-test
+=================================================================
+./ninja pylib
+[1m[92m    Finished[0m ]8;;https://doc.rust-lang.org/cargo/reference/profiles.html#default-profiles\`release` profile [optimized]]8;;\ target(s) in 0.10s
+ninja: no work to do.
+[0m[1m[32m
+Build succeeded in 0.07s.
+[0mQT_QPA_PLATFORM=offscreen PYTHONPATH="out/pylib:pylib:qt:out/qt:cfa/ethics_pairs" out/pyenv/bin/python -m pytest qt/tests/test_cfa_f0b.py -q
+.....                                                                    [100%]
+5 passed in 0.81s
+
+=================================================================
+### F1 cfa-passages-test
+=================================================================
+./ninja pylib
+[1m[92m    Finished[0m ]8;;https://doc.rust-lang.org/cargo/reference/profiles.html#default-profiles\`release` profile [optimized]]8;;\ target(s) in 0.10s
+ninja: no work to do.
+[0m[1m[32m
+Build succeeded in 0.05s.
+[0mPYTHONPATH=out/pylib:cfa/ethics_pairs ANKI_TEST_MODE=1 out/pyenv/bin/python -m pytest cfa/ethics_pairs/tests/test_passages.py -q
+.............................                                            [100%]
+29 passed in 0.27s
+
+=================================================================
+### F1 cfa-passages-validate
+=================================================================
+out/pyenv/bin/python cfa/ethics_pairs/passages.py --dry-run
+validated 30 passages (73 gold spans) from /Users/adarshrajesh/AlphaWeek2/ankiCFA/cfa/ethics_pairs/passages.jsonl
+
+=================================================================
+### F2 cfa-ai-grade-test
+=================================================================
+./ninja pylib
+[1m[92m    Finished[0m ]8;;https://doc.rust-lang.org/cargo/reference/profiles.html#default-profiles\`release` profile [optimized]]8;;\ target(s) in 0.10s
+ninja: no work to do.
+[0m[1m[32m
+Build succeeded in 0.05s.
+[0mPYTHONPATH="cfa/ethics_pairs:." out/pyenv/bin/python -m pytest cfa/ethics_pairs/tests/test_ai_grading.py -q
+.............                                                            [100%]
+13 passed in 0.04s
+QT_QPA_PLATFORM=offscreen PYTHONPATH="out/pylib:pylib:qt:out/qt:cfa/ethics_pairs:." out/pyenv/bin/python -m pytest qt/tests/test_cfa_ethics_ai.py -q
+.......                                                                  [100%]
+7 passed in 0.15s
+
+=================================================================
+### F2 cfa-ethics-eval
+=================================================================
+out/pyenv/bin/python cfa/ethics_pairs/eval_ai_grading.py 
+====================================================================
+F2 ethics-highlight grading eval — human-labeled gold-set
+====================================================================
+attempts            : 30
+active grader       : deterministic fallback (AI OFF)
+grade agreement     : 0.733
+overall accuracy    : 0.733
+deterministic base  : 0.733 (frozen preview, for contrast)
+
+confusion (rows=human, cols=grader):
+               correct  somewhat   partial     wrong
+    correct         18         0         7         1
+   somewhat          0         1         0         0
+    partial          0         0         2         0
+      wrong          0         0         0         1
+
+AI OFF: no OPENAI_API_KEY, so the LLM >= 0.80 assertion is SKIPPED. The deterministic fallback graded every attempt; its agreement is reported above and is the honest AI-off number.
+====================================================================
+
+=================================================================
+### F3 cfa-tab-fill-test
+=================================================================
+./ninja pylib
+[1m[92m    Finished[0m ]8;;https://doc.rust-lang.org/cargo/reference/profiles.html#default-profiles\`release` profile [optimized]]8;;\ target(s) in 0.10s
+ninja: no work to do.
+[0m[1m[32m
+Build succeeded in 0.05s.
+[0mQT_QPA_PLATFORM=offscreen PYTHONPATH="out/pylib:pylib:qt:out/qt:." out/pyenv/bin/python -m pytest qt/tests/test_cfa_tab_fill.py -q
+..................                                                       [100%]
+18 passed in 0.15s
+
+=================================================================
+### F4 cfa-f4-test
+=================================================================
+./ninja pylib
+[1m[92m    Finished[0m ]8;;https://doc.rust-lang.org/cargo/reference/profiles.html#default-profiles\`release` profile [optimized]]8;;\ target(s) in 0.10s
+ninja: no work to do.
+[0m[1m[32m
+Build succeeded in 0.05s.
+[0mPYTHONPATH="out/pylib:pylib" out/pyenv/bin/python -m pytest pylib/tests/test_cfa_f4.py -q
+..............                                                           [100%]
+14 passed in 0.18s
+QT_QPA_PLATFORM=offscreen PYTHONPATH="out/pylib:pylib:qt:out/qt" out/pyenv/bin/python -m pytest qt/tests/test_cfa_f4_dialog.py -q
+...                                                                      [100%]
+3 passed in 0.29s
+
+=================================================================
+### F5 cfa-f5-test
+=================================================================
+./ninja pylib
+[1m[92m    Finished[0m ]8;;https://doc.rust-lang.org/cargo/reference/profiles.html#default-profiles\`release` profile [optimized]]8;;\ target(s) in 0.10s
+ninja: no work to do.
+[0m[1m[32m
+Build succeeded in 0.05s.
+[0mQT_QPA_PLATFORM=offscreen PYTHONPATH="out/pylib:pylib:qt:out/qt" out/pyenv/bin/python -m pytest qt/tests/test_cfa_f5_style.py -q
+.............                                                            [100%]
+13 passed in 0.29s
+
+=================================================================
+### F7 cfa-f7-test
+=================================================================
+./ninja pylib
+[1m[92m    Finished[0m ]8;;https://doc.rust-lang.org/cargo/reference/profiles.html#default-profiles\`release` profile [optimized]]8;;\ target(s) in 0.11s
+ninja: no work to do.
+[0m[1m[32m
+Build succeeded in 0.05s.
+[0mPYTHONPATH=out/pylib:cfa/ethics_pairs ANKI_TEST_MODE=1 out/pyenv/bin/python -m pytest tools/cfa/tests/test_build_mobile_package.py -q
+...                                                                      [100%]
+3 passed in 0.88s
+
+=================================================================
+### F8 cfa-f8-test
+=================================================================
+./ninja pylib
+[1m[92m    Finished[0m ]8;;https://doc.rust-lang.org/cargo/reference/profiles.html#default-profiles\`release` profile [optimized]]8;;\ target(s) in 0.10s
+ninja: no work to do.
+[0m[1m[32m
+Build succeeded in 0.05s.
+[0mPYTHONPATH="out/pylib:pylib:." out/pyenv/bin/python -m pytest pylib/tests/test_cfa_f8_persistence.py -q
+...                                                                      [100%]
+3 passed in 11.36s
+
+=================================================================
+### REGRESSION cfa-test (minimal pairs)
+=================================================================
+./ninja pylib
+[1m[92m    Finished[0m ]8;;https://doc.rust-lang.org/cargo/reference/profiles.html#default-profiles\`release` profile [optimized]]8;;\ target(s) in 0.10s
+ninja: no work to do.
+[0m[1m[32m
+Build succeeded in 0.05s.
+[0mPYTHONPATH=out/pylib:cfa/ethics_pairs ANKI_TEST_MODE=1 out/pyenv/bin/python -m pytest cfa/ethics_pairs/tests -q
+........................................................................ [ 84%]
+.............                                                            [100%]
+85 passed in 0.46s
+
+=================================================================
+### REGRESSION cfa-menu-test
+=================================================================
+./ninja pylib
+[1m[92m    Finished[0m ]8;;https://doc.rust-lang.org/cargo/reference/profiles.html#default-profiles\`release` profile [optimized]]8;;\ target(s) in 0.10s
+ninja: no work to do.
+[0m[1m[32m
+Build succeeded in 0.04s.
+[0mQT_QPA_PLATFORM=offscreen PYTHONPATH="out/pylib:pylib:qt:out/qt" out/pyenv/bin/python -m pytest qt/tests/test_cfa_menu.py -q
+...                                                                      [100%]
+3 passed in 0.15s
+
+=================================================================
+### REGRESSION cfa-seed-test
+=================================================================
+./ninja pylib
+[1m[92m    Finished[0m ]8;;https://doc.rust-lang.org/cargo/reference/profiles.html#default-profiles\`release` profile [optimized]]8;;\ target(s) in 0.10s
+ninja: no work to do.
+[0m[1m[32m
+Build succeeded in 0.05s.
+[0mPYTHONPATH="out/pylib:pylib" out/pyenv/bin/python -m pytest pylib/tests/test_cfa_seed.py -q
+...                                                                      [100%]
+3 passed in 0.44s
+
+=================================================================
+### REGRESSION cfa-scores-test
+=================================================================
+./ninja pylib
+[1m[92m    Finished[0m ]8;;https://doc.rust-lang.org/cargo/reference/profiles.html#default-profiles\`release` profile [optimized]]8;;\ target(s) in 0.09s
+ninja: no work to do.
+[0m[1m[32m
+Build succeeded in 0.05s.
+[0mPYTHONPATH="out/pylib:pylib" out/pyenv/bin/python -m pytest pylib/tests/test_cfa_scores.py -q
+..........                                                               [100%]
+10 passed in 0.14s
+
+=================================================================
+### REGRESSION cfa-deck-test
+=================================================================
+./ninja pylib
+[1m[92m    Finished[0m ]8;;https://doc.rust-lang.org/cargo/reference/profiles.html#default-profiles\`release` profile [optimized]]8;;\ target(s) in 0.10s
+ninja: no work to do.
+[0m[1m[32m
+Build succeeded in 0.05s.
+[0mPYTHONPATH=out/pylib:cfa/ethics_pairs ANKI_TEST_MODE=1 out/pyenv/bin/python -m pytest tools/cfa/tests -q
+..........                                                               [100%]
+10 passed in 0.96s
+
+=================================================================
+### REGRESSION cfa-eval-test + leakage
+=================================================================
+out/pyenv/bin/python -m pytest cfa/eval/tests -q
+......                                                                   [100%]
+6 passed in 0.06s
+out/pyenv/bin/python cfa/eval/leakage_check.py
+held-out concepts: 30  questions: 60
+deck fronts checked: 630
+leak threshold (Jaccard): 0.6
+LEAKAGE CLEAN: no held-out question overlaps training deck
+
+=================================================================
+### REGRESSION cfa-types-test
+=================================================================
+./ninja pylib
+[1m[92m    Finished[0m ]8;;https://doc.rust-lang.org/cargo/reference/profiles.html#default-profiles\`release` profile [optimized]]8;;\ target(s) in 0.10s
+ninja: no work to do.
+[0m[1m[32m
+Build succeeded in 0.05s.
+[0mPYTHONPATH=out/pylib:cfa/ethics_pairs ANKI_TEST_MODE=1 out/pyenv/bin/python -m pytest tools/cfa/tests/test_build_cfa_deck.py -k classify -q
+..                                                                       [100%]
+2 passed, 5 deselected in 0.01s
+PYTHONPATH="out/pylib:pylib" out/pyenv/bin/python -m pytest pylib/tests/test_cfa.py -q
+.........                                                                [100%]
+9 passed in 0.12s
+
+=================================================================
+### REGRESSION cfa-sync-test
+=================================================================
+./ninja pylib
+[1m[92m    Finished[0m ]8;;https://doc.rust-lang.org/cargo/reference/profiles.html#default-profiles\`release` profile [optimized]]8;;\ target(s) in 0.09s
+ninja: no work to do.
+[0m[1m[32m
+Build succeeded in 0.05s.
+[0mPYTHONPATH="out/pylib:pylib:." out/pyenv/bin/python -m pytest pylib/tests/test_cfa_sync.py -q
+......                                                                   [100%]
+6 passed in 11.34s
+
+=================================================================
+### RUST cfa_deadline
+=================================================================
+[1m[92m   Compiling[0m anki_proto v0.0.0 (/Users/adarshrajesh/AlphaWeek2/ankiCFA/rslib/proto)
+[1m[92m   Compiling[0m anki v0.0.0 (/Users/adarshrajesh/AlphaWeek2/ankiCFA/rslib)
+[1m[92m    Finished[0m ]8;;https://doc.rust-lang.org/cargo/reference/profiles.html#default-profiles\`test` profile [unoptimized + debuginfo]]8;;\ target(s) in 5.57s
+[1m[92m     Running[0m unittests src/lib.rs (target/debug/deps/anki-796446915d16bd8a)
+
+running 10 tests
+test scheduler::cfa_deadline::tests::days_until_is_signed_and_rounds_toward_zero ... ok
+test scheduler::cfa_deadline::tests::capped_interval_is_min_of_fsrs_interval_and_days_to_exam ... ok
+test scheduler::cfa_deadline::tests::exam_in_the_past_caps_all_intervals_at_zero ... ok
+test scheduler::cfa_deadline::tests::empty_deck_returns_empty ... ok
+test scheduler::cfa_deadline::tests::fetch_limit_truncates_after_sorting ... ok
+test scheduler::cfa_deadline::tests::never_reviewed_card_is_treated_as_weakest ... ok
+test scheduler::cfa_deadline::tests::lower_predicted_recall_sorts_first ... ok
+test scheduler::cfa_deadline::tests::suggested_interval_is_capped_at_days_to_exam ... ok
+test scheduler::cfa_deadline::tests::recall_drops_as_the_exam_moves_farther_out ... ok
+test scheduler::cfa_deadline::tests::deadline_retention_is_read_only_and_preserves_undo ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 531 filtered out; finished in 0.04s
+
+
+=================================================================
+### RUST exam
+=================================================================
+
+running 15 tests
+test scheduler::cfa_deadline::tests::capped_interval_is_min_of_fsrs_interval_and_days_to_exam ... ok
+test scheduler::cfa_deadline::tests::recall_drops_as_the_exam_moves_farther_out ... ok
+test scheduler::service::tests::exam_queue_weaker_card_ranks_first_for_equal_weight ... ok
+test scheduler::service::tests::exam_queue_type_multiplier_differentiates_equal_weakness_cards ... ok
+test scheduler::cfa_deadline::tests::exam_in_the_past_caps_all_intervals_at_zero ... ok
+test scheduler::cfa_deadline::tests::suggested_interval_is_capped_at_days_to_exam ... ok
+test scheduler::service::tests::exam_queue_orders_by_topic_weight ... ok
+test scheduler::service::tests::exam_queue_empty_deck_returns_empty ... ok
+test scheduler::service::tests::exam_queue_zero_weight_topic_sinks_to_bottom ... ok
+test scheduler::service::tests::exam_queue_mixes_new_and_due_cards ... ok
+test scheduler::service::tests::verification_probe_suspended_new_card_excluded_from_exam_queue ... ok
+test scheduler::service::tests::exam_queue_includes_new_cards ... ok
+test scheduler::service::tests::exam_queue_urgency_is_monotonic_in_days_to_exam ... ok
+test scheduler::service::tests::exam_queue_untyped_card_defaults_to_unit_multiplier ... ok
+test scheduler::service::tests::exam_queue_is_read_only_and_preserves_undo ... ok
+
+test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 526 filtered out; finished in 0.05s
+
+
