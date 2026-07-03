@@ -10,7 +10,7 @@ const fs = require("fs");
 const L = require("./passage_logic.js");
 
 const input = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
-const out = { spans: [], grade: [] };
+const out = { spans: [], grade: [], grade_tolerant: [] };
 
 for (const c of input.spans || []) {
     out.spans.push(L.cfaFindGoldSpans(c.passage, c.phrases));
@@ -18,6 +18,8 @@ for (const c of input.spans || []) {
 for (const c of input.grade || []) {
     // c.cap is null when the default (len(gold) + slack*n_spans) should be used.
     out.grade.push(L.cfaGradeSpans(c.selection, c.gold_spans, c.cap));
+    // Item 2: the deterministic partial-credit tolerant grader, cross-checked against Python.
+    out.grade_tolerant.push(L.cfaGradeSpansTolerant(c.selection, c.gold_spans, c.cap));
 }
 
 process.stdout.write(JSON.stringify(out));

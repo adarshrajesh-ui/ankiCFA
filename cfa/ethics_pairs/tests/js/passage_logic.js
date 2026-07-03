@@ -79,6 +79,48 @@ function cfaGradeSpans(selectionIndices, goldSpans, cap) {
   else grade = "correct";
   return { grade: grade, found: found, total: total, per_span: perSpan, width_ok: widthOk, cap: cap };
 }
+// --- Item 2: deterministic partial-credit tolerance (mobile has no network, so no F2 AI here) ---
+// The strict cfaGradeSpans above only credits a gold span when EVERY one of its tokens is selected,
+// so a materially-correct highlight with different boundaries (e.g. "unreleased quarterly earnings"
+// for the gold "exact unreleased quarterly earnings figure") scored a flat "wrong". cfaSpanTier adds
+// deterministic tolerance: a span is "full" when every gold token is covered (superset ok), "near"
+// when the selection overlaps at least half the gold tokens (right idea, boundaries off), else
+// "none". cfaGradeSpansTolerant then awards partial-credit tiers instead of harsh binary matching,
+// mirroring the desktop F2 grader's tolerance while staying fully offline + deterministic.
+function cfaSpanTier(sel, span) {
+  if (span.length === 0) return "none";
+  var inter = 0, k;
+  for (k = 0; k < span.length; k++) if (sel[span[k]]) inter++;
+  if (inter === span.length) return "full";
+  if (inter > 0 && inter * 2 >= span.length) return "near";
+  return "none";
+}
+function cfaGradeSpansTolerant(selectionIndices, goldSpans, cap) {
+  var sel = {}, selCount = 0, i;
+  for (i = 0; i < selectionIndices.length; i++) {
+    if (!sel[selectionIndices[i]]) { sel[selectionIndices[i]] = true; selCount++; }
+  }
+  var perSpan = [], allGold = {}, allGoldCount = 0, full = 0, near = 0;
+  for (var s = 0; s < goldSpans.length; s++) {
+    var span = goldSpans[s], k;
+    for (k = 0; k < span.length; k++) {
+      if (!allGold[span[k]]) { allGold[span[k]] = true; allGoldCount++; }
+    }
+    var tier = cfaSpanTier(sel, span);
+    perSpan.push(tier);
+    if (tier === "full") full++;
+    else if (tier === "near") near++;
+  }
+  var total = goldSpans.length, matched = full + near;
+  if (cap == null) cap = cfaSpanCap(allGoldCount, total);
+  var widthOk = selCount <= cap;
+  var grade;
+  if (selCount === 0 || matched === 0) grade = "wrong";
+  else if (matched < total) grade = "partial";
+  else if (full === total && widthOk) grade = "correct";
+  else grade = "somewhat";
+  return { grade: grade, found: full, near: near, matched: matched, total: total, per_span: perSpan, width_ok: widthOk, cap: cap };
+}
 // === CFA-SPAN-SHARED-END ===
 
 module.exports = {
@@ -90,4 +132,6 @@ module.exports = {
   cfaFindGoldSpans: cfaFindGoldSpans,
   cfaSpanCap: cfaSpanCap,
   cfaGradeSpans: cfaGradeSpans,
+  cfaSpanTier: cfaSpanTier,
+  cfaGradeSpansTolerant: cfaGradeSpansTolerant,
 };

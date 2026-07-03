@@ -67,6 +67,10 @@
   if (!root || root.dataset.cfaInit) return;
   root.dataset.cfaInit = "1";
 
+  // A fresh front render is a new attempt: discard any grade a previous Check persisted but never
+  // Recorded, so only an in-session Check on THIS card can satisfy the back's completion gate.
+  try { localStorage.removeItem("cfaEthics:pending"); } catch (e) {}
+
   // === CFA-SPAN-SHARED-START ===
   // Mirrored byte-for-byte (ignoring indentation) in cfa/ethics_pairs/tests/js/passage_logic.js and
   // (in Python) in ethics_scoring.py. tests/test_passages.py enforces the copy match and the
@@ -139,6 +143,48 @@
     else grade = "correct";
     return { grade: grade, found: found, total: total, per_span: perSpan, width_ok: widthOk, cap: cap };
   }
+  // --- Item 2: deterministic partial-credit tolerance (mobile has no network, so no F2 AI here) ---
+  // The strict cfaGradeSpans above only credits a gold span when EVERY one of its tokens is selected,
+  // so a materially-correct highlight with different boundaries (e.g. "unreleased quarterly earnings"
+  // for the gold "exact unreleased quarterly earnings figure") scored a flat "wrong". cfaSpanTier adds
+  // deterministic tolerance: a span is "full" when every gold token is covered (superset ok), "near"
+  // when the selection overlaps at least half the gold tokens (right idea, boundaries off), else
+  // "none". cfaGradeSpansTolerant then awards partial-credit tiers instead of harsh binary matching,
+  // mirroring the desktop F2 grader's tolerance while staying fully offline + deterministic.
+  function cfaSpanTier(sel, span) {
+    if (span.length === 0) return "none";
+    var inter = 0, k;
+    for (k = 0; k < span.length; k++) if (sel[span[k]]) inter++;
+    if (inter === span.length) return "full";
+    if (inter > 0 && inter * 2 >= span.length) return "near";
+    return "none";
+  }
+  function cfaGradeSpansTolerant(selectionIndices, goldSpans, cap) {
+    var sel = {}, selCount = 0, i;
+    for (i = 0; i < selectionIndices.length; i++) {
+      if (!sel[selectionIndices[i]]) { sel[selectionIndices[i]] = true; selCount++; }
+    }
+    var perSpan = [], allGold = {}, allGoldCount = 0, full = 0, near = 0;
+    for (var s = 0; s < goldSpans.length; s++) {
+      var span = goldSpans[s], k;
+      for (k = 0; k < span.length; k++) {
+        if (!allGold[span[k]]) { allGold[span[k]] = true; allGoldCount++; }
+      }
+      var tier = cfaSpanTier(sel, span);
+      perSpan.push(tier);
+      if (tier === "full") full++;
+      else if (tier === "near") near++;
+    }
+    var total = goldSpans.length, matched = full + near;
+    if (cap == null) cap = cfaSpanCap(allGoldCount, total);
+    var widthOk = selCount <= cap;
+    var grade;
+    if (selCount === 0 || matched === 0) grade = "wrong";
+    else if (matched < total) grade = "partial";
+    else if (full === total && widthOk) grade = "correct";
+    else grade = "somewhat";
+    return { grade: grade, found: full, near: near, matched: matched, total: total, per_span: perSpan, width_ok: widthOk, cap: cap };
+  }
   // === CFA-SPAN-SHARED-END ===
 
   function esc(s) { return (s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
@@ -147,7 +193,7 @@
     return el ? el.textContent.trim() : "";
   }
 
-  var itemId = root.dataset.itemid || "ITEM";
+  var itemId = (root.dataset.itemid || "").trim();
   var cluster = srcText("cluster");
   var answerVerdict = srcText("verdict").toLowerCase();
   var passage = srcText("passage");
@@ -167,6 +213,10 @@
   var anchor = null;       // pending first-tap index for the next span, or null
   var revealed = false;
   var drag = { on: false, moved: false, anchor: null };
+  // The completed-attempt grade, persisted to localStorage the moment Check reveals it (see reveal()).
+  // The back template reads it so the reflexive built-in "Show answer" reveals the same Standard +
+  // rationale as the checked front — rather than the "Attempt not completed" dead-end.
+  var pendingGrade = null;
 
   // Render the passage as tappable word tokens whose data-i matches the shared tokenizer indices.
   var toks = cfaTokenize(passage);
@@ -301,7 +351,9 @@
     var verdictOK = judgedVerdict === answerVerdict;
     var goldSpans = cfaFindGoldSpans(passage, goldPhrases);
     var effSel = selectionIndices();
-    var res = cfaGradeSpans(effSel, goldSpans, null);
+    // Item 2: grade with deterministic partial-credit tolerance so a materially-correct highlight
+    // (right idea, imperfect boundaries) is not marked a flat "wrong". Fully offline; no F2 AI.
+    var res = cfaGradeSpansTolerant(effSel, goldSpans, null);
     var hl = res.grade;
     var correct = verdictOK && hl === "correct";
 
@@ -323,15 +375,18 @@
 
     var messages = {
       correct: "Correct — you found every piece of evidence.",
-      somewhat: "Right evidence, but you highlighted more than you needed.",
-      partial: "You found some of the evidence, but missed at least one phrase.",
+      somewhat: "Right evidence — your boundaries were close, or you highlighted more than you needed.",
+      partial: "Partial credit — you matched some evidence (a close match counts), but missed at least one phrase.",
       wrong: "Not the evidence — here are the phrases that matter."
     };
 
+    // Render each gold span's tier: ✓ full match, ~ near (materially-overlapping) match, ✗ missed.
     var detail = "";
     for (var g = 0; g < goldPhrases.length; g++) {
-      var ok = res.per_span[g];
-      detail += '<li><span class="' + (ok ? "found" : "missed") + '">' + (ok ? "✓" : "✗") +
+      var tier = res.per_span[g];
+      var mk = tier === "full" ? "✓" : (tier === "near" ? "~" : "✗");
+      var cls = tier === "full" ? "found" : (tier === "near" ? "near" : "missed");
+      detail += '<li><span class="' + cls + '">' + mk +
         '</span> <span class="cfa-span-quote">' + esc(goldPhrases[g]) + "</span> — " + esc(goldRationales[g]) + "</li>";
     }
 
@@ -340,7 +395,7 @@
       '<div class="cfa-grade ' + (correct ? "ok" : "no") + '">' + (correct ? "✓ Fully correct" : "✗ Not fully correct") + "</div>" +
       '<ul class="cfa-breakdown">' +
         "<li>Verdict: correct answer is <b>" + esc(answerVerdict) + "</b> — your call " + (verdictOK ? "✓" : "✗") + "</li>" +
-        "<li>Evidence spans: " + res.found + " of " + res.total + " found · " + hl.charAt(0).toUpperCase() + hl.slice(1) + "</li>" +
+        "<li>Evidence spans: " + res.found + " of " + res.total + " found" + (res.near ? " (+" + res.near + " near)" : "") + " · " + hl.charAt(0).toUpperCase() + hl.slice(1) + "</li>" +
       "</ul>" +
       '<div class="cfa-hl-msg cfa-hl-' + hl + '">' + esc(messages[hl]) + "</div>" +
       '<ul class="cfa-span-detail">' + detail + "</ul>" +
@@ -354,6 +409,36 @@
     hint.style.display = "none";
 
     root.dataset.correct = correct ? "1" : "0";
+
+    // Persist the completed-attempt grade + the full learning payload NOW (not only when the learner
+    // taps "Record & continue"). Tagged with itemId so the back only honors THIS card's attempt. This
+    // is what lets the reflexive built-in "Show answer" reveal the governing Standard + rationale
+    // instead of the "Attempt not completed" dead-end. Additive: "Record & continue" still works.
+    pendingGrade = {
+      itemId: itemId,
+      cluster: cluster,
+      correct: correct,
+      completed: true,
+      answerVerdict: answerVerdict,
+      verdictOK: verdictOK,
+      highlight: hl,
+      found: res.found,
+      near: res.near,
+      total: res.total,
+      standard: srcText("standard"),
+      rationale: srcText("rationale"),
+      spans: []
+    };
+    for (var pi = 0; pi < goldPhrases.length; pi++) {
+      pendingGrade.spans.push({
+        phrase: goldPhrases[pi],
+        rationale: goldRationales[pi],
+        tier: res.per_span[pi],
+        matched: res.per_span[pi] !== "none"
+      });
+    }
+    try { localStorage.setItem("cfaEthics:pending", JSON.stringify(pendingGrade)); } catch (e) {}
+
     root.querySelector("#cfa-record").hidden = false;
 
     // F2: on desktop, ask Python for a SEMANTIC grade (tolerant of paraphrase /
@@ -417,7 +502,10 @@
   }
 
   root.querySelector("#cfa-record-btn").addEventListener("click", function () {
-    var grade = { itemId: itemId, cluster: cluster, correct: root.dataset.correct === "1" };
+    // Re-affirm the rich grade reveal() already persisted (fall back to a minimal one defensively),
+    // so this explicit path and the reflexive built-in "Show answer" reveal the same payload.
+    var grade = pendingGrade ||
+      { itemId: itemId, cluster: cluster, correct: root.dataset.correct === "1", completed: true };
     try { localStorage.setItem("cfaEthics:pending", JSON.stringify(grade)); } catch (e) {}
     if (typeof pycmd !== "undefined") {
       pycmd("ans");

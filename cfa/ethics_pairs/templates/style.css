@@ -215,6 +215,9 @@
 .cfa-span-detail li { margin-bottom: 6px; }
 .cfa-span-detail .found { color: #2e9e5b; }
 .cfa-span-detail .missed { color: #d1453b; }
+/* Item 2: near (materially-overlapping) partial-credit match marker. */
+.cfa-span-detail .near { color: #b45309; font-weight: 700; }
+.nightMode .cfa-span-detail .near { color: #f0b866; }
 .cfa-span-quote { font-weight: 700; }
 
 /* back-of-card commit UI */
@@ -223,6 +226,18 @@
 .cfa-commit .big.ok { color: #2e9e5b; }
 .cfa-commit .big.no { color: #d1453b; }
 .cfa-commit .muted { color: #8a8a93; font-size: .9rem; }
+
+/* back-of-card learning payload: the Standard + rationale revealed once the attempt is complete,
+   so the reflexive built-in "Show answer" is never a dead-end. Left-aligned inside the centered
+   commit block and separated by the same dashed rule the front reveal uses. */
+.cfa-commit-reveal {
+  text-align: left;
+  max-width: 720px;
+  margin: 16px auto 0;
+  padding-top: 14px;
+  border-top: 2px dashed #d6d6de;
+}
+.nightMode .cfa-commit-reveal { border-top-color: #3a3b44; }
 
 /* F2: semantic AI-feedback block (desktop only; shown when the LLM graded) */
 .cfa-ai {
