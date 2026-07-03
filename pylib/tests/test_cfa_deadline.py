@@ -17,7 +17,7 @@ from __future__ import annotations
 import json
 import time
 
-from anki import cfa_deadline
+from anki import cfa, cfa_deadline
 from anki.cards import CardId
 from anki.collection import Collection
 from anki.decks import DeckId
@@ -220,4 +220,125 @@ def test_is_read_only_and_adds_no_undo_step():
 
     # And the pre-existing undo target is still usable.
     col.undo()
+    col.close()
+
+
+# --- item5 / MEDIUM #8: wrapper that also ranks NEW cards ---------------------
+#
+# ``cfa_deadline.deadline_retention`` ranks only DUE cards, so a fresh all-new
+# deck dead-ends on an empty table. ``cfa.deadline_retention_with_new`` wraps it
+# (without modifying it) and merges in NEW cards as recall 0.0 (weakest first).
+
+
+def test_fresh_all_new_deck_ranks_via_wrapper():
+    # 5B: the exact defect — an all-NEW deck yields NOTHING from the due-only
+    # engine, but the wrapper returns a non-empty, weakest-first ranking.
+    col = getEmptyCol()
+    now = int(time.time())
+    nt = col.models.by_name("Basic")
+    deck = col.decks.id("CFA")
+    new_ids = [_add_card(col, deck, nt, f"new-{i}") for i in range(4)]
+    assert len(col.find_cards("deck:CFA is:new")) == 4
+    assert len(col.find_cards("deck:CFA is:due")) == 0
+
+    due_only = cfa_deadline.deadline_retention(
+        col, deck_id=deck, exam_date=_seconds(now, 30), now=now
+    )
+    assert len(due_only) == 0, "precondition: due-only engine sees no cards"
+
+    res = cfa.deadline_retention_with_new(
+        col, deck_id=deck, exam_date=_seconds(now, 30), now=now
+    )
+    assert len(res) == 4, "wrapper surfaces every new card"
+    assert set(res.card_ids) == set(new_ids)
+    assert all(r == 0.0 for r in res.predicted_recall), "new cards are weakest"
+    assert res.predicted_recall == sorted(res.predicted_recall), "weakest-first"
+    assert res.suggested_interval_days == [0, 0, 0, 0], "new cards carry no ivl"
+    # Deterministic tie-break: equal recall -> ascending card id.
+    assert list(res.card_ids) == sorted(new_ids)
+    col.close()
+
+
+def test_wrapper_ranks_new_before_due():
+    # A mix: new cards (recall 0.0) must sort ABOVE a well-remembered due card.
+    col = getEmptyCol()
+    now = int(time.time())
+    nt = col.models.by_name("Basic")
+    deck = col.decks.id("CFA")
+    strong = _add_review_card(
+        col, deck, nt, "strong", stability=1000.0, interval=20, now=now, lrt_days_ago=1
+    )
+    new_a = _add_card(col, deck, nt, "new-a")
+    new_b = _add_card(col, deck, nt, "new-b")
+
+    res = cfa.deadline_retention_with_new(
+        col, deck_id=deck, exam_date=_seconds(now, 14), now=now
+    )
+    assert len(res) == 3, "new + due cards all ranked, none dropped"
+    assert set(res.card_ids) == {strong, new_a, new_b}
+    # The two new cards (0.0) come first, ascending id; the strong due card last.
+    assert list(res.card_ids) == [new_a, new_b, strong]
+    assert res.predicted_recall[0] == 0.0 and res.predicted_recall[1] == 0.0
+    assert res.predicted_recall[2] > 0.0
+    col.close()
+
+
+def test_wrapper_no_double_count_and_due_only_parity():
+    # With NO new cards the wrapper is identical to the due-only engine (no
+    # regression), and no card is ever counted twice.
+    col = getEmptyCol()
+    now = int(time.time())
+    nt = col.models.by_name("Basic")
+    deck = col.decks.id("CFA")
+    _add_review_card(
+        col, deck, nt, "a", stability=1000.0, interval=20, now=now, lrt_days_ago=10
+    )
+    _add_review_card(
+        col, deck, nt, "b", stability=3.0, interval=20, now=now, lrt_days_ago=10
+    )
+    assert len(col.find_cards("deck:CFA is:new")) == 0
+
+    due = cfa_deadline.deadline_retention(
+        col, deck_id=deck, exam_date=_seconds(now, 14), now=now
+    )
+    res = cfa.deadline_retention_with_new(
+        col, deck_id=deck, exam_date=_seconds(now, 14), now=now
+    )
+    assert list(res.card_ids) == list(due.card_ids), "identical ordering"
+    assert res.predicted_recall == due.predicted_recall
+    assert res.suggested_interval_days == due.suggested_interval_days
+    assert len(set(res.card_ids)) == len(res.card_ids), "no duplicates"
+    col.close()
+
+
+def test_wrapper_fetch_limit_applies_to_combined_set():
+    col = getEmptyCol()
+    now = int(time.time())
+    nt = col.models.by_name("Basic")
+    deck = col.decks.id("CFA")
+    _add_review_card(col, deck, nt, "due", stability=1000.0, interval=20, now=now)
+    new_a = _add_card(col, deck, nt, "new-a")
+    _add_card(col, deck, nt, "new-b")
+
+    res = cfa.deadline_retention_with_new(
+        col, deck_id=deck, exam_date=_seconds(now, 14), fetch_limit=1, now=now
+    )
+    assert list(res.card_ids) == [new_a], "single weakest of the combined set"
+    col.close()
+
+
+def test_wrapper_only_ranks_requested_deck():
+    # New cards in a sibling deck must not leak into another deck's ranking.
+    col = getEmptyCol()
+    now = int(time.time())
+    nt = col.models.by_name("Basic")
+    cfa_deck = col.decks.id("CFA")
+    other = col.decks.id("Other")
+    mine = _add_card(col, cfa_deck, nt, "mine")
+    _add_card(col, other, nt, "theirs")
+
+    res = cfa.deadline_retention_with_new(
+        col, deck_id=cfa_deck, exam_date=_seconds(now, 30), now=now
+    )
+    assert list(res.card_ids) == [mine]
     col.close()

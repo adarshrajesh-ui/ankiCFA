@@ -316,6 +316,132 @@ Before the fix these ERROR (import of `ensure_ethics_passages_deck` fails) / FAI
 - no-mistakes outcome: _(recorded below after the axi gate run)_.
 - PR link / merge confirmation / `origin/main` SHA after merge: _(recorded below after merge)_.
 
+## item5 — "Peak-on-Exam-Day" shows an empty table on a fresh profile, and trusts an absurd persisted exam date
+
+Two independent defects in the desktop **Peak-on-Exam-Day (Deadline)** view
+(`DeadlineDialog`, `qt/aqt/cfa.py`).
+
+### Sub-bug 5B — empty ranking on a fresh (all-NEW) profile
+
+#### Symptom
+
+On a fresh profile — where every CFA card is still **NEW** — the dialog dead-ends on
+_"No due cards to rank yet"_ with an empty table, even though the deck is full of cards to
+study.
+
+#### Root cause
+
+The dialog ranked cards via `cfa_deadline.deadline_retention`, whose card set is the deck's
+**`is:due`** cards only (the SQL fallback searches `deck:"…" is:due`; the RPC matches due
+cards). New cards are never due, so a fresh deck yields an **empty** ranking → the
+empty-state notice. (`proof/fixes/p1/item5-before.txt`: `is:new = 6`, `is:due = 0`,
+`ranked cards = 0`, `dialog table rowCount = 0`.)
+
+#### Fix (additive, backward-compatible; **wraps** `cfa_deadline`, does NOT edit it)
+
+- **New pylib wrapper** `anki.cfa.deadline_retention_with_new(col, *, deck_id, exam_date,
+  fetch_limit=0, now=None)` in `pylib/anki/cfa.py`. It calls
+  `cfa_deadline.deadline_retention(...)` verbatim for the DUE-card ranking (engine
+  untouched), then merges in the deck's **NEW** cards (found with the same search-engine
+  semantics, `deck:"…" is:new`, subdecks included), treating their predicted exam-day
+  recall as **0.0** (never studied ⇒ maximally weak) and their deadline-capped interval as
+  **0** (no schedule yet). New cards already ranked as due are excluded (no double-count),
+  the merged rows are re-sorted by `(predicted recall asc, card id asc)` — identical to the
+  engine's own ordering — and `fetch_limit` is applied to the combined set. `used_rpc`
+  mirrors the underlying due-card engine. Read-only throughout (FSRS scheduling + undo stay
+  valid), returning the engine's own `cfa_deadline.DeadlineRetention` dataclass so callers
+  are unchanged.
+- **Honest header** — `DeadlineDialog._reload` now calls the wrapper and the header states,
+  in the non-empty case: _"Predicted FSRS recall AT the exam date; **new (unstudied) cards
+  are included and counted as weakest (recall 0.0)**. Each interval is capped so no review
+  lands after the exam."_ The empty state (now only when the deck is genuinely card-less)
+  reads _"No cards to rank yet."_ + _"Once this deck has cards, the weakest-on-the-day cards
+  (new cards first) will appear here."_
+
+### Sub-bug 5A — an absurd persisted exam date is trusted verbatim
+
+#### Symptom
+
+A stale/absurd far-future exam date persisted in the synced collection config (observed:
+**`2028-08-23`**) is shown and used verbatim by the exam-date picker, with no sanity check.
+(The code *default* is already the canonical near date **2026-08-25** — confirmed by F9's
+`F0b exam config : {'exam_date': '2026-08-25'}` — so this is runtime pollution, not a code
+default bug.)
+
+#### Root cause
+
+`DeadlineDialog._initial_date` read `cfg.get("exam_date") or _default_exam_date()` — i.e. any
+persisted value was trusted blindly; only a *missing* value fell back to the canonical
+default.
+
+#### Fix (additive, backward-compatible; `qt/aqt/cfa.py` only)
+
+- **New guard** `_sanitized_exam_date(iso, *, today=None)` + module constant
+  `_MAX_EXAM_HORIZON_DAYS = 730`. Decision for "absurd": a persisted date is self-healed to
+  the **canonical** `_default_exam_date()` (reused, not a divergent constant) when it is
+  **missing**, **unparseable** (`date.fromisoformat` raises), or **more than 730 days
+  (~2 years) in the future** of `today`; any sane date is returned untouched. The 2-year
+  horizon keeps even a far-out real sitting a candidate might pick (e.g. the existing
+  `_apply_date` test's `2027-05-15`, ~22 months) while flagging multi-year garbage like
+  `2028-08-23` (~26 months). `_initial_date` now calls this guard.
+
+### Regression tests (fail without the fix, pass with it)
+
+- `pylib/tests/test_cfa_deadline.py` (+5): `test_fresh_all_new_deck_ranks_via_wrapper`
+  (the 5B defect — due-only engine returns 0, wrapper returns a non-empty weakest-first
+  ranking with all-0.0 recall and ascending-id tie-break), `test_wrapper_ranks_new_before_due`
+  (new cards sort above a strong due card, none dropped), `test_wrapper_no_double_count_and_due_only_parity`
+  (no-new ⇒ identical to the due-only engine; no duplicates), `test_wrapper_fetch_limit_applies_to_combined_set`,
+  `test_wrapper_only_ranks_requested_deck`.
+- `qt/tests/test_cfa_deadline_dialog.py` (new, 5): 5B —
+  `test_dialog_ranks_new_cards_on_fresh_all_new_deck` (table has 5 rows; header says
+  "recall 0.0" + "unstudied"; no empty notice) and `test_dialog_empty_state_only_when_truly_empty`;
+  5A — `test_sanitized_exam_date_pure` (heals `2028-08-23`/`2099-12-31`/unparseable/None,
+  keeps a sane near-future date and the horizon boundary), `test_dialog_self_heals_absurd_persisted_date`
+  (persisted `2099-12-31` ⇒ picker shows the canonical default), `test_dialog_keeps_sane_persisted_date`.
+- `qt/tests/test_cfa_f0b.py`: `test_deadline_dialog_renders_without_due_cards` updated to the
+  new honest empty-state wording ("No cards to rank yet"); `test_deadline_dialog_apply_persists_exam_date`
+  unchanged (apply persists verbatim; the guard is on the *read* path).
+
+Without the change the pylib/qt dialog tests ERROR (the `deadline_retention_with_new` /
+`_sanitized_exam_date` symbols don't exist) or FAIL (all-new deck ⇒ empty table; absurd
+date shown verbatim).
+
+### Before / after proof
+
+- `proof/fixes/p1/item5_repro.py` — offscreen-Qt + real-Collection harness driving BOTH the
+  pylib entry point and the real `DeadlineDialog`; `--after` exercises the fixed paths.
+- `proof/fixes/p1/item5-before.txt` — 5B: all-NEW deck ⇒ `ranked cards = 0`, dialog
+  `rowCount = 0`, empty notice shown. 5A: persisted `2028-08-23` ⇒ picker shows `2028-08-23`
+  (canonical would be `2026-08-25`).
+- `proof/fixes/p1/item5-after.txt` — 5B: wrapper ranks all 6 new cards weakest-first
+  (recall 0.0), dialog `rowCount = 6`, no empty notice. 5A: persisted `2028-08-23` ⇒ picker
+  shows `2026-08-25` (self-healed). Plus the full test battery + F9 + mypy (below).
+
+### Tests run (raw pytest against the reused `just build`; no ninja prefix)
+
+- `pylib/tests/test_cfa_deadline.py` — **12 passed** (7 + 5 new).
+- `pylib/tests/test_cfa.py` + `test_cfa_scores.py` + `test_cfa_f4.py` — **43 passed**.
+- `qt/tests/test_cfa_deadline_dialog.py` — **5 passed** (new file).
+- `qt/tests/test_cfa_menu.py` + `test_cfa_f4_dialog.py` + `test_cfa_f5_style.py` — **24 passed**.
+- `qt/tests/test_cfa_f0b.py` — **11 passed** (wording updated).
+- `python tools/cfa/f9_reachability.py` (AI-OFF default, unedited) — **F9 REACHABILITY: PASS**.
+- mypy on the 5 touched files (`.mypy.ini`) — **Success: no issues found in 5 source files**
+  (isolated with `--follow-imports=silent`). A plain run additionally reports only a
+  **pre-existing** `import-not-found` in the untouched `qt/aqt/cfa_ethics_ai.py:58`
+  (`ai_grading`, a Feature-F2 runtime `sys.path` import) — outside this item's scope and
+  unchanged by item5.
+
+### Branch / commit (NO no-mistakes, NO push, NO merge — per task)
+
+- Branch: `fix/desktop-item5` (off `origin/main` @ `73bfea57b`), isolated worktree
+  `ankicfa-wt-item5`.
+- Scope (edited): `pylib/anki/cfa.py`, `qt/aqt/cfa.py`, `pylib/tests/test_cfa_deadline.py`,
+  `qt/tests/test_cfa_deadline_dialog.py` (new), `qt/tests/test_cfa_f0b.py`, `proof/fixes/p1/`.
+- Fix commit SHA: _(recorded below after commit)_.
+- Deliberately **not** pushed, **not** run through no-mistakes, and **not** merged — the
+  parent serializes the gate and finalizes.
+
 ---
 
 ## Item 6 (MEDIUM #9) — F3 "AI Back" editor button has no visible AI-off state

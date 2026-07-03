@@ -202,7 +202,7 @@ def test_deadline_dialog_renders_without_due_cards() -> None:
         assert dlg.date_edit.date().toString("yyyy-MM-dd") == cfa._default_exam_date()
         # Renders cleanly (no crash) with an empty, honest table.
         assert dlg._table.rowCount() == 0
-        assert "No due cards" in dlg._header.text()
+        assert "No cards to rank yet" in dlg._header.text()
     finally:
         col.close()
 

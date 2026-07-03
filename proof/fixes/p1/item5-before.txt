@@ -1,0 +1,18 @@
+qt.qpa.fonts: Populating font family aliases took 43 ms. Replace uses of missing font family "Sans Serif" with one that exists to avoid this cost. 
+== item5 BEFORE (broken) ==
+deck cards total   : 6
+deck cards is:new  : 6
+deck cards is:due  : 0
+
+[5B] cfa_deadline.deadline_retention (due-only) on all-NEW deck:
+     ranked cards = 0
+     dialog table rowCount           = 0
+     dialog 'No cards to rank' notice = True
+     dialog header mentions new cards = True
+
+[5A] persisted exam_date = 2028-08-23 (absurd far-future pollution)
+     DeadlineDialog picker shows = 2028-08-23
+     canonical default           = 2026-08-25
+     used verbatim (no self-heal)= True
+
+== END item5 BEFORE (broken) ==
