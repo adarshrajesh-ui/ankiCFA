@@ -1,0 +1,97 @@
+P4 — Item 2 (MYPY DEBT) — AFTER evidence
+=========================================
+
+Branch: p4/02-mypy   (isolated worktree: ankiCFA-p4)
+
+Command run (identical to the `check:mypy` ninja target `$mypy $folders`, using the
+SAME venv mypy the build uses; from the worktree root so .mypy.ini applies):
+
+    $ out/pyenv/bin/mypy pylib qt/aqt qt/tools out/pylib/anki out/qt/_aqt python tools
+
+------------------------------------------------------------------------------
+RAW MYPY OUTPUT (AFTER)
+------------------------------------------------------------------------------
+qt/aqt/cfa.py:135: error: Argument "order" to "SearchTerm" has incompatible type "int"; expected "ValueType"  [arg-type]
+qt/aqt/cfa.py:386: error: Incompatible types in assignment (expression has type "int", variable has type "Collection")  [assignment]
+qt/aqt/cfa.py:387: error: No overload variant of "setSectionResizeMode" of "QHeaderView" matches argument types "Collection", "ResizeMode"  [call-overload]
+qt/aqt/cfa.py:387: note: Possible overload variants:
+qt/aqt/cfa.py:387: note:     def setSectionResizeMode(self, logicalIndex: int, mode: ResizeMode) -> None
+qt/aqt/cfa.py:387: note:     def setSectionResizeMode(self, mode: ResizeMode) -> None
+Found 3 errors in 1 file (checked 325 source files)
+
+------------------------------------------------------------------------------
+OUTCOME:  21 errors (13 files)  ->  3 errors (1 file)
+------------------------------------------------------------------------------
+Owned scope: CLEAN (0 errors).
+  * 16 import-not-found  -> 0   (15 first-party bare imports + `openai`, all cleared)
+  * tools/cfa/sync_roundtrip.py:53,55  -> 0   (fixed, type-annotation-only)
+  * pylib/anki/cfa_sync.py             -> already clean (verified: "no issues found")
+  * cfa/** (followed via cfa.ai.llm_client)  -> clean
+
+The ONLY 3 remaining check:mypy errors are all in P1-owned qt/aqt/cfa.py — NOT
+fixed by P4 (P1 owns that file). Flagged precisely for P1 below.
+
+------------------------------------------------------------------------------
+FLAGGED FOR P1  (qt/aqt/cfa.py — genuine, non-import type errors; P1 to fix)
+------------------------------------------------------------------------------
+qt/aqt/cfa.py:135: [arg-type]       `order=order` (a plain int) passed to
+                                    FilteredDeckConfig.SearchTerm(order=...), whose
+                                    protobuf field expects the enum ValueType. Fix:
+                                    pass the enum member / cast the int to the enum type.
+qt/aqt/cfa.py:386: [assignment]     `for col in range(1, 5):` rebinds the name `col`,
+                                    which earlier in the function is the Collection
+                                    (`col = mw.col`). The loop index shadows it. Fix:
+                                    rename the loop variable (e.g. `for column in range(1, 5)`).
+qt/aqt/cfa.py:387: [call-overload]  Consequence of the :386 shadowing — `col` is still
+                                    seen as Collection here, so
+                                    `thead.setSectionResizeMode(col, ResizeMode...)`
+                                    has no matching overload. Resolved once :386 is fixed
+                                    (rename the loop variable to an int name).
+
+These are pre-existing (present in the BEFORE run too) and untouched by P4.
+
+------------------------------------------------------------------------------
+WHAT CHANGED  (config + type-annotation only; no runtime behavior changes)
+------------------------------------------------------------------------------
+1) .mypy.ini  mypy_path += `.` (repo root)
+   Makes the genuine CFA package imports resolve explicitly on mypy's search path,
+   e.g. `from cfa.ai.llm_client import complete` (qt/aqt/cfa_tab_fill.py,
+   tools/cfa/f9_reachability.py). Mirrors the runtime PYTHONPATH the just recipes
+   use (…:.). Purely additive; existing anki/aqt module naming is unchanged because
+   mypy resolves each file against its nearest, more-specific base (pylib, qt, …).
+
+2) .mypy.ini  targeted per-module ignore_missing_imports:
+   - [mypy-openai] / [mypy-openai.*]  — OPTIONAL third-party SDK, declared only in
+     cfa/ai/requirements.txt, not installed in the type-check venv, imported inside
+     try/except ImportError (AI-off fallback). Matches the existing [mypy-bs4] idiom.
+   - [mypy-ethics_scoring] [mypy-ai_grading] [mypy-passages] [mypy-import_pairs]
+     [mypy-build_cfa_deck] [mypy-seed_collection]  — first-party CFA helper modules
+     that are loaded by BARE name after a runtime `sys.path.insert(0, …)` (e.g.
+     qt/aqt/cfa_seed.py inserts cfa/ethics_pairs; the tools/cfa proof scripts import
+     a sibling from their own dir). mypy cannot follow runtime sys.path edits. These
+     dirs were deliberately NOT added as mypy roots:
+       * tools/cfa is already type-checked as the `tools.cfa.*` package, so adding it
+         as a root triggers a fatal "Source file found twice under different module
+         names" (verified empirically — see NOTES.md), and
+       * rooting cfa/ethics_pairs pulls out-of-scope proof scripts into the checked
+         graph (surfaced 5 pre-existing dict-typing errors in tools/cfa/render_f2_ai_grade.py,
+         a file P4 does not own), i.e. it would WIDEN the target's designed folder scope.
+     A targeted per-module ignore clears the import-not-found noise without blanket
+     ignores and without changing the check:mypy target's scope. It does not hide any
+     error that was previously being checked (these call sites were already `Any`).
+
+3) tools/cfa/sync_roundtrip.py  (OWNED) — type-annotation only:
+   - `_add_card(...) -> CardId`     (was `-> int`; find_cards returns CardId)
+   - `_review(col, cid: CardId, ease: Literal[1, 2, 3, 4])`  (was `cid: int, ease: int`)
+   - added imports `from typing import Literal` and `from anki.cards import CardId`
+   With `from __future__ import annotations` in effect these annotations are never
+   evaluated at runtime, so behavior is unchanged (CardId is a NewType == int).
+
+------------------------------------------------------------------------------
+VERIFY — AI-off path unaffected
+------------------------------------------------------------------------------
+No application logic changed. Changes are (a) mypy config (.mypy.ini) and (b) three
+type annotations in tools/cfa/sync_roundtrip.py (a demo/proof driver). The AI-off
+deterministic fallback in cfa/ai/llm_client.py is byte-for-byte unchanged; the
+`openai` import there is still guarded by try/except ImportError. `ruff check` on the
+edited file passes; `mypy pylib/anki/cfa_sync.py` reports no issues.

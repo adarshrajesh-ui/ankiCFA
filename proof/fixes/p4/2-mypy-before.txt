@@ -1,0 +1,69 @@
+P4 — Item 2 (MYPY DEBT) — BEFORE evidence
+==========================================
+
+Branch: p4/02-mypy   (isolated worktree: ankiCFA-p4)
+Build : `just build` succeeded (cold build) before running mypy, so the
+        generated stubs under out/pylib/anki and out/qt/_aqt are present.
+
+The `check:mypy` ninja target runs (from build/configure/src/python.rs):
+
+    out/pyenv/bin/mypy  pylib qt/aqt qt/tools out/pylib/anki out/qt/_aqt python tools
+
+Command run (identical to the target, from the worktree root so .mypy.ini applies):
+
+    $ out/pyenv/bin/mypy pylib qt/aqt qt/tools out/pylib/anki out/qt/_aqt python tools
+
+------------------------------------------------------------------------------
+RAW MYPY OUTPUT
+------------------------------------------------------------------------------
+tools/cfa/render_f2_ai_grade.py:38: error: Cannot find implementation or library stub for module named "ai_grading"  [import-not-found]
+tools/cfa/render_f2_ai_grade.py:39: error: Cannot find implementation or library stub for module named "ethics_scoring"  [import-not-found]
+tools/cfa/render_f1_passage.py:28: error: Cannot find implementation or library stub for module named "ethics_scoring"  [import-not-found]
+cfa/ai/llm_client.py:229: error: Cannot find implementation or library stub for module named "openai"  [import-not-found]
+tools/cfa/sync_roundtrip.py:53: error: Argument 1 to "get_card" of "Collection" has incompatible type "int"; expected "CardId | None"  [arg-type]
+tools/cfa/sync_roundtrip.py:55: error: Argument 2 to "answerCard" of "Scheduler" has incompatible type "int"; expected "Literal[1, 2, 3, 4]"  [arg-type]
+tools/cfa/seed_collection.py:56: error: Cannot find implementation or library stub for module named "build_cfa_deck"  [import-not-found]
+tools/cfa/seed_collection.py:57: error: Cannot find implementation or library stub for module named "import_pairs"  [import-not-found]
+tools/cfa/f8_persistence_proof.py:30: error: Cannot find implementation or library stub for module named "passages"  [import-not-found]
+tools/cfa/build_mobile_package.py:54: error: Cannot find implementation or library stub for module named "build_cfa_deck"  [import-not-found]
+tools/cfa/build_mobile_package.py:55: error: Cannot find implementation or library stub for module named "passages"  [import-not-found]
+pylib/tests/test_cfa_seed.py:27: error: Cannot find implementation or library stub for module named "seed_collection"  [import-not-found]
+pylib/tests/test_cfa_f8_persistence.py:51: error: Cannot find implementation or library stub for module named "passages"  [import-not-found]
+pylib/tests/test_cfa_f8_persistence.py:51: note: See https://mypy.readthedocs.io/en/stable/running_mypy.html#missing-imports
+qt/aqt/cfa_seed.py:56: error: Cannot find implementation or library stub for module named "import_pairs"  [import-not-found]
+qt/aqt/cfa_seed.py:101: error: Cannot find implementation or library stub for module named "seed_collection"  [import-not-found]
+qt/aqt/cfa_ethics_ai.py:58: error: Cannot find implementation or library stub for module named "ai_grading"  [import-not-found]
+qt/aqt/cfa.py:135: error: Argument "order" to "SearchTerm" has incompatible type "int"; expected "ValueType"  [arg-type]
+qt/aqt/cfa.py:386: error: Incompatible types in assignment (expression has type "int", variable has type "Collection")  [assignment]
+qt/aqt/cfa.py:387: error: No overload variant of "setSectionResizeMode" of "QHeaderView" matches argument types "Collection", "ResizeMode"  [call-overload]
+qt/aqt/cfa.py:387: note: Possible overload variants:
+qt/aqt/cfa.py:387: note:     def setSectionResizeMode(self, logicalIndex: int, mode: ResizeMode) -> None
+qt/aqt/cfa.py:387: note:     def setSectionResizeMode(self, mode: ResizeMode) -> None
+tools/cfa/f9_reachability.py:76: error: Cannot find implementation or library stub for module named "ethics_scoring"  [import-not-found]
+tools/cfa/f9_reachability.py:99: error: Cannot find implementation or library stub for module named "ai_grading"  [import-not-found]
+Found 21 errors in 13 files (checked 325 source files)
+
+------------------------------------------------------------------------------
+BREAKDOWN  (21 errors total)
+------------------------------------------------------------------------------
+[A] import-not-found — 16 errors
+    - 15 are bare-name imports of CFA sibling modules that resolve at RUNTIME
+      via sys.path.insert(0, <dir>) hacks (the scripts add cfa/ethics_pairs and
+      their own tools/cfa dir to sys.path), which mypy cannot follow:
+        * ethics_scoring, ai_grading, passages, import_pairs   -> live in cfa/ethics_pairs/
+        * build_cfa_deck, seed_collection                       -> live in tools/cfa/
+    - 1 is the optional third-party SDK `openai` (cfa/ai/llm_client.py:229),
+      imported inside a try/except ImportError and NOT installed in the
+      type-check venv (AI-off deterministic fallback). Needs a targeted
+      per-module ignore_missing_imports (like the existing [mypy-bs4] entry).
+
+[B] genuine type errors — 5 errors
+    OWNED by P4 (to fix):
+        tools/cfa/sync_roundtrip.py:53  [arg-type]  get_card(int) -> CardId
+        tools/cfa/sync_roundtrip.py:55  [arg-type]  answerCard(int) -> Literal[1,2,3,4]
+    P1-owned (qt/aqt/cfa.py — flag, do NOT fix):
+        qt/aqt/cfa.py:135  [arg-type]       SearchTerm(order=int) -> ValueType
+        qt/aqt/cfa.py:386  [assignment]     `for col in range(...)` shadows `col` (Collection)
+        qt/aqt/cfa.py:387  [call-overload]  setSectionResizeMode(Collection, ...)
+
+Counts:  16 import-not-found + 5 genuine = 21.  Owned genuine: 2.  P1 genuine: 3.
