@@ -1,0 +1,119 @@
+P4 · Item 5 · (D) test tally — AFTER (real, reproducible from one command each)
+==============================================================================
+Captured: 2026-07-03  ·  worktree: ankiCFA-p4  ·  branch: p4/05-submission
+Build outputs already present (just build == `./ninja pylib qt` == no-op).
+
+The real numbers match the prior claims (203 / 21) — the fix is that each is now
+reproducible from a single explicit command, with the double-count pitfalls
+removed. Numbers below are the actual captured output, not accounting.
+
+================================================================================
+PYTHON / QT  —  ONE deduplicated pytest collection
+================================================================================
+Command (also wired as `just cfa-f9-test-tally`):
+
+  QT_QPA_PLATFORM=offscreen \
+  PYTHONPATH="out/pylib:pylib:qt:out/qt:cfa/ethics_pairs:." \
+  out/pyenv/bin/python -m pytest --import-mode=importlib \
+    pylib/tests/test_cfa.py pylib/tests/test_cfa_scores.py \
+    pylib/tests/test_cfa_f4.py pylib/tests/test_cfa_seed.py \
+    pylib/tests/test_cfa_f8_persistence.py pylib/tests/test_cfa_sync.py \
+    cfa/eval/tests cfa/ai/tests cfa/ethics_pairs/tests tools/cfa/tests \
+    qt/tests/test_cfa_f0b.py qt/tests/test_cfa_ethics_ai.py \
+    qt/tests/test_cfa_tab_fill.py qt/tests/test_cfa_f4_dialog.py \
+    qt/tests/test_cfa_f5_style.py qt/tests/test_cfa_menu.py
+
+Why it now works as ONE collection:
+  * --import-mode=importlib lets the four separate `tests` packages
+    (pylib/tests, qt/tests, cfa/ai/tests, cfa/eval/tests) coexist in one
+    process instead of colliding on sys.modules['tests'].
+  * pylib/tests/* are listed FIRST so `from tests.shared import getEmptyCol`
+    and `from tests.test_cfa_scores import _seed_topic` bind to pylib/tests.
+
+Captured output (`just cfa-f9-test-tally`):
+
+  ============================= test session starts ==============================
+  platform darwin -- Python 3.13.13, pytest-8.4.1, pluggy-1.6.0
+  rootdir: /Users/adarshrajesh/AlphaWeek2/ankiCFA-p4
+  configfile: pyproject.toml
+  plugins: mock-3.15.1, anyio-4.13.0
+  collected 204 items
+
+  pylib/tests/test_cfa.py .........                                        [  4%]
+  pylib/tests/test_cfa_scores.py ..........                                [  9%]
+  pylib/tests/test_cfa_f4.py ..............                                [ 16%]
+  pylib/tests/test_cfa_seed.py ...                                         [ 17%]
+  pylib/tests/test_cfa_f8_persistence.py ...                              [ 19%]
+  pylib/tests/test_cfa_sync.py ......                                      [ 22%]
+  cfa/eval/tests/test_eval.py ......                                       [ 25%]
+  cfa/ai/tests/test_llm_client.py ........s                               [ 29%]
+  cfa/ethics_pairs/tests/test_ai_grading.py .............                 [ 35%]
+  cfa/ethics_pairs/tests/test_dashboard.py ....                           [ 37%]
+  cfa/ethics_pairs/tests/test_ethics_scoring.py ............             [ 43%]
+  cfa/ethics_pairs/tests/test_highlight.py .........................      [ 55%]
+  cfa/ethics_pairs/tests/test_import_pairs.py ..                          [ 56%]
+  cfa/ethics_pairs/tests/test_passages.py .............................   [ 71%]
+  tools/cfa/tests/test_build_cfa_deck.py .......                          [ 74%]
+  tools/cfa/tests/test_build_mobile_package.py ...                        [ 75%]
+  qt/tests/test_cfa_f0b.py .....                                          [ 78%]
+  qt/tests/test_cfa_ethics_ai.py .......                                  [ 81%]
+  qt/tests/test_cfa_tab_fill.py ..................                        [ 90%]
+  qt/tests/test_cfa_f4_dialog.py ...                                      [ 92%]
+  qt/tests/test_cfa_f5_style.py .............                             [ 98%]
+  qt/tests/test_cfa_menu.py ...                                           [100%]
+
+  ======================= 203 passed, 1 skipped in 28.06s ========================
+
+  >>> RESULT: 203 passed, 1 skipped  (204 collected)
+  The 1 skip is cfa/ai/tests/test_llm_client.py::test_with_key_real_tiny_call
+  — the with-key real LLM smoke, honestly skipped when OPENAI_API_KEY is unset.
+
+================================================================================
+RUST  —  21 unique CFA tests, via TWO disjoint scoped filters
+================================================================================
+Command 1 (deadline / date-aware scheduling — POV 2):
+
+  $ cargo test -p anki --lib -- scheduler::cfa_deadline
+  running 10 tests
+  test scheduler::cfa_deadline::tests::capped_interval_is_min_of_fsrs_interval_and_days_to_exam ... ok
+  test scheduler::cfa_deadline::tests::days_until_is_signed_and_rounds_toward_zero ... ok
+  test scheduler::cfa_deadline::tests::exam_in_the_past_caps_all_intervals_at_zero ... ok
+  test scheduler::cfa_deadline::tests::empty_deck_returns_empty ... ok
+  test scheduler::cfa_deadline::tests::fetch_limit_truncates_after_sorting ... ok
+  test scheduler::cfa_deadline::tests::lower_predicted_recall_sorts_first ... ok
+  test scheduler::cfa_deadline::tests::never_reviewed_card_is_treated_as_weakest ... ok
+  test scheduler::cfa_deadline::tests::recall_drops_as_the_exam_moves_farther_out ... ok
+  test scheduler::cfa_deadline::tests::suggested_interval_is_capped_at_days_to_exam ... ok
+  test scheduler::cfa_deadline::tests::deadline_retention_is_read_only_and_preserves_undo ... ok
+  test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 531 filtered out; finished in 0.03s
+
+Command 2 (exam-queue build + verification probes — POV 2 & POV 3):
+
+  $ cargo test -p anki --lib -- scheduler::service::tests::exam_queue scheduler::service::tests::verification_probe
+  running 11 tests
+  test scheduler::service::tests::exam_queue_empty_deck_returns_empty ... ok
+  test scheduler::service::tests::exam_queue_zero_weight_topic_sinks_to_bottom ... ok
+  test scheduler::service::tests::verification_probe_suspended_new_card_excluded_from_exam_queue ... ok
+  test scheduler::service::tests::exam_queue_mixes_new_and_due_cards ... ok
+  test scheduler::service::tests::exam_queue_untyped_card_defaults_to_unit_multiplier ... ok
+  test scheduler::service::tests::exam_queue_includes_new_cards ... ok
+  test scheduler::service::tests::exam_queue_orders_by_topic_weight ... ok
+  test scheduler::service::tests::exam_queue_type_multiplier_differentiates_equal_weakness_cards ... ok
+  test scheduler::service::tests::exam_queue_weaker_card_ranks_first_for_equal_weight ... ok
+  test scheduler::service::tests::exam_queue_urgency_is_monotonic_in_days_to_exam ... ok
+  test scheduler::service::tests::exam_queue_is_read_only_and_preserves_undo ... ok
+  test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 530 filtered out; finished in 0.04s
+
+  >>> RESULT: 10 + 11 = 21 unique CFA Rust tests, no overlap.
+  (Contrast the misleading broad filter: `cargo test -p anki --lib -- exam`
+   reports 15 because the substring "exam" also matches the deadline test
+   `exam_in_the_past_caps_all_intervals_at_zero`; adding the 10 deadline tests
+   on top of that 15 is the 25 double-count. The two scoped filters above are
+   disjoint, so 10 + 11 is the honest total.)
+
+================================================================================
+SUMMARY
+================================================================================
+  Python/Qt : 203 passed, 1 skipped   (`just cfa-f9-test-tally`)
+  Rust      : 21 passed (10 + 11)      (two scoped `cargo test` filters above)
+Both reproducible from the exact commands shown. No numbers were forced.

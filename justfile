@@ -173,6 +173,28 @@ cfa-f9-gate:
     {{ ninja }} pylib
     QT_QPA_PLATFORM=offscreen PYTHONPATH="out/pylib:pylib:qt:out/qt:cfa/ethics_pairs:." {{ py }} tools/cfa/f9_reachability.py
 
+# Feature F9: reproducible test tally — ONE deduplicated pytest collection over every CFA Python/Qt suite; the trailing "N passed, M skipped" is the headline Python/Qt number.
+# --import-mode=importlib lets the four separate `tests` packages (pylib, qt, cfa/ai, cfa/eval) coexist in one process; pylib tests are listed first so `tests.shared`/`tests.test_cfa_scores` bind to pylib/tests.
+cfa-f9-test-tally:
+    {{ ninja }} pylib qt
+    QT_QPA_PLATFORM=offscreen PYTHONPATH="out/pylib:pylib:qt:out/qt:cfa/ethics_pairs:." {{ py }} -m pytest --import-mode=importlib \
+        pylib/tests/test_cfa.py \
+        pylib/tests/test_cfa_scores.py \
+        pylib/tests/test_cfa_f4.py \
+        pylib/tests/test_cfa_seed.py \
+        pylib/tests/test_cfa_f8_persistence.py \
+        pylib/tests/test_cfa_sync.py \
+        cfa/eval/tests \
+        cfa/ai/tests \
+        cfa/ethics_pairs/tests \
+        tools/cfa/tests \
+        qt/tests/test_cfa_f0b.py \
+        qt/tests/test_cfa_ethics_ai.py \
+        qt/tests/test_cfa_tab_fill.py \
+        qt/tests/test_cfa_f4_dialog.py \
+        qt/tests/test_cfa_f5_style.py \
+        qt/tests/test_cfa_menu.py
+
 # Feature 9: run the live desktop<->phone sync demo (stands up anki-sync-server, prints a narrated round-trip)
 cfa-sync:
     {{ ninja }} pylib

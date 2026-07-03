@@ -27,9 +27,13 @@ just cfa-f8-test                                    # F8 (3 pass)
 # Pre-existing suites (regression — all still green)
 just cfa-test cfa-menu-test cfa-seed-test cfa-scores-test \
      cfa-deck-test cfa-eval-test cfa-eval-leakage cfa-types-test cfa-sync-test
-# Shared Rust engine
-cargo test -p anki --lib -- scheduler::cfa_deadline scheduler::service::tests::exam \
-     scheduler::service::tests::verification_probe   # 21 pass (10 deadline + 11 exam-queue)
+# Headline Python/Qt count — ONE deduplicated pytest collection (supersedes summing the recipes above)
+just cfa-f9-test-tally                              # 203 passed, 1 skipped
+# Shared Rust engine — 21 unique CFA tests via two DISJOINT scoped filters
+# (the broad `-- exam` filter mis-reports 15: "exam" also matches a cfa_deadline test)
+cargo test -p anki --lib -- scheduler::cfa_deadline                       # 10 pass
+cargo test -p anki --lib -- scheduler::service::tests::exam_queue \
+     scheduler::service::tests::verification_probe                        # 11 pass
 # End-to-end reachability on a fresh seed
 QT_QPA_PLATFORM=offscreen PYTHONPATH="out/pylib:pylib:qt:out/qt:cfa/ethics_pairs:." \
      out/pyenv/bin/python tools/cfa/f9_reachability.py   # F9 REACHABILITY: PASS
@@ -37,8 +41,8 @@ QT_QPA_PLATFORM=offscreen PYTHONPATH="out/pylib:pylib:qt:out/qt:cfa/ethics_pairs
 
 ## Real numbers (this iteration)
 
-- **Python/Qt: 203 passed, 1 skipped** — 116 new F-series tests + 87 pre-existing regression tests.
-- **Rust (CFA-specific): 21 passed** — 10 `scheduler::cfa_deadline` + 11 `scheduler::service` exam-queue tests.
+- **Python/Qt: 203 passed, 1 skipped** — reproducible as ONE deduplicated pytest collection via `just cfa-f9-test-tally` (204 collected; the 1 skip is the with-key real-LLM smoke, honestly skipped AI-off). Composition: 116 new F-series tests + 87 pre-existing regression tests.
+- **Rust (CFA-specific): 21 passed** — 10 (`cargo test -p anki --lib -- scheduler::cfa_deadline`) + 11 (`cargo test -p anki --lib -- scheduler::service::tests::exam_queue scheduler::service::tests::verification_probe`); two disjoint scoped filters, so no double-count (the broad `-- exam` filter mis-reports 15).
 - **Ethics bank:** 30 one-passage items, 73 gold evidence spans, validated verbatim / token-locatable / non-overlapping.
 - **Eval:** 30 human-labeled ethics attempts; AI-off deterministic grader agreement **0.733** (the LLM ≥0.80 assertion is honestly _skipped_ with no key).
 - **Leakage:** clean — no held-out eval question overlaps a training-deck front (Jaccard < 0.6).

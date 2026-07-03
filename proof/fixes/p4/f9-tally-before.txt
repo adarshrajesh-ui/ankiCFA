@@ -1,0 +1,56 @@
+P4 · Item 5 · (D) test tally — BEFORE (the un-reproducible claims)
+================================================================
+Captured: 2026-07-03  ·  worktree: ankiCFA-p4  ·  branch: p4/05-submission
+
+The headline counts existed only as prose "accounting", not as a single command
+anyone could run to reproduce them. Two specific hazards:
+
+--- Python/Qt "203" was a hand-added split, not one collection ----------------
+proof/gnhf2/f9-demo.html (headline, verbatim):
+  "Real rendered / on-device screenshots (AI-off default). 203 py/qt + 21 Rust
+   tests green · reachability PASS."
+
+SUBMISSION-CHECKLIST.md (Real numbers, verbatim):
+  "- **Python/Qt: 203 passed, 1 skipped** — 116 new F-series tests + 87
+     pre-existing regression tests."
+  "- **Rust (CFA-specific): 21 passed** — 10 `scheduler::cfa_deadline` + 11
+     `scheduler::service` exam-queue tests."
+
+203 = 116 + 87 is a *deduplicated accounting* summed across ~10 separate `just`
+recipes. There was no ONE pytest that collects exactly these suites once and
+prints "203 passed". Worse, naively combining the suites into a single pytest
+run FAILS to even collect:
+
+  $ ...pytest cfa/ai/tests qt/tests/... pylib/tests/... tools/cfa/tests cfa/eval/tests
+  ModuleNotFoundError: No module named 'tests.test_cfa_f4'   (and 6 more)
+  Interrupted: 7 errors during collection
+
+  Cause: pylib/tests, qt/tests, cfa/ai/tests, cfa/eval/tests are each a package
+  literally named `tests` (they carry __init__.py). Under pytest's default
+  `prepend` import mode they all fight for sys.modules['tests'], and pylib's
+  own `from tests.shared import getEmptyCol` sibling-imports then resolve to the
+  wrong package. Each suite only passes when run ALONE (its own recipe).
+
+--- Rust "21" is easy to mis-derive with a broad substring filter ------------
+The naive filter double-counts, because a `cfa_deadline` test name contains the
+substring "exam":
+
+  $ cargo test -p anki --lib -- exam
+  running 15 tests
+  ...
+  test scheduler::cfa_deadline::tests::exam_in_the_past_caps_all_intervals_at_zero ... ok
+  test result: ok. 15 passed; 0 failed; ...
+
+  So "exam" -> 15 (11 exam-queue/probe + 4 that merely contain "exam", incl. one
+  that is really part of the 10-test cfa_deadline group). Add the 10 deadline
+  tests on top and you double-count to 25; report only 15 and you undercount.
+  The real unique CFA Rust count is 21 and needs two DISJOINT scoped filters
+  (see f9-tally-after.log).
+
+--- Also fixed this iteration -----------------------------------------------
+- Live-app capture PNGs (originally under proof/verify-20260703/) were left
+  untracked and got swept into a P1 git stash; recovered read-only into
+  proof/fixes/p4/contact-src/ (desktop + android) so they survive as evidence.
+- Real demo videos exist and are tracked: demo/desktop-review.mp4 (45s desktop
+  review), demo/build.mp4 (build timelapse). Still missing (environmental, need
+  a live device/installer fleet): demo/phone-review.mp4, demo/install.mp4.

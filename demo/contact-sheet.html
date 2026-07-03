@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><style>
+  :root{
+    --navy:#0f4c81;--ink:#1c2b3a;--muted:#6b7a8d;--line:#e2e8f0;--bg:#f7f9fc;
+    --paper:#fff;--shot-bg:#eef2f7;--green:#166534;--greenbg:#ecfdf3;
+  }
+  *{box-sizing:border-box;margin:0;}
+  body{font-family:-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);padding:34px;width:1600px;}
+  .banner{background:var(--navy);color:#fff;border-radius:12px;padding:16px 22px;display:flex;align-items:center;gap:14px;margin-bottom:22px;box-shadow:0 2px 8px rgba(15,76,129,.18);}
+  .banner .dot{width:11px;height:11px;border-radius:50%;background:#4ade80;box-shadow:0 0 0 4px rgba(74,222,128,.25);flex:none;}
+  .banner .btxt{font-size:16px;font-weight:750;letter-spacing:.01em;}
+  .banner .bsub{font-size:12px;opacity:.85;font-weight:500;margin-top:1px;}
+  .eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--navy);font-weight:700;}
+  h1{font-size:29px;font-weight:750;margin:4px 0 3px;color:var(--ink);}
+  .sub{color:var(--muted);font-size:14px;margin-bottom:8px;max-width:1180px;line-height:1.5;}
+  .repro{color:var(--ink);font-size:12.5px;margin-bottom:26px;}
+  .repro code{background:var(--shot-bg);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:11px;color:var(--navy);}
+  .sechead{display:flex;align-items:baseline;gap:12px;margin:8px 0 14px;padding-bottom:8px;border-bottom:2px solid var(--navy);}
+  .sechead .st{font-size:17px;font-weight:750;color:var(--navy);}
+  .sechead .sd{font-size:12.5px;color:var(--muted);}
+  .grid{display:grid;gap:18px;margin-bottom:30px;}
+  .grid.desktop{grid-template-columns:repeat(3,1fr);}
+  .grid.mobile{grid-template-columns:repeat(4,1fr);}
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(15,76,129,.06);display:flex;flex-direction:column;}
+  .card .cap{padding:11px 14px;border-bottom:1px solid var(--line);}
+  .card .tag{font-size:11px;font-weight:700;color:var(--navy);letter-spacing:.05em;}
+  .card .tag.vid{color:#9a3412;}
+  .card .title{font-size:12.5px;color:var(--ink);margin-top:3px;line-height:1.38;}
+  .shot{width:100%;background:var(--shot-bg);display:block;object-fit:contain;border-top:1px solid #f0f3f8;}
+  .grid.desktop .shot{height:322px;object-position:center top;}
+  .grid.mobile .shot{height:540px;}
+  .foot{margin-top:8px;color:var(--muted);font-size:12px;border-top:1px solid var(--line);padding-top:16px;line-height:1.65;}
+  .foot b{color:var(--ink);}
+  .foot .row{margin-bottom:7px;}
+  .pill{display:inline-block;background:var(--greenbg);color:var(--green);border:1px solid #bbf7d0;border-radius:11px;padding:1px 9px;font-weight:600;font-size:11px;}
+</style></head><body>
+
+  <div class="banner">
+    <span class="dot"></span>
+    <div>
+      <div class="btxt">LIVE APP CAPTURE — real macOS Anki + AnkiDroid (not HTML / offscreen renders)</div>
+      <div class="bsub">Every panel is a genuine screenshot of the running app or a frame of the real 45s desktop-review recording. Desktop shows macOS window chrome + menu bar; mobile shows the Android status/gesture bar.</div>
+    </div>
+  </div>
+
+  <div class="eyebrow">CFA Exam-Prep Pro Upgrade · Submission Proof (P4 · item 5)</div>
+  <h1>Live App Contact Sheet — every shipped surface, real captures</h1>
+  <div class="sub">Ten genuine captures spanning the desktop (macOS Anki) and mobile (AnkiDroid on a physical Android phone) experiences, plus one frame lifted from the committed 45-second review video. No mockups; no rendered HTML stand-ins.</div>
+  <div class="repro">Headline tests are reproducible from real commands:
+    Python/Qt <span class="pill">203 passed · 1 skipped</span> via <code>just cfa-f9-test-tally</code> (one deduplicated collection) &nbsp;·&nbsp;
+    Rust <span class="pill">21</span> = <code>cargo test -p anki --lib -- scheduler::cfa_deadline</code> (10) + <code>… scheduler::service::tests::exam_queue scheduler::service::tests::verification_probe</code> (11).</div>
+
+  <div class="sechead"><div class="st">Desktop · live macOS Anki</div><div class="sd">real app window (traffic-light chrome + native menu bar visible)</div></div>
+  <div class="grid desktop">
+    <div class="card"><div class="cap"><div class="tag">F0b / F5 · DECK BROWSER</div><div class="title">CFA &rarr; CFA Level II decks, 20 new — clean isolated app window</div></div><img class="shot" src="../proof/fixes/p4/contact-src/33-clean-main.png"></div>
+    <div class="card"><div class="cap"><div class="tag">F0b · STUDY MENU</div><div class="title">CFA menu open: Exam Readiness · Study Ethics Minimal-Pairs · Study by Exam Priority · Peak-on-Exam-Day</div></div><img class="shot" src="../proof/fixes/p4/contact-src/03-cfa-menu-crop.png"></div>
+    <div class="card"><div class="cap"><div class="tag">F4 · EXAM READINESS</div><div class="title">Bayesian 95% credible band + likely-fail call + honest "not enough data" give-up rules + per-topic recall</div></div><img class="shot" src="../proof/fixes/p4/contact-src/04-exam-readiness-crop.png"></div>
+    <div class="card"><div class="cap"><div class="tag">F3 · AI TAB-TO-FILL</div><div class="title">Card back drafted by the REAL LLM (with-key, item 4), note tagged <code>ai-generated</code></div></div><img class="shot" src="../proof/fixes/p4/f3-withkey-after.png"></div>
+    <div class="card"><div class="cap"><div class="tag">F0b · EXAM-PRIORITY QUEUE</div><div class="title">"Study by Exam Priority" action invoked live (queue empty here — 0 due in the fresh seed)</div></div><img class="shot" src="../proof/fixes/p4/contact-src/06-priority-crop.png"></div>
+    <div class="card"><div class="cap"><div class="tag vid">▶ REAL VIDEO FRAME</div><div class="title">Frame from <code>demo/desktop-review.mp4</code> — a CFA card reviewed with the SM-2 answer buttons</div></div><img class="shot" src="../proof/fixes/p4/contact-src/desktop-review-frame.png"></div>
+  </div>
+
+  <div class="sechead"><div class="st">Mobile · AnkiDroid on a physical Android device</div><div class="sd">fork Rust engine + synced content (status bar / gesture bar visible)</div></div>
+  <div class="grid mobile">
+    <div class="card"><div class="cap"><div class="tag">F6 / F7 · ANKIDROID</div><div class="title">Bundled CFA + Ethics Passages decks on device (40 due)</div></div><img class="shot" src="../proof/fixes/p4/contact-src/android/53-ankidroid.png"></div>
+    <div class="card"><div class="cap"><div class="tag">F1 / F7 · ETHICS PASSAGE</div><div class="title">One-passage multi-span card on device — Suitability/MNPI/Diligence cluster</div></div><img class="shot" src="../proof/fixes/p4/contact-src/android/54-ethics-passages.png"></div>
+    <div class="card"><div class="cap"><div class="tag">F2 / F7 · GRADED</div><div class="title">Graded on device: verdict correct, evidence-span scoring (0/2 spans) — multi-span highlight</div></div><img class="shot" src="../proof/fixes/p4/contact-src/android/57-graded.png"></div>
+    <div class="card"><div class="cap"><div class="tag">F1 / F7 · ETHICAL CASE</div><div class="title">Second passage, "Ethical" verdict with highlighted evidence spans</div></div><img class="shot" src="../proof/fixes/p4/contact-src/android/60-ethical-highlighted.png"></div>
+  </div>
+
+  <div class="foot">
+    <div class="row"><b>Provenance.</b> Desktop panels are live macOS Anki (window chrome + menu bar visible); mobile panels are AnkiDroid on a physical Android phone (status/gesture bar visible). Sources recovered read-only into <code>proof/fixes/p4/contact-src/</code> (03/06 cropped to their salient region), plus <code>proof/fixes/p4/f3-withkey-after.png</code> from item 4. The video frame was extracted from the committed recording with ffmpeg.</div>
+    <div class="row"><b>Video.</b> The desktop demo IS recorded: <code>demo/desktop-review.mp4</code> (45s real review) and <code>demo/build.mp4</code> (build timelapse) are committed. Still pending (environmental — needs a live device + installer fleet): <code>demo/phone-review.mp4</code>, <code>demo/install.mp4</code>.</div>
+    <div class="row"><b>Honest scope.</b> Two desktop ethics captures from the source set (22/23) are omitted here — they depict the deck list and an empty-state "deck not available in this build" dialog, not the ethics card UI; the live ethics experience is shown on-device in the mobile panels above.</div>
+    <div class="row"><b>Standing caveats.</b> AI is OFF by default and every feature works with no key (the with-key F2/F3 proofs are the opt-in path); F4 readiness is <b>not</b> validated against real exam outcomes; mobile is the shared fork Rust engine + synced content, not a full desktop port; all deck items are authored-original.</div>
+  </div>
+</body></html>
