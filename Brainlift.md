@@ -1,4 +1,5 @@
 # Brainlift
+
 Purpose
 Build an app on top of Anki that overhauls test prep and enables speed-running a test, targeting a lucrative test prep market.
 In Scope
@@ -41,8 +42,8 @@ The original Anki algorithm was based on predicting review time right before cat
 DOK 2
 Using time-series data, Jarrett improved upon previous spaced-repetition algorithms by solving scheduling through stochastic dynamic programming as an optimization problem.
 Source: From the creator of the modern-day Anki algorithm, FSRS: Jarrett Yi
- A Stochastic Shortest Path Algorithm for Optimizing Spaced Repetition Scheduling
- https://dl.acm.org/doi/epdf/10.1145/3534678.3539081
+A Stochastic Shortest Path Algorithm for Optimizing Spaced Repetition Scheduling
+https://dl.acm.org/doi/epdf/10.1145/3534678.3539081
 
 DOK 1
 Spaced repetition was used for long-term memory, but prior techniques did not adapt to the student dynamically. Instead, they used deterministic controls based on user actions to dictate scheduling.
@@ -72,7 +73,7 @@ He derived the values for the EF-factor through his own use of the scheduling to
 DOK 1
 The key ideas SM-2 was based on were to apply the optimization procedure to the smallest unit, which were problems on individual pages, and to differentiate between items based on their difficulty.
 Source: From the creator of the original Anki algorithm, SM-2: Piotr Wozniak
- https://super-memory.com/english/ol/sm2.htm
+https://super-memory.com/english/ol/sm2.htm
 
 Anki Usage
 DOK 2
@@ -82,31 +83,30 @@ Use Browse, Stats, and Sync deliberately. Browse is your searchable knowledge ba
 Learning Science
 Case Comparison
 Source: Alfieri, Nokes-Malach & Schunn, 2013, Learning Through Case Comparisons: A Meta-Analytic Review, Educational Psychologist
- doi:10.1080/00461520.2013.775712
+doi:10.1080/00461520.2013.775712
 DOK 1
-The meta-analysis looked at 57 experiments and 336 tests. Random-effects analysis found that case comparison beat other forms of case study and instruction with an overall test-level effect of d = 0.50, 95% CI [.44, .56]. This number is accurate, but it should be stated as a pooled comparison against sequential study, single-case study, nonanalogous study, traditional instruction, and control groups, not only sequential or single-case study. Against sequential case study specifically, the effect was smaller but still meaningful: d = 0.37, 95% CI [.31, .44].  
-The moderators that matter most are asking learners to find similarities across cases and presenting the governing principle after the comparison instead of before it. The strongest setup was “find similarities” plus “principle after comparison,” which produced a large average effect, d = 1.18, 95% CI [.93, 1.44].  
+The meta-analysis looked at 57 experiments and 336 tests. Random-effects analysis found that case comparison beat other forms of case study and instruction with an overall test-level effect of d = 0.50, 95% CI [.44, .56]. This number is accurate, but it should be stated as a pooled comparison against sequential study, single-case study, nonanalogous study, traditional instruction, and control groups, not only sequential or single-case study. Against sequential case study specifically, the effect was smaller but still meaningful: d = 0.37, 95% CI [.31, .44].\
+The moderators that matter most are asking learners to find similarities across cases and presenting the governing principle after the comparison instead of before it. The strongest setup was “find similarities” plus “principle after comparison,” which produced a large average effect, d = 1.18, 95% CI [.93, 1.44].
 
 Source: Gentner, Loewenstein & Thompson, 2003, Learning and Transfer: A General Role for Analogical Encoding, Journal of Educational Psychology
- doi:10.1037/0022-0663.95.2.393
+doi:10.1037/0022-0663.95.2.393
 Supporting Source: Loewenstein, Thompson & Gentner, 1999, Analogical Encoding Facilitates Knowledge Transfer in Negotiation, Psychonomic Bulletin & Review
 DOK 1
-Gentner, Loewenstein & Thompson gave learners the same two negotiation cases, but changed whether the learners compared the cases or studied them separately. In Experiment 2, 128 undergraduate students were randomly assigned to the comparison condition or the separate-cases condition. The comparison group transferred the principle 48% of the time versus 19% for the separate-case group.  
-The old “MBAs, accountants, and consultants” line should be reworded. The 48% vs. 19% number came from undergraduates, not professionals. The professional support comes from the authors’ earlier negotiation work, where graduate management students who compared two cases were nearly three times more likely to use the trained strategy in a later negotiation than students who received the same cases separately.  
+Gentner, Loewenstein & Thompson gave learners the same two negotiation cases, but changed whether the learners compared the cases or studied them separately. In Experiment 2, 128 undergraduate students were randomly assigned to the comparison condition or the separate-cases condition. The comparison group transferred the principle 48% of the time versus 19% for the separate-case group.\
+The old “MBAs, accountants, and consultants” line should be reworded. The 48% vs. 19% number came from undergraduates, not professionals. The professional support comes from the authors’ earlier negotiation work, where graduate management students who compared two cases were nearly three times more likely to use the trained strategy in a later negotiation than students who received the same cases separately.
 
 Source: Corral, Kurtz & Jones, 2018, Learning Relational Concepts From Within- Versus Between-Category Comparisons, Journal of Experimental Psychology: General
- doi:10.1037/xge0000517
+doi:10.1037/xge0000517
 DOK 1
-Corral, Kurtz & Jones should be cited as 2018, not 2020. They tested two-item category-learning trials where items were either from the same category or from different categories. The contrast condition, meaning items from different categories, outperformed the match condition for feature-based categories and across four relational-category experiments. This is directly relevant to CFA Ethics because the product is teaching candidates to discriminate between nearby Standards, not just recognize one Standard in isolation.  
+Corral, Kurtz & Jones should be cited as 2018, not 2020. They tested two-item category-learning trials where items were either from the same category or from different categories. The contrast condition, meaning items from different categories, outperformed the match condition for feature-based categories and across four relational-category experiments. This is directly relevant to CFA Ethics because the product is teaching candidates to discriminate between nearby Standards, not just recognize one Standard in isolation.
 
 Source: Rittle-Johnson & Star, 2007, Does Comparing Solution Methods Facilitate Conceptual and Procedural Knowledge? An Experimental Study on Learning to Solve Equations, Journal of Educational Psychology
- doi:10.1037/0022-0663.99.3.561
+doi:10.1037/0022-0663.99.3.561
 Source: Schwartz, Chase, Oppezzo & Chin, 2011, Practicing Versus Inventing With Contrasting Cases: The Effects of Telling First on Learning and Transfer, Journal of Educational Psychology
- doi:10.1037/a0025140
+doi:10.1037/a0025140
 DOK 1
-Rittle-Johnson & Star randomly assigned 70 seventh-grade students to compare alternative algebra solution methods or study the same methods one at a time. The comparison group gained more procedural knowledge and flexibility, but conceptual knowledge gains were comparable across groups. So this source should be used to support “comparison improves flexible application,” not “comparison improves every learning outcome.”  
-Schwartz et al. showed a related effect in physics: students who first invented with contrasting cases learned deeper ratio structure and transferred better than students who were told formulas first and then practiced. In Experiment 2, 120 eighth-graders were used; ICC students had better deep-structure recall and transfer, while the groups did not differ on surface-feature recall or standard word-problem performance. The old d = 0.31 should not be used as a general headline for all case comparison; it is better treated as a specific transfer result inside that physics RCT.  
-
+Rittle-Johnson & Star randomly assigned 70 seventh-grade students to compare alternative algebra solution methods or study the same methods one at a time. The comparison group gained more procedural knowledge and flexibility, but conceptual knowledge gains were comparable across groups. So this source should be used to support “comparison improves flexible application,” not “comparison improves every learning outcome.”\
+Schwartz et al. showed a related effect in physics: students who first invented with contrasting cases learned deeper ratio structure and transferred better than students who were told formulas first and then practiced. In Experiment 2, 120 eighth-graders were used; ICC students had better deep-structure recall and transfer, while the groups did not differ on surface-feature recall or standard word-problem performance. The old d = 0.31 should not be used as a general headline for all case comparison; it is better treated as a specific transfer result inside that physics RCT.
 
 DOK 2
 This is a different mechanism than interleaving because the strongest compare-vs-separate studies used the same cases and only varied whether learners compared them directly. The win cannot just be a spacing effect. It is structural alignment: actually discovering the diagnostic feature.
@@ -139,7 +139,7 @@ As such, CFA test prep is a key entry.
 Market Discovery
 DOK 2 — Knowledge Tree
 Source: College Test Preparation Market Research Report 2034 — MarketIntelo, 2026
- https://marketintelo.com/report/college-test-preparation-market
+https://marketintelo.com/report/college-test-preparation-market
 DOK 1
 Market share of each test for post-graduate / work-only prep:
 GRE leads post-grad prep at 15.2%;
@@ -153,7 +153,7 @@ Among grad-school admissions tests, GRE is the largest prep market, followed by 
 CFA Exam Prep Market Size
 DOK 1
 Winning Source: Navagant, 2024, Growth and Innovation in Exam & Test Preparation Industry — Score: 8/10
- https://navagant.com/wp-content/uploads/2024/08/Test-Prep-Industry-Report_vF.pdf
+https://navagant.com/wp-content/uploads/2024/08/Test-Prep-Industry-Report_vF.pdf
 DOK 1 Facts
 U.S. exam prep is approximately $3.44B.
 Certifications are approximately 20%, or $690M.
@@ -168,7 +168,7 @@ This is derived from Navigant segment shares plus CFA Institute volume.
 CPA Comparison
 DOK 1
 Source: The NASBA Report: Candidate Performance on the Uniform CPA Examination — 2024 Edition
- https://nasba.org/wp-content/uploads/2025/08/The-NASBA-Report-2024-Edition-Now-Available_Final-19Aug25.pdf
+https://nasba.org/wp-content/uploads/2025/08/The-NASBA-Report-2024-Edition-Now-Available_Final-19Aug25.pdf
 DOK 1 Facts
 74,165 unique CPA candidates in 2024.
 Approximately 148,000 section sittings.
@@ -184,12 +184,12 @@ It is #2 on total prep dollars among post-grad certifications.
 Tests With the Highest Amount Spent Per User
 DOK 1
 Winning Source: Bhatnagar et al., 2019 + AAMC PMQ, 2023 — Score: 9/10
- The Cost of Board Examination and Preparation: An Overlooked Factor in Medical Student Debt
- https://doi.org/10.7759/cureus.4168
+The Cost of Board Examination and Preparation: An Overlooked Factor in Medical Student Debt
+https://doi.org/10.7759/cureus.4168
 Supporting: AAMC PMQ
- https://www.aamc.org/media/50146/download
+https://www.aamc.org/media/50146/download
 Supporting: Buchmann, 2010
- https://doi.org/10.1353/sof.2010.0105
+https://doi.org/10.1353/sof.2010.0105
 DOK 1 Facts
 #1 USMLE / board: Bhatnagar, 2019 found $4,129 mean prep and $7,499 with fees across three steps.
 #2 MCAT: $1,000–$7,000.
@@ -202,11 +202,11 @@ Admissions tests have high tutoring ceilings but lower typical spend.
 Memory-Heavy Tests and Spaced-Repetition Fit
 DOK 1
 Source: The Impact of Test Preparation on Performance of Large-Scale Educational Tests — Meta-analysis
- https://doi.org/10.3102/00346543251360775
+https://doi.org/10.3102/00346543251360775
 Supporting: Kann et al., 2024
- https://doi.org/10.1186/s12909-024-05517-9
+https://doi.org/10.1186/s12909-024-05517-9
 Supporting: Mackey et al., 2013
- https://doi.org/10.1523/JNEUROSCI.4141-12.2013
+https://doi.org/10.1523/JNEUROSCI.4141-12.2013
 DOK 1 Facts
 Most memory-heavy:
 USMLE Step 1;
@@ -229,5 +229,3 @@ DOK 1
 The multi-vendor official ecosystem shows that CFA prep is validated but fragmented.
 Kann, Huang et al., 2024 reviewed medical market concentration.
 https://link.springer.com/article/10.1007/s40670-024-02116-7
-
-

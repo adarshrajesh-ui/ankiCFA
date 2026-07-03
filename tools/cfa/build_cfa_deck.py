@@ -226,7 +226,9 @@ def build(path: str, apkg: str | None) -> int:
         weights = stats["topic_weights"]
         deck_id = stats["deck_id"]
 
-        print(f"Added {added} notes across {len(weights)} topics to '{MAIN_DECK_NAME}'.")
+        print(
+            f"Added {added} notes across {len(weights)} topics to '{MAIN_DECK_NAME}'."
+        )
         print(f"Exam config stored (exam_date + {len(weights)} topic weights).")
 
         if apkg:

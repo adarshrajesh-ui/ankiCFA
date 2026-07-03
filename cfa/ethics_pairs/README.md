@@ -85,13 +85,13 @@ minimality & flip-validity, and distractor quality & originality).
 
 Each JSONL record maps to the note type's fields:
 
-| JSONL key                   | Note field                  |   | JSONL key           | Note field           |
-| --------------------------- | --------------------------- | - | ------------------- | -------------------- |
-| `pair_id`                   | `PairId`                    |   | `decisive_fact`         | `DecisiveFact`         |
-| `cluster`                   | `ClusterTag` (`cluster::…`) |   | `decisive_phrase`       | `DecisivePhrase`       |
-| `vignette_a` / `vignette_b` | `VignetteA` / `VignetteB`   |   | `decisive_phrase_case`  | `DecisivePhraseCase`   |
-| `answer_a` / `answer_b`     | `AnswerA` / `AnswerB`       |   | `distractors[0..2]`     | `DistractorFact1..3`   |
-| `standard`                  | `Standard`                  |   | `rationale`             | `Rationale`            |
+| JSONL key                   | Note field                  |   | JSONL key              | Note field           |
+| --------------------------- | --------------------------- | - | ---------------------- | -------------------- |
+| `pair_id`                   | `PairId`                    |   | `decisive_fact`        | `DecisiveFact`       |
+| `cluster`                   | `ClusterTag` (`cluster::…`) |   | `decisive_phrase`      | `DecisivePhrase`     |
+| `vignette_a` / `vignette_b` | `VignetteA` / `VignetteB`   |   | `decisive_phrase_case` | `DecisivePhraseCase` |
+| `answer_a` / `answer_b`     | `AnswerA` / `AnswerB`       |   | `distractors[0..2]`    | `DistractorFact1..3` |
+| `standard`                  | `Standard`                  |   | `rationale`            | `Rationale`          |
 
 `decisive_phrase` is an **exact verbatim substring** of the vignette named by `decisive_phrase_case`
 (`A`/`B`, always the violating vignette) — the importer rejects the bank if it is not, or if it is
@@ -113,7 +113,7 @@ pipeline above is untouched). Instead of two vignettes, the learner reads **one 
   `gold_span` is a verbatim `{phrase, token_range, rationale}`. Each Standard was analyzed to mark
   **all** evidence spans (73 spans total; 15 ethical / 15 unethical; every item is multi-span).
 - **Deterministic grader (AI-off fallback):** `ethics_scoring.find_gold_spans` / `grade_spans` /
-  `grade_passage_attempt`. A span is *found* when every one of its tokens is selected; the grade is
+  `grade_passage_attempt`. A span is _found_ when every one of its tokens is selected; the grade is
   `correct` (all spans found, within a per-span width cap), `somewhat` (all found but over-wide),
   `partial` (some but not all found), or `wrong`. A passage attempt is fully correct only when the
   verdict is right **and** the highlight grades `correct`.
@@ -132,12 +132,12 @@ just cfa-passages-test       # grader + schema + Python<->JS parity + importer r
 
 Proof (rendered card, real driven attempts): `proof/gnhf2/f1-psg17-fullycorrect.png` (verdict +
 three non-contiguous spans → fully correct) and `proof/gnhf2/f1-psg04-partial.png` (correct verdict
-but only 2 of 3 spans → honest *partial*).
+but only 2 of 3 spans → honest _partial_).
 
 ## F2 — semantic AI grading of the highlight (additive, AI-off safe)
 
-The deterministic F1 grader is exact but literal: a learner who highlights *"unreleased quarterly
-earnings figure"* when the gold phrase is *"exact unreleased quarterly earnings figure"* is
+The deterministic F1 grader is exact but literal: a learner who highlights _"unreleased quarterly
+earnings figure"_ when the gold phrase is _"exact unreleased quarterly earnings figure"_ is
 semantically right but scores `partial`/`wrong` on the token overlap. F2 adds a **semantic** grade
 on top, with tolerance for paraphrase and different boundaries.
 
@@ -167,7 +167,7 @@ just cfa-ethics-eval     # AI-off: deterministic baseline; with a key: asserts L
 ```
 
 Proof: `proof/gnhf2/f2-psg01-ai.png` (a driven attempt whose clipped spans grade deterministically
-`wrong` — "0 of 2 found" — while the AI feedback block upgrades it to *Correct* with per-span
+`wrong` — "0 of 2 found" — while the AI feedback block upgrades it to _Correct_ with per-span
 explanations), `proof/gnhf2/f2-psg01-aioff.png` (same attempt with AI OFF: no AI block, the
 deterministic reveal stands), and `proof/gnhf2/f2-eval-report.txt` (the AI-off eval run).
 
@@ -204,16 +204,16 @@ Linux `~/.local/share/Anki2`, Windows `%APPDATA%\Anki2`.
 
 ## Files
 
-| File                                                 | Role                                                                          |
-| ---------------------------------------------------- | ----------------------------------------------------------------------------- |
-| `pairs.jsonl`                                        | the 30-pair starter bank (auditable)                                          |
-| `import_pairs.py`                                    | CLI: jsonl → note type + `CFA::Ethics Pairs` deck + notes (idempotent)        |
-| `ethics_notetype.py`                                 | note-type definition + template installer                                     |
-| `templates/{front,back}.html`, `templates/style.css` | the interactive tap-to-highlight review flow (desktop + mobile)                |
+| File                                                 | Role                                                                                                                 |
+| ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `pairs.jsonl`                                        | the 30-pair starter bank (auditable)                                                                                 |
+| `import_pairs.py`                                    | CLI: jsonl → note type + `CFA::Ethics Pairs` deck + notes (idempotent)                                               |
+| `ethics_notetype.py`                                 | note-type definition + template installer                                                                            |
+| `templates/{front,back}.html`, `templates/style.css` | the interactive tap-to-highlight review flow (desktop + mobile)                                                      |
 | `ethics_scoring.py`                                  | **pure** scoring: tokenize / `find_gold_indices` / `grade_highlight` / `grade_attempt` + aggregation (no `anki` dep) |
-| `ethics_revlog.py`                                   | reads pair attempts from the review log                                       |
-| `ethics_dashboard.py`                                | discrimination dashboard renderer + offline report CLI                        |
-| `__init__.py` + `manifest.json`                      | the in-app dashboard add-on                                                   |
-| `tests/`                                             | unit tests (scoring, highlight grading, aggregation, dashboard), jsonl→notes round-trip |
-| `tests/js/`                                          | standalone copy of the template's highlight logic + Node harness for the Python↔JS parity test |
-| `../../ts/tests/e2e/ethics_pairs_flow.test.ts`       | Playwright flow test (both vignettes; no reveal before attempt)               |
+| `ethics_revlog.py`                                   | reads pair attempts from the review log                                                                              |
+| `ethics_dashboard.py`                                | discrimination dashboard renderer + offline report CLI                                                               |
+| `__init__.py` + `manifest.json`                      | the in-app dashboard add-on                                                                                          |
+| `tests/`                                             | unit tests (scoring, highlight grading, aggregation, dashboard), jsonl→notes round-trip                              |
+| `tests/js/`                                          | standalone copy of the template's highlight logic + Node harness for the Python↔JS parity test                       |
+| `../../ts/tests/e2e/ethics_pairs_flow.test.ts`       | Playwright flow test (both vignettes; no reveal before attempt)                                                      |

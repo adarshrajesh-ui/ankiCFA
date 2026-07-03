@@ -8,14 +8,14 @@ branch `chore/wed-proof`.
 
 ## Segment map
 
-| Time | Beat | Backing proof artifact |
-| --- | --- | --- |
-| 0:00–0:30 | (1) A card review in the app | `demo/desktop-review.mp4`; `proof/gate-launch.log`, `proof/gate-smoke.log` |
+| Time      | Beat                                                                       | Backing proof artifact                                                                         |
+| --------- | -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| 0:00–0:30 | (1) A card review in the app                                               | `demo/desktop-review.mp4`; `proof/gate-launch.log`, `proof/gate-smoke.log`                     |
 | 0:30–1:30 | (2) The Rust change in action — `BuildExamQueue` ordering / Exam Readiness | `demo/build.mp4`; `proof/rust-tests.log`, `docs/cfa/RUST_ENGINE_NOTE.md`, `proof/perf-50k.log` |
-| 1:30–2:15 | (3) A card synced/loaded on the phone (AnkiDroid) | `demo/phone-review.mp4` **[pending AnkiDroid fleet]** |
-| 2:15–3:15 | (4) The three readiness scores with their ranges | `demo/desktop-review.mp4`; `pylib/anki/cfa.py`, `qt/aqt/cfa.py` |
-| 3:15–4:15 | (5) Test results (Rust + Python green) | `proof/rust-tests.log`, `proof/python-tests.log` |
-| 4:15–4:30 | Close / recap | `proof/README.md` |
+| 1:30–2:15 | (3) A card synced/loaded on the phone (AnkiDroid)                          | `demo/phone-review.mp4` **[pending AnkiDroid fleet]**                                          |
+| 2:15–3:15 | (4) The three readiness scores with their ranges                           | `demo/desktop-review.mp4`; `pylib/anki/cfa.py`, `qt/aqt/cfa.py`                                |
+| 3:15–4:15 | (5) Test results (Rust + Python green)                                     | `proof/rust-tests.log`, `proof/python-tests.log`                                               |
+| 4:15–4:30 | Close / recap                                                              | `proof/README.md`                                                                              |
 
 ---
 

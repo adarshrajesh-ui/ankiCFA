@@ -12,11 +12,11 @@ const input = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
 const out = { gold: [], grade: [] };
 
 for (const c of input.gold || []) {
-  out.gold.push(L.cfaFindGold(c.vignette, c.gold));
+    out.gold.push(L.cfaFindGold(c.vignette, c.gold));
 }
 for (const c of input.grade || []) {
-  // c.cap is null when the default (len(gold) + slack) should be used.
-  out.grade.push(L.cfaGradeHighlight(c.selection, c.gold, c.cap));
+    // c.cap is null when the default (len(gold) + slack) should be used.
+    out.grade.push(L.cfaGradeHighlight(c.selection, c.gold, c.cap));
 }
 
 process.stdout.write(JSON.stringify(out));

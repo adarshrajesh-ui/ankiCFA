@@ -1,3 +1,6 @@
+# Copyright: Ankitects Pty Ltd and contributors
+# License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
+
 """Reusable OpenAI client for the CFA exam-prep AI features.
 
 This is the single entry point every AI feature (ethics grading, tab-to-fill,

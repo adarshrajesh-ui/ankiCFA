@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# Copyright: Ankitects Pty Ltd and contributors
+# License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
+
 """Leakage check for the held-out CFA eval set.
 
 A held-out evaluation is only meaningful if its questions were never part of

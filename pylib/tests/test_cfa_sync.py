@@ -160,7 +160,9 @@ def test_conflict_more_recent_wins_no_lost_or_double_reviews(server):
 
     # And the documented rule agrees with what the sync engine actually did.
     winner = cs.resolve_review_conflict(
-        cs.ReviewEvent(card_id=cid, reviewed_at_ms=desktop_ms, ease=1, source="desktop"),
+        cs.ReviewEvent(
+            card_id=cid, reviewed_at_ms=desktop_ms, ease=1, source="desktop"
+        ),
         cs.ReviewEvent(card_id=cid, reviewed_at_ms=phone_ms, ease=4, source="phone"),
     )
     assert winner.reviewed_at_ms == converged

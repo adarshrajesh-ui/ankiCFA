@@ -7,22 +7,22 @@
 //! exam instead needs peak retention on ONE date. This module backs the
 //! read-only `DeadlineRetention` RPC, which for a deck + exam date:
 //!
-//! 1. predicts each due card's FSRS retrievability **at the exam date** (reusing
-//!    the very same `current_retrievability_seconds` helper the rest of the
-//!    engine and `BuildExamQueue` use, but advancing the elapsed time out to the
-//!    exam instant), and
+//! 1. predicts each due card's FSRS retrievability **at the exam date**
+//!    (reusing the very same `current_retrievability_seconds` helper the rest
+//!    of the engine and `BuildExamQueue` use, but advancing the elapsed time
+//!    out to the exam instant), and
 //! 2. proposes a deadline-adjusted next interval = `min(FSRS interval,
-//!    days_to_exam)` so the next review never lands *after* the exam, tightening
-//!    as the exam nears.
+//!    days_to_exam)` so the next review never lands *after* the exam,
+//!    tightening as the exam nears.
 //!
 //! Cards are returned sorted by lowest predicted exam-day recall first, so the
 //! weakest-on-the-day cards surface. Like `BuildExamQueue`, nothing is written:
 //! it only reads cards and returns values, so FSRS scheduling and the undo
 //! history stay valid.
 //!
-//! This is deliberately NAIVE (a per-card cap + reweight, not an optimal-control
-//! solution) but it is a real, second engine change distinct from
-//! `BuildExamQueue` — see `docs/cfa/DOK4-DEADLINE.md`.
+//! This is deliberately NAIVE (a per-card cap + reweight, not an
+//! optimal-control solution) but it is a real, second engine change distinct
+//! from `BuildExamQueue` — see `docs/cfa/DOK4-DEADLINE.md`.
 
 use std::cmp::Ordering;
 
@@ -108,9 +108,9 @@ fn days_until(now: TimestampSecs, exam_date: i64) -> i64 {
 }
 
 /// Deadline-capped next interval: `min(fsrs_interval, days_to_exam)` clamped to
-/// be non-negative, so the next review never lands after the exam. An exam today
-/// or in the past caps the interval at 0 (review now; schedule nothing beyond
-/// the deadline).
+/// be non-negative, so the next review never lands after the exam. An exam
+/// today or in the past caps the interval at 0 (review now; schedule nothing
+/// beyond the deadline).
 fn capped_interval(fsrs_interval_days: u32, days_to_exam: i64) -> u32 {
     // clamp is safe: the low bound (0) is always <= the high bound (>= 0).
     days_to_exam.clamp(0, fsrs_interval_days as i64) as u32

@@ -1,3 +1,6 @@
+# Copyright: Ankitects Pty Ltd and contributors
+# License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
+
 """Smoke + unit tests for the CFA AI foundation (Feature F0a).
 
 Covers the AI-off contract without any network access, plus one real tiny call

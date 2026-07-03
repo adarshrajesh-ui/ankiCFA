@@ -1,7 +1,7 @@
 # CFA design system (F5)
 
 The CFA fork ships one calm, finance-education visual language — modelled on the
-*learning* aesthetic of Mark Meldrum's lessons (restrained type scale, generous
+_learning_ aesthetic of Mark Meldrum's lessons (restrained type scale, generous
 spacing, a quiet slate/navy palette, understated card + table chrome, **no**
 marketing chrome) — shared across every CFA surface so they read as one product.
 
@@ -22,19 +22,19 @@ guardrail that keeps the palette from drifting.
 
 ## Palette
 
-| Token | Hex | Role |
-|-------|-----|------|
-| `ink` | `#1e293b` | primary text (deep slate) |
-| `muted` | `#64748b` | secondary text |
-| `faint` | `#94a3b8` | captions / disabled |
-| `line` | `#e2e8f0` | hairline borders |
-| `surface` | `#f8fafc` | panels / table stripes |
-| `primary` | `#0f4c81` | calm finance navy — structure, not decoration |
-| `primary_soft` | `#e8f0f8` | navy tint fill (selected, AI block) |
-| `pass` / `pass_soft` | `#15803d` / `#f0fdf4` | "likely pass" |
-| `fail` / `fail_soft` | `#b91c1c` / `#fef2f2` | "likely fail" |
-| `warn` | `#b45309` | caution / caveats |
-| `accent` / `accent_soft` | `#b45309` / `#fef3c7` | warm evidence-highlight span |
+| Token                    | Hex                   | Role                                          |
+| ------------------------ | --------------------- | --------------------------------------------- |
+| `ink`                    | `#1e293b`             | primary text (deep slate)                     |
+| `muted`                  | `#64748b`             | secondary text                                |
+| `faint`                  | `#94a3b8`             | captions / disabled                           |
+| `line`                   | `#e2e8f0`             | hairline borders                              |
+| `surface`                | `#f8fafc`             | panels / table stripes                        |
+| `primary`                | `#0f4c81`             | calm finance navy — structure, not decoration |
+| `primary_soft`           | `#e8f0f8`             | navy tint fill (selected, AI block)           |
+| `pass` / `pass_soft`     | `#15803d` / `#f0fdf4` | "likely pass"                                 |
+| `fail` / `fail_soft`     | `#b91c1c` / `#fef2f2` | "likely fail"                                 |
+| `warn`                   | `#b45309`             | caution / caveats                             |
+| `accent` / `accent_soft` | `#b45309` / `#fef3c7` | warm evidence-highlight span                  |
 
 Type scale (px): title 22 · hero 26 · lead 15 · body 14 · meta 12 · eyebrow 11.
 

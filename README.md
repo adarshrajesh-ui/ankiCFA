@@ -67,7 +67,7 @@ Clone the repo into a path that contains **no spaces**. On all platforms you nee
   `tools/install-n2`, or use system/homebrew Ninja (1.10+).
 - A **system Python** (3.9+ recommended). The build auto-bootstraps the remaining
   tooling (`uv`, Node, `protoc`) into `out/`.
-- *(Recommended)* the [`just`](https://just.systems/) command runner
+- _(Recommended)_ the [`just`](https://just.systems/) command runner
   (`brew install just` or `uv tool install just`). All commands below use `just`;
   the underlying `./ninja` / `./run` invocations are shown where useful.
 
@@ -122,22 +122,22 @@ Anki (and therefore ankiCFA) is a layered system whose non-Rust APIs are all
 defined once in Protobuf and generated into each language:
 
 ```
-                 proto/  (service + message definitions, the cross-language API)
-                   │  codegen
-                   ▼
-             rslib/  (Rust core engine: collection, scheduler, FSRS, sync)
-                   │  same engine, two bridges
-        ┌──────────┴───────────┐
-        ▼                      ▼
-   pylib/ (desktop)      rsdroid  →  AnkiDroid (mobile)
-   Python wrapper +      Rust bridge compiled for Android
-   rsbridge (PyO3)       (separate AnkiDroid fork)
-        │
-        ▼
-   qt/aqt/  (PyQt desktop GUI, embeds the web components)
-        ▲
-        │  served web assets
-   ts/ + sass/  (Svelte / TypeScript web components: editor, reviewer, deck config…)
+              proto/  (service + message definitions, the cross-language API)
+                │  codegen
+                ▼
+          rslib/  (Rust core engine: collection, scheduler, FSRS, sync)
+                │  same engine, two bridges
+     ┌──────────┴───────────┐
+     ▼                      ▼
+pylib/ (desktop)      rsdroid  →  AnkiDroid (mobile)
+Python wrapper +      Rust bridge compiled for Android
+rsbridge (PyO3)       (separate AnkiDroid fork)
+     │
+     ▼
+qt/aqt/  (PyQt desktop GUI, embeds the web components)
+     ▲
+     │  served web assets
+ts/ + sass/  (Svelte / TypeScript web components: editor, reviewer, deck config…)
 ```
 
 - **`proto/`** — Protobuf definitions that describe the backend's RPCs and messages;
@@ -160,11 +160,11 @@ The fork keeps its merge surface deliberately small. Almost all CFA logic sits i
 **new, fork-only files** that upstream Anki will never touch; only three existing
 files receive small, additive edits:
 
-| Layer | File | CFA change |
-| --- | --- | --- |
-| proto | `proto/anki/scheduler.proto` | +1 RPC and +2 messages (`BuildExamQueue{Request,Response}`), appended after the last existing RPC |
-| Rust core | `rslib/src/scheduler/service/mod.rs` | `Collection::build_exam_queue` + scoring helpers + unit tests |
-| Desktop lib | `pylib/anki/scheduler/v3.py` | one thin wrapper over the generated binding |
+| Layer       | File                                 | CFA change                                                                                        |
+| ----------- | ------------------------------------ | ------------------------------------------------------------------------------------------------- |
+| proto       | `proto/anki/scheduler.proto`         | +1 RPC and +2 messages (`BuildExamQueue{Request,Response}`), appended after the last existing RPC |
+| Rust core   | `rslib/src/scheduler/service/mod.rs` | `Collection::build_exam_queue` + scoring helpers + unit tests                                     |
+| Desktop lib | `pylib/anki/scheduler/v3.py`         | one thin wrapper over the generated binding                                                       |
 
 New fork-only files (no upstream merge surface):
 [`pylib/anki/cfa.py`](./pylib/anki/cfa.py) (exam config + memory score),
@@ -204,9 +204,9 @@ only the CFA exam-prep layer described above and retains Anki's AGPL-3.0-or-late
 license. The list of Anki contributors is in [CONTRIBUTORS](./CONTRIBUTORS); the
 upstream project's README follows below.
 
-> *CFA® is a registered trademark of CFA Institute. ankiCFA is an independent,
+> _CFA® is a registered trademark of CFA Institute. ankiCFA is an independent,
 > open-source study aid and is not affiliated with, endorsed by, or sponsored by
-> CFA Institute.*
+> CFA Institute._
 
 ---
 

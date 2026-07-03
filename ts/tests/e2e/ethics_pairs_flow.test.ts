@@ -24,8 +24,12 @@ const FEATURE = path.join(REPO, "cfa", "ethics_pairs");
 const STRIP_CHARS = ".,;:!?\"'()[]{}…-–—‘’“”";
 function stripToken(tok: string): string {
     let s = 0, e = tok.length;
-    while (s < e && STRIP_CHARS.indexOf(tok.charAt(s)) !== -1) s++;
-    while (e > s && STRIP_CHARS.indexOf(tok.charAt(e - 1)) !== -1) e--;
+    while (s < e && STRIP_CHARS.indexOf(tok.charAt(s)) !== -1) {
+        s++;
+    }
+    while (e > s && STRIP_CHARS.indexOf(tok.charAt(e - 1)) !== -1) {
+        e--;
+    }
     return tok.slice(s, e).toLowerCase();
 }
 function tokenize(text: string): string[] {
@@ -37,13 +41,20 @@ function normalizedTokens(text: string): string[] {
 }
 function findGoldIndices(vignette: string, gold: string): number[] {
     const v = normalizedTokens(vignette), g = normalizedTokens(gold);
-    if (g.length === 0) return [];
+    if (g.length === 0) {
+        return [];
+    }
     for (let start = 0; start + g.length <= v.length; start++) {
         let ok = true;
         for (let k = 0; k < g.length; k++) {
-            if (v[start + k] !== g[k]) { ok = false; break; }
+            if (v[start + k] !== g[k]) {
+                ok = false;
+                break;
+            }
         }
-        if (ok) return Array.from({ length: g.length }, (_, j) => start + j);
+        if (ok) {
+            return Array.from({ length: g.length }, (_, j) => start + j);
+        }
     }
     return [];
 }

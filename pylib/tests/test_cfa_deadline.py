@@ -100,7 +100,9 @@ def test_never_reviewed_card_surfaces_first():
     strong = _add_review_card(
         col, deck, nt, "strong", stability=500.0, interval=15, now=now
     )
-    fresh = _add_review_card(col, deck, nt, "fresh", stability=None, interval=15, now=now)
+    fresh = _add_review_card(
+        col, deck, nt, "fresh", stability=None, interval=15, now=now
+    )
 
     res = cfa_deadline.deadline_retention(
         col, deck_id=deck, exam_date=_seconds(now, 20), now=now

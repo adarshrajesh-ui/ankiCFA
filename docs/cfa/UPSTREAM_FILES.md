@@ -30,15 +30,15 @@ git diff --stat                                   # uncommitted working-tree edi
 These files exist in vanilla Anki and are the fork's **merge surface** — the only
 places a future rebase onto upstream could conflict.
 
-| Upstream file | Where | One-line change |
-| --- | --- | --- |
-| `proto/anki/scheduler.proto` | `a0001ff11` | Additive `+1 rpc BuildExamQueue` on `SchedulerService` and `+2` messages (`BuildExamQueueRequest`, `BuildExamQueueResponse`), appended after `FuzzDelta` — no field-number/wire-compat break. |
+| Upstream file                        | Where                     | One-line change                                                                                                                                                                                                      |
+| ------------------------------------ | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `proto/anki/scheduler.proto`         | `a0001ff11`               | Additive `+1 rpc BuildExamQueue` on `SchedulerService` and `+2` messages (`BuildExamQueueRequest`, `BuildExamQueueResponse`), appended after `FuzzDelta` — no field-number/wire-compat break.                        |
 | `rslib/src/scheduler/service/mod.rs` | `a0001ff11` + uncommitted | Read-only `Collection::build_exam_queue` (trait method + inherent impl) with 3 private scoring helpers and unit tests; scores due cards by `topic_weight × (1 − retrievability) × deadline_urgency`, writes nothing. |
-| `pylib/anki/scheduler/v3.py` | `a0001ff11` + uncommitted | Thin `build_exam_queue(...)` wrapper over the generated backend binding (one new method in its own section). |
-| `qt/aqt/main.py` | `a0001ff11` | 5 lines: `import aqt.cfa` + `aqt.cfa.setup_menu(self)` to add the top-level **CFA** menu during main-window setup. |
-| `justfile` | `78f9bfb40` | 5 additive recipes for the ethics feature (`cfa-validate`, `cfa-test`, `cfa-import`, `cfa-dashboard`, `cfa-install-addon`) plus `py` / `cfa_env` variables. |
-| `CONTRIBUTORS` | `a0001ff11` | +1 line adding the fork author to the contributors list. |
-| `README.md` | `a0001ff11` | +38 lines: fork intro / CFA section. **(Owned by another agent — listed here for completeness, not edited by this doc.)** |
+| `pylib/anki/scheduler/v3.py`         | `a0001ff11` + uncommitted | Thin `build_exam_queue(...)` wrapper over the generated backend binding (one new method in its own section).                                                                                                         |
+| `qt/aqt/main.py`                     | `a0001ff11`               | 5 lines: `import aqt.cfa` + `aqt.cfa.setup_menu(self)` to add the top-level **CFA** menu during main-window setup.                                                                                                   |
+| `justfile`                           | `78f9bfb40`               | 5 additive recipes for the ethics feature (`cfa-validate`, `cfa-test`, `cfa-import`, `cfa-dashboard`, `cfa-install-addon`) plus `py` / `cfa_env` variables.                                                          |
+| `CONTRIBUTORS`                       | `a0001ff11`               | +1 line adding the fork author to the contributors list.                                                                                                                                                             |
+| `README.md`                          | `a0001ff11`               | +38 lines: fork intro / CFA section. **(Owned by another agent — listed here for completeness, not edited by this doc.)**                                                                                            |
 
 > The task named three known upstream-modified files (`scheduler.proto`,
 > `service/mod.rs`, `v3.py`). All three are confirmed above; the additional
@@ -47,11 +47,11 @@ places a future rebase onto upstream could conflict.
 
 ### Uncommitted working-tree edits (on top of the baseline, present at submission)
 
-| File | Status | One-line change |
-| --- | --- | --- |
-| `rslib/src/scheduler/service/mod.rs` | modified (uncommitted) | Exam queue now also includes **new (never-reviewed) cards** — treated as maximally weak (R = 0) so they rise naturally; adds an `add_new_card` test helper and 2 tests (`exam_queue_includes_new_cards`, `exam_queue_mixes_new_and_due_cards`). Still read-only. |
-| `pylib/anki/scheduler/v3.py` | modified (uncommitted) | Docstring refinement: queue returns studyable cards (due review/learning **plus** new cards). |
-| `proof/.commit`, `proof/GATE.md`, `proof/README.md` | modified (uncommitted) | Fork-only proof artifacts (not upstream files; owned by the proof/coordinator agents). |
+| File                                                | Status                 | One-line change                                                                                                                                                                                                                                                  |
+| --------------------------------------------------- | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `rslib/src/scheduler/service/mod.rs`                | modified (uncommitted) | Exam queue now also includes **new (never-reviewed) cards** — treated as maximally weak (R = 0) so they rise naturally; adds an `add_new_card` test helper and 2 tests (`exam_queue_includes_new_cards`, `exam_queue_mixes_new_and_due_cards`). Still read-only. |
+| `pylib/anki/scheduler/v3.py`                        | modified (uncommitted) | Docstring refinement: queue returns studyable cards (due review/learning **plus** new cards).                                                                                                                                                                    |
+| `proof/.commit`, `proof/GATE.md`, `proof/README.md` | modified (uncommitted) | Fork-only proof artifacts (not upstream files; owned by the proof/coordinator agents).                                                                                                                                                                           |
 
 Read-only preservation note: the uncommitted edits in `rslib/.../mod.rs` and
 `pylib/.../v3.py` were **read/diffed only** for this doc and left untouched.

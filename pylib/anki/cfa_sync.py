@@ -103,7 +103,11 @@ def sync_server(
     )
 
     proc = subprocess.Popen(
-        [sys.executable, "-c", "from anki.syncserver import run_sync_server; run_sync_server()"],
+        [
+            sys.executable,
+            "-c",
+            "from anki.syncserver import run_sync_server; run_sync_server()",
+        ],
         env=env,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
@@ -141,14 +145,14 @@ def sync_server(
 # --------------------------------------------------------------------------
 
 
-def login(
-    col: Collection, server: SyncServerHandle
-) -> SyncAuth:
+def login(col: Collection, server: SyncServerHandle) -> SyncAuth:
     """Authenticate ``col`` against ``server`` and return a SyncAuth."""
     return col.sync_login(server.username, server.password, server.endpoint)
 
 
-def _full_transfer(col: Collection, auth: SyncAuth, *, upload: bool, server_usn: int | None) -> None:
+def _full_transfer(
+    col: Collection, auth: SyncAuth, *, upload: bool, server_usn: int | None
+) -> None:
     col.close_for_full_sync()
     try:
         col.full_upload_or_download(auth=auth, server_usn=server_usn, upload=upload)
@@ -224,10 +228,11 @@ def resolve_review_conflict(a: ReviewEvent, b: ReviewEvent) -> ReviewEvent:
 
 def revlog_events(col: Collection, card_id: int) -> list[ReviewEvent]:
     """All review events recorded for ``card_id``, oldest first."""
-    rows = col.db.all(
-        "select id, ease from revlog where cid = ? order by id", card_id
-    )
-    return [ReviewEvent(card_id=card_id, reviewed_at_ms=int(rid), ease=int(ease)) for rid, ease in rows]
+    rows = col.db.all("select id, ease from revlog where cid = ? order by id", card_id)
+    return [
+        ReviewEvent(card_id=card_id, reviewed_at_ms=int(rid), ease=int(ease))
+        for rid, ease in rows
+    ]
 
 
 def last_review_ms(col: Collection, card_id: int) -> int | None:

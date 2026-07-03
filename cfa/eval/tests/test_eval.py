@@ -1,3 +1,6 @@
+# Copyright: Ankitects Pty Ltd and contributors
+# License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
+
 """Tests for the CFA held-out eval harness (Feature 7).
 
 Stdlib only — no built pylib required. Exercises three things:

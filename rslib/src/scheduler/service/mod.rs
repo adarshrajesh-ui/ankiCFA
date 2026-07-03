@@ -484,13 +484,14 @@ impl Collection {
     /// Gathers the studyable cards for a deck and its subdecks — due
     /// review/learning cards *and* new (never-reviewed) cards — *without*
     /// mutating any card, queue, or scheduling state, scores each by
-    /// `topic_weight * (1 - retrievability) * deadline_urgency * type_multiplier`,
-    /// and returns the card ids with their parallel scores sorted by score
-    /// descending. The content-type multiplier (Brainlift POV3) lets equally-weak
-    /// cards of different item types (formula vs ethics-rule vs multi-step-calc,
-    /// …) be prioritized differently; it defaults to 1.0 when unset.
-    /// New cards carry no FSRS memory state, so they are treated as maximally
-    /// weak (R = 0) and naturally rise toward the top. Because it never writes,
+    /// `topic_weight * (1 - retrievability) * deadline_urgency *
+    /// type_multiplier`, and returns the card ids with their parallel
+    /// scores sorted by score descending. The content-type multiplier
+    /// (Brainlift POV3) lets equally-weak cards of different item types
+    /// (formula vs ethics-rule vs multi-step-calc, …) be prioritized
+    /// differently; it defaults to 1.0 when unset. New cards carry no FSRS
+    /// memory state, so they are treated as maximally weak (R = 0) and
+    /// naturally rise toward the top. Because it never writes,
     /// FSRS scheduling and the undo history stay valid.
     pub(crate) fn build_exam_queue(
         &mut self,

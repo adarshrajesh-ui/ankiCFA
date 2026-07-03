@@ -63,13 +63,13 @@ Result shape:
 
 All optional, read from the environment or the gitignored `.env`:
 
-| Variable | Default | Meaning |
-| --- | --- | --- |
-| `OPENAI_API_KEY` | — | Turns AI on. Absent → AI off (`ok=False`). |
-| `CFA_LLM_MODEL` | `gpt-4o-mini` | Model override. |
-| `CFA_LLM_MAX_TOKENS_PER_PROCESS` | `200000` | Cumulative token cap. |
-| `CFA_LLM_MAX_COST_USD` | `1.00` | Cumulative USD cap. |
-| `CFA_LLM_MAX_RETRIES` | `2` | Transient-error retries (exponential backoff). |
+| Variable                         | Default       | Meaning                                        |
+| -------------------------------- | ------------- | ---------------------------------------------- |
+| `OPENAI_API_KEY`                 | —             | Turns AI on. Absent → AI off (`ok=False`).     |
+| `CFA_LLM_MODEL`                  | `gpt-4o-mini` | Model override.                                |
+| `CFA_LLM_MAX_TOKENS_PER_PROCESS` | `200000`      | Cumulative token cap.                          |
+| `CFA_LLM_MAX_COST_USD`           | `1.00`        | Cumulative USD cap.                            |
+| `CFA_LLM_MAX_RETRIES`            | `2`           | Transient-error retries (exponential backoff). |
 
 ## Cost cap
 

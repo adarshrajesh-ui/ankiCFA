@@ -6,10 +6,10 @@
 
 There are two ways to launch, with different support envelopes:
 
-| Path | Platform support | Requirements | Guarantee |
-| --- | --- | --- | --- |
-| **Wheels + `launch-ankiCFA.sh`** (prebuilt bundle) | **Apple-Silicon macOS 12+ only** | Native **arm64** `python3`, **Python 3.10+** | Fast, no toolchain. The shipped wheels are `anki-26.5-cp310-abi3-macosx_12_0_arm64` + `aqt-26.5-py3-none-any` — arm64-only. |
-| **`just run` from source** (fallback) | Any platform Anki builds on (macOS/Linux/Windows) | Rust (pinned via `rust-toolchain.toml`) + a system Python; build deps auto-bootstrapped | **Always available** — the guaranteed launch path when the arm64 wheels don't match your machine. |
+| Path                                               | Platform support                                  | Requirements                                                                            | Guarantee                                                                                                                   |
+| -------------------------------------------------- | ------------------------------------------------- | --------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| **Wheels + `launch-ankiCFA.sh`** (prebuilt bundle) | **Apple-Silicon macOS 12+ only**                  | Native **arm64** `python3`, **Python 3.10+**                                            | Fast, no toolchain. The shipped wheels are `anki-26.5-cp310-abi3-macosx_12_0_arm64` + `aqt-26.5-py3-none-any` — arm64-only. |
+| **`just run` from source** (fallback)              | Any platform Anki builds on (macOS/Linux/Windows) | Rust (pinned via `rust-toolchain.toml`) + a system Python; build deps auto-bootstrapped | **Always available** — the guaranteed launch path when the arm64 wheels don't match your machine.                           |
 
 `launch-ankiCFA.sh` validates the interpreter up front (arch `arm64`,
 `python3 >= 3.10`, `darwin`) and, on an unsupported setup — Intel/x86_64 mac, an

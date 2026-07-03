@@ -69,7 +69,9 @@ def main() -> int:
 
     with cs.sync_server(srv_base) as server:
         print(f"\n[server]  anki-sync-server listening at {server.endpoint}")
-        print(f"[server]  user '{server.username}', collections stored under {srv_base}")
+        print(
+            f"[server]  user '{server.username}', collections stored under {srv_base}"
+        )
 
         desktop = _new_collection(os.path.join(workdir, "desktop.anki2"))
         cid = _add_card(desktop)
@@ -80,18 +82,24 @@ def main() -> int:
         phone = _new_collection(os.path.join(workdir, "phone.anki2"))
         p_auth = cs.login(phone, server)
         cs.sync(phone, p_auth)
-        print(f"[phone]   synced down: now has {phone.card_count()} card, "
-              f"{phone.note_count()} note")
+        print(
+            f"[phone]   synced down: now has {phone.card_count()} card, "
+            f"{phone.note_count()} note"
+        )
 
         print("\n--- 1. FORWARD: review on desktop, sync, check phone -----------")
         _review(desktop, cid, 3)
-        print(f"[desktop] reviewed card -> '{_EASE[3]}'  (revlog rows: "
-              f"{len(cs.revlog_events(desktop, cid))})")
+        print(
+            f"[desktop] reviewed card -> '{_EASE[3]}'  (revlog rows: "
+            f"{len(cs.revlog_events(desktop, cid))})"
+        )
         cs.sync(desktop, d_auth)
         cs.sync(phone, p_auth)
         pe = cs.revlog_events(phone, cid)
-        print(f"[phone]   after sync: {len(pe)} review present, "
-              f"last = '{_EASE[pe[-1].ease]}'  -> review propagated ✓")
+        print(
+            f"[phone]   after sync: {len(pe)} review present, "
+            f"last = '{_EASE[pe[-1].ease]}'  -> review propagated ✓"
+        )
 
         print("\n--- 2. REVERSE: review on phone, sync, check desktop -----------")
         _review(phone, cid, 2)
@@ -99,8 +107,10 @@ def main() -> int:
         cs.sync(phone, p_auth)
         cs.sync(desktop, d_auth)
         de = cs.revlog_events(desktop, cid)
-        print(f"[desktop] after sync: {len(de)} reviews present, "
-              f"last = '{_EASE[de[-1].ease]}'  -> review propagated back ✓")
+        print(
+            f"[desktop] after sync: {len(de)} reviews present, "
+            f"last = '{_EASE[de[-1].ease]}'  -> review propagated back ✓"
+        )
 
         print("\n--- 3. CONFLICT: same card reviewed on BOTH, offline -----------")
         _review(desktop, cid, 1)
@@ -109,8 +119,10 @@ def main() -> int:
         d_ms = cs.last_review_ms(desktop, cid)
         p_ms = cs.last_review_ms(phone, cid)
         print(f"[desktop] reviewed -> '{_EASE[1]}'  at {d_ms} ms")
-        print(f"[phone]   reviewed -> '{_EASE[4]}'  at {p_ms} ms  "
-              f"(phone is {p_ms - d_ms} ms more recent)")
+        print(
+            f"[phone]   reviewed -> '{_EASE[4]}'  at {p_ms} ms  "
+            f"(phone is {p_ms - d_ms} ms more recent)"
+        )
         cs.sync(desktop, d_auth)
         cs.sync(phone, p_auth)
         cs.sync(desktop, d_auth)
@@ -122,13 +134,21 @@ def main() -> int:
             cs.ReviewEvent(cid, d_ms, 1, "desktop"),
             cs.ReviewEvent(cid, p_ms, 4, "phone"),
         )
-        print(f"[both]    converged revlog ids identical: {sorted(d_ids) == sorted(p_ids)}")
-        print(f"[both]    total distinct reviews: {len(d_ids)} "
-              f"(no duplicates: {len(d_ids) == len(set(d_ids))})")
-        print(f"[rule]    resolve_review_conflict() -> winner is '{winner.source}' "
-              f"(more recent)")
-        print(f"[both]    converged card's last review == phone's review: "
-              f"{converged == p_ms == winner.reviewed_at_ms}")
+        print(
+            f"[both]    converged revlog ids identical: {sorted(d_ids) == sorted(p_ids)}"
+        )
+        print(
+            f"[both]    total distinct reviews: {len(d_ids)} "
+            f"(no duplicates: {len(d_ids) == len(set(d_ids))})"
+        )
+        print(
+            f"[rule]    resolve_review_conflict() -> winner is '{winner.source}' "
+            f"(more recent)"
+        )
+        print(
+            f"[both]    converged card's last review == phone's review: "
+            f"{converged == p_ms == winner.reviewed_at_ms}"
+        )
 
         ok = (
             sorted(d_ids) == sorted(p_ids)

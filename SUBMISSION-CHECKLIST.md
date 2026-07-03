@@ -3,7 +3,7 @@
 Production-grade CFA exam-prep upgrade shipped **one feature at a time**, each
 implemented **additively** on top of `origin/main` (`ee2f36d19`), each proven
 with a passing test suite and real rendered / on-device screenshot proof, and
-each validated through the **documented fallback gate** (see *Gate* below).
+each validated through the **documented fallback gate** (see _Gate_ below).
 
 Every AI feature works fully with **AI OFF** through a deterministic fallback;
 no OpenAI key is committed, printed, or required to run the suite.
@@ -40,25 +40,25 @@ QT_QPA_PLATFORM=offscreen PYTHONPATH="out/pylib:pylib:qt:out/qt:cfa/ethics_pairs
 - **Python/Qt: 203 passed, 1 skipped** — 116 new F-series tests + 87 pre-existing regression tests.
 - **Rust (CFA-specific): 21 passed** — 10 `scheduler::cfa_deadline` + 11 `scheduler::service` exam-queue tests.
 - **Ethics bank:** 30 one-passage items, 73 gold evidence spans, validated verbatim / token-locatable / non-overlapping.
-- **Eval:** 30 human-labeled ethics attempts; AI-off deterministic grader agreement **0.733** (the LLM ≥0.80 assertion is honestly *skipped* with no key).
+- **Eval:** 30 human-labeled ethics attempts; AI-off deterministic grader agreement **0.733** (the LLM ≥0.80 assertion is honestly _skipped_ with no key).
 - **Leakage:** clean — no held-out eval question overlaps a training-deck front (Jaccard < 0.6).
 - Full logs: `proof/gnhf2/f9-full-suite.log`; reachability: `proof/gnhf2/f9-reachability.txt`.
 
 ## Feature status
 
-| # | Feature | Gate recipe(s) | Result | Proof | Branch SHA |
-|---|---------|----------------|--------|-------|-----------|
-| F0a | AI foundation — reusable AI-off-safe OpenAI client | `cfa-ai-smoke` | 8 pass · 1 skip (with-key) | `proof/gnhf2/f0a-ai-foundation.log` | `326b2229b` |
-| F0b | Visible desktop fixes — on-demand ethics preload, no dead-ends, exam-date picker, honest new-card queue | `cfa-f0b-test` | 5 pass | `f0b-deadline-{default,picked}.png` | `9049d92a3` |
-| F1 | Ethics one-passage multi-span redesign (30 passages, 73 spans) + deterministic grader Py↔JS | `cfa-passages-test` / `cfa-passages-validate` | 29 pass · bank valid | `f1-psg17-fullycorrect.png`, `f1-psg04-partial.png` | `0b8ef5d37` |
-| F2 | Semantic AI grading of ethics highlights + AI-off fallback + 30-item eval | `cfa-ai-grade-test` / `cfa-ethics-eval` | 20 pass · agreement 0.733 | `f2-psg01-ai.png`, `f2-psg01-aioff.png`, `f2-eval-report.txt` | `03177a29c` |
-| F3 | AI tab-to-fill card backs (provenance tag, overwrite guard, AI-off disabled) | `cfa-tab-fill-test` | 18 pass | `f3-tab-fill.png` | `683d63314` |
-| F4 | Honest scoring redesign — SM-2 recall fallback + 95% credible band + explicit pass/fail call | `cfa-f4-test` | 17 pass | `f4-readiness-{sparse,strong,weak}.png` | `272352c12` |
-| F5 | UI overhaul — shared CFA design system (Mark-Meldrum calm finance aesthetic) | `cfa-f5-test` | 13 pass | `f5-{readiness,deadline,ethics-card}-{before,after}.png` | `aa759dc44` |
-| F6 | Android shared engine repoint — fork Rust engine runs on-device | on-device (adb) | fork RPC loads on device | `f6-ondevice-deckpicker.png`, `f6-ondevice-logcat.txt`, `f6-fork-rpc-symbols.txt` | `3189d4336` |
-| F7 | Android mobile CFA experience — bundled decks auto-import, ethics card multi-span on device | `cfa-f7-test` + on-device (adb) | 3 pass · 8 device screenshots | `f7-ondevice-*.png`, `f7-ondevice-autoimport-logcat.txt` | `126a29823` |
-| F8 | Cross-platform persistence — deck/ethics/exam-config/queue all reach a fresh phone over sync | `cfa-f8-test` | 3 pass | `f8-persistence-report.txt`, `f8-persistence.log`, `docs/cfa/PLATFORM-MATRIX.md` | `3b74faf9e` |
-| F9 | Final gate — full suite, real numbers, reachability, this checklist | `tools/cfa/f9_reachability.py` | REACHABILITY: PASS | `f9-full-suite.log`, `f9-reachability.txt` | _this iteration_ |
+| #   | Feature                                                                                                 | Gate recipe(s)                                | Result                        | Proof                                                                             | Branch SHA       |
+| --- | ------------------------------------------------------------------------------------------------------- | --------------------------------------------- | ----------------------------- | --------------------------------------------------------------------------------- | ---------------- |
+| F0a | AI foundation — reusable AI-off-safe OpenAI client                                                      | `cfa-ai-smoke`                                | 8 pass · 1 skip (with-key)    | `proof/gnhf2/f0a-ai-foundation.log`                                               | `326b2229b`      |
+| F0b | Visible desktop fixes — on-demand ethics preload, no dead-ends, exam-date picker, honest new-card queue | `cfa-f0b-test`                                | 5 pass                        | `f0b-deadline-{default,picked}.png`                                               | `9049d92a3`      |
+| F1  | Ethics one-passage multi-span redesign (30 passages, 73 spans) + deterministic grader Py↔JS             | `cfa-passages-test` / `cfa-passages-validate` | 29 pass · bank valid          | `f1-psg17-fullycorrect.png`, `f1-psg04-partial.png`                               | `0b8ef5d37`      |
+| F2  | Semantic AI grading of ethics highlights + AI-off fallback + 30-item eval                               | `cfa-ai-grade-test` / `cfa-ethics-eval`       | 20 pass · agreement 0.733     | `f2-psg01-ai.png`, `f2-psg01-aioff.png`, `f2-eval-report.txt`                     | `03177a29c`      |
+| F3  | AI tab-to-fill card backs (provenance tag, overwrite guard, AI-off disabled)                            | `cfa-tab-fill-test`                           | 18 pass                       | `f3-tab-fill.png`                                                                 | `683d63314`      |
+| F4  | Honest scoring redesign — SM-2 recall fallback + 95% credible band + explicit pass/fail call            | `cfa-f4-test`                                 | 17 pass                       | `f4-readiness-{sparse,strong,weak}.png`                                           | `272352c12`      |
+| F5  | UI overhaul — shared CFA design system (Mark-Meldrum calm finance aesthetic)                            | `cfa-f5-test`                                 | 13 pass                       | `f5-{readiness,deadline,ethics-card}-{before,after}.png`                          | `aa759dc44`      |
+| F6  | Android shared engine repoint — fork Rust engine runs on-device                                         | on-device (adb)                               | fork RPC loads on device      | `f6-ondevice-deckpicker.png`, `f6-ondevice-logcat.txt`, `f6-fork-rpc-symbols.txt` | `3189d4336`      |
+| F7  | Android mobile CFA experience — bundled decks auto-import, ethics card multi-span on device             | `cfa-f7-test` + on-device (adb)               | 3 pass · 8 device screenshots | `f7-ondevice-*.png`, `f7-ondevice-autoimport-logcat.txt`                          | `126a29823`      |
+| F8  | Cross-platform persistence — deck/ethics/exam-config/queue all reach a fresh phone over sync            | `cfa-f8-test`                                 | 3 pass                        | `f8-persistence-report.txt`, `f8-persistence.log`, `docs/cfa/PLATFORM-MATRIX.md`  | `3b74faf9e`      |
+| F9  | Final gate — full suite, real numbers, reachability, this checklist                                     | `tools/cfa/f9_reachability.py`                | REACHABILITY: PASS            | `f9-full-suite.log`, `f9-reachability.txt`                                        | _this iteration_ |
 
 ## End-to-end reachability (F9)
 
@@ -86,7 +86,7 @@ ANKI_BASE=/tmp/cfaFinal/ankibase just run
 
 ## Gate: no-mistakes unavailable → documented fallback
 
-`no-mistakes` is available on this machine and its push target *is*
+`no-mistakes` is available on this machine and its push target _is_
 `github.com/adarshrajesh-ui/ankiCFA`, **but** its pipeline requires
 self-commits / push / PR / merge, which the gnhf iteration rules forbid (the
 orchestrator owns commits and the merge to `origin/main`). Per the objective's
@@ -100,10 +100,10 @@ adb-screencap proof. This is recorded per-iteration in
 - **AI-off is the default and fully functional.** With no `OPENAI_API_KEY`, F0a
   returns `{ok:False}`, F2 semantic grading falls back to the deterministic F1
   grader, F3 tab-fill is disabled with a tooltip, and the eval's LLM ≥0.80
-  assertion is *skipped* (never faked). The entire test suite passes AI-off.
+  assertion is _skipped_ (never faked). The entire test suite passes AI-off.
 - **Scoring is not validated against real exam data.** F4 readiness (SM-2
   recall fallback + Bayesian 95% credible band + pass/fail call vs the ~65% MPS
-  proxy) carries a standing *"not validated against real exam data"* label; the
+  proxy) carries a standing _"not validated against real exam data"_ label; the
   eval harness is a seeded synthetic-learner simulation, likewise labelled.
 - **Mobile is shared-engine + synced-content, not a full port.** On Android the
   fork **Rust engine** (BuildExamQueue / DeadlineRetention) runs on-device and

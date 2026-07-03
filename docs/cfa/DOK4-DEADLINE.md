@@ -48,15 +48,15 @@ advancing the elapsed time out to the exam date.
 
 ## How this differs from `BuildExamQueue`
 
-| | `BuildExamQueue` | `DeadlineRetention` (this) |
-| --- | --- | --- |
-| Question | "What should I study next?" (weighted weakness **now**) | "What will I fail **on exam day**, and when is the last useful review?" |
-| Score | `topic_weight × (1 − R_now) × urgency` | `R(exam_date)` + a per-card interval cap |
-| Time frame | present retrievability | retrievability **projected to the exam date** |
-| Output | `card_ids[] / scores[]` (score desc) | `card_ids[] / predicted_recall[] / suggested_interval_days[]` (recall asc) |
-| Suggests intervals | no | **yes** — `min(FSRS interval, days_to_exam)` |
+|                    | `BuildExamQueue`                                        | `DeadlineRetention` (this)                                                 |
+| ------------------ | ------------------------------------------------------- | -------------------------------------------------------------------------- |
+| Question           | "What should I study next?" (weighted weakness **now**) | "What will I fail **on exam day**, and when is the last useful review?"    |
+| Score              | `topic_weight × (1 − R_now) × urgency`                  | `R(exam_date)` + a per-card interval cap                                   |
+| Time frame         | present retrievability                                  | retrievability **projected to the exam date**                              |
+| Output             | `card_ids[] / scores[]` (score desc)                    | `card_ids[] / predicted_recall[] / suggested_interval_days[]` (recall asc) |
+| Suggests intervals | no                                                      | **yes** — `min(FSRS interval, days_to_exam)`                               |
 
-They are complementary, not redundant: one reweights *today's* queue by topic
+They are complementary, not redundant: one reweights _today's_ queue by topic
 importance; this one projects recall onto a fixed date and tightens intervals to
 land before it.
 
@@ -82,7 +82,7 @@ particular:
   does not re-optimise.
 - **No multi-review planning.** `predicted_recall` assumes no further reviews
   between now and the exam. It answers "if I did nothing, where would this card
-  be on exam day?" — it does not solve for the optimal *sequence* of reviews
+  be on exam day?" — it does not solve for the optimal _sequence_ of reviews
   (spacing, count, ordering) that would maximise total exam-day recall under a
   daily time budget. That is the real optimal-control problem; this is a first,
   honest approximation of it.
@@ -95,21 +95,21 @@ particular:
 
 New, fork-only files (no upstream merge surface):
 
-| File | Purpose |
-| --- | --- |
+| File                                  | Purpose                                                                                                                                       |
+| ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
 | `rslib/src/scheduler/cfa_deadline.rs` | All engine logic: `Collection::deadline_retention` + pure helpers (`days_until`, `capped_interval`, `predicted_recall_at_exam`) + unit tests. |
-| `pylib/anki/cfa_deadline.py` | Thin Python wrapper (RPC-preferred, read-only SQL parity fallback) + `DeadlineRetention` result dataclass. |
-| `pylib/tests/test_cfa_deadline.py` | End-to-end Python tests. |
-| `docs/cfa/DOK4-DEADLINE.md` | This note. |
+| `pylib/anki/cfa_deadline.py`          | Thin Python wrapper (RPC-preferred, read-only SQL parity fallback) + `DeadlineRetention` result dataclass.                                    |
+| `pylib/tests/test_cfa_deadline.py`    | End-to-end Python tests.                                                                                                                      |
+| `docs/cfa/DOK4-DEADLINE.md`           | This note.                                                                                                                                    |
 
 Minimal additive edits to existing files:
 
-| File | Change |
-| --- | --- |
-| `proto/anki/scheduler.proto` | +1 rpc `DeadlineRetention` at the end of `SchedulerService`; +2 messages (`DeadlineRetentionRequest`, `DeadlineRetentionResponse`) at the end. Existing `BuildExamQueue` lines untouched. |
-| `rslib/src/scheduler/mod.rs` | +1 line: `mod cfa_deadline;`. |
+| File                                 | Change                                                                                                                                                                                                                     |
+| ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `proto/anki/scheduler.proto`         | +1 rpc `DeadlineRetention` at the end of `SchedulerService`; +2 messages (`DeadlineRetentionRequest`, `DeadlineRetentionResponse`) at the end. Existing `BuildExamQueue` lines untouched.                                  |
+| `rslib/src/scheduler/mod.rs`         | +1 line: `mod cfa_deadline;`.                                                                                                                                                                                              |
 | `rslib/src/scheduler/service/mod.rs` | +1 thin trait delegate `deadline_retention` (mirrors the existing `build_exam_queue` delegate). Required because the generated `SchedulerService` trait has no default methods; all real logic lives in `cfa_deadline.rs`. |
-| `qt/aqt/cfa.py` | +1 "Peak-on-Exam-Day…" menu action + `PeakOnExamDayDialog`. |
+| `qt/aqt/cfa.py`                      | +1 "Peak-on-Exam-Day…" menu action + `PeakOnExamDayDialog`.                                                                                                                                                                |
 
 Everything else (`_backend_generated.py`, the Rust service trait/dispatch,
 `scheduler_pb2.py`) is **generated** from the proto — no hand edits.
@@ -134,9 +134,10 @@ exam date from `anki.cfa.set_exam_config`).
 The Rust RPC and its Rust unit tests build and run from the `.proto` via the
 cargo build scripts (`cargo test -p anki --lib`). The **Python** binding for the
 new RPC (`scheduler_pb2.DeadlineRetentionRequest` + `_backend.deadline_retention`
-+ the recompiled `_rsbridge`) is only regenerated by a full `just build`. Until
-then, `cfa_deadline.deadline_retention` transparently uses the **read-only SQL
-parity fallback**, which computes the same predicted recall via the engine's
-`extract_fsrs_retrievability` function evaluated at the exam instant. Both the
-Python test and the Qt dialog therefore work today; after a full build they use
-the RPC unchanged (`DeadlineRetention.used_rpc` reports which path served).
+
+- the recompiled `_rsbridge`) is only regenerated by a full `just build`. Until
+  then, `cfa_deadline.deadline_retention` transparently uses the **read-only SQL
+  parity fallback**, which computes the same predicted recall via the engine's
+  `extract_fsrs_retrievability` function evaluated at the exam instant. Both the
+  Python test and the Qt dialog therefore work today; after a full build they use
+  the RPC unchanged (`DeadlineRetention.used_rpc` reports which path served).

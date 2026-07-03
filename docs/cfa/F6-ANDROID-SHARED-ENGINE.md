@@ -13,15 +13,15 @@ under `proof/gnhf2/f6-*` are the desktop-repo record of that work.
 
 ## Toolchain (verified on this machine, Apple Silicon macOS)
 
-| Component | Value |
-|-----------|-------|
-| Android SDK | `/opt/homebrew/share/android-commandlinetools` |
-| NDK | `29.0.14206865` |
-| Rust android targets | `aarch64-linux-android`, `x86_64-linux-android` (installed) |
-| `cargo-ndk` | `~/.cargo/bin/cargo-ndk` |
-| JDK for the Gradle build | `/opt/homebrew/opt/openjdk@21` |
-| Emulator AVD | `ankidroid_cfa` — android-34 `google_apis` **arm64-v8a** |
-| adb / emulator | from the homebrew SDK `platform-tools/` and `emulator/` |
+| Component                | Value                                                       |
+| ------------------------ | ----------------------------------------------------------- |
+| Android SDK              | `/opt/homebrew/share/android-commandlinetools`              |
+| NDK                      | `29.0.14206865`                                             |
+| Rust android targets     | `aarch64-linux-android`, `x86_64-linux-android` (installed) |
+| `cargo-ndk`              | `~/.cargo/bin/cargo-ndk`                                    |
+| JDK for the Gradle build | `/opt/homebrew/opt/openjdk@21`                              |
+| Emulator AVD             | `ankidroid_cfa` — android-34 `google_apis` **arm64-v8a**    |
+| adb / emulator           | from the homebrew SDK `platform-tools/` and `emulator/`     |
 
 ## Build procedure (the proven shortcut)
 
@@ -82,12 +82,12 @@ DeckPicker running on the fork engine (empty collection, fresh `wipe-data`).
 
 ## Honest scope / caveat
 
-- **Proven:** the *exact* fork engine `.so` (byte-identical, carrying the
+- **Proven:** the _exact_ fork engine `.so` (byte-identical, carrying the
   `BuildExamQueue`/deadline RPC schema) loads, initializes its Rust runtime, and
   services AnkiDroid's collection RPCs on a real Android device. Every scheduling
   call AnkiDroid makes now runs through the fork engine.
 - **Not wired yet:** AnkiDroid's stock UI has no button that invokes the
-  fork-only `build_exam_queue` RPC, so logcat does not show that *specific* RPC
+  fork-only `build_exam_queue` RPC, so logcat does not show that _specific_ RPC
   firing from a user tap. Its presence on device is proven by the symbol +
   byte-identical `.so` evidence above; surfacing it in the mobile UI (and
   auto-importing the CFA/ethics decks) is F7's scope.

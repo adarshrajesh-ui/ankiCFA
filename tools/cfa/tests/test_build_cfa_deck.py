@@ -70,7 +70,9 @@ def test_classify_item_type_is_deterministic_and_closed():
     assert types.issubset(set(build_cfa_deck.ITEM_TYPES))
     # Deterministic: same item classifies the same way twice.
     for i in items[:20]:
-        assert build_cfa_deck.classify_item_type(i) == build_cfa_deck.classify_item_type(i)
+        assert build_cfa_deck.classify_item_type(
+            i
+        ) == build_cfa_deck.classify_item_type(i)
 
 
 def test_classify_item_type_examples():
@@ -80,7 +82,11 @@ def test_classify_item_type_examples():
     # Ethics topic -> ethics-rule regardless of wording.
     assert (
         build_cfa_deck.classify_item_type(
-            item("Define material nonpublic information.", "info that ...", "los::ethics::mnpi")
+            item(
+                "Define material nonpublic information.",
+                "info that ...",
+                "los::ethics::mnpi",
+            )
         )
         == "ethics-rule"
     )
@@ -94,14 +100,22 @@ def test_classify_item_type_examples():
     # An equation-answer or "write the ..." prompt -> formula.
     assert (
         build_cfa_deck.classify_item_type(
-            item("Write the Cobb-Douglas production function.", "Y = A*K^a*L^(1-a)", "los::econ::growth")
+            item(
+                "Write the Cobb-Douglas production function.",
+                "Y = A*K^a*L^(1-a)",
+                "los::econ::growth",
+            )
         )
         == "formula"
     )
     # A definitional prompt with no cues -> conceptual.
     assert (
         build_cfa_deck.classify_item_type(
-            item("What is intrinsic value?", "The value given full understanding.", "los::equity::val")
+            item(
+                "What is intrinsic value?",
+                "The value given full understanding.",
+                "los::equity::val",
+            )
         )
         == "conceptual"
     )
