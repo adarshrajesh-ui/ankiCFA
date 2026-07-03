@@ -22,7 +22,11 @@ ts/.svelte-kit
 .claude/user.md
 .venv
 # CFA AI features load secrets (OPENAI_API_KEY) from a local .env; never commit it.
+# Also ignore any .env.* variants (e.g. .env.local, .env.*.bak) that could hold a
+# real key, while keeping the tracked placeholder .env.example.
 .env
+.env.*
+!.env.example
 docs/_build/
 docs/autoapi/
 .complexipy_cache

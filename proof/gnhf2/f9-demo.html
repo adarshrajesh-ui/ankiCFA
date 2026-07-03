@@ -5,7 +5,9 @@
   body{font-family:-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);padding:32px;width:1400px;}
   .eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--navy);font-weight:700;}
   h1{font-size:30px;font-weight:750;margin:4px 0 2px;color:var(--ink);}
-  .sub{color:var(--muted);font-size:14px;margin-bottom:24px;}
+  .sub{color:var(--muted);font-size:14px;margin-bottom:8px;}
+  .repro{color:var(--ink);font-size:12px;margin-bottom:24px;line-height:1.6;}
+  .repro code{background:#eef2f7;border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:11px;color:var(--navy);}
   .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;}
   .card{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(15,76,129,.06);}
   .card .cap{padding:10px 14px;border-bottom:1px solid var(--line);}
@@ -16,7 +18,11 @@
 </style></head><body>
   <div class="eyebrow">CFA Exam-Prep Pro Upgrade</div>
   <h1>F9 Demo — every shipped surface, one contact sheet</h1>
-  <div class="sub">Real rendered / on-device screenshots (AI-off default). 203 py/qt + 21 Rust tests green · reachability PASS.</div>
+  <div class="sub">Real rendered / on-device screenshots (AI-off default). 203 passed · 1 skipped (Python/Qt) + 21 Rust — all green · reachability PASS.</div>
+  <div class="repro">Reproducible from three real commands (no accounting):
+    <br>Python/Qt <b>203 passed, 1 skipped</b> in one deduplicated collection — <code>just cfa-f9-test-tally</code>
+    <br>Rust <b>21</b> = 10 + 11 — <code>cargo test -p anki --lib -- scheduler::cfa_deadline</code> &amp; <code>cargo test -p anki --lib -- scheduler::service::tests::exam_queue scheduler::service::tests::verification_probe</code>
+    <br><span style="color:var(--muted)">(the broad <code>-- exam</code> filter mis-reports 15 by matching a deadline test; the two scoped filters above are disjoint.)</span></div>
   <div class="grid">
     <div class="card"><div class="cap"><div class="tag">F4 · SCORING</div><div class="title">Bayesian Exam Readiness — 95% credible band + pass/fail call</div></div><img class="shot" src="f4-readiness-strong.png"></div>
     <div class="card"><div class="cap"><div class="tag">F0b · DESKTOP</div><div class="title">Peak-on-Exam-Day date picker (persists exam config)</div></div><img class="shot" src="f0b-deadline-picked.png"></div>

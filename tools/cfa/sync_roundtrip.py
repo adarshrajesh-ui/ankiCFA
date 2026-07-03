@@ -27,6 +27,7 @@ import os
 import sys
 import tempfile
 import time
+from typing import Literal
 
 _REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 for _p in (os.path.join(_REPO, "out", "pylib"), os.path.join(_REPO, "pylib")):
@@ -34,6 +35,7 @@ for _p in (os.path.join(_REPO, "out", "pylib"), os.path.join(_REPO, "pylib")):
         sys.path.insert(0, _p)
 
 from anki import cfa_sync as cs  # noqa: E402
+from anki.cards import CardId  # noqa: E402
 from anki.collection import Collection  # noqa: E402
 
 
@@ -41,7 +43,7 @@ def _new_collection(path: str) -> Collection:
     return Collection(path)
 
 
-def _add_card(col: Collection) -> int:
+def _add_card(col: Collection) -> CardId:
     note = col.newNote()
     note["Front"] = "CFA L2: what does WACC stand for?"
     note["Back"] = "weighted average cost of capital"
@@ -49,7 +51,7 @@ def _add_card(col: Collection) -> int:
     return col.find_cards("")[0]
 
 
-def _review(col: Collection, cid: int, ease: int) -> None:
+def _review(col: Collection, cid: CardId, ease: Literal[1, 2, 3, 4]) -> None:
     card = col.get_card(cid)
     card.start_timer()
     col.sched.answerCard(card, ease)

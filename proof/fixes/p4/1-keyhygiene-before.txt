@@ -1,0 +1,31 @@
+=== Item 1: KEY HYGIENE — BEFORE evidence ===
+Captured (UTC): 2026-07-03T17:39:47Z
+Repo: /Users/adarshrajesh/AlphaWeek2/ankiCFA
+HEAD: 557a7cc82 on main
+
+[1] git check-ignore .env  (expect: prints .env => gitignored)
+.env
+    => OK: .env is gitignored
+
+[2] Is .env tracked?  git ls-files --error-unmatch .env  (expect: error => untracked)
+    => OK: .env is NOT tracked by git
+
+[3] .env present in working-tree status? (expect: absent, because ignored)
+    => OK: .env not present in git status (ignored/untracked)
+
+[4] Anything staged? git diff --cached --name-only (expect: empty)
+    (end of staged list)
+
+[5] Tracked .env.example placeholder (known non-secret):
+    OPENAI_API_KEY=sk-your-key-here
+
+[6] Strict key grep across TRACKED files (masked): git grep -nE 'sk-(proj-)?[A-Za-z0-9_-]{20,}'
+    cfa/ethics_pairs/tests/test_ai_grading.py:239:    os.environ["OPENAI_API_KEY"] = "sk-***MASKED***"
+    cfa/ethics_pairs/tests/test_ai_grading.py:253:    assert "sk-***MASKED***" not in blob
+
+    NOTE: both matches are in cfa/ethics_pairs/tests/test_ai_grading.py — the intentional
+    fake fixture used by test_prompt_includes_evidence_and_never_the_key (a redaction test
+    proving the real key is NEVER sent to the LLM). Test fixtures, not real secrets.
+
+[7] Strict grep EXCLUDING that test file (expect ZERO => no real key anywhere tracked):
+    => OK: ZERO matches outside the documented test fixtures

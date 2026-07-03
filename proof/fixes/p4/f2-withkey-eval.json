@@ -1,0 +1,306 @@
+{
+    "n": 30,
+    "ran_ai": true,
+    "ai_source_count": 30,
+    "grade_agreement": 0.9333,
+    "correct_accuracy": 0.9333,
+    "deterministic_baseline_agreement": 0.7333,
+    "confusion": {
+        "correct": {
+            "correct": 24,
+            "somewhat": 0,
+            "partial": 2,
+            "wrong": 0
+        },
+        "somewhat": {
+            "correct": 0,
+            "somewhat": 1,
+            "partial": 0,
+            "wrong": 0
+        },
+        "partial": {
+            "correct": 0,
+            "somewhat": 0,
+            "partial": 2,
+            "wrong": 0
+        },
+        "wrong": {
+            "correct": 0,
+            "somewhat": 0,
+            "partial": 0,
+            "wrong": 1
+        }
+    },
+    "per_item": [
+        {
+            "item_id": "PSG-01",
+            "human_grade": "correct",
+            "grader_grade": "partial",
+            "source": "ai",
+            "human_correct": true,
+            "grader_correct": false,
+            "explanation": "The learner matched one gold span but missed the critical aspect of the unreleased earnings being material and nonpublic."
+        },
+        {
+            "item_id": "PSG-02",
+            "human_grade": "correct",
+            "grader_grade": "correct",
+            "source": "ai",
+            "human_correct": true,
+            "grader_correct": true,
+            "explanation": "All gold spans were matched accurately, focusing on the relevant evidence for the ethical judgment."
+        },
+        {
+            "item_id": "PSG-03",
+            "human_grade": "correct",
+            "grader_grade": "correct",
+            "source": "ai",
+            "human_correct": true,
+            "grader_correct": true,
+            "explanation": "All gold spans were matched accurately, focusing on the key unethical actions and information."
+        },
+        {
+            "item_id": "PSG-04",
+            "human_grade": "correct",
+            "grader_grade": "correct",
+            "source": "ai",
+            "human_correct": true,
+            "grader_correct": true,
+            "explanation": "All gold spans were matched, focusing on the key evidence for ethical conduct."
+        },
+        {
+            "item_id": "PSG-05",
+            "human_grade": "correct",
+            "grader_grade": "correct",
+            "source": "ai",
+            "human_correct": true,
+            "grader_correct": true,
+            "explanation": "All gold spans were matched accurately, focusing on the key evidence of unethical conduct."
+        },
+        {
+            "item_id": "PSG-06",
+            "human_grade": "partial",
+            "grader_grade": "partial",
+            "source": "ai",
+            "human_correct": false,
+            "grader_correct": false,
+            "explanation": "The learner matched one gold span but missed two others that also support the ethical judgment."
+        },
+        {
+            "item_id": "PSG-07",
+            "human_grade": "correct",
+            "grader_grade": "correct",
+            "source": "ai",
+            "human_correct": true,
+            "grader_correct": true,
+            "explanation": "All gold spans were matched accurately, focusing on the client's changed circumstances and the advisor's failure to reassess suitability."
+        },
+        {
+            "item_id": "PSG-08",
+            "human_grade": "correct",
+            "grader_grade": "correct",
+            "source": "ai",
+            "human_correct": true,
+            "grader_correct": true,
+            "explanation": "All gold spans were matched accurately, focusing on the key evidence of discussing and documenting the suitability mismatch."
+        },
+        {
+            "item_id": "PSG-09",
+            "human_grade": "correct",
+            "grader_grade": "correct",
+            "source": "ai",
+            "human_correct": true,
+            "grader_correct": true,
+            "explanation": "All gold spans were matched accurately, focusing on the key evidence of unethical conduct."
+        },
+        {
+            "item_id": "PSG-10",
+            "human_grade": "correct",
+            "grader_grade": "correct",
+            "source": "ai",
+            "human_correct": true,
+            "grader_correct": true,
+            "explanation": "All gold spans were matched accurately, demonstrating a focused selection of relevant evidence."
+        },
+        {
+            "item_id": "PSG-11",
+            "human_grade": "correct",
+            "grader_grade": "correct",
+            "source": "ai",
+            "human_correct": true,
+            "grader_correct": true,
+            "explanation": "The learner correctly highlighted both gold spans, focusing on the key evidence of unethical conduct."
+        },
+        {
+            "item_id": "PSG-12",
+            "human_grade": "correct",
+            "grader_grade": "correct",
+            "source": "ai",
+            "human_correct": true,
+            "grader_correct": true,
+            "explanation": "The learner matched all gold spans accurately, focusing on the key evidence supporting the ethical judgment."
+        },
+        {
+            "item_id": "PSG-13",
+            "human_grade": "somewhat",
+            "grader_grade": "somewhat",
+            "source": "ai",
+            "human_correct": false,
+            "grader_correct": false,
+            "explanation": "The learner matched both gold spans but included an irrelevant phrase about commissioning the report."
+        },
+        {
+            "item_id": "PSG-14",
+            "human_grade": "correct",
+            "grader_grade": "correct",
+            "source": "ai",
+            "human_correct": true,
+            "grader_correct": true,
+            "explanation": "The learner matched all gold spans accurately, focusing on relevant evidence without including irrelevant text."
+        },
+        {
+            "item_id": "PSG-15",
+            "human_grade": "correct",
+            "grader_grade": "correct",
+            "source": "ai",
+            "human_correct": true,
+            "grader_correct": true,
+            "explanation": "The learner matched all gold spans accurately, focusing on the key evidence of unethical conduct."
+        },
+        {
+            "item_id": "PSG-16",
+            "human_grade": "correct",
+            "grader_grade": "correct",
+            "source": "ai",
+            "human_correct": true,
+            "grader_correct": true,
+            "explanation": "All gold spans were matched accurately, confirming the ethical nature of Damir's claims."
+        },
+        {
+            "item_id": "PSG-17",
+            "human_grade": "wrong",
+            "grader_grade": "wrong",
+            "source": "ai",
+            "human_correct": false,
+            "grader_correct": false,
+            "explanation": "The learner did not match any gold spans, only highlighting the introductory context without relevant evidence."
+        },
+        {
+            "item_id": "PSG-18",
+            "human_grade": "correct",
+            "grader_grade": "correct",
+            "source": "ai",
+            "human_correct": true,
+            "grader_correct": true,
+            "explanation": "All gold spans were matched, and the selection was focused on relevant evidence."
+        },
+        {
+            "item_id": "PSG-19",
+            "human_grade": "correct",
+            "grader_grade": "correct",
+            "source": "ai",
+            "human_correct": true,
+            "grader_correct": true,
+            "explanation": "All gold spans were matched accurately, focusing on the misrepresentation of the note's characteristics."
+        },
+        {
+            "item_id": "PSG-20",
+            "human_grade": "correct",
+            "grader_grade": "correct",
+            "source": "ai",
+            "human_correct": true,
+            "grader_correct": true,
+            "explanation": "Both gold spans were matched accurately, focusing on the disclosure and the third-party source."
+        },
+        {
+            "item_id": "PSG-21",
+            "human_grade": "correct",
+            "grader_grade": "correct",
+            "source": "ai",
+            "human_correct": true,
+            "grader_correct": true,
+            "explanation": "The learner matched all gold spans accurately, focusing on the key unethical actions without irrelevant text."
+        },
+        {
+            "item_id": "PSG-22",
+            "human_grade": "correct",
+            "grader_grade": "correct",
+            "source": "ai",
+            "human_correct": true,
+            "grader_correct": true,
+            "explanation": "All gold spans were matched perfectly, demonstrating a focused selection of relevant evidence."
+        },
+        {
+            "item_id": "PSG-23",
+            "human_grade": "correct",
+            "grader_grade": "correct",
+            "source": "ai",
+            "human_correct": false,
+            "grader_correct": false,
+            "explanation": "Both gold spans were matched, but the learner's verdict was incorrect. The highlighted phrases correctly identify the unethical actions without irrelevant text."
+        },
+        {
+            "item_id": "PSG-24",
+            "human_grade": "correct",
+            "grader_grade": "correct",
+            "source": "ai",
+            "human_correct": true,
+            "grader_correct": true,
+            "explanation": "All gold spans were matched accurately, demonstrating a focused selection of relevant evidence."
+        },
+        {
+            "item_id": "PSG-25",
+            "human_grade": "correct",
+            "grader_grade": "partial",
+            "source": "ai",
+            "human_correct": true,
+            "grader_correct": false,
+            "explanation": "The learner matched one gold span but missed the second span about diverting opportunities from clients."
+        },
+        {
+            "item_id": "PSG-26",
+            "human_grade": "correct",
+            "grader_grade": "correct",
+            "source": "ai",
+            "human_correct": true,
+            "grader_correct": true,
+            "explanation": "All gold spans were matched accurately, demonstrating a clear understanding of the ethical conduct."
+        },
+        {
+            "item_id": "PSG-27",
+            "human_grade": "partial",
+            "grader_grade": "partial",
+            "source": "ai",
+            "human_correct": false,
+            "grader_correct": false,
+            "explanation": "The learner matched one gold span but missed the second span regarding the subordination of client orders."
+        },
+        {
+            "item_id": "PSG-28",
+            "human_grade": "correct",
+            "grader_grade": "correct",
+            "source": "ai",
+            "human_correct": true,
+            "grader_correct": true,
+            "explanation": "All gold spans were matched accurately, focusing on the ethical allocation process and prioritizing client interests."
+        },
+        {
+            "item_id": "PSG-29",
+            "human_grade": "correct",
+            "grader_grade": "correct",
+            "source": "ai",
+            "human_correct": true,
+            "grader_correct": true,
+            "explanation": "All gold spans were matched accurately, focusing on the key unethical actions."
+        },
+        {
+            "item_id": "PSG-30",
+            "human_grade": "correct",
+            "grader_grade": "correct",
+            "source": "ai",
+            "human_correct": true,
+            "grader_correct": true,
+            "explanation": "All gold spans were matched accurately, focusing on the key actions that demonstrate ethical conduct."
+        }
+    ]
+}

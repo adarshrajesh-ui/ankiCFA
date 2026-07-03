@@ -1,0 +1,52 @@
+P4 · Item 5 · SUBMISSION PROOF — BEFORE
+=======================================
+Captured: 2026-07-03  ·  worktree: ankiCFA-p4  ·  branch: p4/05-submission
+
+Gap #5 is the final engineering-quality gap: the submission's headline evidence
+(test counts + screenshots) was not one-command reproducible, the real live-app
+captures were untracked, and there was no single "here is everything shipped,
+proven" contact artifact tied to the Brainlift POVs. Concretely:
+
+1. TEST COUNTS WERE ACCOUNTING, NOT A REPRODUCIBLE COMMAND
+   proof/gnhf2/f9-demo.html headline (verbatim):
+     "Real rendered / on-device screenshots (AI-off default). 203 py/qt + 21
+      Rust tests green · reachability PASS."
+
+   Root SUBMISSION-CHECKLIST.md tally lines (verbatim):
+     "- **Python/Qt: 203 passed, 1 skipped** — 116 new F-series tests + 87
+        pre-existing regression tests."
+     "- **Rust (CFA-specific): 21 passed** — 10 `scheduler::cfa_deadline` + 11
+        `scheduler::service` exam-queue tests."
+
+   * 203 was a hand-summed dedup (116 F-series + 87 regression) spread across
+     ~10 separate `just` recipes; no single pytest reproduced it. Naively
+     combining the suites errored out at collection (four packages all named
+     `tests` collide under pytest's default prepend import mode). Detail +
+     verbatim failure in f9-tally-before.txt.
+   * 21 Rust is easy to mis-derive: the broad `cargo test ... -- exam` filter
+     reports 15 (the substring "exam" also matches a cfa_deadline test), so a
+     careless reader lands on 15 or double-counts to 25. Detail in
+     f9-tally-before.txt.
+
+2. REAL LIVE-APP CAPTURES WERE UNTRACKED (and nearly lost)
+   The genuine macOS Anki + AnkiDroid screenshots (originally under
+   proof/verify-20260703/) were never committed and got swept into a P1 git
+   stash. Recovered read-only into proof/fixes/p4/contact-src/ (desktop +
+   android). Without this item they were not part of the submission evidence.
+
+3. NO SINGLE "LIVE APP" CONTACT ARTIFACT
+   proof/gnhf2/f9-demo.html is a fine feature grid, but several of its panels are
+   rendered/offscreen HTML shots. There was no one labeled sheet built purely
+   from REAL on-device / live-app captures, and nothing that maps the three
+   Brainlift spiky POVs -> shipped features -> concrete evidence in one place.
+
+4. DEMO VIDEO COVERAGE PARTIAL (honest caveat)
+   Tracked and real: demo/desktop-review.mp4 (45s desktop review),
+   demo/build.mp4 (build timelapse). Still missing (environmental — need a live
+   device + installer fleet): demo/phone-review.mp4, demo/install.mp4.
+
+WHAT ITEM 5 DELIVERS (see 5-submission-after.txt)
+  A) this before doc                                B) demo/contact-sheet.{html,png}
+  C) proof/fixes/p4/BRAINLIFT.md (POV->feature->evidence)
+  D) `just cfa-f9-test-tally` + two scoped cargo cmds -> reproducible 203/21
+  E) 5-submission-after.txt, and headline updates to f9-demo.html + root checklist

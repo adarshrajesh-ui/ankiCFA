@@ -1,0 +1,86 @@
+P4 · Item 5 · SUBMISSION PROOF — AFTER
+======================================
+Captured: 2026-07-03  ·  worktree: ankiCFA-p4  ·  branch: p4/05-submission
+
+Every gap from 5-submission-before.txt is now closed with a runnable command or a
+committed artifact. Nothing was faked; where reality differed from the assumed
+captions, the honest version was shipped (see item 3 below).
+
+(B) LIVE-APP CONTACT SHEET  →  demo/contact-sheet.png  (+ demo/contact-sheet.html)
+  - 3336 x 4200 retina PNG, built ONLY from real live-app captures + one real
+    video frame. Rendered from the HTML via headless Chrome (--force-device-
+    scale-factor=2).
+  - Banner: "LIVE APP CAPTURE — real macOS Anki + AnkiDroid (not HTML/offscreen
+    renders)". Ten labeled panels:
+      Desktop (live macOS Anki):
+        1 F0b/F5 deck browser            33-clean-main
+        2 F0b CFA study menu (4 actions) 03-cfa-menu-crop  (cropped from 03-cfa-menu-open)
+        3 F4 exam readiness              04-exam-readiness-crop
+        4 F3 AI tab-to-fill (with-key)   f3-withkey-after
+        5 F0b study-by-exam-priority     06-priority-crop  (cropped from 06-study-by-priority)
+        6 REAL VIDEO FRAME               desktop-review-frame (ffmpeg @14s of demo/desktop-review.mp4)
+      Mobile (AnkiDroid on a physical Android device):
+        7 F6/F7 AnkiDroid bundled decks  android/53-ankidroid
+        8 F1/F7 ethics passage on device android/54-ethics-passages
+        9 F2/F7 graded (verdict+spans)   android/57-graded
+       10 F1/F7 "Ethical" case+highlight android/60-ethical-highlighted
+  - HONEST panel selection: the source set's 22-ethics-minpair-front and
+    23-ethics-study-result do NOT depict ethics content (22 = the deck list;
+    23 = an empty-state "CFA:Ethics Pairs deck is not available in this build"
+    dialog), so they were NOT mislabeled as ethics — the real ethics UI is shown
+    live on device in panels 8-10. This is stated on the sheet's footer too.
+
+(C) BRAINLIFT WRITEUP  →  proof/fixes/p4/BRAINLIFT.md
+  - Each of the three spiky POVs (quoted verbatim from Brainlift.md) mapped to
+    shipped features + concrete evidence:
+      POV 1 (ethics as recall; near-miss boundary) -> F1 (30 passages/73 spans)
+             + F2 (semantic grading, F1 fallback). Evidence: passages.jsonl,
+             f2-withkey-eval.txt (0.933), contact-sheet panels, cfa-passages-test.
+      POV 2 (peak-on-exam-day scheduling) -> F0b picker+priority queue,
+             rslib/src/scheduler/cfa_deadline.rs, BuildExamQueue
+             (rslib/src/scheduler/service/mod.rs), F4. Evidence: the 10+11 Rust
+             tests, contact-sheet panels 3/5, cfa-f0b-test, cfa-f4-test.
+      POV 3 (content-type-aware weighting) -> type:: tags + type_multipliers.
+             Evidence: build_cfa_deck.py classify_item_type,
+             service/mod.rs type_multiplier_for_tags, test_cfa.py, cfa-types-test.
+  - Includes the honest caveats (AI off by default; F4 not validated vs real
+    exams; mobile = shared engine + synced content; all items authored-original)
+    and links the with-key F2/F3 proofs + the contact sheet.
+
+(D) REPRODUCIBLE TEST TALLY  (was accounting; now one command each)
+  - Python/Qt: 203 passed, 1 skipped  (204 collected; the 1 skip is the with-key
+    real-LLM smoke). ONE deduplicated collection:
+        just cfa-f9-test-tally
+    New recipe added to justfile (uses --import-mode=importlib + pylib-first
+    ordering so the four `tests` packages coexist in one pytest process).
+  - Rust: 21 = 10 + 11, via two DISJOINT scoped filters:
+        cargo test -p anki --lib -- scheduler::cfa_deadline                              # 10
+        cargo test -p anki --lib -- scheduler::service::tests::exam_queue \
+             scheduler::service::tests::verification_probe                               # 11
+    (The broad `-- exam` filter mis-reports 15 by also matching a cfa_deadline
+    test; the two filters above are disjoint, so 10+11 is the honest total.)
+  - Before/after captured: f9-tally-before.txt (old claims + the collision/
+    double-count pitfalls) and f9-tally-after.log (real numbers + exact commands).
+
+  Files updated for the tally:
+  - justfile: added `cfa-f9-test-tally` recipe.
+  - proof/gnhf2/f9-demo.html: headline now cites the reproducible commands
+    (numbers unchanged: 203/1 + 21). NOTE: f9-demo.png was NOT re-rendered — the
+    numbers are identical, only the reproducibility citation was added to the
+    HTML source, and demo/contact-sheet.png already carries that citation
+    visually. (docs/** untouched — P3 owns it.)
+  - SUBMISSION-CHECKLIST.md (root): "How to reproduce" now lists
+    `just cfa-f9-test-tally` + the two scoped cargo commands; "Real numbers"
+    lines cite the reproducible commands and the disjoint-filter note.
+
+VIDEOS
+  - Real + committed: demo/desktop-review.mp4 (45s real desktop review; the
+    contact-sheet video frame is extracted from it) and demo/build.mp4 (build
+    timelapse). Both are the desktop demo recording.
+  - Still pending (environmental — need a live device + installer fleet):
+    demo/phone-review.mp4, demo/install.mp4. Honest caveat carried on the sheet.
+
+SECURITY
+  - No OPENAI_API_KEY is printed or committed. The staged-file scrub
+    `git diff --cached --name-only | xargs grep -nE 'sk-(proj-)?[A-Za-z0-9_-]{20,}'`
+    was run before committing and came back clean.
