@@ -1,0 +1,37 @@
+=== Item 1: KEY HYGIENE — AFTER evidence (post-hardening) ===
+Captured (UTC): 2026-07-03T17:40:26Z
+
+[A] Hardened .gitignore .env rules (working tree):
+    24:# CFA AI features load secrets (OPENAI_API_KEY) from a local .env; never commit it.
+    25:# Also ignore any .env.* variants (e.g. .env.local, .env.*.bak) that could hold a
+    26:# real key, while keeping the tracked placeholder .env.example.
+    27:.env
+    28:.env.*
+    29:!.env.example
+
+[B] .env still ignored?  git check-ignore .env
+.env
+    => OK: .env ignored
+
+[C] New coverage — key-bearing variants now ignored:
+    => OK ignored: .env.local
+    => OK ignored: .env.withkey.bak
+    => OK ignored: .env.backup
+
+[D] Placeholder .env.example is STILL tracked (not ignored):
+    => OK: .env.example is not ignored
+    => OK: .env.example is tracked
+
+[E] .env still NOT tracked and NOT staged:
+    => OK: .env untracked
+    => OK: .env not staged
+
+[F] Strict key grep across TRACKED files (masked) — only documented test fixtures remain:
+    cfa/ethics_pairs/tests/test_ai_grading.py:239:    os.environ["OPENAI_API_KEY"] = "sk-***MASKED***"
+    cfa/ethics_pairs/tests/test_ai_grading.py:253:    assert "sk-***MASKED***" not in blob
+
+[G] Strict grep EXCLUDING the fixture test file (expect ZERO real keys):
+    => OK: ZERO real-key matches outside documented test fixtures
+
+RESULT: OPENAI_API_KEY lives only in the gitignored .env; .env.example holds the
+placeholder; .gitignore now also blocks .env.* key variants; no real key is tracked.
