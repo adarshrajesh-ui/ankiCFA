@@ -101,6 +101,39 @@ not locatable by whitespace tokenization. The legacy `decisive_fact`/`distractor
 Each note is tagged with its `los::ethics::…` learning-objective tag, its `cluster::…` tag, and
 `ethics::minimal-pair`.
 
+## F1 — one-passage multi-span redesign (additive)
+
+A second, self-contained study mode lives beside the minimal-pairs feature (the minimal-pairs
+pipeline above is untouched). Instead of two vignettes, the learner reads **one passage**, calls it
+**Ethical / Unethical**, and then **highlights every evidence span** that supports that verdict —
+**supporting multiple non-contiguous spans**. This is the schema the mobile/AI features (F2+) build on.
+
+- **Bank:** [`passages.jsonl`](passages.jsonl) — the 30 items re-authored to
+  `{item_id, cluster, standard, los_tags, verdict, passage, gold_spans[], rationale}`, where each
+  `gold_span` is a verbatim `{phrase, token_range, rationale}`. Each Standard was analyzed to mark
+  **all** evidence spans (73 spans total; 15 ethical / 15 unethical; every item is multi-span).
+- **Deterministic grader (AI-off fallback):** `ethics_scoring.find_gold_spans` / `grade_spans` /
+  `grade_passage_attempt`. A span is *found* when every one of its tokens is selected; the grade is
+  `correct` (all spans found, within a per-span width cap), `somewhat` (all found but over-wide),
+  `partial` (some but not all found), or `wrong`. A passage attempt is fully correct only when the
+  verdict is right **and** the highlight grades `correct`.
+- **Card:** [`templates/passage_front.html`](templates/passage_front.html) +
+  [`passage_back.html`](templates/passage_back.html). The tokenizer + multi-span grader are mirrored
+  byte-for-byte between the template JS, [`tests/js/passage_logic.js`](tests/js/passage_logic.js),
+  and Python, so grades are identical on desktop Anki and AnkiDroid.
+- **Validation + import:** [`passages.py`](passages.py) validates the bank (verbatim,
+  token-locatable, non-overlapping spans; the union of spans must itself grade `correct`) and imports
+  it into a sibling deck **`CFA::Ethics Passages`** with note type **`CFA Ethics One-Passage`**.
+
+```sh
+just cfa-passages-validate   # validate the bank (no collection)
+just cfa-passages-test       # grader + schema + Python<->JS parity + importer round-trip
+```
+
+Proof (rendered card, real driven attempts): `proof/gnhf2/f1-psg17-fullycorrect.png` (verdict +
+three non-contiguous spans → fully correct) and `proof/gnhf2/f1-psg04-partial.png` (correct verdict
+but only 2 of 3 spans → honest *partial*).
+
 ## Quick start
 
 ```sh

@@ -82,6 +82,15 @@ cfa-test:
     {{ ninja }} pylib
     {{ cfa_env }} {{ py }} -m pytest cfa/ethics_pairs/tests -q
 
+# Validate the F1 one-passage bank (passages.jsonl) without opening a collection
+cfa-passages-validate:
+    {{ py }} cfa/ethics_pairs/passages.py --dry-run
+
+# Run the F1 one-passage multi-span tests (grader, schema, Python<->JS parity, importer round-trip)
+cfa-passages-test:
+    {{ ninja }} pylib
+    {{ cfa_env }} {{ py }} -m pytest cfa/ethics_pairs/tests/test_passages.py -q
+
 # Validate the authored CFA Level II deck items (cfa/deck/*.jsonl) and run the builder tests
 cfa-deck-validate:
     {{ py }} cfa/deck/validate_deck.py

@@ -144,6 +144,53 @@
 
 .cfa-record { margin-top: 16px; }
 
+/* --- F1 one-passage multi-span redesign (additive) --- */
+.cfa-passage-wrap {
+  border: 1px solid #dcdce3;
+  border-radius: 12px;
+  padding: 16px 18px;
+  background: #fbfbfd;
+  margin: 10px 0 16px;
+}
+.nightMode .cfa-passage-wrap { background: #23242a; border-color: #3a3b44; }
+.cfa-passage { margin: 0; -webkit-user-select: none; user-select: none; }
+
+.cfa-verdict-btns { display: flex; gap: 10px; margin: 4px 0 14px; }
+.cfa-verdict-btn {
+  cursor: pointer; flex: 1; font-weight: 700; font-size: .95rem;
+  border: 1px solid #c7c7d1; background: #fff; color: inherit;
+  border-radius: 9px; padding: 10px 14px;
+}
+.nightMode .cfa-verdict-btn { background: #2c2d34; border-color: #474853; }
+.cfa-verdict-btn.sel { border-color: #3b6fe0; background: #e8f0ff; color: #123a8f; }
+.nightMode .cfa-verdict-btn.sel { background: #21335c; color: #cfe0ff; border-color: #4d78d6; }
+.cfa-verdict-btn[data-v="ethical"].sel { border-color: #2e9e5b; background: #eafaf0; color: #14663a; }
+.cfa-verdict-btn[data-v="unethical"].sel { border-color: #d1453b; background: #fcecea; color: #8f201a; }
+
+/* committed multi-span chips + controls */
+.cfa-span-controls { display: flex; align-items: center; gap: 10px; margin: 4px 0 10px; flex-wrap: wrap; }
+.cfa-span-count { font-size: .85rem; color: #6a6a72; }
+.nightMode .cfa-span-count { color: #a9a9b3; }
+#cfa-clear-spans {
+  cursor: pointer; font-size: .82rem; font-weight: 600;
+  border: 1px solid #c7c7d1; background: #fff; color: inherit;
+  border-radius: 7px; padding: 5px 10px;
+}
+.nightMode #cfa-clear-spans { background: #2c2d34; border-color: #474853; }
+.cfa-tok.committed { background: #ffe08a; color: #3a2e00; }
+.nightMode .cfa-tok.committed { background: #7a5f12; color: #fff4d6; }
+
+/* multi-span partial-credit grade tiers */
+.cfa-tok.pick-partial { background: #ffe08a; color: #5a4300; }
+.nightMode .cfa-tok.pick-partial { background: #6b5310; color: #ffe9b0; }
+.cfa-hl-partial { background: #fff6df; color: #7a5b12; border: 1px solid #f0d69a; }
+.nightMode .cfa-hl-partial { background: #3b300f; color: #ffdf9c; border-color: #5c4a1a; }
+.cfa-span-detail { margin: 10px 0 0; padding-left: 18px; font-size: .9rem; }
+.cfa-span-detail li { margin-bottom: 6px; }
+.cfa-span-detail .found { color: #2e9e5b; }
+.cfa-span-detail .missed { color: #d1453b; }
+.cfa-span-quote { font-weight: 700; }
+
 /* back-of-card commit UI */
 .cfa-commit { max-width: 720px; margin: 0 auto; text-align: center; font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif; }
 .cfa-commit .big { font-size: 1.3rem; font-weight: 800; margin-bottom: 8px; }

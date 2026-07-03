@@ -127,6 +127,128 @@ def grade_highlight(
     return "correct" if len(selection) <= cap else "somewhat"
 
 
+# ------------------------------------------------------------------- multi-span highlight grading
+#
+# F1 one-passage redesign. Instead of two side-by-side vignettes with ONE decisive phrase, the
+# learner reads ONE passage, calls it Ethical/Unethical, and highlights EVERY evidence span that
+# supports that verdict. The evidence may be SEVERAL NON-CONTIGUOUS spans, so grading is by
+# per-span coverage rather than a single contiguous overlap.
+#
+# find_gold_spans() / grade_spans() are the deterministic AI-off fallback for F2's semantic grader.
+# They are mirrored CHARACTER-FOR-CHARACTER by the passage card template JS (templates/
+# passage_front.html, between the CFA-SPAN-SHARED markers) and by tests/js/passage_logic.js, so the
+# grade strings are byte-identical on desktop Anki and AnkiDroid. tests/test_passages.py enforces
+# the copy match and the Python<->JS behavioural agreement. Keep the three copies in sync.
+
+ETHICAL = "ethical"
+UNETHICAL = "unethical"
+VERDICTS = (ETHICAL, UNETHICAL)
+
+# Per-span width allowance. The total-selection cap for a multi-span attempt scales with the number
+# of gold spans, since the learner makes one sub-selection per span: cap = |gold| + slack * n_spans.
+SPAN_CAP_SLACK = 4
+
+
+def find_gold_spans(passage: str, phrases: Sequence[str]) -> list[list[int]]:
+    """Resolve each verbatim gold ``phrase`` to its contiguous token-index run inside ``passage``.
+
+    Returns one index run per phrase, preserving order (an empty run if a phrase is not locatable).
+    Each run is contiguous, but the runs are generally NON-CONTIGUOUS with one another. Identical
+    algorithm to the passage template JS ``cfaFindGoldSpans``.
+    """
+    return [find_gold_indices(passage, p) for p in phrases]
+
+
+def span_cap(gold_token_count: int, n_spans: int) -> int:
+    """Upper bound on |SELECTION| that still counts as CORRECT: ``gold + SPAN_CAP_SLACK * n_spans``."""
+    return gold_token_count + SPAN_CAP_SLACK * max(1, n_spans)
+
+
+def grade_spans(
+    selection_indices: Sequence[int],
+    gold_spans: Sequence[Sequence[int]],
+    cap: int | None = None,
+) -> dict:
+    """Grade a multi-span highlight by per-span coverage. Returns a result dict with a ``grade``.
+
+    A gold span is FOUND when every one of its tokens is in the learner's selection. Grades:
+
+    - ``"correct"``  -- EVERY gold span is found AND ``|selection| <= cap`` (no runaway width).
+    - ``"somewhat"`` -- every gold span is found BUT ``|selection| > cap`` (right regions, over-wide).
+    - ``"partial"``  -- at least one but NOT all gold spans are found.
+    - ``"wrong"``    -- no gold span is found, or the selection is empty.
+
+    ``cap`` defaults to ``span_cap(total_gold_tokens, n_spans)``. Only ``"correct"`` counts as a
+    fully-correct highlight in ``grade_passage_attempt``.
+    """
+    selection = set(selection_indices)
+    per_span = []
+    all_gold: set[int] = set()
+    found = 0
+    for span in gold_spans:
+        s = set(span)
+        all_gold |= s
+        covered = bool(s) and s.issubset(selection)
+        per_span.append(covered)
+        if covered:
+            found += 1
+    total = len(gold_spans)
+    if cap is None:
+        cap = span_cap(len(all_gold), total)
+    width_ok = len(selection) <= cap
+    if not selection or found == 0:
+        grade = "wrong"
+    elif found < total:
+        grade = "partial"
+    elif not width_ok:
+        grade = "somewhat"
+    else:
+        grade = "correct"
+    return {
+        "grade": grade,
+        "found": found,
+        "total": total,
+        "per_span": per_span,
+        "width_ok": width_ok,
+        "cap": cap,
+    }
+
+
+@dataclass(frozen=True)
+class PassageAttempt:
+    """One learner attempt at a single one-passage item, with the answer key to grade against.
+
+    ``judged_verdict`` is the learner's Ethical/Unethical call, ``answer_verdict`` the correct one.
+    ``selection_indices`` are ALL word indices the learner highlighted across every span they marked
+    (union, order-independent); ``gold_spans`` are the authored evidence spans' index runs.
+    """
+
+    judged_verdict: str
+    answer_verdict: str
+    selection_indices: Sequence[int]
+    gold_spans: Sequence[Sequence[int]]
+    cap: int | None = None
+
+
+def grade_passage_attempt(attempt: PassageAttempt) -> dict:
+    """Deterministically grade one one-passage attempt (verdict + multi-span evidence highlight).
+
+    ``correct`` is True only when the verdict is right AND the multi-span highlight grades fully
+    ``"correct"`` (every gold span found, within the width cap). This is the AI-off fallback grade.
+    """
+    verdict_correct = attempt.judged_verdict == attempt.answer_verdict
+    spans = grade_spans(attempt.selection_indices, attempt.gold_spans, attempt.cap)
+    highlight_correct = spans["grade"] == "correct"
+    correct = verdict_correct and highlight_correct
+    return {
+        "verdict_correct": verdict_correct,
+        "highlight": spans["grade"],
+        "spans": spans,
+        "highlight_correct": highlight_correct,
+        "correct": correct,
+    }
+
+
 @dataclass(frozen=True)
 class PairAttempt:
     """One learner attempt at a single minimal-pair, with the correct answers to grade against.
