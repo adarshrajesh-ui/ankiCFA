@@ -124,6 +124,68 @@ def test_study_ethics_pairs_seeds_on_demand_and_enters_review(monkeypatch) -> No
 
 
 # ---------------------------------------------------------------------------
+# item1 (P1 fix): "Study Ethics Minimal-Pairs" is RE-ENTRANT.
+#
+# Regression guard for the dead-end where a repeat invocation created a fresh,
+# name-colliding filtered deck. On the second call the previous build still held
+# the 30 cards, and Anki won't gather cards already inside a filtered deck, so
+# the rebuild gathered 0 → "No cards to study" tooltip → the retry-after-seed
+# then surfaced a FALSE "CFA::Ethics Pairs deck is not available in this build"
+# modal even though the 30 cards clearly exist. The fix reuses/rebuilds the
+# existing same-named filtered deck (cards home → re-gather) so the action
+# reliably re-enters review every time, and the false modal never fires when the
+# cards exist. This test FAILS without the fix and PASSES with it.
+# ---------------------------------------------------------------------------
+
+STUDY_DECK = "CFA::Study — Ethics Minimal-Pairs"
+
+
+def test_study_ethics_pairs_is_reentrant_no_false_modal(monkeypatch) -> None:
+    col = _empty_col()
+    mw = _StandInMW(col)
+    try:
+        info_calls: list[str] = []
+        warn_calls: list[str] = []
+        monkeypatch.setattr(cfa, "showInfo", lambda *a, **k: info_calls.append(a[0]))
+        monkeypatch.setattr(cfa, "showWarning", lambda *a, **k: warn_calls.append(a[0]))
+        monkeypatch.setattr(cfa, "tooltip", lambda *a, **k: None)
+
+        # The 30 ethics cards exist up front (the exact precondition under which
+        # the false "not available in this build" modal must never appear).
+        assert ensure_ethics_deck(col) == 30
+        assert _card_count(col, ETHICS_DECK) == 30
+
+        # First invocation pulls the 30 cards into the filtered study deck.
+        cfa.study_ethics_pairs(mw)  # type: ignore[arg-type]
+        did1 = col.decks.id_for_name(STUDY_DECK)
+        assert did1 is not None, "first invocation should build the study deck"
+        assert col.decks.card_count(did1, include_subdecks=False) == 30
+        assert mw.states.count("review") == 1
+
+        # Second invocation is the bug: it must RE-ENTER review with the same 30
+        # cards, not dead-end. Without the fix it gathers 0 and shows the false
+        # "not available in this build" modal.
+        cfa.study_ethics_pairs(mw)  # type: ignore[arg-type]
+
+        # The false modal must NEVER fire when the cards demonstrably exist.
+        assert info_calls == [], f"false dead-end modal fired: {info_calls}"
+        assert warn_calls == [], f"unexpected warning: {warn_calls}"
+        # And we must actually be back in the reviewer with the 30 cards.
+        assert mw.states.count("review") == 2, (
+            "repeat invocation must re-enter the reviewer"
+        )
+        did2 = col.decks.id_for_name(STUDY_DECK)
+        assert did2 is not None, "repeat invocation must keep a populated deck"
+        assert col.decks.card_count(did2, include_subdecks=False) == 30, (
+            "repeat invocation must re-gather the 30 ethics cards, not 0"
+        )
+        # The 30 ethics cards are never lost from the source deck either.
+        assert _card_count(col, ETHICS_DECK) == 30
+    finally:
+        col.close()
+
+
+# ---------------------------------------------------------------------------
 # Fix 3: Peak-on-Exam-Day date picker
 # ---------------------------------------------------------------------------
 

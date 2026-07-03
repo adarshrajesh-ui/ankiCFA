@@ -1,0 +1,61 @@
+======================================================================
+item1 BEFORE-FIX EVIDENCE — 'Study Ethics Minimal-Pairs' dead-ends on
+a repeat invocation with a FALSE 'not available in this build' modal.
+Captured: 2026-07-03T17:38:46Z  commit: 557a7cc82
+======================================================================
+
+### (1) Explicit symptom probe (real Collection, 30 ethics cards exist):
+seeded ethics pairs         : 30
+after call #1 review states : ['review']
+after call #1 study-deck cnt: 30
+after call #2 review states : ['review']   <-- BUG: no 2nd 'review'
+after call #2 study-deck cnt: 30 (stuck leftover cards)
+after call #2 showInfo modal: ['The CFA::Ethics Pairs deck is not available in this build, so there is nothing to study yet.']   <-- BUG: FALSE 'not available in this build'
+ethics source deck count    : 30 (cards clearly exist!)
+
+### (2) Regression test FAILS on current (buggy) code:
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_____________ test_study_ethics_pairs_is_reentrant_no_false_modal ______________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x120ea6060>
+
+    def test_study_ethics_pairs_is_reentrant_no_false_modal(monkeypatch) -> None:
+        col = _empty_col()
+        mw = _StandInMW(col)
+        try:
+            info_calls: list[str] = []
+            warn_calls: list[str] = []
+            monkeypatch.setattr(cfa, "showInfo", lambda *a, **k: info_calls.append(a[0]))
+            monkeypatch.setattr(cfa, "showWarning", lambda *a, **k: warn_calls.append(a[0]))
+            monkeypatch.setattr(cfa, "tooltip", lambda *a, **k: None)
+    
+            # The 30 ethics cards exist up front (the exact precondition under which
+            # the false "not available in this build" modal must never appear).
+            assert ensure_ethics_deck(col) == 30
+            assert _card_count(col, ETHICS_DECK) == 30
+    
+            # First invocation pulls the 30 cards into the filtered study deck.
+            cfa.study_ethics_pairs(mw)  # type: ignore[arg-type]
+            did1 = col.decks.id_for_name(STUDY_DECK)
+            assert did1 is not None, "first invocation should build the study deck"
+            assert col.decks.card_count(did1, include_subdecks=False) == 30
+            assert mw.states.count("review") == 1
+    
+            # Second invocation is the bug: it must RE-ENTER review with the same 30
+            # cards, not dead-end. Without the fix it gathers 0 and shows the false
+            # "not available in this build" modal.
+            cfa.study_ethics_pairs(mw)  # type: ignore[arg-type]
+    
+            # The false modal must NEVER fire when the cards demonstrably exist.
+>           assert info_calls == [], f"false dead-end modal fired: {info_calls}"
+E           AssertionError: false dead-end modal fired: ['The CFA::Ethics Pairs deck is not available in this build, so there is nothing to study yet.']
+E           assert ['The CFA::Et...o study yet.'] == []
+E             
+E             Left contains one more item: 'The CFA::Ethics Pairs deck is not available in this build, so there is nothing to study yet.'
+E             Use -v to get more diff
+
+qt/tests/test_cfa_f0b.py:171: AssertionError
+=========================== short test summary info ============================
+FAILED qt/tests/test_cfa_f0b.py::test_study_ethics_pairs_is_reentrant_no_false_modal
+1 failed in 0.32s

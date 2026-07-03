@@ -126,13 +126,24 @@ def _study_filtered_deck(
     if not col:
         return False
 
-    deck = col.sched.get_or_create_filtered_deck(deck_id=DeckId(0))
+    # Reuse an existing same-named filtered deck instead of creating a fresh,
+    # name-colliding one. On a repeat invocation the previous build still holds
+    # its cards, and Anki will not gather cards that already live inside a
+    # filtered deck — so a brand-new deck (deck_id=0) would gather 0 and
+    # dead-end. Passing the existing deck's id makes add_or_update_filtered_deck
+    # rebuild it in place: it first returns the cards home, then re-gathers them
+    # via the search, so the action reliably re-enters review every time.
+    existing_id = col.decks.id_for_name(name)
+    reuse = existing_id is not None and col.decks.is_filtered(existing_id)
+    deck = col.sched.get_or_create_filtered_deck(
+        deck_id=existing_id if reuse else DeckId(0)
+    )
     deck.name = name
     config = deck.config
     config.reschedule = reschedule
     del config.search_terms[:]
     config.search_terms.append(
-        FilteredDeckConfig.SearchTerm(search=search, limit=limit, order=order)
+        FilteredDeckConfig.SearchTerm(search=search, limit=limit, order=order)  # type: ignore[arg-type]
     )
     try:
         out = col.sched.add_or_update_filtered_deck(deck)
@@ -177,7 +188,20 @@ def study_ethics_pairs(mw: AnkiQt) -> None:
         if added:
             tooltip(f"Loaded {added} CFA Ethics pairs — starting review.", parent=mw)
             mw.reset()
-        if not _study_filtered_deck(mw, name=name, search=search, order=0):
+        if _study_filtered_deck(mw, name=name, search=search, order=0):
+            return
+
+        # Still couldn't enter review. Only claim the deck is "not available in
+        # this build" when the ethics cards genuinely do not exist — never when
+        # they clearly do (the reuse/rebuild above makes that the normal case).
+        # This keeps the message honest and rules out the false dead-end.
+        ethics_id = mw.col.decks.id_for_name(ETHICS_DECK_NAME)
+        have_cards = ethics_id is not None and bool(
+            mw.col.decks.card_count(ethics_id, include_subdecks=True)
+        )
+        if have_cards:
+            tooltip("No ethics cards are available to study right now.", parent=mw)
+        else:
             showInfo(
                 "The CFA::Ethics Pairs deck is not available in this build, so "
                 "there is nothing to study yet.",
@@ -383,8 +407,8 @@ class ExamReadinessDialog(QDialog):
         table.setShowGrid(False)
         table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         thead = table.horizontalHeader()
-        for col in range(1, 5):
-            thead.setSectionResizeMode(col, QHeaderView.ResizeMode.ResizeToContents)
+        for col_idx in range(1, 5):
+            thead.setSectionResizeMode(col_idx, QHeaderView.ResizeMode.ResizeToContents)
         thead.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
         for row, t in enumerate(sorted(score.topics, key=lambda x: -x.weight)):
             if t.avg_r is None:
