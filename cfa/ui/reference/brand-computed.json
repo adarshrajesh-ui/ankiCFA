@@ -1,0 +1,1035 @@
+{
+    "meta": {
+        "source": "https://www.markmeldrum.com/",
+        "extractedAt": "2026-07-03T20:13:16.997Z",
+        "viewport": "1440x900 @1x (desktop)",
+        "engine": "system Google Chrome via playwright-core (channel: chrome), headless",
+        "method": "getComputedStyle + document.styleSheets CSS custom-property enumeration; all rgb/rgba converted to uppercase hex",
+        "navigationNote": "waitUntil:'networkidle' TIMED OUT (this WordPress/BuddyBoss site keeps long-poll/analytics sockets open, so it never reaches network-idle). Re-fetched with waitUntil:'load' -> HTTP 200, document.fonts.ready resolved, 422 CSS custom properties + full DOM captured. Values are from a fully-rendered page.",
+        "platform": "WordPress + BuddyBoss theme + LearnDash (brand tokens are authored as native CSS custom properties -> authoritative, not inferred)",
+        "rawPasses": [
+            "pass1 = broad heuristic sample",
+            "pass2 = focused card/h1/button/container sample"
+        ]
+    },
+    "summaryKeyValues": {
+        "brandNavyPrimary": "#122B46",
+        "mmSignatureAccentGreen": "#009666",
+        "ctaAccentOrange": "#DA5C01",
+        "ctaAccentOrangeHover": "#C45301",
+        "linkOrange": "#DA5C01",
+        "pageBackground": "#FAFBFD",
+        "surfaceWhite": "#FFFFFF",
+        "surfaceAlt": "#FBFBFC",
+        "bodyText": "#4D5C6D",
+        "headingText": "#122B46",
+        "mutedText": "#939597",
+        "hairlineBorder": "#E7E9EC",
+        "bodyFontStack": "-apple-system, \"system-ui\", \"Segoe UI\", Roboto, Oxygen-Sans, Ubuntu, Cantarell, \"Helvetica Neue\", sans-serif",
+        "bodyWebFontLoaded": "IBM Plex Sans",
+        "headingFontStack": "\"Source Serif 4\", Georgia, \"Times New Roman\", serif",
+        "namedLoadedWebFonts": [
+            "Source Serif 4",
+            "IBM Plex Sans",
+            "SF UI Display",
+            "SF UI Text"
+        ],
+        "heroH1": "40px / weight 400 / line-height 42px / \"Source Serif 4\" / #122B46 (white over hero imagery)",
+        "statsDisplayH1": "55px / weight 400 / \"Source Serif 4\" / #122B46",
+        "h4CardTitle": "18px / weight 600 / line-height 24px / system stack / #122B46",
+        "body": "16px / line-height 24px (1.5) / weight 400 / #4D5C6D",
+        "primaryButton": "bg #DA5C01, text #FFFFFF, border 1px solid #DA5C01, radius 100px (pill), padding 0 20px, weight 500",
+        "featureCard": "bg #FFFFFF, radius 4px, border none (hairline #E7E9EC available), own box-shadow: none, ~24px gap",
+        "containerMaxWidth": "1200px (~15px gutter; inner text column 540px)",
+        "sectionVerticalPadding": "80px (top) / 64px (symmetric) dominant"
+    },
+    "colors": {
+        "brandNavy": {
+            "hex": "#122B46",
+            "where": "--bb-headings-color, --bb-tooltip-background, --bb-admin-screen-txt-color; h1 section headings; h4 card titles"
+        },
+        "mmAccentGreen": {
+            "hex": "#009666",
+            "where": "--mm-accent-color (literal Mark-Meldrum accent); active pricing toggle button"
+        },
+        "ctaOrange": {
+            "hex": "#DA5C01",
+            "where": "--bb-primary-color, --bb-primary-button-background-regular; primary button; content links; sidenav active"
+        },
+        "ctaOrangeHover": {
+            "hex": "#C45301",
+            "where": "--bb-primary-button-background-hover"
+        },
+        "promoGreenDark": {
+            "hex": "#0A4B36",
+            "where": "a.banner-redirection hero promo CTA buttons"
+        },
+        "featureBandGreen": {
+            "hex": "#007E56",
+            "where": "section background (green feature band)"
+        },
+        "tetalSignIn": {
+            "hex": "#145959",
+            "where": "a.button.small.outline \"Sign In\" text"
+        },
+        "headerLinkHoverTeal": {
+            "hex": "#4C8181",
+            "where": "--bb-header-links-hover"
+        },
+        "linkBlue": {
+            "hex": "#00518A",
+            "where": "some in-content anchors"
+        },
+        "labelBlue": {
+            "hex": "#385DFF",
+            "where": "--bb-label-text-color / login-register button"
+        },
+        "pageBackground": {
+            "hex": "#FAFBFD",
+            "where": "--bb-body-background-color, --bb-admin-screen-bgr-color"
+        },
+        "surfaceWhite": {
+            "hex": "#FFFFFF",
+            "where": "--bb-content-background-color, --bb-header-background; header; cards"
+        },
+        "surfaceAlt": {
+            "hex": "#FBFBFC",
+            "where": "--bb-content-alternate-background-color"
+        },
+        "coolSection": {
+            "hex": "#F3F6F8",
+            "where": "section background (cool light band)"
+        },
+        "coolSection2": {
+            "hex": "#F6F8FA",
+            "where": "--ld-color-system-light-2 (fields / alt panels)"
+        },
+        "creamWarm1": {
+            "hex": "#F1ECE4",
+            "where": "section background (warm cream band)"
+        },
+        "creamWarm2": {
+            "hex": "#F8F5F1",
+            "where": "section background (warm cream band)"
+        },
+        "hairlineBorder": {
+            "hex": "#E7E9EC",
+            "where": "--bb-content-border-color"
+        },
+        "bodyText": {
+            "hex": "#4D5C6D",
+            "where": "--bb-body-text-color"
+        },
+        "bodyTextComputed": {
+            "hex": "#474747",
+            "where": "computed color on <body>"
+        },
+        "cardBodyText": {
+            "hex": "#6C7485",
+            "where": "computed color inside .card"
+        },
+        "mutedText": {
+            "hex": "#939597",
+            "where": "--bb-alternate-text-color, --bb-sidenav-text-regular"
+        },
+        "headerLinks": {
+            "hex": "#515151",
+            "where": "--bb-header-links, --wc-secondary-text"
+        },
+        "coverBg": {
+            "hex": "#607387",
+            "where": "--bb-cover-image-background-color"
+        },
+        "white": "#FFFFFF",
+        "black": "#000000"
+    },
+    "siteSemanticColors": {
+        "note": "Existing pass/fail/warn triad should be KEPT (per station brief). Listed only for reference.",
+        "success": {
+            "hex": "#1CD991",
+            "where": "--bb-success-color"
+        },
+        "warning": {
+            "hex": "#F7BA45",
+            "where": "--bb-warning-color"
+        },
+        "danger": {
+            "hex": "#EF3E46",
+            "where": "--bb-danger-color"
+        },
+        "info": {
+            "hex": "#007CFF",
+            "where": "--bb-default-notice-color"
+        },
+        "ldSuccess": {
+            "hex": "#2F8351",
+            "where": "--ld-color-semantic-success"
+        },
+        "ldError": {
+            "hex": "#DB0000",
+            "where": "--ld-color-semantic-error"
+        }
+    },
+    "backgroundColorsObserved": [
+        {
+            "color": "#FFFFFF",
+            "count": 7
+        },
+        {
+            "color": "#009666",
+            "count": 2
+        },
+        {
+            "color": "#F1ECE4",
+            "count": 2
+        },
+        {
+            "color": "#F8F5F1",
+            "count": 1
+        },
+        {
+            "color": "#F3F6F8",
+            "count": 1
+        },
+        {
+            "color": "#007E56",
+            "count": 1
+        }
+    ],
+    "linkColorsObserved": [
+        {
+            "color": "#FAFAFA [nav/footer]",
+            "count": 29
+        },
+        {
+            "color": "#FFFFFF [content]",
+            "count": 18
+        },
+        {
+            "color": "#515151 [nav/footer]",
+            "count": 7
+        },
+        {
+            "color": "#DA5C01 [content]",
+            "count": 4
+        },
+        {
+            "color": "#122B46 [nav/footer]",
+            "count": 1
+        },
+        {
+            "color": "#145959 [nav/footer]",
+            "count": 1
+        },
+        {
+            "color": "#DA5C01 [nav/footer]",
+            "count": 1
+        },
+        {
+            "color": "#00518A [content]",
+            "count": 1
+        }
+    ],
+    "root": {
+        "html_background": "transparent",
+        "body_background": "transparent",
+        "body_effectiveBg": {
+            "color": null,
+            "from": null
+        },
+        "body_color": "#474747",
+        "body_fontFamily": "-apple-system, \"system-ui\", \"Segoe UI\", Roboto, Oxygen-Sans, Ubuntu, Cantarell, \"Helvetica Neue\", sans-serif",
+        "body_fontSize": "16px",
+        "body_lineHeight": "16px",
+        "body_fontWeight": "400",
+        "body_letterSpacing": "normal"
+    },
+    "header": {
+        "selector": "header#masthead.site-header.site-header--bb",
+        "background": "#FFFFFF",
+        "effectiveBg": {
+            "color": "#FFFFFF",
+            "from": "header#masthead.site-header.site-header--bb"
+        },
+        "color": "#474747",
+        "borderBottom": "0px none #474747",
+        "boxShadow": "rgba(139, 141, 157, 0.05) 0px 1px 0px 0px, rgba(65, 71, 108, 0.15) 0px 0px 1px 0px",
+        "height": 76,
+        "position": "fixed"
+    },
+    "typography": {
+        "headingFontFamilyComputed": "\"Source Serif 4\"",
+        "bodyFontFamilyComputed": "-apple-system, \"system-ui\", \"Segoe UI\", Roboto, Oxygen-Sans, Ubuntu, Cantarell, \"Helvetica Neue\", sans-serif",
+        "bodyWebFontUsed": "IBM Plex Sans (hero lead paragraphs + pricing toggle buttons compute to \"IBM Plex Sans\")",
+        "loadedFontFamilies_all": [
+            "Elusive-Icons",
+            "Font Awesome 5 Brands",
+            "Font Awesome 5 Free",
+            "FontAwesome",
+            "Genericons",
+            "IBM Plex Sans",
+            "SF UI Display",
+            "SF UI Text",
+            "Source Serif 4",
+            "WooCommerce",
+            "affirm",
+            "bb-icons",
+            "bb-icons-legacy",
+            "dashicons",
+            "foundation-icons",
+            "ld-icons",
+            "slick",
+            "star"
+        ],
+        "loadedWebFonts_brand": [
+            "Source Serif 4",
+            "IBM Plex Sans",
+            "SF UI Display",
+            "SF UI Text"
+        ],
+        "loadedFonts_iconsAndPlugins": [
+            "Elusive-Icons",
+            "Font Awesome 5 Brands",
+            "Font Awesome 5 Free",
+            "FontAwesome",
+            "Genericons",
+            "WooCommerce",
+            "bb-icons",
+            "bb-icons-legacy",
+            "dashicons",
+            "foundation-icons",
+            "ld-icons",
+            "slick",
+            "star",
+            "affirm"
+        ],
+        "heroH1": {
+            "selector": "h1.home-h1",
+            "fontFamily": "\"Source Serif 4\"",
+            "fontSize": "40px",
+            "fontWeight": "400",
+            "lineHeight": "42px",
+            "letterSpacing": "normal",
+            "color": "#122B46 (light bg) / #FFFFFF (over hero image)"
+        },
+        "statsDisplay": {
+            "selector": "h1.home-h1.mm-stats-heading",
+            "fontFamily": "\"Source Serif 4\"",
+            "fontSize": "55px",
+            "fontWeight": "400",
+            "lineHeight": "42px",
+            "color": "#122B46"
+        },
+        "h4CardTitle": {
+            "selector": "h4",
+            "text": "Lecture Videos",
+            "rect": {
+                "x": 561,
+                "y": 832,
+                "w": 202,
+                "h": 24
+            },
+            "color": "#122B46",
+            "fontFamily": "-apple-system, \"system-ui\", \"Segoe UI\", Roboto, Oxygen-Sans, Ubuntu, Cantarell, \"Helvetica Neue\", sans-serif",
+            "fontSize": "18px",
+            "fontWeight": "600",
+            "lineHeight": "24px",
+            "letterSpacing": "normal",
+            "textTransform": "none"
+        },
+        "bodyLead": {
+            "selector": "p (hero lead)",
+            "fontFamily": "\"IBM Plex Sans\"",
+            "fontSize": "16px",
+            "fontWeight": "400",
+            "lineHeight": "24px",
+            "color": "#FFFFFF (over image) / #4D5C6D (on light)"
+        },
+        "paragraphsSample": [
+            {
+                "selector": "p",
+                "text": "Now Offering FRM® Prep with Bionic Turtle",
+                "color": "#FFFFFF",
+                "fontFamily": "\"Source Serif 4\"",
+                "fontSize": "40px",
+                "fontWeight": "400",
+                "lineHeight": "42px",
+                "letterSpacing": "normal"
+            },
+            {
+                "selector": "p",
+                "text": "The trusted CFA® content you know from Meldrum is ",
+                "color": "#FFFFFF",
+                "fontFamily": "\"IBM Plex Sans\"",
+                "fontSize": "16px",
+                "fontWeight": "400",
+                "lineHeight": "24px",
+                "letterSpacing": "normal"
+            },
+            {
+                "selector": "p",
+                "text": "Intensive Live Online Review for August Level 1 an",
+                "color": "#FFFFFF",
+                "fontFamily": "\"Source Serif 4\"",
+                "fontSize": "40px",
+                "fontWeight": "400",
+                "lineHeight": "42px",
+                "letterSpacing": "normal"
+            },
+            {
+                "selector": "p",
+                "text": "Join us for live online, expert-led sessions cover",
+                "color": "#FFFFFF",
+                "fontFamily": "\"IBM Plex Sans\"",
+                "fontSize": "16px",
+                "fontWeight": "400",
+                "lineHeight": "24px",
+                "letterSpacing": "normal"
+            },
+            {
+                "selector": "p",
+                "text": "Level 1: Aug 6 – 9",
+                "color": "#FFFFFF",
+                "fontFamily": "\"IBM Plex Sans\"",
+                "fontSize": "16px",
+                "fontWeight": "400",
+                "lineHeight": "24px",
+                "letterSpacing": "normal"
+            },
+            {
+                "selector": "p",
+                "text": "Level 2: Aug 13 – 16",
+                "color": "#FFFFFF",
+                "fontFamily": "\"IBM Plex Sans\"",
+                "fontSize": "16px",
+                "fontWeight": "400",
+                "lineHeight": "24px",
+                "letterSpacing": "normal"
+            },
+            {
+                "selector": "p",
+                "text": "Master the CFA® Exam with Confidence",
+                "color": "#FFFFFF",
+                "fontFamily": "\"Source Serif 4\"",
+                "fontSize": "40px",
+                "fontWeight": "400",
+                "lineHeight": "42px",
+                "letterSpacing": "normal"
+            },
+            {
+                "selector": "p",
+                "text": "Join the thousands of candidates who trust Meldrum",
+                "color": "#FFFFFF",
+                "fontFamily": "\"IBM Plex Sans\"",
+                "fontSize": "16px",
+                "fontWeight": "400",
+                "lineHeight": "24px",
+                "letterSpacing": "normal"
+            }
+        ],
+        "wpPresetFontSizes": {
+            "small": "13px",
+            "normal": "16px",
+            "medium": "20px",
+            "large": "36px",
+            "x-large": "42px",
+            "huge": "42px"
+        },
+        "note": "No visible <h2>/<h3> on the homepage — the WordPress page builder styles section titles as h1.home-h1 (40px serif). h4 is the smallest heading level in use (18px/600 system-stack navy)."
+    },
+    "buttons": {
+        "primary": {
+            "selector": "a.button.small.full (\"Sign in\")",
+            "background": "#DA5C01",
+            "color": "#FFFFFF",
+            "border": "1px solid #DA5C01",
+            "borderRadius": "100px",
+            "padding": "0px 20px",
+            "fontWeight": "500",
+            "fontSize": "14px",
+            "hover": "#C45301",
+            "tokens": "--bb-primary-button-* , --bb-button-radius:100px"
+        },
+        "secondary": {
+            "background": "#FFFFFF",
+            "borderAndText": "#DA5C01",
+            "borderRadius": "100px",
+            "tokens": "--bb-secondary-button-*"
+        },
+        "promoGreen": {
+            "selector": "a.banner-redirection (hero CTAs)",
+            "background": "#0A4B36",
+            "color": "#FFFFFF",
+            "borderRadius": "3px",
+            "padding": "5px 15px",
+            "fontWeight": "700",
+            "fontSize": "16px"
+        },
+        "pricingToggle": {
+            "selector": "button.pricing-table-year-btn",
+            "backgroundActive": "#009666",
+            "backgroundInactive": "#FFFFFF",
+            "color": "#FFFFFF / #000000",
+            "borderRadius": "4px",
+            "padding": "8px 20px",
+            "fontWeight": "500",
+            "fontFamily": "\"IBM Plex Sans\"",
+            "border": "1px solid #CCCCCC"
+        },
+        "radii": {
+            "pill": "100px (--bb-button-radius, --ld-button-border-radius-rounded)",
+            "block": "4px (--bb-block-radius, --ld-radius)",
+            "option": "3px (--bb-option-radius)",
+            "input": "4px (--bb-input-radius)"
+        }
+    },
+    "cards": {
+        "featureCard": {
+            "selector": "div.card.text-center.card-shadow",
+            "background": "#FFFFFF",
+            "borderRadius": "4px",
+            "border": "none (0px)",
+            "boxShadowComputed": "none",
+            "marginBottom": "24px",
+            "bodyTextColor": "#6C7485",
+            "width": "277px",
+            "note": "the .card-shadow class computed to box-shadow:none at sample time; use the site-header quiet shadow (below) as the reference elevation"
+        },
+        "tooltipOverlayCard": {
+            "selector": "label.mm-feature-box-tooltip",
+            "background": "#122B46 (a=0.95)",
+            "color": "#FFFFFF",
+            "borderRadius": "4px",
+            "padding": "7px 15px",
+            "fontSize": "13px",
+            "letterSpacing": "-0.24px"
+        },
+        "quietElevationReference": {
+            "where": "site-header (header#masthead) box-shadow",
+            "value": "rgba(139, 141, 157, 0.05) 0 1px 0 0, rgba(65, 71, 108, 0.15) 0 0 1px 0"
+        },
+        "blockRadius": "4px (--bb-block-radius)"
+    },
+    "layout": {
+        "containerMaxWidth": "1200px",
+        "containerGutterPadding": "~10px–15px",
+        "innerTextColumn": "540px",
+        "twoColumnHalves": "45% / 60%",
+        "sectionVerticalPadding_ranked": [
+            {
+                "pad": "80px/0px",
+                "count": 9
+            },
+            {
+                "pad": "64px/64px",
+                "count": 5
+            },
+            {
+                "pad": "32px/32px",
+                "count": 2
+            },
+            {
+                "pad": "76px/0px",
+                "count": 1
+            },
+            {
+                "pad": "48px/0px",
+                "count": 1
+            },
+            {
+                "pad": "15px/30px",
+                "count": 1
+            },
+            {
+                "pad": "0px/30px",
+                "count": 1
+            },
+            {
+                "pad": "28px/28px",
+                "count": 1
+            }
+        ],
+        "cardAndContentGaps": [
+            {
+                "gap": "10px",
+                "count": 10
+            },
+            {
+                "gap": "32px",
+                "count": 6
+            },
+            {
+                "gap": "3.5px",
+                "count": 3
+            },
+            {
+                "gap": "5px",
+                "count": 1
+            },
+            {
+                "gap": "96px 64px",
+                "count": 1
+            },
+            {
+                "gap": "30px",
+                "count": 1
+            },
+            {
+                "gap": "15px",
+                "count": 1
+            }
+        ],
+        "maxWidthsObserved": [
+            {
+                "maxWidth": "540px",
+                "count": 18
+            },
+            {
+                "maxWidth": "1200px",
+                "count": 12
+            },
+            {
+                "maxWidth": "60%",
+                "count": 9
+            },
+            {
+                "maxWidth": "45%",
+                "count": 9
+            },
+            {
+                "maxWidth": "25%",
+                "count": 4
+            },
+            {
+                "maxWidth": "100%",
+                "count": 3
+            },
+            {
+                "maxWidth": "800px",
+                "count": 1
+            },
+            {
+                "maxWidth": "450px",
+                "count": 1
+            },
+            {
+                "maxWidth": "max-content",
+                "count": 1
+            },
+            {
+                "maxWidth": "140px",
+                "count": 1
+            },
+            {
+                "maxWidth": "365px",
+                "count": 1
+            },
+            {
+                "maxWidth": "575px",
+                "count": 1
+            }
+        ],
+        "containersObserved": [
+            {
+                "info": "w=540 maxW=540px pad=0px",
+                "count": 18
+            },
+            {
+                "info": "w=1200 maxW=1200px pad=10px",
+                "count": 11
+            },
+            {
+                "info": "w=540 maxW=60% pad=0px",
+                "count": 9
+            },
+            {
+                "info": "w=531 maxW=45% pad=0px",
+                "count": 9
+            },
+            {
+                "info": "w=295 maxW=25% pad=9px",
+                "count": 4
+            },
+            {
+                "info": "w=0 maxW=1200px pad=0px",
+                "count": 1
+            },
+            {
+                "info": "w=0 maxW=800px pad=30px",
+                "count": 1
+            },
+            {
+                "info": "w=1210 maxW=100% pad=15px",
+                "count": 1
+            },
+            {
+                "info": "w=1178 maxW=100% pad=15px",
+                "count": 1
+            },
+            {
+                "info": "w=450 maxW=450px pad=0px",
+                "count": 1
+            },
+            {
+                "info": "w=450 maxW=max-content pad=0px",
+                "count": 1
+            },
+            {
+                "info": "w=140 maxW=140px pad=0px",
+                "count": 1
+            }
+        ],
+        "ldSpacerScaleFixedPx": [
+            "4",
+            "8",
+            "12",
+            "16",
+            "20",
+            "24",
+            "32",
+            "36",
+            "40",
+            "48",
+            "56",
+            "64",
+            "80",
+            "96",
+            "128"
+        ],
+        "ldSpacerScaleRem": [
+            "0.25",
+            "0.5",
+            "0.75",
+            "1",
+            "1.25",
+            "1.5",
+            "2",
+            "2.25",
+            "2.5",
+            "3",
+            "3.5",
+            "4",
+            "5",
+            "6",
+            "8"
+        ],
+        "inferredRhythm": "Base unit 8px; section padding 64–80px; card gap 24–32px; container 1200px."
+    },
+    "cssBrandVariables": {
+        "--wp--preset--font-size--normal": "16px",
+        "--wp--preset--font-size--huge": "42px",
+        "--wp--preset--font-size--small": "13px",
+        "--wp--preset--font-size--medium": "20px",
+        "--wp--preset--font-size--large": "36px",
+        "--wp--preset--font-size--x-large": "42px",
+        "--wp--preset--shadow--natural": {
+            "value": "6px 6px 9px rgba(0, 0, 0, 0.2)",
+            "hex": "#000000 (a=0.2)"
+        },
+        "--wp--preset--shadow--deep": {
+            "value": "12px 12px 50px rgba(0, 0, 0, 0.4)",
+            "hex": "#000000 (a=0.4)"
+        },
+        "--wp--preset--shadow--sharp": {
+            "value": "6px 6px 0px rgba(0, 0, 0, 0.2)",
+            "hex": "#000000 (a=0.2)"
+        },
+        "--wp--preset--shadow--outlined": {
+            "value": "6px 6px 0px -3px rgba(255, 255, 255, 1), 6px 6px rgba(0, 0, 0, 1)",
+            "hex": "#FFFFFF"
+        },
+        "--wp--preset--shadow--crisp": {
+            "value": "6px 6px 0px rgba(0, 0, 0, 1)",
+            "hex": "#000000"
+        },
+        "--ld-spacer-0": "0.25rem",
+        "--ld-spacer-1": "0.5rem",
+        "--ld-spacer-2": "0.75rem",
+        "--ld-spacer-3": "1rem",
+        "--ld-spacer-4": "1.25rem",
+        "--ld-spacer-5": "1.5rem",
+        "--ld-spacer-6": "2rem",
+        "--ld-spacer-7": "2.25rem",
+        "--ld-spacer-8": "2.5rem",
+        "--ld-spacer-9": "3rem",
+        "--ld-spacer-10": "3.5rem",
+        "--ld-spacer-11": "4rem",
+        "--ld-spacer-12": "5rem",
+        "--ld-spacer-13": "6rem",
+        "--ld-spacer-14": "8rem",
+        "--ld-spacer-fixed-0": "4px",
+        "--ld-spacer-fixed-1": "8px",
+        "--ld-spacer-fixed-2": "12px",
+        "--ld-spacer-fixed-3": "16px",
+        "--ld-spacer-fixed-4": "20px",
+        "--ld-spacer-fixed-5": "24px",
+        "--ld-spacer-fixed-6": "32px",
+        "--ld-spacer-fixed-7": "36px",
+        "--ld-spacer-fixed-8": "40px",
+        "--ld-spacer-fixed-9": "48px",
+        "--ld-spacer-fixed-10": "56px",
+        "--ld-spacer-fixed-11": "64px",
+        "--ld-spacer-fixed-12": "80px",
+        "--ld-spacer-fixed-13": "96px",
+        "--ld-spacer-fixed-14": "128px",
+        "--ld-radius": "4px",
+        "--ld-color-brand-primary": {
+            "value": "#3259eb",
+            "hex": "#3259EB"
+        },
+        "--ld-color-brand-secondary": {
+            "value": "#f3b33e",
+            "hex": "#F3B33E"
+        },
+        "--ld-color-brand-tertiary": {
+            "value": "#479bf8",
+            "hex": "#479BF8"
+        },
+        "--ld-color-semantic-success": {
+            "value": "#3eab6a",
+            "hex": "#2F8351"
+        },
+        "--ld-color-semantic-error": {
+            "value": "#e65255",
+            "hex": "#DB0000"
+        },
+        "--ld-typography-font-family": "inter,-apple-system,roboto,ubuntu,sans-serif",
+        "--ld-typography-font-weight-regular": "400",
+        "--ld-typography-font-weight-medium": "500",
+        "--ld-typography-font-weight-bold": "700",
+        "--wp--preset--font-size--ext-small": "1rem",
+        "--wp--preset--font-size--ext-medium": "1.125rem",
+        "--wp--preset--font-size--ext-large": "clamp(1.65rem, 3.5vw, 2.15rem)",
+        "--wp--preset--font-size--ext-x-large": "clamp(3rem, 6vw, 4.75rem)",
+        "--wp--preset--font-size--ext-xx-large": "clamp(3.25rem, 7.5vw, 5.75rem)",
+        "--mm-accent-color": "#009666",
+        "--mm-button-blue": {
+            "value": "#3363c9",
+            "hex": "#3363C9"
+        },
+        "--bb-primary-color": "#DA5C01",
+        "--bb-primary-color-rgb": "218, 92, 1",
+        "--bb-body-background-color": "#FAFBFD",
+        "--bb-body-background-color-rgb": "250, 251, 253",
+        "--bb-content-background-color": "#FFFFFF",
+        "--bb-content-alternate-background-color": "#FBFBFC",
+        "--bb-content-border-color": "#E7E9EC",
+        "--bb-content-border-color-rgb": "231, 233, 236",
+        "--bb-cover-image-background-color": "#607387",
+        "--bb-headings-color": "#122B46",
+        "--bb-headings-color-rgb": "18, 43, 70",
+        "--bb-body-text-color": "#4D5C6D",
+        "--bb-body-text-color-rgb": "77, 92, 109",
+        "--bb-alternate-text-color": "#939597",
+        "--bb-alternate-text-color-rgb": "147, 149, 151",
+        "--bb-primary-button-background-regular": "#DA5C01",
+        "--bb-primary-button-background-hover": "#C45301",
+        "--bb-primary-button-border-regular": "#DA5C01",
+        "--bb-primary-button-border-hover": "#C45301",
+        "--bb-primary-button-text-regular": "#FFFFFF",
+        "--bb-primary-button-text-regular-rgb": "255, 255, 255",
+        "--bb-primary-button-text-hover": "#FFFFFF",
+        "--bb-primary-button-text-hover-rgb": "255, 255, 255",
+        "--bb-secondary-button-background-regular": "#FFFFFF",
+        "--bb-secondary-button-background-hover": "#F2F4F5",
+        "--bb-secondary-button-border-regular": "#DA5C01",
+        "--bb-secondary-button-border-hover": "#C45301",
+        "--bb-secondary-button-text-regular": "#DA5C01",
+        "--bb-secondary-button-text-hover": "#C45301",
+        "--bb-header-background": "#FFFFFF",
+        "--bb-header-alternate-background": "#FFFFFF",
+        "--bb-header-links": "#515151",
+        "--bb-header-links-hover": "#4C8181",
+        "--bb-header-mobile-logo-size": "350px",
+        "--bb-header-height": "76px",
+        "--bb-sidenav-background": "#FFFFFF",
+        "--bb-sidenav-text-regular": "#939597",
+        "--bb-sidenav-text-hover": "#DA5C01",
+        "--bb-sidenav-text-active": "#DA5C01",
+        "--bb-sidenav-menu-background-color-regular": "#FFFFFF",
+        "--bb-sidenav-menu-background-color-hover": "#FFFFFF",
+        "--bb-sidenav-menu-background-color-active": "#FFFFFF",
+        "--bb-sidenav-count-text-color-regular": "#939597",
+        "--bb-sidenav-count-text-color-hover": "#FFFFFF",
+        "--bb-sidenav-count-text-color-active": "#DA5C01",
+        "--bb-sidenav-count-background-color-regular": "#F2F4F5",
+        "--bb-sidenav-count-background-color-hover": "#DA5C01",
+        "--bb-sidenav-count-background-color-active": "#FFFFFF",
+        "--bb-footer-background": "#FFFFFF",
+        "--bb-footer-widget-background": "#FFFFFF",
+        "--bb-footer-text-color": "#5A5A5A",
+        "--bb-footer-menu-link-color-regular": "#939597",
+        "--bb-footer-menu-link-color-hover": "#DA5C01",
+        "--bb-footer-menu-link-color-active": "#DA5C01",
+        "--bb-admin-screen-bgr-color": "#FAFBFD",
+        "--bb-admin-screen-txt-color": "#122B46",
+        "--bb-login-register-link-color-regular": "#DA5C01",
+        "--bb-login-register-link-color-hover": "#DA5C01",
+        "--bb-login-register-button-background-color-regular": "#385DFF",
+        "--bb-login-register-button-background-color-hover": "#1E42DD",
+        "--bb-login-register-button-border-color-regular": "#385DFF",
+        "--bb-login-register-button-border-color-hover": "#1E42DD",
+        "--bb-login-register-button-text-color-regular": "#FFFFFF",
+        "--bb-login-register-button-text-color-hover": "#FFFFFF",
+        "--bb-label-background-color": "#D7DFFF",
+        "--bb-label-text-color": "#385DFF",
+        "--bb-tooltip-background": "#122B46",
+        "--bb-tooltip-background-rgb": "18, 43, 70",
+        "--bb-tooltip-color": "#FFFFFF",
+        "--bb-default-notice-color": "#007CFF",
+        "--bb-default-notice-color-rgb": "0, 124, 255",
+        "--bb-success-color": "#1CD991",
+        "--bb-success-color-rgb": "28, 217, 145",
+        "--bb-warning-color": "#F7BA45",
+        "--bb-warning-color-rgb": "247, 186, 69",
+        "--bb-danger-color": "#EF3E46",
+        "--bb-danger-color-rgb": "239, 62, 70",
+        "--bb-login-custom-heading-color": "#FFFFFF",
+        "--bb-button-radius": "100px",
+        "--bb-block-radius": "4px",
+        "--bb-option-radius": "3px",
+        "--bb-block-radius-inner": "4px",
+        "--bb-input-radius": "4px",
+        "--bb-checkbox-radius": "2.7px",
+        "--bb-primary-button-focus-shadow": "none",
+        "--bb-secondary-button-focus-shadow": "none",
+        "--bb-outline-button-focus-shadow": "none",
+        "--bb-input-focus-shadow": "none",
+        "--bb-input-focus-border-color": {
+            "value": "var(--bb-content-border-color)",
+            "hex": "#E7E9EC"
+        },
+        "--bb-label-type-radius": "100px",
+        "--bb-widget-title-text-transform": "uppercase"
+    },
+    "tokenReconciliationProposal": {
+        "disclaimer": "PROPOSAL ONLY for the tokens-reconciliation station. cfa_style.py and all CSS were NOT modified by this station. pass/fail/warn semantic triad kept as-is.",
+        "keyTension": "The site's INTERACTIVE primary (BuddyBoss --bb-primary-color) is warm ORANGE #DA5C01, while its STRUCTURAL colour is calm NAVY #122B46, plus a signature GREEN #009666 (--mm-accent-color). Mapping keeps the existing token intent (primary = calm structural navy; accent = warm highlight) and surfaces the MM green separately.",
+        "tokens": {
+            "ink": {
+                "current": "#1e293b",
+                "proposed": "#122B46",
+                "source": "--bb-headings-color"
+            },
+            "muted": {
+                "current": "#64748b",
+                "proposed": "#4D5C6D",
+                "source": "--bb-body-text-color"
+            },
+            "faint": {
+                "current": "#94a3b8",
+                "proposed": "#939597",
+                "source": "--bb-alternate-text-color"
+            },
+            "line": {
+                "current": "#e2e8f0",
+                "proposed": "#E7E9EC",
+                "source": "--bb-content-border-color"
+            },
+            "surface": {
+                "current": "#f8fafc",
+                "proposed": "#F3F6F8",
+                "source": "observed cool section bg (alt: #FBFBFC --bb-content-alternate-background-color)"
+            },
+            "bg": {
+                "current": "#ffffff",
+                "proposed": "#FFFFFF",
+                "source": "--bb-content-background-color (page-level tint #FAFBFD available for large surfaces)"
+            },
+            "primary": {
+                "current": "#0f4c81",
+                "proposed": "#122B46",
+                "source": "site structural navy — NB coincides with ink; alt keep-distinct = orange #DA5C01"
+            },
+            "primary_soft": {
+                "current": "#e8f0f8",
+                "proposed": "#F3F6F8",
+                "source": "observed cool section bg (soft navy/slate tint)"
+            },
+            "accent": {
+                "current": "#b45309",
+                "proposed": "#DA5C01",
+                "source": "--bb-primary-color (warm CTA orange; hover #C45301)"
+            },
+            "accent_soft": {
+                "current": "#fef3c7",
+                "proposed": "#FCEBDA",
+                "source": "DERIVED soft tint of #DA5C01 — no exact on-site value"
+            },
+            "pass": {
+                "current": "#15803d",
+                "proposed": "KEEP",
+                "source": "site ref --bb-success-color #1CD991"
+            },
+            "pass_soft": {
+                "current": "#f0fdf4",
+                "proposed": "KEEP",
+                "source": ""
+            },
+            "fail": {
+                "current": "#b91c1c",
+                "proposed": "KEEP",
+                "source": "site ref --bb-danger-color #EF3E46"
+            },
+            "fail_soft": {
+                "current": "#fef2f2",
+                "proposed": "KEEP",
+                "source": ""
+            },
+            "warn": {
+                "current": "#b45309",
+                "proposed": "KEEP",
+                "source": "site ref --bb-warning-color #F7BA45"
+            },
+            "font": {
+                "current": "-apple-system, \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, sans-serif",
+                "proposed": "\"IBM Plex Sans\", -apple-system, \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, sans-serif",
+                "source": "loaded body web font"
+            },
+            "font_heading_NEW": {
+                "current": "(none)",
+                "proposed": "\"Source Serif 4\", Georgia, \"Times New Roman\", serif",
+                "source": "h1 headings — propose adding a serif display token for the MM feel"
+            },
+            "fs_hero": {
+                "current": "26",
+                "proposed": "28",
+                "source": "site hero 40px serif @400 (scaled to dialog); serif + weight 400 recommended"
+            },
+            "fs_title": {
+                "current": "22",
+                "proposed": "22",
+                "source": "keep"
+            },
+            "fs_lead": {
+                "current": "15",
+                "proposed": "16",
+                "source": "site body 16px"
+            },
+            "fs_body": {
+                "current": "14",
+                "proposed": "15",
+                "source": "site body 16px → 15 dialog-scale, line-height ~1.5"
+            },
+            "fs_meta": {
+                "current": "12",
+                "proposed": "12",
+                "source": "site small 13px"
+            },
+            "fs_eyebrow": {
+                "current": "11",
+                "proposed": "11",
+                "source": "site pre-title 12px"
+            }
+        },
+        "extra": {
+            "mmSignatureGreen": {
+                "hex": "#009666",
+                "note": "No current token slot. Recommend the tokens station add a secondary/brand-accent token (or use for eyebrows / hero rules / progress). Do NOT overwrite semantic pass green."
+            },
+            "recommendedBodyLineHeight": "1.5",
+            "recommendedButtonRadius": "100px (pill) for primary, 4px for blocks/cards",
+            "recommendedContainer": "1200px max-width, 64–80px section padding"
+        }
+    }
+}
