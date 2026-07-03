@@ -70,6 +70,16 @@ def setup_menu(mw: AnkiQt) -> None:
     mw._cfa_menu = menu  # type: ignore[attr-defined]
     mw.form.menubar.addMenu(menu)
 
+    # F2: register the semantic ethics-highlight grading bridge (pycmd). Safe
+    # to call unconditionally — it falls back to the deterministic grade when
+    # AI is off, and it never raises during registration.
+    try:
+        from aqt.cfa_ethics_ai import register as _register_ethics_ai
+
+        _register_ethics_ai()
+    except Exception:
+        pass
+
 
 def show_exam_readiness(mw: AnkiQt) -> None:
     if not mw.col:

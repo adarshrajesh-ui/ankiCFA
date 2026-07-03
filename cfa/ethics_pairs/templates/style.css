@@ -197,3 +197,15 @@
 .cfa-commit .big.ok { color: #2e9e5b; }
 .cfa-commit .big.no { color: #d1453b; }
 .cfa-commit .muted { color: #8a8a93; font-size: .9rem; }
+
+/* F2: semantic AI-feedback block (desktop only; shown when the LLM graded) */
+.cfa-ai {
+  margin-top: 14px; padding: 12px 14px;
+  border: 1px solid #cbdcff; border-radius: 10px;
+  background: #f2f7ff;
+}
+.nightMode .cfa-ai { border-color: #34456b; background: #1b2333; }
+.cfa-ai-head { font-size: .95rem; margin-bottom: 6px; }
+.cfa-ai-badge { background: #3b6fe0; color: #fff; }
+.cfa-ai-explain { font-size: .92rem; line-height: 1.45; }
+.cfa-ai-spans { margin-top: 8px; }

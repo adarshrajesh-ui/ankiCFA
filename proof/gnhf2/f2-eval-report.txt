@@ -1,0 +1,18 @@
+====================================================================
+F2 ethics-highlight grading eval — human-labeled gold-set
+====================================================================
+attempts            : 30
+active grader       : deterministic fallback (AI OFF)
+grade agreement     : 0.733
+overall accuracy    : 0.733
+deterministic base  : 0.733 (frozen preview, for contrast)
+
+confusion (rows=human, cols=grader):
+               correct  somewhat   partial     wrong
+    correct         18         0         7         1
+   somewhat          0         1         0         0
+    partial          0         0         2         0
+      wrong          0         0         0         1
+
+AI OFF: no OPENAI_API_KEY, so the LLM >= 0.80 assertion is SKIPPED. The deterministic fallback graded every attempt; its agreement is reported above and is the honest AI-off number.
+====================================================================

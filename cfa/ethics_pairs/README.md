@@ -134,6 +134,43 @@ Proof (rendered card, real driven attempts): `proof/gnhf2/f1-psg17-fullycorrect.
 three non-contiguous spans → fully correct) and `proof/gnhf2/f1-psg04-partial.png` (correct verdict
 but only 2 of 3 spans → honest *partial*).
 
+## F2 — semantic AI grading of the highlight (additive, AI-off safe)
+
+The deterministic F1 grader is exact but literal: a learner who highlights *"unreleased quarterly
+earnings figure"* when the gold phrase is *"exact unreleased quarterly earnings figure"* is
+semantically right but scores `partial`/`wrong` on the token overlap. F2 adds a **semantic** grade
+on top, with tolerance for paraphrase and different boundaries.
+
+- **Grader:** [`ai_grading.py`](ai_grading.py) — `grade_semantic(passage, answer_verdict,
+  judged_verdict, gold_spans, learner_spans)` sends the attempt through
+  [`cfa/ai/llm_client.py`](../ai/llm_client.py) and asks the model to judge, WITH an explicit error
+  margin, whether the learner's spans cover each gold piece of evidence. It returns
+  `{grade, correct, explanation, per_span[]}` plus `source: "ai" | "fallback"`.
+- **AI-OFF contract:** no key, a network error, the cost cap, or an unparseable reply all mean
+  `grade_semantic` returns the **exact F1 deterministic grade** with `source == "fallback"`. It never
+  raises, and the API key never enters the prompt or the result. The verdict correctness is always
+  computed by string equality (never trusted to the model).
+- **Desktop bridge:** [`qt/aqt/cfa_ethics_ai.py`](../../qt/aqt/cfa_ethics_ai.py) registers a
+  `webview_did_receive_js_message` handler. The card JS keeps its own deterministic grade (so
+  AnkiDroid / AI-off lose nothing), then calls `pycmd("cfaGradeEthics:" + payload, cb)`; when the
+  LLM actually graded, an **AI feedback** block is appended showing the semantic grade + what was
+  nailed/missed. Registered from `aqt.cfa.setup_menu`.
+- **Eval:** [`eval_ai_grading.py`](eval_ai_grading.py) over the 30 human-labeled attempts in
+  [`eval_attempts.jsonl`](eval_attempts.jsonl) (authored by [`build_eval_attempts.py`](build_eval_attempts.py);
+  8 are "semantic-win" cases where the deterministic grader under-scores). With `OPENAI_API_KEY` set
+  it asserts LLM grade-agreement ≥ 0.80; **AI-off it prints the deterministic baseline (0.733) and
+  skips the LLM assertion** — the honest AI-off number, not a faked pass.
+
+```sh
+just cfa-ai-grade-test   # pure grader tests (mocked LLM + AI-off fallback) + the desktop bridge tests
+just cfa-ethics-eval     # AI-off: deterministic baseline; with a key: asserts LLM agreement >= 0.8
+```
+
+Proof: `proof/gnhf2/f2-psg01-ai.png` (a driven attempt whose clipped spans grade deterministically
+`wrong` — "0 of 2 found" — while the AI feedback block upgrades it to *Correct* with per-span
+explanations), `proof/gnhf2/f2-psg01-aioff.png` (same attempt with AI OFF: no AI block, the
+deterministic reveal stands), and `proof/gnhf2/f2-eval-report.txt` (the AI-off eval run).
+
 ## Quick start
 
 ```sh

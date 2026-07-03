@@ -153,6 +153,18 @@ cfa-sync:
 cfa-ai-smoke:
     {{ py }} -m pytest cfa/ai/tests -q
 
+# F2: semantic ethics-highlight grading — pure grader tests (mocked LLM + AI-off fallback)
+# plus the desktop pycmd bridge tests. No network; the key is never required.
+cfa-ai-grade-test:
+    {{ ninja }} pylib
+    PYTHONPATH="cfa/ethics_pairs:." {{ py }} -m pytest cfa/ethics_pairs/tests/test_ai_grading.py -q
+    QT_QPA_PLATFORM=offscreen PYTHONPATH="out/pylib:pylib:qt:out/qt:cfa/ethics_pairs:." {{ py }} -m pytest qt/tests/test_cfa_ethics_ai.py -q
+
+# F2: run the 30-item human-labeled grading eval. AI-off prints the deterministic
+# baseline; with OPENAI_API_KEY set the LLM grades and >=0.8 agreement is asserted.
+cfa-ethics-eval *args:
+    {{ py }} cfa/ethics_pairs/eval_ai_grading.py {{ args }}
+
 # Feature 5: boot straight into a freshly-seeded CFA collection (own profile base under /tmp)
 cfa *args:
     ANKI_BASE="${ANKI_BASE:-/tmp/gnhf-cfa-seed/ankibase}" {{ run_script }} {{ args }}

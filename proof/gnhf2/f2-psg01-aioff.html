@@ -1,4 +1,216 @@
-<!-- CFA Ethics ONE-PASSAGE — FRONT (question) template (F1 redesign).
+<!doctype html><html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'><style>body{background:#fff;margin:24px;}
+/* CFA Ethics Minimal-Pair — shared card styling.
+   Self-contained; works in Anki desktop/mobile webviews and standalone (for the flow test).
+   Night-mode aware via Anki's `.nightMode` body class. */
+
+.card { font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif; }
+
+.cfa-pair {
+  max-width: 900px;
+  margin: 0 auto;
+  text-align: left;
+  color: #1a1a1a;
+  line-height: 1.45;
+}
+.nightMode .cfa-pair { color: #e8e8e8; }
+
+.cfa-src { display: none !important; }
+
+.cfa-header { margin-bottom: 14px; }
+.cfa-header h2 { font-size: 1.15rem; margin: 6px 0 0; }
+.cfa-cluster {
+  display: inline-block;
+  font: 600 0.72rem/1 ui-monospace, Menlo, monospace;
+  letter-spacing: .02em;
+  color: #5a4b8a;
+  background: #efeafc;
+  border: 1px solid #d8ccf5;
+  padding: 4px 8px;
+  border-radius: 999px;
+}
+.nightMode .cfa-cluster { color: #cbb8ff; background: #2a2440; border-color: #43396b; }
+
+/* two co-presented cases, side by side (stacks on narrow screens) */
+.cfa-cases {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin: 10px 0 18px;
+}
+@media (max-width: 640px) { .cfa-cases { grid-template-columns: 1fr; } }
+
+.cfa-case {
+  border: 1px solid #dcdce3;
+  border-radius: 12px;
+  padding: 14px 16px;
+  background: #fbfbfd;
+}
+.nightMode .cfa-case { background: #23242a; border-color: #3a3b44; }
+.cfa-case-label { font-weight: 700; font-size: .8rem; text-transform: uppercase; letter-spacing: .04em; color: #888; }
+.cfa-vignette { margin: 8px 0 12px; }
+
+.cfa-judge { display: flex; gap: 8px; margin-top: 10px; }
+.cfa-judge-btn {
+  cursor: pointer;
+  border: 1px solid #c7c7d1;
+  background: #fff;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: .92rem;
+  color: inherit;
+  flex: 1;
+  font-weight: 600;
+}
+.nightMode .cfa-judge-btn { background: #2c2d34; border-color: #474853; }
+.cfa-judge-btn.sel { border-color: #3b6fe0; background: #e8f0ff; color: #123a8f; }
+.nightMode .cfa-judge-btn.sel { background: #21335c; color: #cfe0ff; border-color: #4d78d6; }
+
+/* tap-to-highlight word tokens inside each vignette */
+.cfa-vignette { -webkit-user-select: none; user-select: none; }
+.cfa-tok {
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 1px 1px;
+  transition: background-color .05s ease;
+}
+.cfa-tok:hover { background: #eef2fb; }
+.nightMode .cfa-tok:hover { background: #2b3550; }
+.cfa-tok.sel { background: #ffe08a; color: #3a2e00; }
+.nightMode .cfa-tok.sel { background: #7a5f12; color: #fff4d6; }
+.cfa-tok.locked { cursor: default; }
+.cfa-tok.locked:hover { background: transparent; }
+
+/* the in-vignette highlight step */
+.cfa-highlight-step { margin: 6px 0 12px; }
+.cfa-highlight-step h3 { font-size: 1rem; margin: 0 0 6px; }
+.cfa-highlight-instr { margin: 0; color: #6a6a72; font-size: .88rem; }
+.nightMode .cfa-highlight-instr { color: #a9a9b3; }
+
+/* post-attempt marks */
+.cfa-case.correct { border-color: #2e9e5b; box-shadow: 0 0 0 1px #2e9e5b inset; }
+.cfa-case.wrong { border-color: #d1453b; box-shadow: 0 0 0 1px #d1453b inset; }
+.cfa-verdict { margin-top: 8px; font-weight: 600; font-size: .85rem; }
+
+/* the learner's picked span, recolored by grade tier after Check */
+.cfa-tok.pick { background: #ffe08a; color: #3a2e00; }
+.cfa-tok.pick-correct { background: #bff0cf; color: #14663a; }
+.cfa-tok.pick-somewhat { background: #ffe08a; color: #5a4300; }
+.cfa-tok.pick-wrong { background: #f6c9c4; color: #8f201a; }
+.nightMode .cfa-tok.pick-correct { background: #1f5133; color: #bdf3d1; }
+.nightMode .cfa-tok.pick-somewhat { background: #6b5310; color: #ffe9b0; }
+.nightMode .cfa-tok.pick-wrong { background: #5a221d; color: #f4b3ab; }
+/* the true gold phrase, always revealed in a distinct green outline */
+.cfa-tok.gold { box-shadow: 0 0 0 2px #2e9e5b inset; }
+.nightMode .cfa-tok.gold { box-shadow: 0 0 0 2px #56c98a inset; }
+
+.cfa-actions { margin: 8px 0; }
+#cfa-check, #cfa-record-btn {
+  cursor: pointer; font-weight: 700; font-size: .95rem;
+  border: none; border-radius: 9px; padding: 11px 20px;
+  background: #3b6fe0; color: #fff;
+}
+#cfa-check:disabled { background: #b9c2d6; cursor: not-allowed; }
+.cfa-hint { color: #8a8a93; font-size: .85rem; margin: 8px 0 0; }
+
+/* reveal panel — hidden until the attempt is checked */
+.cfa-reveal {
+  margin-top: 18px;
+  border-top: 2px dashed #d6d6de;
+  padding-top: 16px;
+}
+.cfa-grade { font-size: 1.2rem; font-weight: 800; margin-bottom: 10px; }
+.cfa-grade.ok { color: #2e9e5b; }
+.cfa-grade.no { color: #d1453b; }
+.cfa-breakdown { margin: 0 0 12px; padding-left: 18px; font-size: .9rem; color: #555; }
+.nightMode .cfa-breakdown { color: #b6b6bf; }
+
+/* highlight-grade message + the always-revealed gold phrase */
+.cfa-hl-msg { font-size: .95rem; margin: 0 0 12px; padding: 10px 12px; border-radius: 8px; }
+.cfa-hl-correct { background: #eafaf0; color: #14663a; border: 1px solid #b7e6c8; }
+.cfa-hl-somewhat { background: #fff6df; color: #7a5b12; border: 1px solid #f0d69a; }
+.cfa-hl-wrong { background: #fcecea; color: #8f201a; border: 1px solid #f0c3bd; }
+.nightMode .cfa-hl-correct { background: #16351f; color: #7fe0a6; border-color: #2c5b3c; }
+.nightMode .cfa-hl-somewhat { background: #3b300f; color: #ffdf9c; border-color: #5c4a1a; }
+.nightMode .cfa-hl-wrong { background: #3a1c1a; color: #f0a49d; border-color: #5c2b27; }
+.cfa-gold-phrase { font-weight: 700; background: #d7f2e1; color: #14663a; padding: 1px 6px; border-radius: 4px; }
+.nightMode .cfa-gold-phrase { background: #1f5133; color: #bdf3d1; }
+.cfa-standard { font-size: 1.05rem; font-weight: 600; margin-bottom: 8px; }
+.cfa-badge {
+  font: 700 .68rem/1 ui-monospace, Menlo, monospace;
+  text-transform: uppercase; letter-spacing: .05em;
+  color: #fff; background: #5a4b8a; padding: 4px 7px; border-radius: 6px; margin-right: 6px;
+}
+.cfa-rationale { color: #333; }
+.nightMode .cfa-rationale { color: #d0d0d8; }
+
+.cfa-record { margin-top: 16px; }
+
+/* --- F1 one-passage multi-span redesign (additive) --- */
+.cfa-passage-wrap {
+  border: 1px solid #dcdce3;
+  border-radius: 12px;
+  padding: 16px 18px;
+  background: #fbfbfd;
+  margin: 10px 0 16px;
+}
+.nightMode .cfa-passage-wrap { background: #23242a; border-color: #3a3b44; }
+.cfa-passage { margin: 0; -webkit-user-select: none; user-select: none; }
+
+.cfa-verdict-btns { display: flex; gap: 10px; margin: 4px 0 14px; }
+.cfa-verdict-btn {
+  cursor: pointer; flex: 1; font-weight: 700; font-size: .95rem;
+  border: 1px solid #c7c7d1; background: #fff; color: inherit;
+  border-radius: 9px; padding: 10px 14px;
+}
+.nightMode .cfa-verdict-btn { background: #2c2d34; border-color: #474853; }
+.cfa-verdict-btn.sel { border-color: #3b6fe0; background: #e8f0ff; color: #123a8f; }
+.nightMode .cfa-verdict-btn.sel { background: #21335c; color: #cfe0ff; border-color: #4d78d6; }
+.cfa-verdict-btn[data-v="ethical"].sel { border-color: #2e9e5b; background: #eafaf0; color: #14663a; }
+.cfa-verdict-btn[data-v="unethical"].sel { border-color: #d1453b; background: #fcecea; color: #8f201a; }
+
+/* committed multi-span chips + controls */
+.cfa-span-controls { display: flex; align-items: center; gap: 10px; margin: 4px 0 10px; flex-wrap: wrap; }
+.cfa-span-count { font-size: .85rem; color: #6a6a72; }
+.nightMode .cfa-span-count { color: #a9a9b3; }
+#cfa-clear-spans {
+  cursor: pointer; font-size: .82rem; font-weight: 600;
+  border: 1px solid #c7c7d1; background: #fff; color: inherit;
+  border-radius: 7px; padding: 5px 10px;
+}
+.nightMode #cfa-clear-spans { background: #2c2d34; border-color: #474853; }
+.cfa-tok.committed { background: #ffe08a; color: #3a2e00; }
+.nightMode .cfa-tok.committed { background: #7a5f12; color: #fff4d6; }
+
+/* multi-span partial-credit grade tiers */
+.cfa-tok.pick-partial { background: #ffe08a; color: #5a4300; }
+.nightMode .cfa-tok.pick-partial { background: #6b5310; color: #ffe9b0; }
+.cfa-hl-partial { background: #fff6df; color: #7a5b12; border: 1px solid #f0d69a; }
+.nightMode .cfa-hl-partial { background: #3b300f; color: #ffdf9c; border-color: #5c4a1a; }
+.cfa-span-detail { margin: 10px 0 0; padding-left: 18px; font-size: .9rem; }
+.cfa-span-detail li { margin-bottom: 6px; }
+.cfa-span-detail .found { color: #2e9e5b; }
+.cfa-span-detail .missed { color: #d1453b; }
+.cfa-span-quote { font-weight: 700; }
+
+/* back-of-card commit UI */
+.cfa-commit { max-width: 720px; margin: 0 auto; text-align: center; font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif; }
+.cfa-commit .big { font-size: 1.3rem; font-weight: 800; margin-bottom: 8px; }
+.cfa-commit .big.ok { color: #2e9e5b; }
+.cfa-commit .big.no { color: #d1453b; }
+.cfa-commit .muted { color: #8a8a93; font-size: .9rem; }
+
+/* F2: semantic AI-feedback block (desktop only; shown when the LLM graded) */
+.cfa-ai {
+  margin-top: 14px; padding: 12px 14px;
+  border: 1px solid #cbdcff; border-radius: 10px;
+  background: #f2f7ff;
+}
+.nightMode .cfa-ai { border-color: #34456b; background: #1b2333; }
+.cfa-ai-head { font-size: .95rem; margin-bottom: 6px; }
+.cfa-ai-badge { background: #3b6fe0; color: #fff; }
+.cfa-ai-explain { font-size: .92rem; line-height: 1.45; }
+.cfa-ai-spans { margin-top: 8px; }
+</style></head><body class='card'><!-- CFA Ethics ONE-PASSAGE — FRONT (question) template (F1 redesign).
      Renders ONE passage as tap/drag-to-highlight word tokens, captures an Ethical/Unethical verdict,
      and asks the learner to highlight EVERY evidence span that supports that verdict — supporting
      MULTIPLE NON-CONTIGUOUS spans (tap first+last word to add a span; tap inside a committed span to
@@ -12,20 +224,20 @@
      find_gold_spans / span_cap / grade_spans). tests/test_passages.py enforces the copy match and the
      Python<->JS agreement so grades are identical on desktop Anki and AnkiDroid. -->
 
-<div class="cfa-pair cfa-onepassage" data-itemid="{{ItemId}}">
+<div class="cfa-pair cfa-onepassage" data-itemid="PSG-01">
 
   <!-- Hidden source fields: read by JS, never shown until reveal. -->
   <div class="cfa-src">
-    <div data-role="verdict">{{Verdict}}</div>
-    <div data-role="goldSpans">{{GoldSpans}}</div>
-    <div data-role="passage">{{Passage}}</div>
-    <div data-role="standard">{{Standard}}</div>
-    <div data-role="cluster">{{ClusterTag}}</div>
-    <div data-role="rationale">{{Rationale}}</div>
+    <div data-role="verdict">unethical</div>
+    <div data-role="goldSpans">[{"phrase": "exact unreleased quarterly earnings figure", "rationale": "A precise, still-unreleased earnings number is material and nonpublic, so it is the MNPI whose use II(A) prohibits and cannot form part of a permissible mosaic."}, {"phrase": "sells the company out of her clients' portfolios", "rationale": "Trading on the basis of that MNPI is the wrongful act that II(A) bars, since one must not act on material nonpublic information."}]</div>
+    <div data-role="passage">Priya, a buy-side analyst, spends the week assembling public filings and industry shipment data, then calls a former plant employee who tells her the exact unreleased quarterly earnings figure, which is far below guidance. Combining everything, she concludes earnings will disappoint and sells the company out of her clients' portfolios.</div>
+    <div data-role="standard">II(A) Material Nonpublic Information</div>
+    <div data-role="cluster">cluster::suitability-mnpi-diligence</div>
+    <div data-role="rationale">II(A) forbids acting on material nonpublic information; the mosaic theory would only save conclusions built from public data plus individually non-material nonpublic details. Here the former employee handed Priya the exact unreleased earnings figure (material and nonpublic), and she then sold the position on it, so the conduct violates II(A).</div>
   </div>
 
   <div class="cfa-header">
-    <span class="cfa-cluster">{{ClusterTag}}</span>
+    <span class="cfa-cluster">cluster::suitability-mnpi-diligence</span>
     <h2>Is the conduct in this passage ethical or unethical?</h2>
   </div>
 
@@ -430,3 +642,4 @@
   updateCheck();
 })();
 </script>
+</body></html>
