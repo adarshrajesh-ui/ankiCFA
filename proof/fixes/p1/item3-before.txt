@@ -1,0 +1,36 @@
+========================================================================
+SUB-BUG 3A — hero must ABSTAIN below the give-up threshold
+========================================================================
+graded_reviews = 2 (give-up needs >= 200)
+memory.abstain      = True   reason='not enough data: 2 graded reviews (need 200), 100% topic coverage (need 50%)'
+performance.abstain = True
+readiness.abstain   = True
+bayes.call          = 'likely pass'  call_prob=0.70
+------------------------------------------------------------------------
+HERO contains 'p='            : True
+HERO contains 'likely'        : True
+HERO contains '95% CI'        : True
+HERO says 'keep studying'     : False
+Memory/Perf/Readiness bands abstain honestly : True
+VERDICT 3A: BUG  (hero is CONFIDENT below the threshold)
+
+========================================================================
+SUB-BUG 3B — topic accounting must be canonical + consistent
+========================================================================
+canonical CFA topics in code = (CANONICAL_TOPICS not defined yet)
+------------------------------------------------------------------------
+(i) memory_score topic total must be canonical + deck-independent:
+    memory_score(CFA parent).topics_total      = 2
+    memory_score(CFA::EthicsOnly).topics_total = 1
+    whole.topics list  = ['los::ethics', 'los::quant']
+    scoped.topics list = ['los::ethics']
+    whole.coverage_pct = 1.000 (denominator 2); scoped.coverage_pct = 1.000 (denominator 1)
+    VERDICT 3B(i): BUG  (total deck-independent & == canonical 8: False)
+------------------------------------------------------------------------
+(ii) bayesian_readiness fallback must NOT crash with no exam config:
+    ValueError: too many values to unpack (expected 3)
+    VERDICT 3B(ii): BUG
+------------------------------------------------------------------------
+(iii) ExamReadinessDialog must render; caption == table == list == 8:
+    ValueError: too many values to unpack (expected 3)
+    VERDICT 3B(iii): BUG

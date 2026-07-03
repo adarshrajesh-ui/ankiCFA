@@ -55,6 +55,43 @@ DEFAULT_TYPE_MULTIPLIERS: dict[str, float] = {
 MIN_GRADED_REVIEWS = 200
 MIN_TOPIC_COVERAGE = 0.50
 
+# --- Canonical CFA syllabus --------------------------------------------------
+# The authored CFA Level II topic areas, keyed by their ``los::<topic>`` tag
+# prefix. This is the in-code source of truth for "how big is the syllabus", so
+# the readiness scores agree on a single, deck-independent topic total: the
+# per-topic table, the coverage denominator and the "N/total topics" caption all
+# resolve to this same list no matter which deck happens to be selected.
+#
+# These eight prefixes are exactly the topics present in the authored deck
+# (``cfa/deck/*.jsonl``); when that deck is seeded the exam config persists a
+# weight for each, so ``sorted(weights.keys())`` already equals this list. The
+# constant is what the scores fall back to when no exam weights are configured,
+# instead of deriving a variable, deck-scoped list from whatever cards are in
+# scope (which produced inconsistent totals — and, for the four-column readiness
+# query, an outright crash).
+CANONICAL_TOPICS: list[str] = [
+    "los::altinv",
+    "los::corp",
+    "los::econ",
+    "los::equity",
+    "los::ethics",
+    "los::fra",
+    "los::portmgmt",
+    "los::quant",
+]
+
+
+def readiness_topic_prefixes(weights: dict[str, float]) -> list[str]:
+    """Topic prefixes for the CFA-readiness scores, as a canonical list.
+
+    When exam ``weights`` are configured they are authoritative — the seeded
+    product persists one weight per authored topic, so this is the canonical
+    syllabus already. When no weights are configured we fall back to the fixed
+    :data:`CANONICAL_TOPICS` list rather than deriving topics from the cards in
+    scope, so the topic total, coverage denominator and per-topic table stay
+    consistent (and deck-independent) regardless of which deck is selected."""
+    return sorted(weights.keys()) if weights else list(CANONICAL_TOPICS)
+
 
 # =============================================================================
 # Exam configuration (persisted in the collection config -> syncs natively)
@@ -256,19 +293,6 @@ def _topic_of(tags: str, topic_prefixes: list[str]) -> Optional[str]:
     return best
 
 
-def _derive_topics(rows: list[Any]) -> list[str]:
-    """When no weights are configured, derive topics as the 2-level ``los::x``
-    prefix of every ``los::`` tag seen in the deck."""
-    topics: set[str] = set()
-    for _cid, tags, _r in rows:
-        for tag in (tags or "").split():
-            if tag.startswith(TOPIC_PREFIX):
-                parts = tag.split("::")
-                if len(parts) >= 2:
-                    topics.add("::".join(parts[:2]))
-    return sorted(topics)
-
-
 def _range(values: list[float]) -> tuple[float, float, float]:
     """(point, low, high) = mean +/- population stdev, clamped to [0, 1]."""
     point = statistics.fmean(values)
@@ -447,7 +471,7 @@ def memory_score(
 
     cfg = get_exam_config(col) or {}
     weights: dict[str, float] = cfg.get("topic_weights", {})
-    topic_prefixes = sorted(weights.keys()) if weights else _derive_topics(rows)
+    topic_prefixes = readiness_topic_prefixes(weights)
 
     topics = _build_topic_scores(rows, review_counts, topic_prefixes, weights)
     total_reviews = sum(review_counts.values())
@@ -879,7 +903,7 @@ def bayesian_readiness(
 
     cfg = get_exam_config(col) or {}
     weights: dict[str, float] = cfg.get("topic_weights", {})
-    topic_prefixes = sorted(weights.keys()) if weights else _derive_topics(rows)
+    topic_prefixes = readiness_topic_prefixes(weights)
 
     # Group per-topic correctness counts and recall estimates.
     per_succ: dict[str, int] = {t: 0 for t in topic_prefixes}

@@ -1,0 +1,38 @@
+========================================================================
+SUB-BUG 3A — hero must ABSTAIN below the give-up threshold
+========================================================================
+graded_reviews = 2 (give-up needs >= 200)
+memory.abstain      = True   reason='not enough data: 2 graded reviews (need 200), 100% topic coverage (need 50%)'
+performance.abstain = True
+readiness.abstain   = True
+bayes.call          = 'likely pass'  call_prob=0.70
+------------------------------------------------------------------------
+HERO contains 'p='            : False
+HERO contains 'likely'        : False
+HERO contains '95% CI'        : False
+HERO says 'keep studying'     : True
+Memory/Perf/Readiness bands abstain honestly : True
+VERDICT 3A: OK (fixed)  (hero ABSTAINS below the threshold)
+
+========================================================================
+SUB-BUG 3B — topic accounting must be canonical + consistent
+========================================================================
+canonical CFA topics in code = 8
+------------------------------------------------------------------------
+(i) memory_score topic total must be canonical + deck-independent:
+    memory_score(CFA parent).topics_total      = 8
+    memory_score(CFA::EthicsOnly).topics_total = 8
+    whole.topics list  = ['los::altinv', 'los::corp', 'los::econ', 'los::equity', 'los::ethics', 'los::fra', 'los::portmgmt', 'los::quant']
+    scoped.topics list = ['los::altinv', 'los::corp', 'los::econ', 'los::equity', 'los::ethics', 'los::fra', 'los::portmgmt', 'los::quant']
+    whole.coverage_pct = 0.250 (denominator 8); scoped.coverage_pct = 0.125 (denominator 8)
+    VERDICT 3B(i): OK (fixed)  (total deck-independent & == canonical 8: True)
+------------------------------------------------------------------------
+(ii) bayesian_readiness fallback must NOT crash with no exam config:
+    bayesian_readiness returned normally; topics_total=8
+    VERDICT 3B(ii): OK (fixed)
+------------------------------------------------------------------------
+(iii) ExamReadinessDialog must render; caption == table == list == 8:
+    dialog per-topic table row count = 8
+    dialog caption contains '/8 topics' : True
+    len(score.topics) = 8
+    VERDICT 3B(iii): OK (fixed)

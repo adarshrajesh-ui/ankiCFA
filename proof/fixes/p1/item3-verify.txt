@@ -1,0 +1,21 @@
+item3 verification battery (raw pytest against the single just build)
+=========================================================================
+
+### pylib: test_cfa_f4.py test_cfa_scores.py test_cfa.py
+...........................................                              [100%]
+43 passed in 0.51s
+
+### qt: test_cfa_f4_dialog.py test_cfa_f5_style.py test_cfa_menu.py
+......................                                                   [100%]
+22 passed in 0.54s
+
+### qt: test_cfa_f0b.py
+........                                                                 [100%]
+8 passed in 0.80s
+
+### F9 reachability (AI-OFF: OPENAI_API_KEY neutralized, never printed)
+F4 readiness      : call=likely fail p_pass=0.07 acc=0.50 CI=[0.30,0.70]
+F9 REACHABILITY: PASS
+
+### mypy (leave type-clean)
+Success: no issues found in 2 source files

@@ -48,10 +48,19 @@ class _StandInMW(QWidget):
         self.col = col
 
 
-def _seed(col: Collection, topic: str, n_cards: int, reviews_each: int, frac_ok: float):
+def _seed(
+    col: Collection,
+    topic: str,
+    n_cards: int,
+    reviews_each: int,
+    frac_ok: float,
+    *,
+    deck_name: str = "CFA",
+    configure: bool = True,
+):
     now = int(time.time())
     nt = col.models.by_name("Basic")
-    deck = col.decks.id("CFA")
+    deck = col.decks.id(deck_name)
     cids = []
     for i in range(n_cards):
         note = col.new_note(nt)
@@ -79,7 +88,10 @@ def _seed(col: Collection, topic: str, n_cards: int, reviews_each: int, frac_ok:
         " values (?,?,?,?,?,?,?,?,?)",
         rows,
     )
-    anki_cfa.set_exam_config(col, exam_date="2026-12-01", topic_weights={topic: 1.0})
+    if configure:
+        anki_cfa.set_exam_config(
+            col, exam_date="2026-12-01", topic_weights={topic: 1.0}
+        )
     return deck
 
 
@@ -98,20 +110,123 @@ def test_dialog_renders_call_and_ci_for_strong_deck() -> None:
     col.close()
 
 
-def test_dialog_renders_with_almost_no_data_no_giveup_wall() -> None:
-    # Two reviews only: the old give-up wall would abstain; F4 must still render
-    # a call + a (wide) band.
+def test_dialog_hero_abstains_below_giveup_threshold() -> None:
+    # item3 sub-bug 3A (this test was previously
+    # ``test_dialog_renders_with_almost_no_data_no_giveup_wall``, which asserted
+    # the OPPOSITE). With only two graded reviews the give-up rule fires
+    # (memory_score.abstain), so the hero must ABSTAIN — "keep studying", NO
+    # confident "p=" call and NO accuracy "95% CI" lead — matching the honest
+    # Memory/Performance/Readiness bands beneath it instead of printing a
+    # confident verdict from the flat Beta(1,1) prior.
+    from PyQt6.QtWidgets import QLabel
+
     col = _empty_col()
     deck = _seed(col, "los::topica", n_cards=2, reviews_each=1, frac_ok=1.0)
+    # Precondition: the give-up rule actually fires for this deck.
+    assert anki_cfa.memory_score(col, deck_id=deck).abstain
     mw = _StandInMW(col)
     dlg = cfa.ExamReadinessDialog(mw, deck)  # type: ignore[arg-type]
+
+    text = " ".join(lbl.text() for lbl in dlg.findChildren(QLabel))
+    assert "keep studying" in text.lower()
+    assert "p=" not in text, "abstaining hero must not print a p= probability"
+    assert "likely pass" not in text and "likely fail" not in text
+    assert "95% CI" not in text, "abstaining hero must not show the accuracy CI"
+    # The honesty caveat is still present.
+    assert "not validated against real exam data" in text
+    dlg.close()
+    col.close()
+
+
+def test_dialog_hero_shows_call_above_giveup_threshold() -> None:
+    # item3 sub-bug 3A — the complement: with enough graded reviews and coverage
+    # the give-up rule does NOT fire, so the confident Bayesian call is shown
+    # exactly as before (p=, the 95% CI lead) and the abstain hero is absent.
     from PyQt6.QtWidgets import QLabel
+
+    col = _empty_col()
+    deck = _seed(col, "los::topica", n_cards=40, reviews_each=6, frac_ok=0.95)
+    assert not anki_cfa.memory_score(col, deck_id=deck).abstain
+    mw = _StandInMW(col)
+    dlg = cfa.ExamReadinessDialog(mw, deck)  # type: ignore[arg-type]
 
     text = " ".join(lbl.text() for lbl in dlg.findChildren(QLabel))
     assert ("likely pass" in text) or ("likely fail" in text)
+    assert "p=" in text
     assert "95% CI" in text
+    assert "keep studying" not in text.lower()
     dlg.close()
     col.close()
+
+
+def test_dialog_hero_abstains_when_only_performance_gives_up() -> None:
+    # review-1 — the hero must abstain whenever ANY give-up-gated band does, not
+    # just Memory. Here >=200 graded reviews spread over <30 distinct cards means
+    # memory_score does NOT abstain (enough reviews, full coverage) but
+    # performance_score DOES (first_exposures < MIN_FIRST_EXPOSURES=30). The hero
+    # must still abstain — no confident "p=" call, no accuracy "95% CI".
+    from PyQt6.QtWidgets import QLabel
+
+    col = _empty_col()
+    deck = _seed(col, "los::topica", n_cards=20, reviews_each=12, frac_ok=0.95)
+    assert not anki_cfa.memory_score(col, deck_id=deck).abstain
+    perf = anki_cfa.performance_score(col, deck_id=deck)
+    assert perf.abstain and perf.first_exposures < anki_cfa.MIN_FIRST_EXPOSURES
+    mw = _StandInMW(col)
+    dlg = cfa.ExamReadinessDialog(mw, deck)  # type: ignore[arg-type]
+
+    text = " ".join(lbl.text() for lbl in dlg.findChildren(QLabel))
+    assert "keep studying" in text.lower()
+    assert "p=" not in text, "abstaining hero must not print a p= probability"
+    assert "likely pass" not in text and "likely fail" not in text
+    assert "95% CI" not in text, "abstaining hero must not show the accuracy CI"
+    assert "not validated against real exam data" in text
+    dlg.close()
+    col.close()
+
+
+def test_dialog_topic_count_is_canonical_and_consistent() -> None:
+    # item3 sub-bug 3B — count == table rows == list == canonical 8. With no
+    # exam config the readiness scores fall back to the canonical topic list, so
+    # the per-topic table, the "N/total topics" caption and score.topics all
+    # resolve to the same eight authored CFA topics (and the dialog renders
+    # without the old no-config crash).
+    from PyQt6.QtWidgets import QLabel, QTableWidget
+
+    col = _empty_col()
+    deck = _seed(
+        col, "los::ethics", n_cards=5, reviews_each=3, frac_ok=0.8, configure=False
+    )
+    assert anki_cfa.get_exam_config(col) is None
+    score = anki_cfa.memory_score(col, deck_id=deck)
+    assert score.topics_total == 8
+    assert len(score.topics) == 8
+
+    mw = _StandInMW(col)
+    dlg = cfa.ExamReadinessDialog(mw, deck)  # type: ignore[arg-type]
+    table = dlg.findChild(QTableWidget)
+    assert table is not None
+    assert table.rowCount() == 8, (
+        "per-topic table must have one row per canonical topic"
+    )
+
+    text = " ".join(lbl.text() for lbl in dlg.findChildren(QLabel))
+    assert "/8 topics" in text, "caption must count against the canonical 8"
+    dlg.close()
+    col.close()
+
+
+def test_readiness_abstain_html_pure() -> None:
+    html = cfa._readiness_abstain_html(
+        "not enough data: 2 graded reviews (need 200), 100% topic coverage (need 50%)"
+    )
+    assert "keep studying" in html.lower()
+    assert "p=" not in html
+    assert "95% CI" not in html
+    assert "not enough data" in html.lower()
+    # Give-up reason is surfaced and the standing caveat is kept.
+    assert "2 graded reviews" in html
+    assert "not validated against real exam data" in html
 
 
 def test_readiness_call_html_pure() -> None:
