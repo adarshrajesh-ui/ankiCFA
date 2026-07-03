@@ -3,7 +3,12 @@
 > **Exam:** **CFA Level II.** ankiCFA is a fork of **[Anki](https://apps.ankiweb.net)**
 > (upstream source: <https://github.com/ankitects/anki>).
 > **License:** GNU **AGPL-3.0-or-later** — unchanged from Anki (see [LICENSE](./LICENSE)).
-> generated content, no chatbot. Everything here is deterministic spaced repetition.
+> **AI is optional and OFF by default.** The core study experience is fully
+> deterministic spaced repetition and makes no network calls. An optional AI layer
+> (semantic grading of ethics highlights and editor card-back drafting) activates
+> only when you supply your own `OPENAI_API_KEY`; with no key the app falls back to
+> the deterministic graders and behaves exactly like an AI-free build. No API key
+> and no AI-generated content are committed to this repository.
 
 **ankiCFA** adds a thin **exam-prep layer** on top of Anki's Rust scheduling engine
 for candidates studying for the **CFA Level II** exam. Anki's spaced-repetition
