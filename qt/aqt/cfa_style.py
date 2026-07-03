@@ -35,6 +35,7 @@ TOKENS: dict[str, str] = {
     # Brand — the calm structural navy (coincides with ink on the real site).
     "primary": "#122B46",
     "primary_soft": "#F3F6F8",
+    "primary_hover": "#0E2238",  # darker navy for button hover (derived from primary)
     # Semantic — the pass / fail / caution triad.
     "pass": "#15803d",
     "pass_soft": "#f0fdf4",
@@ -111,7 +112,7 @@ def dialog_qss() -> str:
         font-weight: 600;
         font-family: {t["font"]};
     }}
-    QPushButton:hover {{ background: #0c3d68; }}
+    QPushButton:hover {{ background: {t["primary_hover"]}; }}
     QPushButton:disabled {{ background: {t["faint"]}; color: {t["surface"]}; }}
     QDateEdit {{
         border: 1px solid {t["line"]};

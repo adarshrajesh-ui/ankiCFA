@@ -16,6 +16,7 @@
   --cfa-surface: #F3F6F8;      /* cool section band */
   --cfa-primary: #122B46;      /* structural navy (coincides with ink) */
   --cfa-primary-soft: #F3F6F8;
+  --cfa-primary-hover: #0E2238; /* darker navy for button hover (derived from primary) */
   --cfa-pass: #15803d;
   --cfa-pass-soft: #f0fdf4;
   --cfa-fail: #b91c1c;
@@ -131,7 +132,7 @@
   border: none; border-radius: 9px; padding: 11px 20px;
   background: var(--cfa-primary); color: #fff;
 }
-#cfa-check:hover, #cfa-record-btn:hover { background: #0c3d68; }
+#cfa-check:hover, #cfa-record-btn:hover { background: var(--cfa-primary-hover); }
 #cfa-check:disabled { background: var(--cfa-faint); cursor: not-allowed; }
 .cfa-hint { color: #8a8a93; font-size: .85rem; margin: 8px 0 0; }
 
