@@ -105,3 +105,69 @@ is still guarded by try/except ImportError; `ruff check tools/cfa/sync_roundtrip
 passes.
 
 Gate: DEFERRED — `no-mistakes` intentionally NOT run for this item.
+
+---
+
+## Item 3 — aqt test wiring (aqt TEST HARNESS WIRING)
+
+- Branch: `p4/03-aqt` (stacked on `p4/02-mypy`, which contains items 1 + 2)
+- Commit SHA: `4af70d0f89dc8d540b3faaac3a2d66c58247f883`
+- Evidence — Before: `proof/fixes/p4/3-aqt-before.txt`
+- Evidence — After:  `proof/fixes/p4/3-aqt-after.txt`
+
+The bug: the global gate target `check:pytest:aqt` (defined in
+`build/configure/src/aqt.rs`) ran pytest with
+`PYTHONPATH=pylib:$builddir/pylib:$builddir/qt:$builddir/qt/tools` — which OMITS the
+repo root (`$builddir` = `out`). The gate invokes the `pytest` CONSOLE SCRIPT
+(`out/pyenv/bin/pytest`) which, unlike `python -m pytest`, does NOT add the CWD to
+`sys.path`. So the AI-off default-client lazy import at `qt/aqt/cfa_tab_fill.py:157`
+(`from cfa.ai.llm_client import complete`) raised `ModuleNotFoundError: No module named
+'cfa'`, failing `test_fill_note_back_ai_off_leaves_note_untouched`. It passed only under
+`just cfa-tab-fill-test`, whose PYTHONPATH ends with the repo root `.`.
+
+Reproduction note: the item's literal `python -m pytest …` command MASKS the bug (the
+`-m` form prepends the CWD/repo root to `sys.path`, so it reports 18 passed). The
+faithful BEFORE repro therefore uses the console-script pytest, exactly like the gate —
+see `3-aqt-before.txt`.
+
+The fix (test wiring / build-config only — NO product code touched):
+
+- `build/configure/src/aqt.rs`, fn `check_python`, target `check:pytest:aqt`: appended
+  `"."` (repo root) to the `python_path` array; existing entries unchanged and not
+  reordered:
+
+      python_path: &[
+          "pylib",
+          "$builddir/pylib",
+          "$builddir/qt",
+          "$builddir/qt/tools",
+          // repo root, so first-party `cfa.*` packages resolve under the gate
+          ".",
+      ],
+
+  This mirrors the working `just cfa-tab-fill-test` recipe (PYTHONPATH ends with `.`).
+
+Gate outcome (REAL regenerated global gate via `just test-py`):
+
+- Regeneration was AUTOMATIC: ninja recompiled `build:configure_bin` and re-ran
+  `build:configure`; the generated `out/build.ninja` now shows
+  `pythonpath = pylib:$builddir/pylib:$builddir/qt:$builddir/qt/tools:.` (repo root
+  present; pytest still the console script `$builddir/pyenv/bin/pytest`).
+- `check:pytest:aqt` → `qt/tests/test_cfa_tab_fill.py` = 18/18 PASS, including the
+  previously-failing `test_fill_note_back_ai_off_leaves_note_untouched`.
+- Full aqt suite delta (same command, only the repo-root entry differs):
+  BEFORE (old path) 3 failed / 119 passed → AFTER (regenerated gate) 2 failed /
+  120 passed. Exactly +1 fixed, ZERO regressions. Sibling suites unaffected:
+  `check:pytest:pylib` 173 passed, `check:pytest:tools` 4 passed.
+- The remaining 2 failures (`test_installer.py::test_compile_fails_loudly`,
+  `::test_build_and_package`) are PRE-EXISTING / environmental — Briefcase cannot clone
+  the mac app template ("Unable to clone application template … mac-template … correct?").
+  Proven PYTHONPATH-INDEPENDENT: they fail identically under the OLD gate path, so this
+  fix neither causes nor affects them. They live in `qt/tests` (so technically inside
+  `check:pytest:aqt`) but are upstream/env issues, not ours to fix.
+
+Verify (AI-off unaffected): build-config only; `just cfa-tab-fill-test` still passes
+(18 passed) after the change; `qt/aqt/cfa_tab_fill.py` and `cfa/ai/llm_client.py` are
+untouched.
+
+Gate: DEFERRED — `no-mistakes` intentionally NOT run for this item.
