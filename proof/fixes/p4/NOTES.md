@@ -222,3 +222,73 @@ Verify (AI-off unaffected): no product code changed — only a new proof/render 
 under `tools/cfa/` and evidence under `proof/fixes/p4/`. The key copy is removed
 from the worktree at the end of this item (`rm -f .env .env.withkey.bak`); the
 shared checkout's `.env` is never touched.
+
+---
+
+## Item 5 — submission proof (SUBMISSION PROOF)
+
+- Branch: `p4/05-submission` (stacked on `p4/04-withkey`, which contains items 1–4)
+- Commit SHA (artifacts): `360529750ab9b6bec8938edbcf3550f870e2ede4`
+- Commit SHA (this NOTES entry): _recorded via `git log` on the branch (the follow-up commit)_
+- Gate: DEFERRED — `no-mistakes` intentionally NOT run for this item.
+
+Closed the final engineering-quality gap: the headline evidence (test counts +
+screenshots) was accounting/prose, not one-command reproducible; the real
+live-app captures were untracked; and nothing tied the Brainlift POVs to shipped
+features with evidence. All work is additive (`proof/**`, `demo/**`, `justfile`
+recipe, `proof/gnhf2/f9-demo.html`, root `SUBMISSION-CHECKLIST.md`); no product
+code, `docs/**`, or P1/P2 files were touched.
+
+### Artifacts produced
+
+- `demo/contact-sheet.png` (3336×4200 retina) + `demo/contact-sheet.html` — a
+  clean labeled contact sheet built ONLY from real live-app captures (6 desktop
+  macOS Anki panels + 4 AnkiDroid on-device panels) plus one real frame extracted
+  from `demo/desktop-review.mp4` (ffmpeg @14s). Banner: "LIVE APP CAPTURE — real
+  macOS Anki + AnkiDroid (not HTML/offscreen renders)".
+- `proof/fixes/p4/BRAINLIFT.md` — the three spiky POVs (verbatim) → shipped
+  features → concrete evidence, with honest caveats.
+- `proof/fixes/p4/5-submission-before.txt`, `5-submission-after.txt` — the gap
+  writeups (A/E).
+- `proof/fixes/p4/f9-tally-before.txt`, `f9-tally-after.log` — the tally
+  before/after with exact commands (D).
+- `proof/fixes/p4/contact-src/` — the recovered real captures kept as evidence,
+  plus two cropped panels (`03-cfa-menu-crop`, `06-priority-crop`) and the
+  extracted `desktop-review-frame.png`.
+
+### Reproducible tally (real numbers, one command each)
+
+- Python/Qt: **203 passed, 1 skipped** (204 collected; the 1 skip is the with-key
+  real-LLM smoke) via the new recipe `just cfa-f9-test-tally` — ONE deduplicated
+  pytest collection using `--import-mode=importlib` with pylib tests listed first
+  (so the four `tests` packages coexist and `tests.shared` binds to pylib/tests).
+- Rust: **21** = 10 + 11 via two DISJOINT scoped filters:
+  `cargo test -p anki --lib -- scheduler::cfa_deadline` (10) and
+  `cargo test -p anki --lib -- scheduler::service::tests::exam_queue scheduler::service::tests::verification_probe` (11).
+  The broad `-- exam` filter mis-reports 15 (it also matches the cfa_deadline test
+  `exam_in_the_past_caps_all_intervals_at_zero`); the two scoped filters are
+  disjoint, so 10+11 is the honest total.
+- Updated to cite these exact commands: `justfile` (new recipe),
+  `proof/gnhf2/f9-demo.html` (headline), root `SUBMISSION-CHECKLIST.md`
+  (reproduce section + Real numbers). NOTE: `proof/gnhf2/f9-demo.png` was NOT
+  re-rendered — the numbers are unchanged (203/1 + 21); only the HTML source
+  gained the reproducibility citation, and `demo/contact-sheet.png` already
+  carries it visually.
+
+### Honest caveats
+
+- Two source captures (`22-ethics-minpair-front`, `23-ethics-study-result`) do
+  NOT depict the ethics card UI (22 = the deck list; 23 = an empty-state "CFA:
+  Ethics Pairs deck is not available in this build" dialog), so they were kept as
+  evidence but NOT put on the sheet as ethics panels; the live ethics experience
+  is shown on-device (panels 8–10). Stated on the sheet footer too.
+- Real committed videos: `demo/desktop-review.mp4` (45s desktop review — source of
+  the contact-sheet frame) + `demo/build.mp4` (build timelapse). Still pending
+  (environmental — needs a live device + installer fleet): `demo/phone-review.mp4`,
+  `demo/install.mp4`.
+- AI is OFF by default and every feature works without a key; F4 readiness is not
+  validated against real exam outcomes; mobile = the shared fork Rust engine +
+  synced content, not a full desktop port; all deck items are authored-original.
+- Security: no `OPENAI_API_KEY` printed or committed; the staged-file scrub
+  `git diff --cached --name-only | xargs grep -nE 'sk-(proj-)?[A-Za-z0-9_-]{20,}'`
+  (and a byte-level Python re-scan of all 26 staged files) came back clean.
