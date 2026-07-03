@@ -1,0 +1,33 @@
+======================================================================
+F8 CROSS-PLATFORM PERSISTENCE — desktop -> sync -> fresh phone
+======================================================================
+
+[1] Local anki-sync-server up at http://127.0.0.1:62316/
+    (identical Rust sync engine to the on-device fork, per F6)
+
+[2] Seeded DESKTOP collection:
+      decks       : ['CFA', 'CFA Level II', 'CFA::Ethics Passages', 'Default']
+      notes       : 8
+      exam config : {'exam_date': '2026-08-25', 'topic_weights': {'los::equity': 0.15, 'los::ethics': 0.2, 'los::fixed-income': 0.15}}
+
+[3] Desktop synced -> server seeded (full upload)
+
+[4] Fresh empty PHONE collection created:
+      notes before sync : 0
+      ...full download...
+
+[5] PHONE collection AFTER sync:
+      decks              : ['CFA', 'CFA Level II', 'CFA::Ethics Passages', 'Default']
+      notes              : 8
+      note-types         : ['Basic', 'Basic (and reversed card)', 'Basic (optional reversed card)', 'Basic (type in the answer)', 'CFA Ethics One-Passage', 'Cloze', 'Image Occlusion']
+      ethics cards       : 5
+      exam config        : {'exam_date': '2026-08-25', 'topic_weights': {'los::equity': 0.15, 'los::ethics': 0.2, 'los::fixed-income': 0.15}}
+      days_to_exam(7/3)  : 53
+
+[6] SHARED-ENGINE exam queue (Rust BuildExamQueue) on the phone:
+      card_ids (weakest-first): [1783069639775, 1783069639773, 1783069639774]
+      scores                  : [0.0049, 0.0028, 0.0024]
+
+======================================================================
+RESULT: PASS — all CFA content + exam config + shared-engine queue reached the phone
+======================================================================

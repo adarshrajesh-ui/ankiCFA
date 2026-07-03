@@ -163,6 +163,11 @@ cfa-sync-test:
     {{ ninja }} pylib
     PYTHONPATH="out/pylib:pylib:." {{ py }} -m pytest pylib/tests/test_cfa_sync.py -q
 
+# Feature F8: cross-platform persistence — CFA deck, ethics deck, exam config, and shared-engine queue all reach a fresh phone over sync
+cfa-f8-test:
+    {{ ninja }} pylib
+    PYTHONPATH="out/pylib:pylib:." {{ py }} -m pytest pylib/tests/test_cfa_f8_persistence.py -q
+
 # Feature 9: run the live desktop<->phone sync demo (stands up anki-sync-server, prints a narrated round-trip)
 cfa-sync:
     {{ ninja }} pylib

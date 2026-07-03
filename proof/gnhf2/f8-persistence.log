@@ -1,0 +1,13 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.13, pytest-8.4.1, pluggy-1.6.0 -- /Users/adarshrajesh/AlphaWeek2/ankiCFA/out/pyenv/bin/python
+cachedir: .pytest_cache
+rootdir: /Users/adarshrajesh/AlphaWeek2/ankiCFA/pylib
+configfile: pyproject.toml
+plugins: mock-3.15.1, anyio-4.13.0
+collecting ... collected 3 items
+
+pylib/tests/test_cfa_f8_persistence.py::test_cfa_deck_and_ethics_deck_reach_the_phone PASSED [ 33%]
+pylib/tests/test_cfa_f8_persistence.py::test_exam_config_reaches_the_phone_over_sync PASSED [ 66%]
+pylib/tests/test_cfa_f8_persistence.py::test_shared_engine_queue_runs_on_synced_phone_collection PASSED [100%]
+
+============================== 3 passed in 11.40s ==============================
