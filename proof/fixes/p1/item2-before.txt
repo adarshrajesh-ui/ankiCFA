@@ -1,0 +1,78 @@
+=== item2 BEFORE: exam-priority dead-end reproduction ===
+date: 2026-07-03T18:55:17Z
+origin/main SHA at start: efb9fabd2b44ccf92f44e9328a2083fec8af49d1
+branch: fix/desktop-item2
+
+--- Faithful reproduction via study_by_exam_priority (stand-in MW) ---
+
+=== A: full seed, current deck as-is (fresh profile default) ===
+current_deck='Default' new_in_current=0 has_config=True
+states=[] msgs=[('info', 'This deck has no studyable cards for the exam-priority queue — every card is either suspended or in another deck.')]
+RESULT: DEAD-END
+
+=== B: full seed, main deck selected ===
+current_deck='CFA Level II' new_in_current=630 has_config=True
+states=['review'] msgs=[('tip', 'Exam-priority queue: 200 cards weakest-first (including 200 new).')]
+RESULT: ENTERED REVIEW
+
+=== C: main deck selected, NO exam config ===
+current_deck='CFA Level II' new_in_current=630 has_config=False
+states=['review'] msgs=[('tip', 'Exam-priority queue: 200 cards weakest-first (including 200 new).')]
+RESULT: ENTERED REVIEW
+
+--- Mechanism probe: RPC + filtered gather DO include new cards when a CFA deck IS selected ---
+main deck notes_added=630 all_cards=630 new_cards=630
+days_to_exam=53
+[RPC] build_exam_queue returned 200 card_ids
+[search] cid_search matches 200 cards (200 new)
+[filtered] gathered 200 cards into filtered deck
+=> filtered deck gathered cards; exam-priority should enter review
+
+=== item2 FAILING-TEST EVIDENCE (regression tests run against origin/main source, NO fix) ===
+--- qt: test_study_by_exam_priority_from_empty_default_deck_no_dead_end ---
+            assert added == 30
+            anki_cfa.set_exam_config(
+                col, exam_date="2026-08-25", topic_weights={"los::ethics": 1.0}
+            )
+    
+            # Reproduce the fresh-profile precondition EXACTLY: do NOT select a CFA
+            # deck. The current deck is the empty built-in "Default" deck.
+            cur = col.decks.get_current_id()
+            assert col.decks.name(cur) == "Default"
+            assert len(col.find_cards('deck:"Default" is:new')) == 0
+    
+            tips: list[str] = []
+            monkeypatch.setattr(cfa, "tooltip", lambda *a, **k: tips.append(a[0]))
+            monkeypatch.setattr(
+                cfa, "showInfo", lambda *a, **k: tips.append("INFO:" + a[0])
+            )
+    
+            cfa.study_by_exam_priority(mw)  # type: ignore[arg-type]
+    
+            # Must NOT dead-end: the widened scope reaches the 30 NEW cards and
+            # enters review, reporting the new count honestly.
+>           assert "review" in mw.states, f"exam-priority dead-ended: {tips}"
+E           AssertionError: exam-priority dead-ended: ['INFO:This deck has no studyable cards for the exam-priority queue — every card is either suspended or in another deck.']
+E           assert 'review' in []
+E            +  where [] = <tests.test_cfa_f0b._StandInMW object at 0x1035e8910>.states
+
+qt/tests/test_cfa_f0b.py:307: AssertionError
+=========================== short test summary info ============================
+FAILED qt/tests/test_cfa_f0b.py::test_study_by_exam_priority_from_empty_default_deck_no_dead_end
+1 failed in 0.29s
+--- pylib: test_build_exam_queue_all_decks_merges_new_cards_across_decks (NO fix) ---
+    
+        # Deck-scoped to the empty Default deck: nothing studyable (the dead-end).
+        default_id = col.decks.id("Default")
+        scoped = cfa.build_exam_queue(col, deck_id=default_id, fetch_limit=0)
+        assert list(scoped.card_ids) == []
+    
+        # Collection-wide: both NEW cards, higher-weight topic first.
+>       merged = cfa.build_exam_queue_all_decks(col, fetch_limit=0)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'anki.cfa' has no attribute 'build_exam_queue_all_decks'
+
+pylib/tests/test_cfa.py:188: AttributeError
+=========================== short test summary info ============================
+FAILED pylib/tests/test_cfa.py::test_build_exam_queue_all_decks_merges_new_cards_across_decks
+1 failed in 0.09s

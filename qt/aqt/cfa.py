@@ -221,9 +221,20 @@ def study_by_exam_priority(mw: AnkiQt) -> None:
         queue = cfa.build_exam_queue(col, deck_id=deck_id, fetch_limit=200)
         card_ids = list(getattr(queue, "card_ids", []))
         if not card_ids:
+            # The current deck has nothing studyable. On a fresh profile the
+            # current deck is the empty built-in "Default" deck (the first-launch
+            # seeder creates the CFA decks but never selects one), so a
+            # deck-scoped queue is empty even though every NEW CFA card — treated
+            # as maximally weak (R=0) — is waiting in the CFA decks. Widen the
+            # scope to the whole collection so exam-priority never dead-ends
+            # while studyable cards exist somewhere.
+            queue = cfa.build_exam_queue_all_decks(col, fetch_limit=200)
+            card_ids = list(getattr(queue, "card_ids", []))
+        if not card_ids:
             showInfo(
-                "This deck has no studyable cards for the exam-priority queue — "
-                "every card is either suspended or in another deck.",
+                "There are no studyable cards for the exam-priority queue right "
+                "now — every card is suspended, buried, or already being studied "
+                "in a filtered deck.",
                 parent=mw,
             )
             return

@@ -161,6 +161,42 @@ def test_build_exam_queue_zero_weight_and_empty_deck():
     col.close()
 
 
+def test_build_exam_queue_all_decks_merges_new_cards_across_decks():
+    # item2 fresh-profile fix: when the current deck is empty, exam-priority
+    # falls back to a collection-wide merge. Two sibling top-level decks each
+    # hold a NEW card (treated as maximally weak, R=0); the built-in Default
+    # deck stays empty. A deck-scoped queue on Default is empty, but the merged
+    # collection-wide queue must include BOTH new cards, weakest-first.
+    col = getEmptyCol()
+    nt = col.models.by_name("Basic")
+    d1 = col.decks.id("CFA Level II")
+    d2 = col.decks.id("CFA::Ethics Pairs")  # also creates top-level "CFA"
+    quant_new = _add_card(col, d1, nt, "quant-new", ["los::quant::r1"])
+    ethics_new = _add_card(col, d2, nt, "ethics-new", ["los::ethics::r1"])
+    cfa.set_exam_config(
+        col,
+        exam_date="2026-08-25",
+        topic_weights={"los::quant": 0.9, "los::ethics": 0.1},
+    )
+
+    # Deck-scoped to the empty Default deck: nothing studyable (the dead-end).
+    default_id = col.decks.id("Default")
+    scoped = cfa.build_exam_queue(col, deck_id=default_id, fetch_limit=0)
+    assert list(scoped.card_ids) == []
+
+    # Collection-wide: both NEW cards, higher-weight topic first.
+    merged = cfa.build_exam_queue_all_decks(col, fetch_limit=0)
+    assert set(merged.card_ids) == {quant_new, ethics_new}
+    assert merged.card_ids[0] == quant_new, "higher-weight (quant) card first"
+    assert len(merged.card_ids) == len(merged.scores)
+    assert merged.scores[0] >= merged.scores[-1]
+
+    # fetch_limit truncates the merged, already-sorted result.
+    capped = cfa.build_exam_queue_all_decks(col, fetch_limit=1)
+    assert capped.card_ids == [quant_new]
+    col.close()
+
+
 def test_build_exam_queue_is_read_only_and_undo_still_works():
     col = getEmptyCol()
     nt = col.models.by_name("Basic")

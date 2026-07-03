@@ -1,0 +1,43 @@
+=== item2 VERIFY — regression battery (raw pytest against single just build) ===
+date: 2026-07-03T18:56:44Z
+
+### qt/tests/test_cfa_f0b.py
+.......                                                                  [100%]
+7 passed in 0.77s
+
+### qt/tests/test_cfa_menu.py
+...                                                                      [100%]
+3 passed in 0.18s
+
+### pylib/tests/test_cfa.py
+..........                                                               [100%]
+10 passed in 0.14s
+
+### pylib/tests/test_cfa_scores.py
+..........                                                               [100%]
+10 passed in 0.18s
+
+### pylib/tests/test_cfa_f4.py
+..............                                                           [100%]
+14 passed in 0.23s
+
+### qt/tests/test_cfa_f4_dialog.py
+...                                                                      [100%]
+3 passed in 0.33s
+
+### qt/tests/test_cfa_f5_style.py
+.............                                                            [100%]
+13 passed in 0.34s
+
+### F9 reachability (AI-OFF: OPENAI_API_KEY neutralized)
+F1 grader         : passages=30 spans=73 perfect_attempt_correct=True
+F2 semantic grade : source=fallback correct=True
+F3 tab-fill AIoff : ok=False (AI off -> no draft, back untouched)
+F4 readiness      : call=likely fail p_pass=0.07 acc=0.50 CI=[0.30,0.70]
+F5 design tokens  : primary=#0f4c81 keys=22
+F6/F7/F8 engine   : build_exam_queue -> 5 cards (shared Rust engine, on-device via fork librsdroid.so)
+
+F9 REACHABILITY: PASS
+
+### mypy (.mypy.ini) on touched source files
+Success: no issues found in 2 source files
