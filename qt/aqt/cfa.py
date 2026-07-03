@@ -212,7 +212,13 @@ def study_ethics_pairs(mw: AnkiQt) -> None:
 
 
 def study_by_exam_priority(mw: AnkiQt) -> None:
-    """Build the exam-priority queue and open a filtered deck in that order."""
+    """Build the exam-priority queue and open a filtered deck in that order.
+
+    Scoped to the current deck; on the built-in "Default" deck an empty
+    deck-scoped queue falls back to the whole collection
+    (:func:`cfa.build_exam_queue_all_decks`) so a fresh profile still has cards
+    to study.
+    """
     col = mw.col
     if not col:
         return

@@ -69,7 +69,7 @@ heavier CFA logic lives here to keep the merge surface tiny.
   collection config so it syncs natively) and the **honest per-topic memory
   score**: FSRS retrievability reported as a range with an enforced give-up rule.
 - `qt/aqt/cfa.py` — the **CFA → Exam Readiness** desktop dialog.
-- `pylib/tests/test_cfa.py` — 7 Python end-to-end tests (RPC + memory score).
+- `pylib/tests/test_cfa.py` — 10 Python end-to-end tests (RPC + memory score).
 - `tools/cfa/build_cfa_deck.py` — CFA Level II deck builder (`los::topic::reading` tags).
 - `dist/launch-ankiCFA.sh` — clean-machine venv + launch script.
 
