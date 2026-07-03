@@ -171,3 +171,54 @@ Verify (AI-off unaffected): build-config only; `just cfa-tab-fill-test` still pa
 untouched.
 
 Gate: DEFERRED — `no-mistakes` intentionally NOT run for this item.
+
+---
+
+## Item 4 — with-key AI proof (WITH-KEY AI PROOF)
+
+- Branch: `p4/04-withkey` (stacked on `p4/03-aqt`, which contains items 1–3)
+- Commit SHA (evidence + render tool): `2522bc7802f74fd140a494907f5f9490b317932f`
+- Gate: DEFERRED — `no-mistakes` intentionally NOT run for this item.
+
+Ran the CFA AI features against the REAL `OPENAI_API_KEY` (kept only in the
+gitignored, untracked `.env`; never printed, echoed, logged, or committed). Every
+commit was preceded by the staged-file scrub
+`git diff --cached --name-only | xargs grep -nE 'sk-(proj-)?[A-Za-z0-9_-]{20,}'`,
+which came back clean. Preflight `just cfa-ai-smoke` = **9 passed / 0 skipped**,
+i.e. `test_with_key_real_tiny_call` made a genuine call and returned `ok=True`.
+
+### Part 1 — F2 eval WITH the real LLM (PASS)
+
+- `just cfa-ethics-eval` (exit 0): `active grader : LLM (semantic)` (NOT the
+  deterministic fallback), **grade agreement 0.933 >= threshold 0.80 -> PASS**.
+- `--json` confirms `"ran_ai": true`, `"ai_source_count": 30`, `"n": 30`,
+  `"grade_agreement": 0.9333` — all 30 attempts graded by the real LLM, no
+  fallback mix. Deterministic baseline `0.7333` reported for contrast.
+- Evidence: `proof/fixes/p4/f2-withkey-eval.txt`, `proof/fixes/p4/f2-withkey-eval.json`.
+
+### Part 2 — F3 tab-to-fill with the REAL LLM (before/after)
+
+- New proof tool `tools/cfa/render_f3_tab_fill_withkey.py` calls
+  `aqt.cfa_tab_fill.fill_note_back(note)` with NO injected `complete_fn`, so the
+  default real `cfa.ai.llm_client.complete` path runs. It asserts `res["ok"]`,
+  `res["status"] == "filled"`, and `ai-generated in note.tags`.
+- The AFTER back is a genuine, run-to-run-varying LLM draft (this run:
+  `gpt-4o-mini`, 369 chars, a correct Standard III(B) fair-dealing answer) — never
+  hardcoded. BEFORE makes no LLM call (front filled, back empty, button enabled).
+- Evidence: `proof/fixes/p4/f3-withkey-before.png`, `proof/fixes/p4/f3-withkey-after.png`
+  (+ the `.html` sources; the after HTML embeds the real drafted text).
+
+### Part 3 — AI-off fallback still works with the key ABSENT
+
+- With `.env` moved aside (`.env.withkey.bak`, gitignored via item 1) and
+  `OPENAI_API_KEY` unset: `just cfa-tab-fill-test` = **18/18 pass**, including
+  `test_fill_note_back_ai_off_leaves_note_untouched`.
+- `just cfa-ethics-eval` (exit 0) then reports `active grader : deterministic
+  fallback (AI OFF)`, agreement **0.733**, and the LLM `>= 0.80` assertion is
+  SKIPPED — the honest AI-off number. `.env` was restored afterward.
+- Evidence: `proof/fixes/p4/f2-aioff-eval.txt`.
+
+Verify (AI-off unaffected): no product code changed — only a new proof/render tool
+under `tools/cfa/` and evidence under `proof/fixes/p4/`. The key copy is removed
+from the worktree at the end of this item (`rm -f .env .env.withkey.bak`); the
+shared checkout's `.env` is never touched.
