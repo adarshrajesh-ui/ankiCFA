@@ -409,14 +409,17 @@ class ExamReadinessDialog(QDialog):
         ready = cfa.readiness_score(col, deck_id=deck_id)
         deck_name = col.decks.name(deck_id)
 
-        # F4 hero: the Bayesian pass/fail call — but ABSTAIN when we are below
-        # the give-up threshold (reuse memory_score's give-up outcome, which
-        # gates on graded reviews, topic coverage and skipped high-weight
-        # topics), so the hero never prints a confident "p=xx" from the flat
-        # Beta(1,1) prior while the scores beneath it honestly abstain.
+        # F4 hero: the Bayesian pass/fail call — but ABSTAIN when either the
+        # Memory or Performance score gives up (memory gates on graded reviews,
+        # topic coverage and skipped high-weight topics; performance gates on
+        # first-exposure count), so the hero never prints a confident "p=xx"
+        # from the flat Beta(1,1) prior while any band beneath it honestly
+        # abstains.
+        hero_abstain = score.abstain or perf.abstain
+        hero_reason = score.reason if score.abstain else perf.reason
         hero_html = (
-            _readiness_abstain_html(score.reason)
-            if score.abstain
+            _readiness_abstain_html(hero_reason)
+            if hero_abstain
             else _readiness_call_html(bayes)
         )
 

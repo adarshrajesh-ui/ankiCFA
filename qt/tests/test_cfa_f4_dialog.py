@@ -159,6 +159,32 @@ def test_dialog_hero_shows_call_above_giveup_threshold() -> None:
     col.close()
 
 
+def test_dialog_hero_abstains_when_only_performance_gives_up() -> None:
+    # review-1 — the hero must abstain whenever ANY give-up-gated band does, not
+    # just Memory. Here >=200 graded reviews spread over <30 distinct cards means
+    # memory_score does NOT abstain (enough reviews, full coverage) but
+    # performance_score DOES (first_exposures < MIN_FIRST_EXPOSURES=30). The hero
+    # must still abstain — no confident "p=" call, no accuracy "95% CI".
+    from PyQt6.QtWidgets import QLabel
+
+    col = _empty_col()
+    deck = _seed(col, "los::topica", n_cards=20, reviews_each=12, frac_ok=0.95)
+    assert not anki_cfa.memory_score(col, deck_id=deck).abstain
+    perf = anki_cfa.performance_score(col, deck_id=deck)
+    assert perf.abstain and perf.first_exposures < anki_cfa.MIN_FIRST_EXPOSURES
+    mw = _StandInMW(col)
+    dlg = cfa.ExamReadinessDialog(mw, deck)  # type: ignore[arg-type]
+
+    text = " ".join(lbl.text() for lbl in dlg.findChildren(QLabel))
+    assert "keep studying" in text.lower()
+    assert "p=" not in text, "abstaining hero must not print a p= probability"
+    assert "likely pass" not in text and "likely fail" not in text
+    assert "95% CI" not in text, "abstaining hero must not show the accuracy CI"
+    assert "not validated against real exam data" in text
+    dlg.close()
+    col.close()
+
+
 def test_dialog_topic_count_is_canonical_and_consistent() -> None:
     # item3 sub-bug 3B — count == table rows == list == canonical 8. With no
     # exam config the readiness scores fall back to the canonical topic list, so
