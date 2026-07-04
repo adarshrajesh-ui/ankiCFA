@@ -125,6 +125,12 @@ cfa-scores-test:
     {{ ninja }} pylib
     PYTHONPATH="out/pylib:pylib" {{ py }} -m pytest pylib/tests/test_cfa_scores.py -q
 
+# A10: crash + offline robustness — kill mid-review ~20x -> zero corruption
+# (backend integrity check), plus offline + AI-off still returns a score.
+cfa-crash-test:
+    {{ ninja }} pylib
+    PYTHONPATH="out/pylib:pylib" {{ py }} -m pytest pylib/tests/test_cfa_crash_robustness.py -q
+
 # Phase-0 spine: the shared Rust ComputeCfaScores engine == pylib/anki/cfa.py to 1e-9 (desktop==mobile==old-Python parity), and the (card,day) double-count fix
 cfa-parity-test:
     {{ ninja }} pylib

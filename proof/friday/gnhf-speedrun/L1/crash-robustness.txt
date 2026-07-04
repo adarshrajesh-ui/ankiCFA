@@ -1,0 +1,54 @@
+==============================================================
+A10 — CRASH + OFFLINE ROBUSTNESS  (measured, no AI, no network)
+Generated: 2026-07-04T22:50:00Z
+Command:  just cfa-crash-test  (real built backend, out/pyenv)
+==============================================================
+
+## What it proves
+1. Kill mid-review 20x -> zero corruption. A subprocess reviews
+   cards in a tight loop (real revlog + card-state writes every iteration);
+   the parent SIGKILLs it at random offsets AFTER the first review commits,
+   then reopens and runs the backend integrity check (fix_integrity ->
+   check_database / quick_check). Every reopen reports a clean DB and the
+   review log grows -> reviews were interrupted, survived, no corruption.
+2. Offline + AI-off (cfa_ai_enabled=False) still returns a real score range
+   for memory / performance / readiness (pure local compute, no network).
+
+## Instrumented 20-kill run (revlog count + integrity after each SIGKILL)
+seeded collection: tmphatj0_ka.anki2
+initial revlog rows: 280
+
+kill#  ready?   revlog  integrity
+    0     yes      773  CLEAN
+    1     yes      844  CLEAN
+    2     yes      933  CLEAN
+    3     yes     1441  CLEAN
+    4     yes     1800  CLEAN
+    5     yes     1966  CLEAN
+    6     yes     2296  CLEAN
+    7     yes     2588  CLEAN
+    8     yes     2647  CLEAN
+    9     yes     2924  CLEAN
+   10     yes     3230  CLEAN
+   11     yes     3464  CLEAN
+   12     yes     3722  CLEAN
+   13     yes     3878  CLEAN
+   14     yes     4004  CLEAN
+   15     yes     4098  CLEAN
+   16     yes     4142  CLEAN
+   17     yes     4186  CLEAN
+   18     yes     4276  CLEAN
+   19     yes     4358  CLEAN
+
+final revlog rows: 4358  (grew -> real reviews survived)
+
+## Offline + AI-off still scores
+cfa_ai_enabled config = False   ai_enabled() = False
+memory      abstain=False  point=0.9985  range=[0.9942, 1.0000]
+performance abstain=False  point=0.7500  range=[0.5981, 0.8581]
+readiness   range=[0.6130, 1.0000]  (wide uncalibrated band)
+-> scores returned with AI hard-OFF and no network. HONEST: no LLM path touched.
+
+## Test suite
+....                                                                     [100%]
+4 passed in 5.90s
