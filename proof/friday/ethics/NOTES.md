@@ -135,7 +135,7 @@ the one-passage duplication. Keep Python<->JS grader parity byte-for-byte.
   `qt/tests/test_cfa_f0b.py`. Exact edits in HANDOFF.md.
 
 ### INC5 — persist attempt-detail hooks (structured payload for W5 custom_data)
-- **Commit:** `<INC5_SHA>`
+- **Commit:** `1d64e6322`
 - **Gap (before):** the front stashed only `{ pairId, cluster, correct }` in localStorage — no
   verdicts, spans, tiers, grade tier, or source/standard provenance. W5 could persist only pass/fail.
   Evidence: `item5-payload-before-after.md` (the old 3-field payload).
