@@ -1,0 +1,4 @@
+=== BEFORE (base 6ef32ec8c): no in-app AI toggle ===
+fatal: path 'qt/aqt/cfa_ai_settings.py' exists on disk, but not in '6ef32ec8c'
+  qt/aqt/cfa_ai_settings.py absent at base
+  cfa_ai_enabled key referenced in aqt at base: 

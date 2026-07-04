@@ -72,6 +72,9 @@ def setup_menu(mw: AnkiQt) -> None:
     deadline = menu.addAction("Peak-on-Exam-Day (Deadline)…")
     qconnect(deadline.triggered, lambda: show_deadline(mw))
 
+    ai_settings = menu.addAction("AI Settings…")
+    qconnect(ai_settings.triggered, lambda: _open_ai_settings(mw))
+
     # Keep a reference so the menu (and its slots) survive garbage collection.
     mw._cfa_menu = menu  # type: ignore[attr-defined]
     mw.form.menubar.addMenu(menu)
@@ -104,6 +107,13 @@ def setup_menu(mw: AnkiQt) -> None:
         _register_tab_fill()
     except Exception:
         pass
+
+
+def _open_ai_settings(mw: AnkiQt) -> None:
+    # Lazy import keeps aqt.cfa import-light and avoids a Qt import cycle.
+    from aqt.cfa_ai_settings import open_ai_settings
+
+    open_ai_settings(mw)
 
 
 def show_exam_readiness(mw: AnkiQt) -> None:

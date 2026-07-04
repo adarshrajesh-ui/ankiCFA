@@ -132,3 +132,30 @@ The remaining stock surfaces (top toolbar + deck list) now carry the CFA palette
   toolbar.css/deckbrowser.css + the exact injected CFA CSS).
 - Build: `./ninja pylib qt` green. Tests: `just cfa-desktop-shell-test` → 24 passed.
 - SHA: (this commit)  ·  PR: #24
+
+---
+
+## Increment 5 — In-app AI toggle UI (D3b)
+
+A visible desktop control for the AI-toggle contract, reachable from the CFA Home
+"AI · settings" chip AND the CFA menu.
+
+- Files (my scope only):
+  - `qt/aqt/cfa_ai_settings.py` (new) — `get_ai_toggles`/`set_ai_toggles`/`ai_active`
+    over col.conf keys `cfa_ai_enabled` (master) / `cfa_ai_grading_enabled` /
+    `cfa_ai_tabfill_enabled` (all default OFF); `CfaAiSettingsDialog` (CFA-styled
+    via `cfa_style.apply`) with the master + per-feature switches (features gated
+    on master); `open_ai_settings` refreshes CFA Home so its chip updates.
+  - `qt/aqt/cfa_home.py` — the Home "AI · settings" chip now opens the real dialog.
+  - `qt/aqt/cfa.py` — CFA menu gains "AI Settings…".
+  - `qt/tests/test_cfa_menu.py` (updated to 6 actions) + `qt/tests/test_cfa_ai_settings.py` (6 tests).
+- Contract note: this owns the UI + persistence only. The AI modules read these
+  keys through their own gate (AI files are out of my scope) — when Phase 0's
+  `ai_enabled(feature)` gate lands it consumes exactly these keys. `ai_active()`
+  mirrors the toggle half (master AND feature) so UI/tests agree on the rule.
+  Never reads/logs the API key.
+- Evidence: `item5-ai-toggle-before.txt` (control/keys absent at base) + REAL
+  dialog renders `item5-ai-settings-off.png` (features greyed out) /
+  `item5-ai-settings-on.png` (master + grading on).
+- Build: `./ninja pylib qt` green. Tests: `just cfa-desktop-shell-test` → 29 passed.
+- SHA: (this commit)  ·  PR: #24

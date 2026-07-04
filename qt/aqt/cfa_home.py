@@ -20,7 +20,7 @@ from typing import TYPE_CHECKING
 
 import aqt
 from aqt.sound import av_player
-from aqt.utils import openLink, showInfo, tooltip
+from aqt.utils import openLink, tooltip
 from aqt.webview import AnkiWebViewKind
 
 if TYPE_CHECKING:
@@ -83,15 +83,7 @@ class CfaHome:
 
 
 def open_ai_settings(mw: AnkiQt) -> None:
-    """Open the in-app AI settings.
+    """Open the in-app AI settings dialog (master + per-feature AI toggles)."""
+    from aqt.cfa_ai_settings import open_ai_settings as _open
 
-    Increment 5 replaces this with the real toggle UI; until then it reports the
-    current master AI state so the CTA is always reachable and honest.
-    """
-    enabled = bool(mw.col.get_config("cfa_ai_enabled", False))
-    showInfo(
-        f"AI features are currently {'ON' if enabled else 'OFF'}.\n\n"
-        "Use the AI settings control to change this.",
-        parent=mw,
-        title="ankiCFA — AI settings",
-    )
+    _open(mw)

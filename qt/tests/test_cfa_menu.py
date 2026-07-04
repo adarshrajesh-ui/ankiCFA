@@ -37,10 +37,10 @@ def _make_menu() -> "tuple[QWidget, object]":
     return mw, mw._cfa_menu  # type: ignore[attr-defined]
 
 
-def test_cfa_menu_has_five_actions() -> None:
+def test_cfa_menu_has_six_actions() -> None:
     _mw, menu = _make_menu()
     actions = menu.actions()
-    assert len(actions) == 5
+    assert len(actions) == 6
 
 
 def test_cfa_menu_action_labels() -> None:
@@ -52,6 +52,7 @@ def test_cfa_menu_action_labels() -> None:
         "Study Ethics Minimal-Pairs",
         "Study by Exam Priority",
         "Peak-on-Exam-Day (Deadline)…",
+        "AI Settings…",
     ]
 
 
