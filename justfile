@@ -182,6 +182,13 @@ cfa-calibration *args:
 cfa-performance-eval *args:
     {{ py }} cfa/eval/performance_eval.py {{ args }}
 
+# A5: paraphrase memory-vs-performance gap — rote recall on the drilled card
+# (question_a) vs accuracy on the reworded exam question (question_b) over the
+# 30 held-out concepts; reports the gap + bootstrap CI. --observations scores
+# real per-attempt data (drops SIMULATED); abstains on too-little data.
+cfa-paraphrase *args:
+    {{ py }} cfa/eval/paraphrase_test.py {{ args }}
+
 # Feature 8: content-type-aware weighting — equal-weakness cards of different item types get different exam-queue multipliers
 cfa-types-test:
     {{ ninja }} pylib

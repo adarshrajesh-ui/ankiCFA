@@ -1,0 +1,51 @@
+A5 — Paraphrase memory-vs-performance gap
+Command: just cfa-paraphrase  (== python3 cfa/eval/paraphrase_test.py)
+Captured: 2026-07-04
+============================================================================
+
+$ python3 cfa/eval/paraphrase_test.py
+CFA paraphrase memory-vs-performance gap [SIMULATED — not validated against real exam data]
+====================================================================
+learners            : 200
+held-out concepts   : 30  (x2 paraphrases)
+rote boost (model)  : 0.30 mastery units
+
+MEMORY  recall rate (drilled card question_a)  : 0.8492
+PERFORMANCE accuracy (reworded    question_b)  : 0.5908
+--------------------------------------------------------------------
+memory-vs-performance GAP                      : 0.2583
+  bootstrap 95% CI                             : [0.2408, 0.2767]
+  per-concept gap  (min / mean / max)          : 0.1050 / 0.2583 / 0.4000
+
+VERDICT: memory and performance are DISTINGUISHABLE (CI clears 0: True; gap>=0.02: True)
+
+$ python3 cfa/eval/paraphrase_test.py --rote-boost 0.0   (control: no rote advantage)
+CFA paraphrase memory-vs-performance gap [SIMULATED — not validated against real exam data]
+====================================================================
+learners            : 200
+held-out concepts   : 30  (x2 paraphrases)
+rote boost (model)  : 0.00 mastery units
+
+MEMORY  recall rate (drilled card question_a)  : 0.5592
+PERFORMANCE accuracy (reworded    question_b)  : 0.5908
+--------------------------------------------------------------------
+memory-vs-performance GAP                      : -0.0317
+  bootstrap 95% CI                             : [-0.0453, -0.0182]
+  per-concept gap  (min / mean / max)          : -0.1500 / -0.0317 / 0.0850
+
+VERDICT: memory and performance are NOT DISTINGUISHABLE (CI clears 0: False; gap>=0.02: False)
+
+$ python3 cfa/eval/paraphrase_test.py --learners 5   (give-up rule)
+CFA paraphrase memory-vs-performance gap [SIMULATED — not validated against real exam data]
+====================================================================
+RESULT: ABSTAIN (give-up rule)
+reason: insufficient data (learners=5 < 30 or concepts=30 < 10)
+
+============================================================================
+TESTS: python3 -m pytest cfa/eval/tests/test_paraphrase.py -q
+..........                                                               [100%]
+10 passed in 0.49s
+
+FULL eval suite: python3 -m pytest cfa/eval/tests -q
+......................................                                   [100%]
+38 passed in 14.33s
