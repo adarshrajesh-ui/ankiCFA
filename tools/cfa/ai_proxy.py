@@ -43,39 +43,43 @@ from cfa.ai import llm_client  # noqa: E402
 DEFAULT_TOKEN = "cfa-ai-proxy"
 DEFAULT_PORT = 27702
 
-_TABFILL_SYSTEM = (
-    "You write the BACK (answer) of a CFA Level II study flashcard given its "
-    "FRONT. Be accurate, exam-relevant, and concise (<=60 words). Reply with "
-    "ONLY the answer text — no preamble, no quotes."
-)
-
-
 def _token() -> str:
     return os.environ.get("CFA_AI_PROXY_TOKEN", DEFAULT_TOKEN)
 
 
-def tabfill(front: str, notetype: str = "", *, complete_fn=None) -> dict[str, Any]:
-    """Draft a card back. Returns provenance; never raises. ``source`` is "ai"
-    on success, "fallback" on AI-off / any failure (same contract as desktop)."""
-    front = (front or "").strip()
-    if not front:
-        return {"ok": False, "text": "", "source": "fallback",
-                "model": None, "error": "empty_front"}
+def fill(
+    front: str = "",
+    back: str = "",
+    notetype: str = "",
+    *,
+    complete_fn=None,
+) -> dict[str, Any]:
+    """Bidirectional tab-fill: generate whichever side is empty from the filled
+    one (front->back or back->front). Returns provenance; never raises. ``source``
+    is "ai" on success, "fallback" on AI-off / any failure / nothing-to-fill."""
+    from cfa.ai import tabfill as tabfill_lib
+
+    target = tabfill_lib.infer_target(front, back)
+    if target is None:
+        return {"ok": False, "text": "", "target": None, "source": "fallback",
+                "model": None, "error": "nothing_to_fill"}
+    source_text = front if target == "back" else back
+    system, user = tabfill_lib.build_messages(source_text, target, notetype)
     if complete_fn is None:
         complete_fn = llm_client.complete
     res = complete_fn(
-        _TABFILL_SYSTEM, front, max_tokens=300, temperature=0.2,
-        purpose="tab_fill_back_mobile",
+        system, user, max_tokens=400, temperature=0.2,
+        purpose=f"tabfill_{target}_mobile",
     )
     if not isinstance(res, dict) or not res.get("ok"):
-        return {"ok": False, "text": "", "source": "fallback",
+        return {"ok": False, "text": "", "target": target, "source": "fallback",
                 "model": (res or {}).get("model"),
                 "error": (res or {}).get("error", "ai_unavailable")}
     text = (res.get("text") or "").strip()
     if not text:
-        return {"ok": False, "text": "", "source": "fallback",
+        return {"ok": False, "text": "", "target": target, "source": "fallback",
                 "model": res.get("model"), "error": "empty_completion"}
-    return {"ok": True, "text": text, "source": "ai",
+    return {"ok": True, "text": text, "target": target, "source": "ai",
             "model": res.get("model"), "error": None}
 
 
@@ -140,8 +144,10 @@ class Handler(BaseHTTPRequestHandler):
         route = self.path.rstrip("/")
         try:
             if route == "/cfa/tabfill":
-                return self._send(200, tabfill(
-                    str(payload.get("front", "")), str(payload.get("notetype", ""))))
+                return self._send(200, fill(
+                    str(payload.get("front", "")),
+                    str(payload.get("back", "")),
+                    str(payload.get("notetype", ""))))
             if route == "/cfa/grade":
                 return self._send(200, grade(payload))
         except Exception as exc:  # pragma: no cover - endpoints are no-raise

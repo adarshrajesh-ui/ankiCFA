@@ -30,26 +30,39 @@ def _fail(*a, **k):
     return {"ok": False, "text": "", "model": None, "error": "rate_limit", "usage": {}}
 
 
-def test_tabfill_ai_path():
-    r = ai_proxy.tabfill("Define front-running.", "Basic", complete_fn=_ok)
+def test_fill_front_to_back():
+    r = ai_proxy.fill(front="Define front-running.", back="", complete_fn=_ok)
     assert r["ok"] is True
+    assert r["target"] == "back"
     assert r["source"] == "ai"
     assert r["model"] == "gpt-4o-mini"
-    assert "front-running" in r["text"].lower()
 
 
-def test_tabfill_falls_back_on_failure():
-    r = ai_proxy.tabfill("Define front-running.", complete_fn=_fail)
+def test_fill_back_to_front():
+    r = ai_proxy.fill(front="", back="Front-running: trading ahead of client orders.", complete_fn=_ok)
+    assert r["ok"] is True
+    assert r["target"] == "front"
+    assert r["source"] == "ai"
+
+
+def test_fill_nothing_when_both_empty():
+    r = ai_proxy.fill(front="  ", back="", complete_fn=_ok)
+    assert r["source"] == "fallback"
+    assert r["error"] == "nothing_to_fill"
+
+
+def test_fill_nothing_when_both_filled():
+    r = ai_proxy.fill(front="Q", back="A", complete_fn=_ok)
+    assert r["source"] == "fallback"
+    assert r["error"] == "nothing_to_fill"
+
+
+def test_fill_falls_back_on_failure():
+    r = ai_proxy.fill(front="Define front-running.", complete_fn=_fail)
     assert r["ok"] is False
     assert r["source"] == "fallback"
+    assert r["target"] == "back"
     assert r["error"] == "rate_limit"
-    assert r["text"] == ""
-
-
-def test_tabfill_empty_front():
-    r = ai_proxy.tabfill("   ", complete_fn=_ok)
-    assert r["source"] == "fallback"
-    assert r["error"] == "empty_front"
 
 
 def test_grade_ai_path():

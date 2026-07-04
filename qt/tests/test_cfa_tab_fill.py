@@ -20,6 +20,8 @@ from aqt.cfa_tab_fill import (  # noqa: E402
     AI_TAG,
     build_messages,
     draft_back,
+    draft_field,
+    fill_note,
     fill_note_back,
     find_field_indices,
     register,
@@ -315,3 +317,46 @@ def test_register_is_idempotent():
     register()
     n2 = len(gui_hooks.editor_did_init_buttons._hooks)
     assert n1 == n2
+
+
+# --- bidirectional fill (front<->back) --------------------------------------
+
+
+def _basic(front, back):
+    return FakeNote(["Front", "Back"], [front, back])
+
+
+def test_fill_note_front_to_back():
+    note = _basic("What is the MPS proxy?", "")
+    res = fill_note(note, complete_fn=_ok_complete("~65% minimum passing standard."))
+    assert res["ok"] and res["status"] == "filled" and res["target"] == "back"
+    assert note.fields[1] == "~65% minimum passing standard."
+    assert note.fields[0] == "What is the MPS proxy?"  # source untouched
+    assert AI_TAG in note.tags
+
+
+def test_fill_note_back_to_front():
+    note = _basic("", "Modified duration estimates price change per 1% yield move.")
+    res = fill_note(note, complete_fn=_ok_complete("What does modified duration estimate?"))
+    assert res["ok"] and res["status"] == "filled" and res["target"] == "front"
+    assert note.fields[0] == "What does modified duration estimate?"
+    assert note.fields[1].startswith("Modified duration")  # source untouched
+    assert AI_TAG in note.tags
+
+
+def test_fill_note_nothing_when_both_filled():
+    note = _basic("Q", "A")
+    res = fill_note(note, complete_fn=_ok_complete())
+    assert res["status"] == "nothing_to_fill"
+    assert note.fields == ["Q", "A"] and AI_TAG not in note.tags
+
+
+def test_fill_note_nothing_when_both_empty():
+    res = fill_note(_basic("  ", ""), complete_fn=_ok_complete())
+    assert res["status"] == "nothing_to_fill"
+
+
+def test_draft_field_both_directions():
+    assert draft_field("Q", "back", complete_fn=_ok_complete("A"))["ok"] is True
+    r = draft_field("A", "front", complete_fn=_ok_complete("Q?"))
+    assert r["ok"] is True and r["target"] == "front"

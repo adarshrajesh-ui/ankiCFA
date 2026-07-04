@@ -50,7 +50,7 @@ def _ensure_repo_root() -> None:
 AI_TAG = "ai-generated"
 FILL_SHORTCUT = "Ctrl+Alt+F"
 FILL_CMD = "cfaTabFill"
-_BUTTON_LABEL = "AI Back"
+_BUTTON_LABEL = "AI Fill"
 
 # Field-name heuristics for locating the "front" (prompt) and "back" (answer)
 # fields regardless of note type. Matching is case-insensitive; the first hit
@@ -290,6 +290,106 @@ def fill_note_back(
     }
 
 
+# --- bidirectional fill (front<->back) --------------------------------------
+
+
+def draft_field(
+    source_text: str,
+    target: str,
+    notetype_name: str = "",
+    *,
+    complete_fn: Optional[CompleteFn] = None,
+    max_tokens: int = 400,
+) -> dict:
+    """Draft ``target`` ("back"|"front") from ``source_text`` (the filled side).
+
+    Uses the shared prompts (cfa.ai.tabfill) so desktop and the mobile proxy
+    generate identically. Never raises; ``ok`` is False on AI-off / any failure.
+    """
+    source_text = (source_text or "").strip()
+    if not source_text:
+        return {"ok": False, "text": "", "error": "empty_source", "model": None, "target": target}
+    _ensure_repo_root()
+    from cfa.ai.tabfill import build_messages as _shared_messages
+
+    if complete_fn is None:
+        from cfa.ai.llm_client import complete as complete_fn  # type: ignore
+    system, user = _shared_messages(source_text, target, notetype_name)
+    try:
+        res = complete_fn(
+            system, user, max_tokens=max_tokens, temperature=0.2,
+            purpose=f"tabfill_{target}",
+        )
+    except Exception as exc:  # pragma: no cover - client is no-raise; belt+braces
+        return {"ok": False, "text": "", "error": f"client_error:{type(exc).__name__}",
+                "model": None, "target": target}
+    if not isinstance(res, dict) or not res.get("ok"):
+        return {"ok": False, "text": "", "error": (res or {}).get("error", "ai_unavailable"),
+                "model": (res or {}).get("model"), "target": target}
+    text = (res.get("text") or "").strip()
+    if not text:
+        return {"ok": False, "text": "", "error": "empty_completion",
+                "model": res.get("model"), "target": target}
+    return {"ok": True, "text": text, "error": None, "model": res.get("model"), "target": target}
+
+
+def fill_note(
+    note: Any,
+    *,
+    complete_fn: Optional[CompleteFn] = None,
+    front_idx: Optional[int] = None,
+    back_idx: Optional[int] = None,
+) -> dict:
+    """Bidirectional fill: generate whichever side is EMPTY from the filled one.
+
+    Front filled + back empty -> draft the back; back filled + front empty ->
+    draft the front; both filled or both empty -> status "nothing_to_fill" (no
+    overwrite ever). On success the empty field is set and the note is tagged.
+    """
+    _ensure_repo_root()
+    from cfa.ai.tabfill import infer_target
+
+    fields = getattr(note, "fields", None)
+    if not fields:
+        return {"ok": False, "status": "no_note", "text": "", "error": "no_note"}
+    if front_idx is None or back_idx is None:
+        fi, bi = find_field_indices(note)
+        front_idx = fi if front_idx is None else front_idx
+        back_idx = bi if back_idx is None else back_idx
+    if len(fields) < 2 or front_idx == back_idx:
+        return {"ok": False, "status": "single_field", "text": "", "error": "single_field"}
+
+    front_text = _strip_html(fields[front_idx])
+    back_text = _strip_html(fields[back_idx])
+    target = infer_target(front_text, back_text)
+    if target is None:
+        return {"ok": False, "status": "nothing_to_fill", "text": "", "error": "nothing_to_fill"}
+
+    source_text = front_text if target == "back" else back_text
+    target_idx = back_idx if target == "back" else front_idx
+    notetype_name = ""
+    try:
+        notetype_name = note.note_type()["name"]  # type: ignore[index]
+    except Exception:
+        pass
+
+    drafted = draft_field(source_text, target, notetype_name, complete_fn=complete_fn)
+    if not drafted["ok"]:
+        return {"ok": False, "status": "ai_unavailable", "text": "", "error": drafted["error"]}
+
+    fields[target_idx] = drafted["text"]
+    _tag_note(note)
+    return {
+        "ok": True,
+        "status": "filled",
+        "text": drafted["text"],
+        "error": None,
+        "target": target,
+        "target_idx": target_idx,
+        "model": drafted["model"],
+    }
+
+
 # --- editor wiring (thin adapter) -------------------------------------------
 
 
@@ -304,41 +404,41 @@ def _ai_enabled() -> bool:
 
 
 def _fill_back_action(editor: Any) -> None:
-    """Editor button/shortcut handler. Runs after the note is saved."""
-    from aqt.utils import askUser, tooltip
+    """Editor button/shortcut handler: fill the EMPTY side (front<->back).
+
+    Front filled -> drafts the back; back filled -> drafts the front. Runs after
+    the note is saved; only ever fills an empty field (never overwrites)."""
+    from aqt.utils import tooltip
 
     note = getattr(editor, "note", None)
     if note is None:
         return
     if not _ai_enabled():
         tooltip(
-            "AI is off — set OPENAI_API_KEY to enable AI Back.", parent=editor.widget
+            "AI is off — set OPENAI_API_KEY to enable AI Fill.", parent=editor.widget
         )
         return
 
-    def _confirm() -> bool:
-        return askUser(
-            "This card's back is not empty. Replace it with an AI-drafted back?",
-            parent=editor.widget,
-            title="AI Back",
-        )
-
-    result = fill_note_back(note, confirm_overwrite=_confirm)
+    result = fill_note(note)
     status = result["status"]
     if status == "filled":
         # Reflect the new field + provenance tag in the web view.
         editor.loadNote()
-        tooltip("Drafted the back with AI · tagged ai-generated", parent=editor.widget)
-    elif status == "empty_front":
-        tooltip("Add some front content first.", parent=editor.widget)
+        side = "back" if result.get("target") == "back" else "front"
+        tooltip(
+            f"Drafted the {side} with AI · tagged ai-generated", parent=editor.widget
+        )
+    elif status == "nothing_to_fill":
+        tooltip(
+            "Type one side and leave the other empty, then AI Fill generates it.",
+            parent=editor.widget,
+        )
     elif status == "single_field":
         tooltip(
-            "This note type has no separate back field to fill.", parent=editor.widget
+            "This note type has no separate front/back to fill.", parent=editor.widget
         )
-    elif status == "cancelled":
-        pass  # user declined the overwrite
     else:  # ai_unavailable / no_note
-        tooltip("AI Back is unavailable right now — try again.", parent=editor.widget)
+        tooltip("AI Fill is unavailable right now — try again.", parent=editor.widget)
 
 
 def _button_html(enabled: bool) -> str:
@@ -366,7 +466,7 @@ def _button_html(enabled: bool) -> str:
     if enabled:
         return (
             f'<button tabindex=-1 class="anki-addon-button linkb" type="button" '
-            f'title="Draft the back with AI ({FILL_SHORTCUT})" '
+            f'title="Generate the empty side with AI ({FILL_SHORTCUT})" '
             f'data-command="{FILL_CMD}">{_BUTTON_LABEL}</button>'
         )
     tip = "AI is off — set OPENAI_API_KEY to enable"
@@ -385,7 +485,7 @@ def _on_init_buttons(buttons: list, editor: Any) -> None:
             icon=None,
             cmd=FILL_CMD,
             func=_fill_back_action,
-            tip=f"Draft the back with AI ({FILL_SHORTCUT})",
+            tip=f"Generate the empty side with AI ({FILL_SHORTCUT})",
             label=_BUTTON_LABEL,
             keys=FILL_SHORTCUT,
         )
@@ -413,6 +513,8 @@ __all__ = [
     "FILL_SHORTCUT",
     "build_messages",
     "draft_back",
+    "draft_field",
+    "fill_note",
     "fill_note_back",
     "find_field_indices",
     "register",
