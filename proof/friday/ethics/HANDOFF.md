@@ -42,11 +42,30 @@ INCREMENT 2. The pairs card sends the SAME `cfaGradeEthics:` payload shape the o
 sends, so **no change is required** — the bridge already grades it and returns
 `{source, grade, verdict_correct, correct, explanation, per_span, error, model}`.
 
-`ai_grading.grade_semantic` / `grade_fallback` now ALSO return `standard` + `item_id` (echoed from
-the payload) so the card can render the named governing Standard in the AI-feedback block. The
-bridge passes the payload through unchanged, so these already flow to the card **as long as the card
-includes `standard` + `itemId` in the payload it sends** (it does — see the pairs `front.html`
-`requestAiGrade`). No bridge edit needed for provenance; this note is FYI.
+`ai_grading.grade_semantic` / `grade_fallback` now take (and echo) `item_id` + `standard` keyword
+args so the result carries provenance the card can render as "Graded by AI · II(A) …". The card
+ALWAYS renders the named Standard from its own `{{Standard}}` field as a fallback (see
+`renderAiGrade`: `resp.standard || srcText("standard")`), so **no bridge edit is required for the
+Standard to appear**. The block only shows when `resp.source === "ai"`.
+
+**Optional (to have `ai_grading`'s result carry the provenance too):** in
+`qt/aqt/cfa_ethics_ai.py::handle_grade_request`, forward the two payload keys into `grade_semantic`:
+
+```python
+    item_id = str(payload.get("itemId", ""))
+    standard = str(payload.get("standard", ""))
+    ...
+    return grade_semantic(
+        passage, answer_verdict, judged_verdict, gold_spans,
+        [str(p) for p in learner_spans],
+        selection_indices=[int(i) for i in selection] if selection else None,
+        item_id=item_id, standard=standard,   # <-- add these two
+    )
+```
+
+(and pass `item_id=item_id, standard=standard` to the defensive `grade_fallback(...)` in the except
+branch). The pairs `front.html` already includes `itemId` + `standard` in the `cfaGradeEthics:`
+payload. This is a 2-line enhancement, not required for correctness.
 
 If the bridge owner wants to *enforce* the AI master/grading toggles server-side (col.conf keys
 `cfa_ai_enabled` + `cfa_ai_grading_enabled`): gate `handle_grade_request` so it returns the
