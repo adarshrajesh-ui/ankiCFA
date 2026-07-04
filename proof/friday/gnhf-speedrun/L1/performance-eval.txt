@@ -1,0 +1,67 @@
+# A4 — Performance-model accuracy on held-out exam-style questions
+# Captured 2026-07-04T11:53:13Z via: python3 cfa/eval/performance_eval.py
+# SIMULATED cohort (no real exam data); deterministic given --seed.
+
+== default (seed 0) ==
+CFA performance-model accuracy — held-out exam-style questions  [SIMULATED — not validated against real exam data]
+--------------------------------------------------------------------
+seed                 : 0
+learners             : 120
+features             : topic_mastery, difficulty, timing, coverage
+concepts (total)     : 30
+concepts held out    : 10  (whole concepts — no paraphrase leakage)
+train rows           : 4800
+held-out test rows   : 2400
+test base rate       : 0.6863
+
+ACCURACY (held-out)  : 0.7217   <-- headline
+AUC (ROC)            : 0.7161
+majority baseline    : 0.6863
+beats baseline       : True
+
+gate: accuracy >= 0.70 AND beats baseline  ->  PASS
+
+EXIT=0
+
+== JSON (seed 0) ==
+{
+  "seed": 0,
+  "learners": 120,
+  "simulated": true,
+  "features": [
+    "topic_mastery",
+    "difficulty",
+    "timing",
+    "coverage"
+  ],
+  "concepts_total": 30,
+  "concepts_held_out": 10,
+  "train_rows": 4800,
+  "test_rows": 2400,
+  "test_base_rate": 0.68625,
+  "accuracy": 0.7216666666666667,
+  "auc": 0.7161227585105843,
+  "majority_baseline_acc": 0.68625,
+  "beats_baseline": true,
+  "accuracy_cut": 0.7,
+  "gate_pass": true,
+  "learned_weights": {
+    "topic_mastery": 0.7724522136642005,
+    "difficulty": -0.3115702106471358,
+    "timing": -0.26948723457958484,
+    "coverage": 0.17437033732208182
+  },
+  "learned_bias": 0.7207881496622829
+}
+
+== robustness sweep: model beats majority baseline on every seed ==
+seed=0  acc=0.7217  baseline=0.6863  auc=0.7161  beats_baseline=True  gate=True
+seed=1  acc=0.7129  baseline=0.6808  auc=0.7099  beats_baseline=True  gate=True
+seed=2  acc=0.7304  baseline=0.6917  auc=0.7367  beats_baseline=True  gate=True
+seed=3  acc=0.7250  baseline=0.6958  auc=0.6968  beats_baseline=True  gate=True
+seed=4  acc=0.7362  baseline=0.7083  auc=0.7244  beats_baseline=True  gate=True
+seed=5  acc=0.7033  baseline=0.6717  auc=0.6870  beats_baseline=True  gate=True
+
+== tests ==
+........                                                                 [100%]
+8 passed in 13.85s

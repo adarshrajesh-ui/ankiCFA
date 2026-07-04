@@ -176,6 +176,12 @@ cfa-baseline-compare *args:
 cfa-calibration *args:
     {{ py }} cfa/eval/calibration.py {{ args }}
 
+# A4: performance-model accuracy on held-out exam-style questions — predicts
+# correctness from topic mastery/difficulty/timing/coverage, concept-level
+# train/test split (no paraphrase leakage), reports held-out accuracy + gate.
+cfa-performance-eval *args:
+    {{ py }} cfa/eval/performance_eval.py {{ args }}
+
 # Feature 8: content-type-aware weighting — equal-weakness cards of different item types get different exam-queue multipliers
 cfa-types-test:
     {{ ninja }} pylib
