@@ -197,6 +197,17 @@ cfa-paraphrase *args:
 cfa-cardgen-check *args:
     {{ py }} cfa/eval/cardgen_check.py {{ args }}
 
+# A7: coverage map + 10-topic outline. Renders the ten official CFA Level II
+# topic areas (cfa/outline/level2_topics.json) as a coverage map PNG (topic ->
+# covered? -> % of deck), REAL deck-derived data; --check-parity asserts the
+# outline tags match the canonical topic list. Stdlib only (no build).
+cfa-coverage-map *args:
+    {{ py }} cfa/outline/coverage_map.py {{ args }}
+
+# A7: coverage-map + outline test suite (10-topic outline, parity, PNG render)
+cfa-outline-test:
+    {{ py }} -m pytest cfa/outline/tests -q
+
 # Feature 8: content-type-aware weighting — equal-weakness cards of different item types get different exam-queue multipliers
 cfa-types-test:
     {{ ninja }} pylib

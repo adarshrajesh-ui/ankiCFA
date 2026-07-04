@@ -65,19 +65,27 @@ MIN_TOPIC_COVERAGE = 0.50
 # per-topic table, the coverage denominator and the "N/total topics" caption all
 # resolve to this same list no matter which deck happens to be selected.
 #
-# These eight prefixes are exactly the topics present in the authored deck
-# (``cfa/deck/*.jsonl``); when that deck is seeded the exam config persists a
-# weight for each, so ``sorted(weights.keys())`` already equals this list. The
-# constant is what the scores fall back to when no exam weights are configured,
-# instead of deriving a variable, deck-scoped list from whatever cards are in
-# scope (which produced inconsistent totals — and, for the four-column readiness
-# query, an outright crash).
+# These ten prefixes are the official CFA Level II topic areas (see
+# ``cfa/outline/level2_topics.json``): Ethics, Quantitative Methods, Economics,
+# Financial Reporting & Analysis, Corporate Issuers, Equity, Fixed Income,
+# Derivatives, Alternative Investments and Portfolio Management. Each is exactly
+# the ``los::`` prefix the authored deck (``cfa/deck/*.jsonl``) tags its cards
+# with, so ``sorted(weights.keys())`` matches this list when the exam config is
+# seeded. (Fixed Income uses the hyphenated ``los::fixed-income`` prefix that its
+# deck cards carry — matching the tag is what makes the topic count as covered.)
+# The constant is what the scores fall back to when no exam weights are
+# configured, instead of deriving a variable, deck-scoped list from whatever
+# cards are in scope (which produced inconsistent totals — and, for the
+# four-column readiness query, a crash). Keep sorted; keep in lock-step with the
+# Rust ``CANONICAL_TOPICS`` in ``rslib/src/scheduler/cfa_scores.rs``.
 CANONICAL_TOPICS: list[str] = [
     "los::altinv",
     "los::corp",
+    "los::derivatives",
     "los::econ",
     "los::equity",
     "los::ethics",
+    "los::fixed-income",
     "los::fra",
     "los::portmgmt",
     "los::quant",
@@ -98,6 +106,7 @@ TOPIC_DISPLAY_NAMES: dict[str, str] = {
     "corp": "Corporate Issuers",
     "equity": "Equity Investments",
     "fixed_income": "Fixed Income",
+    "fixed-income": "Fixed Income",
     "fi": "Fixed Income",
     "derivatives": "Derivatives",
     "altinv": "Alternative Investments",

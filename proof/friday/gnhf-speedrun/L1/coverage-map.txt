@@ -1,0 +1,19 @@
+out/pyenv/bin/python cfa/outline/coverage_map.py --check-parity --png proof/friday/gnhf-speedrun/L1/coverage-map.png
+CFA Level II — coverage map (topic -> covered? -> % of deck)
+REAL data: card counts read from cfa/deck/*.jsonl (no simulation).
+====================================================================
+topic                               covered  cards   deck %   exam wt
+--------------------------------------------------------------------
+Ethics & Professional Standards         yes     46     6.5%    10-15%
+Quantitative Methods                    yes     88    12.4%     5-10%
+Economics                               yes     95    13.4%     5-10%
+Financial Reporting & Analysis          yes     89    12.5%    10-15%
+Corporate Issuers                       yes     87    12.2%     5-10%
+Equity Investments                      yes     87    12.2%    10-15%
+Fixed Income                            yes     43     6.0%    10-15%
+Derivatives                             yes     38     5.3%     5-10%
+Alternative Investments                 yes     46     6.5%     5-10%
+Portfolio Management                    yes     92    12.9%    10-15%
+--------------------------------------------------------------------
+topics covered: 10/10   total authored cards: 711
+coverage map PNG: proof/friday/gnhf-speedrun/L1/coverage-map.png

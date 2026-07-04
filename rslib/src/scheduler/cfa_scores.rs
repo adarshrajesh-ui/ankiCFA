@@ -43,15 +43,20 @@ use crate::prelude::*;
 const TOPIC_PREFIX: &str = "los::";
 const EXAM_CONFIG_KEY: &str = "cfa_exam_config";
 
-/// Authored CFA Level II topic areas, keyed by their `los::<topic>` tag. Used
-/// as the syllabus when no exam weights are configured (mirrors
-/// `cfa.CANONICAL_TOPICS`; keep sorted, matching `sorted(weights.keys())`).
-const CANONICAL_TOPICS: [&str; 8] = [
+/// The ten official CFA Level II topic areas, keyed by their `los::<topic>`
+/// tag. Used as the syllabus when no exam weights are configured (mirrors
+/// `cfa.CANONICAL_TOPICS` and `cfa/outline/level2_topics.json`; keep sorted,
+/// matching `sorted(weights.keys())`). Each prefix is exactly what the authored
+/// deck tags its cards with — Fixed Income uses the hyphenated
+/// `los::fixed-income` its cards carry, so all ten areas count as covered.
+const CANONICAL_TOPICS: [&str; 10] = [
     "los::altinv",
     "los::corp",
+    "los::derivatives",
     "los::econ",
     "los::equity",
     "los::ethics",
+    "los::fixed-income",
     "los::fra",
     "los::portmgmt",
     "los::quant",
@@ -859,10 +864,13 @@ mod tests {
         assert!(out.performance.unwrap().abstain, "no first exposures");
         assert!(out.readiness.unwrap().abstain, "readiness abstains too");
         // The Bayesian hero never abstains: with no evidence it sits at the
-        // uniform prior (accuracy 0.5) and a wide band.
+        // uniform prior (accuracy 0.5) and a wide band. The exact width depends
+        // on the topic count — the aggregate mean averages N independent
+        // Beta(1,1) topics, so its std is sqrt((1/12)/N): ~0.358 across the ten
+        // canonical topics (was ~0.400 at eight). Still wide with no data.
         let bay = out.bayesian.unwrap();
         assert!((bay.accuracy - 0.5).abs() < 1e-9, "prior mean is 0.5");
-        assert!(bay.ci_high - bay.ci_low > 0.4, "band is wide with no data");
+        assert!(bay.ci_high - bay.ci_low > 0.3, "band is wide with no data");
         assert_eq!(bay.first_exposures, 0);
     }
 
@@ -870,7 +878,7 @@ mod tests {
     fn happy_path_produces_all_scores() {
         let mut col = Collection::new();
         let now_ms = TimestampMillis::now().0;
-        // 30 cards in each of the 8 canonical topics, one graded review each,
+        // 30 cards in each of the 10 canonical topics, one graded review each,
         // spread over prior days so they don't collide on one (card, day).
         for (ti, topic) in CANONICAL_TOPICS.iter().enumerate() {
             for i in 0..30 {
@@ -881,19 +889,21 @@ mod tests {
                 add_review(&mut col, cid, now_ms - ((ti * 100 + i) as i64) * 86_400_000, ease);
             }
         }
+        let n_topics = CANONICAL_TOPICS.len() as u32;
+        let n_reviews = n_topics * 30; // 30 cards/topic, one review each
         let out = scores(&mut col);
         let mem = out.memory.unwrap();
-        assert!(!mem.abstain, "240 reviews / 100% coverage -> no abstain: {}", mem.reason);
-        assert_eq!(mem.graded_reviews, 240);
-        assert_eq!(mem.topics_total, 8);
-        assert_eq!(mem.topics_covered, 8);
+        assert!(!mem.abstain, "full-coverage cohort -> no abstain: {}", mem.reason);
+        assert_eq!(mem.graded_reviews, n_reviews);
+        assert_eq!(mem.topics_total, n_topics);
+        assert_eq!(mem.topics_covered, n_topics);
         let p = mem.point.expect("memory point");
         assert!(p > 0.0 && p < 1.0, "memory point in (0,1): {p}");
         assert!(mem.range_low.unwrap() <= p && p <= mem.range_high.unwrap());
 
         let perf = out.performance.unwrap();
-        assert!(!perf.abstain, "240 first exposures");
-        assert_eq!(perf.first_exposures, 240);
+        assert!(!perf.abstain, "all first exposures present");
+        assert_eq!(perf.first_exposures, n_reviews);
         assert!(perf.point.unwrap() > 0.5, "~80% correct");
 
         let rd = out.readiness.unwrap();
@@ -902,7 +912,7 @@ mod tests {
         assert!(rd.point.unwrap() > 0.0 && rd.point.unwrap() < 1.0);
 
         let bay = out.bayesian.unwrap();
-        assert_eq!(bay.first_exposures, 240);
+        assert_eq!(bay.first_exposures, n_reviews);
         assert!(bay.accuracy > 0.5, "mostly-correct -> accuracy above prior");
         assert!(bay.call == "likely pass" || bay.call == "likely fail");
     }

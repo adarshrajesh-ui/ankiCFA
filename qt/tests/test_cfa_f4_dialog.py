@@ -187,25 +187,26 @@ def test_payload_hero_abstains_when_only_performance_gives_up() -> None:
 
 
 def test_payload_topic_count_is_canonical_and_consistent() -> None:
-    # item3 sub-bug 3B — topic rows == caption total == canonical 8. With no exam
-    # config the readiness scores fall back to the canonical topic list, so the
-    # per-topic rows, the "N/total topics" caption and score.topics all resolve
-    # to the same eight authored CFA topics (and the payload builds without the
-    # old no-config crash).
+    # item3 sub-bug 3B — topic rows == caption total == the canonical CFA
+    # syllabus. With no exam config the readiness scores fall back to the
+    # canonical topic list, so the per-topic rows, the "N/total topics" caption
+    # and score.topics all resolve to the same ten official CFA topic areas (and
+    # the payload builds without the old no-config crash).
     _app()
     col = _empty_col()
+    n = len(anki_cfa.CANONICAL_TOPICS)
     deck = _seed(
         col, "los::ethics", n_cards=5, reviews_each=3, frac_ok=0.8, configure=False
     )
     try:
         assert anki_cfa.get_exam_config(col) is None
         score = anki_cfa.memory_score(col, deck_id=deck)
-        assert score.topics_total == 8
-        assert len(score.topics) == 8
+        assert score.topics_total == n
+        assert len(score.topics) == n
 
         payload = _cfa_exam_readiness_payload(col, int(deck))
-        assert len(payload["topics"]) == 8, "one row per canonical topic"
-        assert payload["caption"]["topicsTotal"] == 8
+        assert len(payload["topics"]) == n, "one row per canonical topic"
+        assert payload["caption"]["topicsTotal"] == n
     finally:
         col.close()
 

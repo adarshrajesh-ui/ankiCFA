@@ -309,14 +309,14 @@ def test_memory_score_abstains_when_high_weight_topic_skipped():
 
 
 def test_memory_score_no_config_uses_canonical_topic_total():
-    # Fresh, no exam config, no cards: the total is the canonical 8 (not a
+    # Fresh, no exam config, no cards: the total is the canonical 10 (not a
     # deck-derived 0/1), and topics_total == len(topics) (== table rows).
     col = getEmptyCol()
     deck = col.decks.id("CFA")
     assert cfa.get_exam_config(col) is None
     score = cfa.memory_score(col, deck_id=deck)
-    assert score.topics_total == 8
-    assert len(score.topics) == 8
+    assert score.topics_total == len(cfa.CANONICAL_TOPICS)
+    assert len(score.topics) == len(cfa.CANONICAL_TOPICS)
     assert score.topics_covered == 0
     assert [t.topic for t in score.topics] == cfa.CANONICAL_TOPICS
     assert all(not t.covered and t.avg_r is None for t in score.topics)
@@ -325,36 +325,38 @@ def test_memory_score_no_config_uses_canonical_topic_total():
 
 def test_memory_score_no_config_partial_study_denominator_is_canonical():
     # Study one canonical topic heavily but with no config; the coverage
-    # denominator is the canonical 8 (not 1), so coverage = 1/8 < 0.5 and the
-    # give-up rule correctly abstains (the "1 -> 8 denominator" change). Exactly
-    # one row is covered; the other seven render as "no data".
+    # denominator is the canonical 10 (not 1), so coverage = 1/10 < 0.5 and the
+    # give-up rule correctly abstains (the "1 -> N denominator" change). Exactly
+    # one row is covered; the other nine render as "no data".
     col = getEmptyCol()
     nt = col.models.by_name("Basic")
     deck = col.decks.id("CFA")
+    n = len(cfa.CANONICAL_TOPICS)
     _seed_studied(col, deck, nt, "los::ethics", 10, 25)  # 250 reviews, ethics only
     assert cfa.get_exam_config(col) is None
 
     score = cfa.memory_score(col, deck_id=deck)
     assert score.graded_reviews >= 200  # plenty of reviews ...
-    assert score.topics_total == 8
-    assert len(score.topics) == 8
+    assert score.topics_total == n
+    assert len(score.topics) == n
     assert score.topics_covered == 1
-    assert abs(score.coverage_pct - 1 / 8) < 1e-9
-    assert score.abstain  # ... but 1/8 coverage < 0.50 -> abstain
+    assert abs(score.coverage_pct - 1 / n) < 1e-9
+    assert score.abstain  # ... but 1/N coverage < 0.50 -> abstain
     assert "topic coverage" in score.reason
     by = {t.topic: t for t in score.topics}
     assert by["los::ethics"].covered and by["los::ethics"].avg_r is not None
     uncovered = [t for t in score.topics if t.topic != "los::ethics"]
-    assert len(uncovered) == 7
+    assert len(uncovered) == n - 1
     assert all(not t.covered and t.avg_r is None for t in uncovered)
     col.close()
 
 
 def test_memory_score_topic_total_deck_independent_without_config():
-    # Same canonical total (8) whether scoped to the parent or a single-topic
+    # Same canonical total (10) whether scoped to the parent or a single-topic
     # subdeck; only the covered subset differs.
     col = getEmptyCol()
     nt = col.models.by_name("Basic")
+    n = len(cfa.CANONICAL_TOPICS)
     ethics_deck = col.decks.id("CFA::EthicsOnly")
     quant_deck = col.decks.id("CFA::QuantOnly")
     _seed_studied(col, ethics_deck, nt, "los::ethics", 3, 5)
@@ -363,8 +365,8 @@ def test_memory_score_topic_total_deck_independent_without_config():
 
     whole = cfa.memory_score(col, deck_id=parent)
     scoped = cfa.memory_score(col, deck_id=ethics_deck)
-    assert whole.topics_total == scoped.topics_total == 8
-    assert len(whole.topics) == len(scoped.topics) == 8
+    assert whole.topics_total == scoped.topics_total == n
+    assert len(whole.topics) == len(scoped.topics) == n
     assert whole.topics_covered == 2  # ethics + quant both in scope
     assert scoped.topics_covered == 1  # only ethics in this subdeck
     col.close()
@@ -379,12 +381,12 @@ def test_memory_score_config_topic_total_matches_configured_topics():
     cfa.set_exam_config(
         col,
         exam_date="2026-12-01",
-        topic_weights={t: 1.0 / 8 for t in cfa.CANONICAL_TOPICS},
+        topic_weights={t: 1.0 / len(cfa.CANONICAL_TOPICS) for t in cfa.CANONICAL_TOPICS},
     )
     _seed_studied(col, deck, nt, "los::ethics", 5, 25)
     score = cfa.memory_score(col, deck_id=deck)
-    assert score.topics_total == 8
-    assert len(score.topics) == 8
+    assert score.topics_total == len(cfa.CANONICAL_TOPICS)
+    assert len(score.topics) == len(cfa.CANONICAL_TOPICS)
     assert score.topics_covered == 1
     col.close()
 
@@ -399,6 +401,8 @@ def test_topic_display_name_maps_canonical_slugs_and_falls_back():
         "los::fra": "Financial Reporting & Analysis",
         "los::corp": "Corporate Issuers",
         "los::equity": "Equity Investments",
+        "los::fixed-income": "Fixed Income",
+        "los::derivatives": "Derivatives",
         "los::altinv": "Alternative Investments",
         "los::portmgmt": "Portfolio Management",
     }

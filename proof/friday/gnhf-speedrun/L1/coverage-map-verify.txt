@@ -1,0 +1,59 @@
+A7 — Coverage map + topics 8->10 (Rust==Python parity). Captured 2026-07-04T22:22:23Z
+======================================================================
+
+>>> Rust CANONICAL_TOPICS (rslib/src/scheduler/cfa_scores.rs):
+    "los::altinv",
+    "los::corp",
+    "los::derivatives",
+    "los::econ",
+    "los::equity",
+    "los::ethics",
+    "los::fixed-income",
+    "los::fra",
+    "los::portmgmt",
+    "los::quant",
+
+>>> Python CANONICAL_TOPICS (pylib/anki/cfa.py):
+los::altinv
+los::corp
+los::derivatives
+los::econ
+los::equity
+los::ethics
+los::fixed-income
+los::fra
+los::portmgmt
+los::quant
+len 10
+
+>>> Outline (cfa/outline/level2_topics.json) tags sorted:
+los::altinv
+los::corp
+los::derivatives
+los::econ
+los::equity
+los::ethics
+los::fixed-income
+los::fra
+los::portmgmt
+los::quant
+
+>>> cargo test -p anki scheduler::cfa_scores:
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 541 filtered out; finished in 0.04s
+
+>>> just cfa-scores-test:
+..........                                                               [100%]
+10 passed in 0.19s
+>>> just cfa-parity-test:
+..                                                                       [100%]
+2 passed in 0.13s
+>>> just cfa-f4-test:
+QT_QPA_PLATFORM=offscreen PYTHONPATH="out/pylib:pylib:qt:out/qt" out/pyenv/bin/python -m pytest qt/tests/test_cfa_f4_dialog.py -q
+......                                                                   [100%]
+6 passed in 0.46s
+>>> just cfa-deck-test:
+...............                                                          [100%]
+15 passed in 1.73s
+>>> just cfa-outline-test:
+...........                                                              [100%]
+11 passed in 0.17s
