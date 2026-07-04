@@ -388,7 +388,7 @@ def _rich_complete(**_):
 
 
 def test_ai_result_carries_tailored_coaching_and_tip():
-    r = grade_semantic(
+    r = A.grade_semantic(
         "passage", "unethical", "unethical",
         [{"phrase": "x", "rationale": "MNPI"}], ["x"],
         complete_fn=_rich_complete,
@@ -401,7 +401,7 @@ def test_ai_result_carries_tailored_coaching_and_tip():
 
 
 def test_fallback_coaching_nudges_to_ai():
-    r = grade_fallback(
+    r = A.grade_fallback(
         "passage", "unethical", "unethical",
         [{"phrase": "x", "rationale": "MNPI"}], ["x"],
         standard="II(A)",
