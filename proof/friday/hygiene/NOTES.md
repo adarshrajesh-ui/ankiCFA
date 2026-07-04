@@ -58,7 +58,13 @@ AFTER:  `proof/friday/hygiene/inc1-after.txt` — mypy `Success: no issues found
 329 source files`; prettier `All matched files use Prettier code style!`; probe
 files absent; pytest `31 passed, 2 skipped`.
 Tests run AI-OFF (worktree has no `.env`) + `just build` green.
-SHA: (filled after commit)  PR: (filled after push)
+SHA: `0c18ec672`  PR: https://github.com/adarshrajesh-ui/ankiCFA/pull/25 (#25)
+
+Note on `proof/gnhf2/f0b-deadline-*.png`: produced by the prior run of the exact
+committed `render_f0b_proof.py`. Re-running it here regenerated the `default`
+PNG but the mediasrv host thread hangs before the `picked` state in this
+environment, so the committed pair (a consistent prior-run capture) is kept. The
+render fix itself is proven by `check:mypy` going 3 errors → 0.
 
 ## Increment 2 — CFA deck content quality + provenance
 (pending)
