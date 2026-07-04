@@ -82,6 +82,14 @@ def setup_menu(mw: AnkiQt) -> None:
     except Exception:
         pass
 
+    # W5/sync: persist ethics attempt detail into card.custom_data (syncs).
+    try:
+        from aqt.cfa_ethics_sync import register as _register_ethics_sync
+
+        _register_ethics_sync()
+    except Exception:
+        pass
+
     # F3: register the editor "AI Back" tab-to-fill button + shortcut. Safe to
     # call unconditionally — with AI off the button renders disabled with a
     # tooltip, and registration never raises.

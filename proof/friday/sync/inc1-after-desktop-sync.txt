@@ -1,0 +1,25 @@
+CFA_DESKTOP_SYNC {
+  "endpoint": "http://127.0.0.1:27701/",
+  "username": "cfa",
+  "sync_result": "FULL_DOWNLOAD",
+  "before": {
+    "cards": 0,
+    "notes": 0,
+    "revlog": 0,
+    "decks": [
+      "Default"
+    ]
+  },
+  "after": {
+    "cards": 660,
+    "notes": 660,
+    "revlog": 3,
+    "decks": [
+      "CFA",
+      "CFA Level II",
+      "CFA::Ethics Passages",
+      "Default",
+      "y"
+    ]
+  }
+}

@@ -1,0 +1,18 @@
+Increment 4 — offline review landed on desktop after sync
+=========================================================
+Phone (airplane mode ON): reviewed one Ethics Pairs card offline.
+  Evidence: inc4-offline-01-front.png (airplane icon + ethics card in reviewer)
+            inc4-offline-02-reviewed.png / inc4-after-synced.png (Studied 1 card;
+            Ethics Pairs 20→19 new, 0→1 learning)
+
+Phone sync (airplane OFF): tools/cfa/phone_sync.sh phone → Full Upload Completed
+  (inc4-phone-sync-log.txt: 'Full sync from local')
+
+Desktop pull: force_full_download → revlog count 262 → 1 (phone collection is
+authoritative after full upload; contains the offline review):
+
+  NEW revlog id = 1783138068339
+  card id       = 1783137755800
+  ease          = 3 (Good)
+
+Recording: proof/friday/sync/offline-then-sync.mp4

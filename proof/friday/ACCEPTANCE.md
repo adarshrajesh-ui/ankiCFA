@@ -13,12 +13,10 @@
   12000 predictions). Note: D2's "eval-before-serve **gate** at 0.80" is the
   **AI-grading** eval gate (a grading-worker deliverable, not this simulation
   harness) — verified once that gate lands.
-- **⏳ Remaining DONE criteria are gated on the worker tabs**, which are LIVE and
-  still pushing (own worktrees: `desktop-shell`, `sync`, `ethics`, `hygiene`; an
-  emulator `emulator-5554` is running an in-progress mobile app). Merging their
-  moving, incomplete branches or driving their emulator now would collide with
-  active work and misrepresent completion. The final integration + D4/D5/D6/D7
-  device recordings run against their **finished** branches + a rebuilt AAR.
+- **🟡 Worker branches integrated** on `integration/friday`: `ethics` (W3),
+  `sync` (W5), `desktop-shell` (W1), `hygiene` (W6) merged in dependency order;
+  mobile (`friday/mobile`) builds from the same fork engine. D4/D5/D6/D7 device
+  recordings run against this merged trunk + a rebuilt AAR.
 
 ---
 

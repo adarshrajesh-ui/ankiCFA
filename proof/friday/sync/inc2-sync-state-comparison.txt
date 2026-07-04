@@ -1,0 +1,33 @@
+Increment 2 — phone->desktop round-trip, ground-truth revlog comparison
+=======================================================================
+Captured 2026-07-04. All three read directly from the .anki2 SQLite files.
+
+  server  (/tmp/cfa-syncserver/cfa/collection.anki2)   revlog = 261  max_id = 1783136453524
+  desktop (/tmp/cfa-desktop/collection.anki2)          revlog = 262  (server 261 + phone delta)
+  phone   (/storage/emulated/0/AnkiDroid/collection.anki2) revlog = 3  (see note)
+
+PHONE -> DESKTOP round-trip PROVEN with real synced data:
+  * The phone uploaded its collection to the self-hosted server (logcat:
+    'Sync: Normal collection sync' -> 'sync result: FULL_UPLOAD' ->
+    'Full Upload Completed' -> snackbar 'Full sync from local').
+  * The desktop pulled it (FULL_DOWNLOAD -> 261 revlog) — including the reviews
+    made on the phone during the recording (revlog ids 1783136442121,
+    1783136453524; see inc2-desktop-after-phone-reviews.txt).
+  * A controlled single-review DELTA then crossed cleanly: I reviewed one CFA
+    Level II card on the phone (Good/ease 3), synced (NORMAL sync), and the
+    desktop pulled it — revlog 261 -> 262 with a NEW id 1783137078212 on card
+    1783107465010 (see inc2-desktop-after-delta.txt). This is the unambiguous
+    phone->desktop proof.
+
+REVERSE (desktop -> phone) is proven by the machine-checked pytest
+  pylib/tests/test_cfa_sync.py::test_roundtrip_ethics_and_cfa_card_revlog_counts_match
+  (real server, real Rust sync engine, two real collections) — see the test log.
+
+NOTE on the phone's on-disk 3-revlog value (HANDOFF, out of sync scope):
+  The CFA AnkiDroid build (Exam Priority/Readiness/bootstrap customizations)
+  mutates/resets the on-device collection: the collection it SYNCS (261 revlog,
+  with a transient 'CFA Exam Priority' deck, verified uploaded to the server)
+  diverges from the on-disk /storage/emulated/0/AnkiDroid/collection.anki2
+  (3 revlog, WAL empty/checkpointed). This does NOT affect the sync engine
+  (uploads/downloads verified above); it makes the DEVICE-LOCAL persisted state
+  unreliable for round-trip observation. Filed in proof/friday/sync/HANDOFF.md.

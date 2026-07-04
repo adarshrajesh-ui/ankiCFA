@@ -1,0 +1,17 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.13, pytest-8.4.1, pluggy-1.6.0 -- /Users/adarshrajesh/AlphaWeek2/ankiCFA/out/pyenv/bin/python
+cachedir: .pytest_cache
+rootdir: /Users/adarshrajesh/AlphaWeek2/ankiCFA-sync/pylib
+configfile: pyproject.toml
+plugins: mock-3.15.1, anyio-4.13.0
+collecting ... collected 7 items
+
+pylib/tests/test_cfa_sync.py::test_conflict_rule_more_recent_wins PASSED [ 14%]
+pylib/tests/test_cfa_sync.py::test_conflict_rule_tie_is_deterministic PASSED [ 28%]
+pylib/tests/test_cfa_sync.py::test_conflict_rule_rejects_cross_card PASSED [ 42%]
+pylib/tests/test_cfa_sync.py::test_forward_review_desktop_to_phone PASSED [ 57%]
+pylib/tests/test_cfa_sync.py::test_reverse_review_phone_to_desktop PASSED [ 71%]
+pylib/tests/test_cfa_sync.py::test_conflict_more_recent_wins_no_lost_or_double_reviews PASSED [ 85%]
+pylib/tests/test_cfa_sync.py::test_roundtrip_ethics_and_cfa_card_revlog_counts_match PASSED [100%]
+
+============================== 7 passed in 16.68s ==============================

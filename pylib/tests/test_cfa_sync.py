@@ -166,3 +166,81 @@ def test_conflict_more_recent_wins_no_lost_or_double_reviews(server):
         cs.ReviewEvent(card_id=cid, reviewed_at_ms=phone_ms, ease=4, source="phone"),
     )
     assert winner.reviewed_at_ms == converged
+
+
+# --------------------------------------------------------------------------
+# Increment 2: D4/D7 round-trip of BOTH an ethics card and a CFA-deck card,
+# phone -> desktop and then reverse, asserting the revlog counts (and the exact
+# revlog ids) match on both sides. This is the machine-checked half of the
+# roundtrip.mp4 human proof.
+# --------------------------------------------------------------------------
+
+
+def _add_card(col, deck_name: str, front: str, back: str) -> int:
+    did = col.decks.id(deck_name)
+    note = col.new_note(col.models.by_name("Basic"))
+    note["Front"] = front
+    note["Back"] = back
+    col.add_note(note, did)
+    return col.find_cards(f"nid:{note.id}")[0]
+
+
+def _two_deck_devices(server):
+    """Desktop + phone sharing a server, with a CFA-deck card and an ethics card."""
+    desktop = getEmptyCol()
+    cfa_cid = _add_card(
+        desktop,
+        "CFA Level II",
+        "What does WACC stand for?",
+        "weighted average cost of capital",
+    )
+    eth_cid = _add_card(
+        desktop,
+        "CFA::Ethics Pairs",
+        "Acting on an unreleased earnings figure: conform or violate?",
+        "violate - Standard II(A)",
+    )
+    d_auth = cs.login(desktop, server)
+    cs.sync(desktop, d_auth)  # seed the server (full upload)
+
+    phone = getEmptyCol()
+    p_auth = cs.login(phone, server)
+    cs.sync(phone, p_auth)  # full download
+    assert phone.card_count() == 2
+    return desktop, d_auth, phone, p_auth, cfa_cid, eth_cid
+
+
+def test_roundtrip_ethics_and_cfa_card_revlog_counts_match(server):
+    desktop, d_auth, phone, p_auth, cfa_cid, eth_cid = _two_deck_devices(server)
+
+    # ---- forward: review BOTH cards on the phone, then land them on desktop ----
+    _review(phone, cfa_cid, 3)
+    _review(phone, eth_cid, 1)
+    cs.sync(phone, p_auth)
+    cs.sync(desktop, d_auth)
+
+    for cid in (cfa_cid, eth_cid):
+        d_events = cs.revlog_events(desktop, cid)
+        p_events = cs.revlog_events(phone, cid)
+        # same number of reviews, and the exact same revlog ids on both sides:
+        # no review lost, none duplicated.
+        assert len(d_events) == len(p_events) == 1, cid
+        assert [e.reviewed_at_ms for e in d_events] == [
+            e.reviewed_at_ms for e in p_events
+        ]
+
+    # ---- reverse: review the CFA card on the desktop, land it on the phone ----
+    _review(desktop, cfa_cid, 4)
+    cs.sync(desktop, d_auth)
+    cs.sync(phone, p_auth)
+
+    d_events = cs.revlog_events(desktop, cfa_cid)
+    p_events = cs.revlog_events(phone, cfa_cid)
+    assert len(d_events) == len(p_events) == 2
+    assert [e.reviewed_at_ms for e in d_events] == [e.reviewed_at_ms for e in p_events]
+
+    # ---- whole-collection revlog matches on both sides, with no duplicate ids ----
+    d_all = desktop.db.list("select id from revlog order by id")
+    p_all = phone.db.list("select id from revlog order by id")
+    assert d_all == p_all
+    assert len(d_all) == len(set(d_all)) == 3  # 2 forward reviews + 1 reverse

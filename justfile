@@ -214,6 +214,17 @@ cfa-sync:
     {{ ninja }} pylib
     {{ py }} tools/cfa/sync_roundtrip.py
 
+# Feature 9: stand up the SELF-HOSTED anki-sync-server with FIXED creds (user cfa / pass cfa-friday / port 27701).
+# Desktop points at http://127.0.0.1:27701/ ; the emulator points at http://10.0.2.2:27701/ . Runs until Ctrl-C.
+cfa-syncserver *args:
+    {{ ninja }} pylib
+    {{ py }} tools/cfa/sync_server.py serve {{ args }}
+
+# Feature 9: no-double-count + ethics-custom_data-round-trip tests over a real sync server (extends cfa-sync-test).
+cfa-sync-dedup-test:
+    {{ ninja }} pylib
+    PYTHONPATH="out/pylib:pylib:." {{ py }} -m pytest pylib/tests/test_cfa_sync_dedup.py -q
+
 # F0a: AI foundation smoke test — covers no-key (graceful ok:False) and, when
 # OPENAI_API_KEY is configured, one tiny real call (ok:True); real call skipped otherwise.
 cfa-ai-smoke:

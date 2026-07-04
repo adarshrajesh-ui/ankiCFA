@@ -1,0 +1,3 @@
+phone custom_data: {"cfaEthic":{"id":"SMD-01","ok":true,"hl":"correct","src":"fb","std":"II(A) Material Nonpublic"}}
+desktop custom_data namespace: {'id': 'SMD-01', 'ok': True, 'hl': 'correct', 'src': 'fb', 'std': 'II(A) Material Nonpublic'}
+INC5_CROSS_DEVICE PASS

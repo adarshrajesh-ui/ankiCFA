@@ -1,0 +1,16 @@
+[phone_sync] cold-launch to a stable DeckPicker
+[phone_sync] locating Sync button
+[phone_sync] tap Sync at (912,211)
+[phone_sync] outcome:
+07-03 23:08:14.722 27218 27218 I SyncKt  : Sync: Normal collection sync
+07-03 23:08:15.401 27218 27218 I SyncKt  : sync result: FULL_SYNC
+[phone_sync] cold-launch to a stable DeckPicker
+[phone_sync] locating Sync button
+[phone_sync] tap Sync at (912,211)
+[phone_sync] full-sync dialog present -> keep phone
+[phone_sync] outcome:
+07-03 23:09:25.116 28561 28561 I SyncKt  : Sync: Normal collection sync
+07-03 23:09:26.141 28561 28561 I SyncKt  : sync result: FULL_SYNC
+07-03 23:09:38.641 28561 28561 I SyncKt  : Sync: Full collection upload requested
+07-03 23:09:38.765 28561 28561 I SyncKt  : Full Upload Completed
+07-03 23:09:38.776 28561 28561 D SnackbarsKt: displayed snackbar: 'Full sync from local'

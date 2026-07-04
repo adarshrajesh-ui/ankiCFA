@@ -1,0 +1,14 @@
+Increment 3 BEFORE — naive graded-review count would double-count
+===============================================================
+Scenario: same card reviewed offline on desktop AND phone, then synced.
+
+Without per-(card, day) dedup the give-up rule would see:
+  raw revlog rows     = 2   (both reviews correctly persist — no merge)
+  deduped for scoring = 1   (same card, same collection day)
+
+Current memory_score() in pylib/anki/cfa.py still uses raw count(*)
+(see test_offline_same_card_dual_review_revlog_distinct_not_inflated assertion
+ score.graded_reviews == raw). Orchestrator must apply dedup at score time.
+
+This file is the BEFORE contract statement; AFTER proof is inc3-dedup-test.log
+(4 passed, flagship test_offline_same_card_dual_review_revlog_distinct_not_inflated).
