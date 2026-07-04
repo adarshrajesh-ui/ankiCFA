@@ -39,6 +39,7 @@ from __future__ import annotations
 
 import json
 import os
+import random
 import time
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
@@ -65,20 +66,34 @@ from anki.decks import DeckId  # noqa: E402
 
 DAY = 86_400
 
-# (tag, n_cards, stability, reviews_each, n_first_correct, exam_weight)
-# Stability is deliberately spread so per-topic FSRS recall — and the
-# predicted-recall-at-exam ranking on the deadline page — vary realistically.
-# ~81% first-exposure accuracy across 94 cards => a confident "likely pass".
-TOPICS: list[tuple[str, int, float, int, int, float]] = [
-    ("los::ethics", 14, 400.0, 6, 12, 0.12),
-    ("los::fra", 16, 300.0, 6, 13, 0.15),
-    ("los::equity", 14, 90.0, 6, 11, 0.13),
-    ("los::portmgmt", 12, 150.0, 6, 10, 0.11),
-    ("los::corp", 10, 220.0, 5, 9, 0.11),
-    ("los::econ", 10, 120.0, 5, 8, 0.09),
-    ("los::quant", 10, 60.0, 6, 7, 0.09),
-    ("los::altinv", 8, 45.0, 5, 6, 0.10),
+# (tag, n_cards, mastery, reviews_each, n_first_correct, exam_weight)
+# `mastery` picks a base FSRS stability + a base days-since-review; both are
+# jittered PER CARD (deterministically) so today's per-topic recall spreads into
+# a realistic gradient (strong topics ~high R, weak topics lower R) instead of
+# every card pinning at 100%. ~81% first-exposure accuracy across 94 cards keeps
+# the hero a confident "likely pass".
+TOPICS: list[tuple[str, int, str, int, int, float]] = [
+    ("los::ethics", 14, "strong", 6, 12, 0.12),
+    ("los::fra", 16, "strong", 6, 13, 0.15),
+    ("los::equity", 14, "medium", 6, 11, 0.13),
+    ("los::portmgmt", 12, "medium", 6, 10, 0.11),
+    ("los::corp", 10, "medium", 5, 9, 0.11),
+    ("los::econ", 10, "weak", 5, 6, 0.09),
+    ("los::quant", 10, "weak", 6, 6, 0.09),
+    ("los::altinv", 8, "weak", 5, 5, 0.10),
 ]
+
+# base_stability_days, base_days_since_last_review.
+# FSRS "recall now" ~ f(days_since_review / stability). Ageing the last-review
+# time per mastery band is what actually spreads the readiness column: strong
+# cards were seen recently vs a big stability (R~0.99); weak cards were seen long
+# ago vs a small stability (R dips into the 0.60s). The same ageing, extended to
+# the exam date, gives the deadline view its at-risk (warn) gradient.
+MASTERY: dict[str, tuple[float, float]] = {
+    "strong": (300.0, 9.0),
+    "medium": (85.0, 34.0),
+    "weak": (26.0, 78.0),
+}
 
 
 def _add_card(
@@ -99,25 +114,37 @@ def _seed_topic(
     topic: str,
     n_cards: int,
     *,
-    stability: float,
+    stabilities: list[float],
+    elapsed_days: list[int],
     reviews_each: int,
     first_ease: list[int],
     now: int,
 ) -> list[CardId]:
-    """Seed ``n_cards`` review cards under ``topic`` with an FSRS memory state
-    (fixed ``stability``) and ``reviews_each`` graded reviews each.
+    """Seed ``n_cards`` review cards under ``topic``, each with its own FSRS
+    memory state (per-card ``stabilities`` + per-card ``elapsed_days`` since the
+    last review) plus ``reviews_each`` graded reviews.
 
-    Copied verbatim from ``pylib/tests/test_cfa_scores.py`` so the live pages are
-    fed the same shape the score maths is unit-tested against."""
+    Adapted from the authoritative ``_seed_topic`` in
+    ``pylib/tests/test_cfa_scores.py`` (same card/revlog shape the score maths is
+    unit-tested against); the only change is per-card stability + last-review age
+    so FSRS recall spreads into a realistic gradient instead of a flat 100%. The
+    interval mirrors the elapsed age so the card reads as legitimately due."""
     cids = [
         _add_card(col, deck_id, notetype, f"{topic}-{i}", [f"{topic}::r1"])
         for i in range(n_cards)
     ]
     col.sched.set_due_date(cids, "0")  # -> review cards, due today
-    data = json.dumps({"s": stability, "d": 5.0, "lrt": now - DAY})
-    col.db.executemany(
-        "update cards set data=?, ivl=? where id=?", [(data, 20, c) for c in cids]
-    )
+    updates = [
+        (
+            json.dumps(
+                {"s": stabilities[i], "d": 5.0, "lrt": now - elapsed_days[i] * DAY}
+            ),
+            elapsed_days[i],
+            c,
+        )
+        for i, c in enumerate(cids)
+    ]
+    col.db.executemany("update cards set data=?, ivl=? where id=?", updates)
 
     base = (col.db.scalar("select coalesce(max(id), 0) from revlog") or 0) + 1
     rows = []
@@ -138,12 +165,23 @@ def _seed_topic(
 
 def seed_rich(col: Collection) -> DeckId:
     """Seed all eight canonical topics so every readiness/deadline surface is
-    full of real numbers and the hero lands in the 'likely pass' state."""
+    full of real, VARIED numbers and the hero lands in the 'likely pass' state.
+
+    Per-card stability + interval are jittered with a fixed-seed RNG, so the run
+    is reproducible yet the per-topic recall ranges and the weakest-first
+    deadline ranking show a genuine gradient (some at-risk/warn rows included)."""
     now = int(time.time())
+    rng = random.Random(20260703)
     nt = col.models.by_name("Basic")
     deck = col.decks.id("CFA Level II")
     weights: dict[str, float] = {}
-    for tag, n_cards, stability, reviews_each, n_correct, weight in TOPICS:
+    for tag, n_cards, mastery, reviews_each, n_correct, weight in TOPICS:
+        base_stab, base_elapsed = MASTERY[mastery]
+        stabilities = [base_stab * (0.7 + 0.6 * rng.random()) for _ in range(n_cards)]
+        elapsed_days = [
+            max(1, round(base_elapsed * (0.6 + 0.8 * rng.random())))
+            for _ in range(n_cards)
+        ]
         first_ease = [3] * n_correct + [1] * (n_cards - n_correct)
         _seed_topic(
             col,
@@ -151,7 +189,8 @@ def seed_rich(col: Collection) -> DeckId:
             nt,
             tag,
             n_cards,
-            stability=stability,
+            stabilities=stabilities,
+            elapsed_days=elapsed_days,
             reviews_each=reviews_each,
             first_ease=first_ease,
             now=now,
