@@ -250,7 +250,7 @@ equivalent for the passages deck, so nothing could preload it either.
 2. **Menu action + handler** — new `"Study Ethics (One-Passage)"` action in `setup_menu`
    (placed right after "Study Ethics Minimal-Pairs" to group the two ethics actions), wired
    to a new `study_ethics_passages(mw)` handler.
-3. **Entering review the *normal-deck* way.** `CFA::Ethics Passages` is a NORMAL
+3. **Entering review the _normal-deck_ way.** `CFA::Ethics Passages` is a NORMAL
    (non-filtered) deck, so — unlike the minimal-pairs sibling which uses `_study_filtered_deck`
    — the handler follows Anki's own overview "Study" path: seed-if-missing → `decks.select(did)`
    → `mw.reset()` → `mw.moveToState("review")`.
@@ -302,7 +302,7 @@ Before the fix these ERROR (import of `ensure_ethics_passages_deck` fails) / FAI
   **F9 REACHABILITY: PASS**.
 - mypy on touched source (`qt/aqt/cfa.py`, `qt/aqt/cfa_seed.py`) — **Success: no issues found
   in 2 source files**. Official folder-level mypy: 16 remaining errors, all pre-existing
-  baseline in files I do not own (tools/cfa/*, cfa/ai/*, pylib/tests/*, qt/aqt/cfa_ethics_ai.py);
+  baseline in files I do not own (tools/cfa/_, cfa/ai/_, pylib/tests/*, qt/aqt/cfa_ethics_ai.py);
   **none** in my touched files.
 - ruff check + ruff format --check on touched files — **clean**.
 
@@ -364,14 +364,14 @@ empty-state notice. (`proof/fixes/p1/item5-before.txt`: `is:new = 6`, `is:due = 
 
 A stale/absurd far-future exam date persisted in the synced collection config (observed:
 **`2028-08-23`**) is shown and used verbatim by the exam-date picker, with no sanity check.
-(The code *default* is already the canonical near date **2026-08-25** — confirmed by F9's
+(The code _default_ is already the canonical near date **2026-08-25** — confirmed by F9's
 `F0b exam config : {'exam_date': '2026-08-25'}` — so this is runtime pollution, not a code
 default bug.)
 
 #### Root cause
 
 `DeadlineDialog._initial_date` read `cfg.get("exam_date") or _default_exam_date()` — i.e. any
-persisted value was trusted blindly; only a *missing* value fell back to the canonical
+persisted value was trusted blindly; only a _missing_ value fell back to the canonical
 default.
 
 #### Fix (additive, backward-compatible; `qt/aqt/cfa.py` only)
@@ -401,7 +401,7 @@ default.
   (persisted `2099-12-31` ⇒ picker shows the canonical default), `test_dialog_keeps_sane_persisted_date`.
 - `qt/tests/test_cfa_f0b.py`: `test_deadline_dialog_renders_without_due_cards` updated to the
   new honest empty-state wording ("No cards to rank yet"); `test_deadline_dialog_apply_persists_exam_date`
-  unchanged (apply persists verbatim; the guard is on the *read* path).
+  unchanged (apply persists verbatim; the guard is on the _read_ path).
 
 Without the change the pylib/qt dialog tests ERROR (the `deadline_retention_with_new` /
 `_sanitized_exam_date` symbols don't exist) or FAIL (all-new deck ⇒ empty table; absurd
@@ -447,7 +447,7 @@ date shown verbatim).
 ## Item 6 (MEDIUM #9) — F3 "AI Back" editor button has no visible AI-off state
 
 **Symptom.** With no `OPENAI_API_KEY`, the F3 "AI Back" editor button was supposed to
-render *visibly disabled with an explanatory tooltip*, but it did neither: it looked/behaved
+render _visibly disabled with an explanatory tooltip_, but it did neither: it looked/behaved
 enabled and hovering showed nothing.
 
 ### Root cause (two concrete defects in `_button_html()` in `qt/aqt/cfa_tab_fill.py`)

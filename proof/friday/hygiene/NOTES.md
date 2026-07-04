@@ -166,6 +166,25 @@ overclaims:
 
 ---
 
+## Respawn addendum — completed the dprint format debt
+
+A later session re-entered on `origin/friday/hygiene` (all four increments already
+pushed, PR #25) in a private uncontended checkout
+(`/Users/adarshrajesh/AlphaWeek2/hyg-solo`). Verified the branch, then completed
+the ONE thing left for a green `just check`: the three pre-existing
+`check:format:dprint` files (`cfa/ui/reference/capture_app.mjs`,
+`cfa/ui/reference/app/verify-ethics-crossplatform-NOTES.md`,
+`proof/fixes/p1/NOTES.md`) were still dirty. These are dprint-only, in the (e)
+`just fix-fmt` mandate, and not on the "Do NOT edit" list — so they were formatted
+(`out/node_modules/.bin/dprint fmt`, no `.py`/serve touched). Full `just check`
+with the (handed-off) serve isort reorder applied is now green end-to-end
+(`inc5-dprint-complete-check.txt`, `CHECK_EXIT=0`).
+
 ## Cross-scope HANDOFFs
 
-(none yet — see HANDOFF.md if any)
+- `tools/cfa/serve_cfa_pages.py` ruff `I001` import sort — serve/desktop-shell code
+  (Do-NOT-edit); the ONLY remaining `just check` blocker. Owned by that workstream
+  (their reorder is uncommitted in the shared tree). See HANDOFF.md #5.
+- One-passage retirement — blocked on W3 (HANDOFF.md #1); left intact.
+- Mobile native surfaces cited to the fork PR; `computeCfaScores` RPC ask to the
+  engine owner (HANDOFF.md #2).

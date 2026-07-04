@@ -1,0 +1,23 @@
+[1m[92m    Finished[0m `release` profile [optimized] target(s) in 0.37s
+[1/5; 5 active; 0.044s] check:ruff
+All checks passed!
+[2/5; 4 active; 0.052s] check:format:python:tools
+25 files already formatted
+All checks passed!
+[3/5; 3 active; 0.249s] check:pytest:tools
+============================= test session starts ==============================
+platform darwin -- Python 3.13.13, pytest-8.4.1, pluggy-1.6.0
+rootdir: /Users/adarshrajesh/AlphaWeek2/hyg-solo
+configfile: pyproject.toml
+plugins: mock-3.15.1, anyio-4.13.0
+collected 4 items
+
+tools/tests/test_mintlify_hooks.py ....                                  [100%]
+
+============================== 4 passed in 0.02s ===============================
+[4/5; 2 active; 0.249s] check:format:dprint
+[5/5; 1 active; 0.952s] check:minilints
+     Ignored package `cargo-license v0.7.0` is already installed, use --force to override
+[0m[1m[32m
+Build succeeded in 1.00s.
+[0mCHECK_EXIT=0

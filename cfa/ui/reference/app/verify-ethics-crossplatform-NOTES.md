@@ -5,12 +5,14 @@ Branch `verify/ethics-crossplatform` (worktree `ankiCFA-wt-verify`), off `origin
 Restyle merged as PR #12 (`be9a21449`). VERIFY-ONLY: no template/style edits.
 
 ## Screenshots (this dir)
+
 - `verify-ethics-desktop-front.png` / `-desktop-back.png` — 2000x1520 / 2000x1200 (2x)
 - `verify-ethics-android-front.png` / `-android-back.png` — 1080x2400 (real device)
 
 ## Capture method — HONEST
 
 ### Desktop = harness render (Blink), NOT the live Qt window
+
 Rendered the REAL `passage_front.html` / `passage_back.html` + `style.css` with **headless
 Google Chrome** via the repo's own `tools/cfa/render_ethics_restyle.py` (same tool that
 produced the committed `ethics-restyle-after-*.png`). Blink is the same engine as the
@@ -20,8 +22,10 @@ would stall this lightweight check); labeled harness-vs-live per instructions. T
 rendered from a seeded fully-correct `localStorage` payload (the harness's normal method).
 
 ### Android = REAL emulator, GENUINE attempt
+
 Emulator `ankidroid_cfa` (`emulator-5554`, Android 14, 1080x2400), AnkiDroid
 `com.ichi2.anki.debug`, System WebView **Chrome/113.0.5672.136**.
+
 - The on-device deck still had the PRE-restyle templates (on-device notetype css=11 070 B,
   none of the restyle/font markers). I rebuilt the current deck (`just cfa-mobile-package`,
   byte-identical templates to origin/main) AND, to render the current restyle
@@ -37,12 +41,13 @@ Emulator `ankidroid_cfa` (`emulator-5554`, Android 14, 1080x2400), AnkiDroid
   (not seeded) attempt.
 
 ## Fonts ACTUALLY LOAD on BOTH platforms (measured, not eyeballed)
+
 Via `document.fonts` + DOM width probes at 120px:
 
-| | Source Serif 4 | IBM Plex Sans |
-|---|---|---|
+|                              | Source Serif 4                                                      | IBM Plex Sans                                       |
+| ---------------------------- | ------------------------------------------------------------------- | --------------------------------------------------- |
 | Android WebView (Chrome 113) | `loaded`, check=true, 1243px vs 1235px generic-serif → **distinct** | `loaded` w400+w500, 1162px vs 1152px → **distinct** |
-| Desktop Blink (Chrome 150) | `loaded`, check=true, 1243px vs 1080px generic-serif → **distinct** | `loaded`, 1162px vs 1147px → **distinct** |
+| Desktop Blink (Chrome 150)   | `loaded`, check=true, 1243px vs 1080px generic-serif → **distinct** | `loaded`, 1162px vs 1147px → **distinct**           |
 
 Source Serif 4 = **1243px** and IBM Plex Sans = **1162px** on BOTH → the same bundled
 data-URI faces render identically cross-platform. The @font-face data URIs work in
@@ -80,6 +85,7 @@ desktop shot); (c) desktop back seeded vs Android back genuine — both land on 
 "fully correct" reveal.
 
 ## Prioritized fixes for true cross-platform parity
+
 1. **Adopt Meldrum's cream canvas** (`.card` bg ~`#f2ede4`, warm panel tint) so both
    platforms match the site's warmth instead of cool white. (Biggest fidelity lift.)
 2. **CTA first impression** — give the disabled "Check answer" a subtler outlined/ghost look

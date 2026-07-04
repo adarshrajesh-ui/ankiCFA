@@ -63,26 +63,24 @@ mobile `MAX_SESSION_CARDS = 100` (`CfaExamPriorityActivity`). The deck itself is
   worktree mid-run (reflog), wiping uncommitted copies once. Mitigated by
   committing + pushing each increment promptly.
 
-## 5. Pre-existing, out-of-scope `just check` failures (NOT mine) — blocking full green
+## 5. `serve_cfa_pages.py` ruff I001 — the ONLY remaining `just check` blocker
 
 A full `just check` in a clean `friday/hygiene` worktree (Rust: **556 tests
-pass**) still fails on lint debt that is **already committed in `origin/main`**
-by other workstreams' PRs — none of it in my scope, none introduced by me:
+pass**) now fails on exactly ONE target — a cross-scope one I must not touch:
 
-- `check:ruff` — `tools/cfa/serve_cfa_pages.py:58` **I001** (import block un-sorted).
-  Committed in `origin/main` (PR #21); also the file the sync agent keeps
-  reordering. Explicitly on my NEVER-COMMIT list, so I cannot fix it.
-- `check:format:dprint` — three markdown/mjs files dirty in `origin/main`:
-  - `cfa/ui/reference/capture_app.mjs` (PR #22)
-  - `cfa/ui/reference/app/verify-ethics-crossplatform-NOTES.md` (PR #18)
-  - `proof/fixes/p1/NOTES.md` (PR #17)
+- `check:ruff` — `tools/cfa/serve_cfa_pages.py:58` **I001** (import block
+  un-sorted). Committed in `origin/main` (PR #21) and continually re-reordered by
+  the serve/desktop-shell + sync workstreams (their uncommitted reorder is the
+  fix). `serve_cfa_pages.py` is serve code — on the "Do NOT edit" list — so it is
+  **handed off, not committed here**. `ruff check --fix` produces the one-line
+  reorder; once it lands on `origin/main`, a rebase makes `just check` fully green.
+  Diagnostic proof that everything else is green with that reorder applied:
+  `proof/friday/hygiene/inc5-dprint-complete-check.txt` (`CHECK_EXIT=0`).
 
-These predate my branch (verified via `git log origin/main -- <file>` +
-`ruff`/`dprint` on the committed blobs). **Action:** the owning workstreams (or a
-repo-wide `just fix-fmt`, which touches non-scope files) should format them; I
-left them untouched per the "only your scope" rule. My six in-scope failures are
-fixed and my own files are ruff/dprint clean (`proof/friday/hygiene/inc1-after.txt`,
-`final-check-summary.txt`).
-NOTE: two lint issues I _did_ introduce — an unformatted `test_cfa_deadline_dialog.py`
-(ruff format) and my own dprint-dirty `NOTES.md`/`HANDOFF.md` — were caught by the
-full `just check` and fixed in commit-fixup (see NOTES.md Inc-1 addendum).
+RESOLVED (previously handed off): the three pre-existing `check:format:dprint`
+failures — `cfa/ui/reference/capture_app.mjs` (PR #22),
+`cfa/ui/reference/app/verify-ethics-crossplatform-NOTES.md` (PR #18),
+`proof/fixes/p1/NOTES.md` (PR #17) — are now **formatted in-scope** via the
+(e) `just fix-fmt` mandate (dprint is explicitly a hygiene-owned check, and the
+sibling prettier `.svelte` fixes were already applied the same way). These are
+format-only, no-logic changes; they carry no other workstream's semantics.
