@@ -120,6 +120,20 @@ cfa-scores-test:
     {{ ninja }} pylib
     PYTHONPATH="out/pylib:pylib" {{ py }} -m pytest pylib/tests/test_cfa_scores.py -q
 
+# Phase-0 spine: the shared Rust ComputeCfaScores engine == pylib/anki/cfa.py to 1e-9 (desktop==mobile==old-Python parity), and the (card,day) double-count fix
+cfa-parity-test:
+    {{ ninja }} pylib
+    PYTHONPATH="out/pylib:pylib" {{ py }} -m pytest pylib/tests/test_cfa_parity.py -q
+
+# Phase-0 spine: the in-app AI toggle — ai_feature_enabled == key AND master AND feature (col.conf keys), deterministic AI-off by default
+cfa-ai-toggle-test:
+    {{ py }} -m pytest cfa/ai/tests/test_toggle.py -q
+
+# Phase-0 spine: long-running fixed-credential LAN sync server for a REAL desktop<->phone round-trip (Ctrl-C to stop). See docs/cfa/SYNC-SETUP.md
+cfa-syncserver:
+    {{ ninja }} pylib
+    {{ py }} tools/cfa/syncserver.py
+
 # Feature F4: Bayesian readiness — SM-2 recall fallback + 95% credible band + explicit pass/fail call (no give-up wall)
 cfa-f4-test:
     {{ ninja }} pylib

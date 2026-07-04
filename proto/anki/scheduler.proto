@@ -78,6 +78,17 @@ service SchedulerService {
   // reshuffle of the BuildExamQueue score.
   rpc DeadlineRetention(DeadlineRetentionRequest)
       returns (DeadlineRetentionResponse);
+  // CFA fork addition. Read-only "honest" per-deck scores, mirroring
+  // pylib/anki/cfa.py EXACTLY so desktop and the AnkiDroid mobile client read
+  // identical numbers from one shared engine: a give-up-aware memory score
+  // (exam-weighted FSRS retrievability as a range), a first-exposure Wilson
+  // performance score, a coarse logistic readiness P(pass), and the Bayesian
+  // readiness "hero" band that never abstains. It de-duplicates graded reviews
+  // to at most one per (card, day) so an offline dual-device round-trip cannot
+  // double-count. Never mutates card/queue/scheduling state, so FSRS and undo
+  // stay valid.
+  rpc ComputeCfaScores(ComputeCfaScoresRequest)
+      returns (ComputeCfaScoresResponse);
 }
 
 // Implicitly includes any of the above methods that are not listed in the
@@ -195,6 +206,113 @@ message BuildExamQueueRequest {
 message BuildExamQueueResponse {
   repeated int64 card_ids = 1;
   repeated float scores = 2;
+}
+
+// CFA fork. Inputs for the read-only honest score computation. Weights and the
+// exam date are read from the collection config (the same source cfa.py uses),
+// not passed here, so a single call reproduces cfa.py verbatim. All numeric
+// outputs are `double` (f64) to preserve exact parity with the Python floats.
+message ComputeCfaScoresRequest {
+  // Deck to score, subdecks included. Ignored when whole_collection is true.
+  int64 deck_id = 1;
+  // Score the entire collection instead of a single deck (deck_id ignored).
+  bool whole_collection = 2;
+  // Unix seconds treated as "now" for retrievability + freshness. 0 => the
+  // backend's wall clock; tests pin it for determinism.
+  int64 now = 3;
+}
+
+// One topic row of the memory score (mirrors cfa.TopicScore).
+message CfaTopicScore {
+  string topic = 1;
+  double weight = 2;
+  uint32 reviewed_cards = 3;
+  uint32 graded_reviews = 4;
+  optional double avg_r = 5;
+  optional double r_low = 6;
+  optional double r_high = 7;
+  bool covered = 8;
+}
+
+// Honest memory score (mirrors cfa.MemoryScore).
+message CfaMemoryScore {
+  bool abstain = 1;
+  string reason = 2;
+  optional double point = 3;
+  optional double range_low = 4;
+  optional double range_high = 5;
+  double coverage_pct = 6;
+  uint32 topics_total = 7;
+  uint32 topics_covered = 8;
+  uint32 graded_reviews = 9;
+  optional string last_review_at = 10;
+  string computed_at = 11;
+  repeated CfaTopicScore topics = 12;
+}
+
+// Honest performance score (mirrors cfa.PerformanceScore).
+message CfaPerformanceScore {
+  bool abstain = 1;
+  string reason = 2;
+  optional double point = 3;
+  optional double range_low = 4;
+  optional double range_high = 5;
+  uint32 first_exposures = 6;
+  uint32 correct = 7;
+  string computed_at = 8;
+}
+
+// Honest readiness score (mirrors cfa.ReadinessScore).
+message CfaReadinessScore {
+  bool abstain = 1;
+  string reason = 2;
+  optional double point = 3;
+  optional double range_low = 4;
+  optional double range_high = 5;
+  string label = 6;
+  optional double memory_point = 7;
+  optional double performance_point = 8;
+  double coverage_pct = 9;
+  string computed_at = 10;
+}
+
+// One topic posterior of the Bayesian readiness (mirrors cfa.TopicPosterior).
+message CfaTopicPosterior {
+  string topic = 1;
+  double weight = 2;
+  uint32 successes = 3;
+  uint32 failures = 4;
+  double mean = 5;
+  double ci_low = 6;
+  double ci_high = 7;
+  optional double recall = 8;
+  bool covered = 9;
+}
+
+// Bayesian readiness "hero" band; never abstains (mirrors cfa.BayesianReadiness).
+message CfaBayesianReadiness {
+  double accuracy = 1;
+  double ci_low = 2;
+  double ci_high = 3;
+  string call = 4;
+  double call_prob = 5;
+  double p_pass = 6;
+  double mps = 7;
+  optional double recall = 8;
+  string label = 9;
+  uint32 first_exposures = 10;
+  uint32 topics_total = 11;
+  uint32 topics_covered = 12;
+  string computed_at = 13;
+  repeated CfaTopicPosterior topics = 14;
+}
+
+// All four honest scores, computed in one read-only pass.
+message ComputeCfaScoresResponse {
+  CfaMemoryScore memory = 1;
+  CfaPerformanceScore performance = 2;
+  CfaReadinessScore readiness = 3;
+  CfaBayesianReadiness bayesian = 4;
 }
 
 message SchedTimingTodayResponse {

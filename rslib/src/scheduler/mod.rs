@@ -9,6 +9,7 @@ use crate::prelude::*;
 pub mod answering;
 pub mod bury_and_suspend;
 mod cfa_deadline;
+mod cfa_scores;
 pub(crate) mod congrats;
 pub(crate) mod filtered;
 pub mod fsrs;

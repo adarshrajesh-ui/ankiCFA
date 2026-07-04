@@ -1,0 +1,4 @@
+test scheduler::cfa_scores::tests::abstains_on_empty_collection_but_bayesian_still_answers ... ok
+test scheduler::cfa_scores::tests::double_count_fix_dedups_same_day_reviews ... ok
+test scheduler::cfa_scores::tests::happy_path_produces_all_scores ... ok
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 541 filtered out; finished in 0.03s

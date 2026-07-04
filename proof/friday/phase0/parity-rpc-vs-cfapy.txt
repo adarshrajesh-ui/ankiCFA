@@ -1,0 +1,14 @@
+=== reference cfa.py ===
+  memory: abstain=False point=0.9985126376152039 reviews=240
+  perf:   point=0.75 first=40 correct=30
+  ready:  point=0.8574231682166994
+  bayes:  acc=0.9090909090909092 p_pass=0.9999999999244179 call='likely pass'
+=== RPC ===
+  memory: abstain=False point=0.9985126376152039 reviews=240
+  perf:   point=0.75 first=40 correct=30
+  ready:  point=0.8574231682166994
+  bayes:  acc=0.9090909090909092 p_pass=0.9999999999244179 call='likely pass'
+
+=== double-count fix: dup card has 3 revlog rows, adds 1 to the topic count (fix works: True) ===
+
+PARITY PASSED: RPC == cfa.py on every field (tol 1e-9), double-count fixed.
