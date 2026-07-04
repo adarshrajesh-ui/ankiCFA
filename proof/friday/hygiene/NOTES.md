@@ -182,6 +182,25 @@ on the branch now **EXITS 0 (green)** — verified in `final-justcheck-exit0.txt
 `check:format:python`'s isort autofixer + the runner's retry pass (same as
 `origin/main`), so nothing hygiene-owned blocks the check.
 
+## Continuation check — 2026-07-03 (post-invoice respawn)
+
+- **PR #25:** OPEN, mergeable — https://github.com/adarshrajesh-ui/ankiCFA/pull/25
+- **Branch:** `origin/friday/hygiene` @ `b7853e467` (9 commits; worktree fast-forwarded from
+  `de21dbc51`). No new hygiene-scope commits this session.
+- **CI:** no GitHub checks reported on the branch (fork has no workflow runs for
+  `friday/hygiene`).
+- **W3 / one-passage:** still **NOT** on `origin/main` (`friday/ethics` unmerged). One-passage
+  retirement remains blocked per HANDOFF #1 — no doc/test edits made.
+- **Full `just check`:** green on branch (inc5 dprint + serve self-heals; see
+  `final-justcheck-exit0.txt`).
+- **Targeted verification (AI-OFF, no `.env` in worktree):** `just test-py` → 141 passed, 2
+  skipped; `just cfa-deck-test` → 13 passed. Evidence:
+  `proof/friday/hygiene/continuation-testpy-20260703.txt`.
+- **Blockers for merge:** none hygiene-owned. Residual `serve_cfa_pages.py` isort reorder is
+  cross-scope (HANDOFF #5); committing it in the serve workstream is optional cleanup.
+- **Recommended next step:** merge PR #25. Revisit one-passage retirement after W3
+  (`friday/ethics`) lands on `origin/main`.
+
 ## Cross-scope HANDOFFs
 
 - `tools/cfa/serve_cfa_pages.py` ruff `I001` — pre-existing `origin/main` debt
