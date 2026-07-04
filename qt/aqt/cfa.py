@@ -50,17 +50,21 @@ EXAM_PRIORITY_DECK_NAME = "CFA::Exam Priority"
 
 
 def setup_menu(mw: AnkiQt) -> None:
-    """Add a top-level CFA menu to the main window with four study actions."""
+    """Add a top-level CFA menu, consistent with the CFA Home dashboard CTAs.
+
+    Single ethics entry (Minimal-Pairs, the flagship); the one-passage drill is
+    retired from the menu. ``study_ethics_passages`` remains callable for
+    compatibility, it is simply no longer surfaced here."""
     menu = QMenu("&CFA", mw)
+
+    home = menu.addAction("CFA Home")
+    qconnect(home.triggered, lambda: mw.moveToState("cfaHome"))
 
     readiness = menu.addAction("Exam Readiness…")
     qconnect(readiness.triggered, lambda: show_exam_readiness(mw))
 
     ethics = menu.addAction("Study Ethics Minimal-Pairs")
     qconnect(ethics.triggered, lambda: study_ethics_pairs(mw))
-
-    passages = menu.addAction("Study Ethics (One-Passage)")
-    qconnect(passages.triggered, lambda: study_ethics_passages(mw))
 
     priority = menu.addAction("Study by Exam Priority")
     qconnect(priority.triggered, lambda: study_by_exam_priority(mw))

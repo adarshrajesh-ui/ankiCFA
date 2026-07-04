@@ -1,0 +1,8 @@
+=== BEFORE (base 6ef32ec8c): stock Anki toolbar + menu ===
+--- toolbar center links at base ---
+    def _centerLinks(self) -> str:
+        links = [
+            self.create_link(
+"decks" "decks" "add" "add" "browse" "browse" "stats" "stats" "add" 
+--- CFA menu at base (has one-passage) ---
+"Study Ethics Minimal-Pairs" "Study Ethics (One-Passage)" "Study Ethics Minimal-Pairs" "Study Ethics (One-Passage)" 

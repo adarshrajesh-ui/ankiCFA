@@ -82,3 +82,28 @@ list. Deck list stays reachable (toolbar "Decks", the Home "Browse decks" CTA,
   + cfa-home route bundled). `svelte-check`: 0 errors / 0 warnings (1286 files).
 - Tests: `just cfa-desktop-shell-test` -> 10 passed (branding 4 + home 6).
 - SHA: (this commit)  ·  PR: #24
+
+---
+
+## Increment 3 — Toolbar + menu reframe
+
+Top bar and CFA menu read as a CFA product.
+
+- Files (my scope only):
+  - `qt/aqt/toolbar.py` — `_centerLinks` now Home / Study / Ethics / Readiness
+    (+ Sync kept last, ids intact); added `_cfa{Home,Study,Ethics,Readiness}LinkHandler`
+    delegating to `moveToState("cfaHome")` / `cfa.study_by_exam_priority` /
+    `cfa.study_ethics_pairs` / `cfa.show_exam_readiness`. Add/Browse/Stats stay in
+    the menu bar.
+  - `qt/aqt/cfa.py` — CFA menu: added "CFA Home"; single ethics entry =
+    Minimal-Pairs (one-passage menu action retired; `study_ethics_passages`
+    function kept for compatibility).
+  - `qt/tests/test_cfa_menu.py` (updated) + `qt/tests/test_cfa_toolbar.py` (new).
+- Scope check: `friday/ethics` does NOT touch `cfa.py`/`test_cfa_menu.py`
+  (verified `git diff 6ef32ec8c friday/ethics`), so no cross-worker conflict.
+- Evidence: `item3-toolbar-menu-before.txt` (stock decks/add/browse/stats +
+  one-passage) / `item3-toolbar-menu-after.txt` (reframed links + menu labels).
+  The restyled toolbar *visual* lands in Increment 4 (design-system chrome).
+- Build: `./ninja pylib qt` green. Tests: `just cfa-desktop-shell-test` → 19 passed
+  (branding 4 + home 6 + menu 5 + toolbar 4).
+- SHA: (this commit)  ·  PR: #24
