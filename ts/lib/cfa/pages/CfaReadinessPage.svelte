@@ -85,7 +85,7 @@ the pass/fail/warn semantic triad preserved throughout.
                 sub={`p=${hb.callProb.toFixed(2)}`}
                 note={heroNote}
             >
-                Estimated exam accuracy
+                Estimated exam-weighted accuracy
                 <strong class="cfa-readiness__em">{pct(hb.accuracy)}</strong>
                 <span class="cfa-readiness__muted"
                     >(95% CI {pct(hb.ciLow)}–{pct(hb.ciHigh)})</span
