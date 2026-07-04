@@ -1,0 +1,55 @@
+############################################################
+# A6 — card-generation gold-set checker
+# generated 2026-07-04T22:04:19Z (UTC)
+############################################################
+
+## Gold set: cfa/eval/cardgen_gold.jsonl (50 known-correct CFA QA,
+## sampled from the already-vetted study deck cfa/deck/*.jsonl, 5 per topic)
+   per-topic: {'altinv': 5, 'corp': 5, 'derivatives': 5, 'econ': 5, 'equity': 5, 'ethics': 5, 'fixed-income': 5, 'fra': 5, 'portmgmt': 5, 'quant': 5}
+   total: 50
+
+## 1) SIMULATED generator (AI OFF) — default: PASSES the declared cutoff
+$ just cfa-cardgen-check
+======================================================================
+A6 — card-generation gold-set checker (50 known-correct CFA QA)
+======================================================================
+generator                : SIMULATED generator (AI OFF)
+gold cards               : 50
+declared cutoff          : correct_useful >= 80% AND wrong <= 10%
+
+checker buckets (independent of the generator):
+  correct + useful       :  43  (86.0%)
+  correct but bad card   :   3  (6.0%)
+  wrong                  :   4  (8.0%)
+
+gate: useful 86.0% >= 80%? True  |  wrong 8.0% <= 10%? True  ->  PASS
+
+Note: SIMULATED — no LLM ran; the generator output is fabricated (labelled SIMULATED) purely to exercise the checker and gate. The bucket counts above are the checker's honest judgement of that fabricated batch. With a real generator (AI ON) a failing batch is blocked (non-zero exit).
+======================================================================
+   exit=0
+
+## 2) SIMULATED --bad-sim — a skewed batch FAILS -> gate BLOCKS (exit still 0:
+##    honest AI-off, a SIMULATED batch is a measurement, no real cards admitted)
+$ just cfa-cardgen-check --bad-sim
+======================================================================
+A6 — card-generation gold-set checker (50 known-correct CFA QA)
+======================================================================
+generator                : SIMULATED generator (AI OFF)
+gold cards               : 50
+declared cutoff          : correct_useful >= 80% AND wrong <= 10%
+
+checker buckets (independent of the generator):
+  correct + useful       :  25  (50.0%)
+  correct but bad card   :   5  (10.0%)
+  wrong                  :  20  (40.0%)
+
+gate: useful 50.0% >= 80%? False  |  wrong 40.0% <= 10%? False  ->  FAIL — batch BLOCKED
+
+Note: SIMULATED — no LLM ran; the generator output is fabricated (labelled SIMULATED) purely to exercise the checker and gate. The bucket counts above are the checker's honest judgement of that fabricated batch. With a real generator (AI ON) a failing batch is blocked (non-zero exit).
+======================================================================
+   exit=0
+
+## 3) Tests
+$ just cfa-eval-test  (cardgen_check subset shown)
+.............                                                            [100%]
+13 passed in 0.01s

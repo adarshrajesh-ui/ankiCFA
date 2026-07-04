@@ -189,6 +189,14 @@ cfa-performance-eval *args:
 cfa-paraphrase *args:
     {{ py }} cfa/eval/paraphrase_test.py {{ args }}
 
+# A6: card-generation gold-set checker — draft 50 backs from cfa/eval/cardgen_gold.jsonl
+# and bucket them correct+useful / correct-but-bad / wrong against the gold answers.
+# Cutoff declared up front (correct_useful>=80% AND wrong<=10%); a REAL batch that
+# fails is BLOCKED (non-zero exit). Default is a SIMULATED generator (AI OFF);
+# pass --generate to use the real draft_back, --bad-sim to demo blocking.
+cfa-cardgen-check *args:
+    {{ py }} cfa/eval/cardgen_check.py {{ args }}
+
 # Feature 8: content-type-aware weighting — equal-weakness cards of different item types get different exam-queue multipliers
 cfa-types-test:
     {{ ninja }} pylib
