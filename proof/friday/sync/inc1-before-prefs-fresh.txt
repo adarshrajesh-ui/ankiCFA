@@ -1,0 +1,28 @@
+# AnkiDroid prefs BEFORE increment 1 (fresh capture 2026-07-04T03:29:33Z)
+# package: com.ichi2.anki.debug
+<?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+<map>
+    <string name="hideSystemBars">0</string>
+    <string name="lastVersion">2.25.0alpha1-debug</string>
+    <boolean name="showAnswerButtons" value="true" />
+    <int name="preferenceUpgradeVersion" value="28" />
+    <string name="syncFetchMedia">always</string>
+    <boolean name="showAnswerFeedback" value="true" />
+    <boolean name="automaticSyncMode" value="false" />
+    <boolean name="showProgress" value="true" />
+    <boolean name="cfa_bootstrap_imported" value="true" />
+    <string name="deckPath">/storage/emulated/0/AnkiDroid</string>
+    <boolean name="hideHardAndEasy" value="false" />
+    <boolean name="ignoreDisplayCutout" value="false" />
+    <boolean name="showAudioPlayButtons" value="true" />
+    <string name="reviewerToolbarPosition">0</string>
+    <boolean name="showEstimates" value="true" />
+    <boolean name="allowMetered" value="false" />
+    <string name="reportErrorMode">1</string>
+    <boolean name="newReviewerOptions" value="false" />
+    <int name="syncIoTimeoutSecs" value="60" />
+    <boolean name="acra.disable" value="true" />
+    <string name="reviewerFrameStyle">0</string>
+    <boolean name="showSyncStatusBadge" value="true" />
+    <boolean name="IntroductionSlidesShown" value="true" />
+</map>

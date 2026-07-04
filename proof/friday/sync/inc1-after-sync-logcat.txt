@@ -1,0 +1,9 @@
+07-03 22:34:23.679 14104 14104 I SyncKt  : Sync: Normal collection sync
+07-03 22:34:23.697 14104 14180 D rsdroid : anki::sync::collection::normal: fetching meta...
+07-03 22:34:24.564 14104 14180 D rsdroid : anki::sync::collection::status: meta remote=SyncMeta { modified: TimestampMillis(0), schema: TimestampMillis(1783136064094), usn: Usn(0), current_time: TimestampSecs(1783136064), server_message: "", should_continue: true, host_number: 0, empty: true, media_usn: Usn(0), v2_scheduler_or_later: false, v2_timezone: false, collection_bytes: 0 }
+07-03 22:34:24.564 14104 14180 D rsdroid : anki::sync::collection::status: meta local=SyncMeta { modified: TimestampMillis(1783132078083), schema: TimestampMillis(1783107670158), usn: Usn(0), current_time: TimestampSecs(1783136063), server_message: "", should_continue: true, host_number: 0, empty: false, media_usn: Usn(0), v2_scheduler_or_later: true, v2_timezone: true, collection_bytes: 700416 }
+07-03 22:34:24.564 14104 14180 D rsdroid : anki::sync::collection::normal: fetched state=ClientSyncState { required: FullSyncRequired { upload_ok: true, download_ok: false }, server_message: "", host_number: 0, new_endpoint: None, local_is_newer: true, usn_at_last_sync: Usn(0), server_usn: Usn(0), pending_usn: Usn(-1), server_media_usn: Usn(0) }
+07-03 22:34:24.573 14104 14104 I SyncKt  : sync result: FULL_UPLOAD
+07-03 22:34:24.573 14104 14104 I SyncKt  : Sync: Full collection upload requested
+07-03 22:34:24.878 14104 14104 I SyncKt  : Full Upload Completed
+07-03 22:34:24.892 14104 14104 D SnackbarsKt: displayed snackbar: 'Full sync from local'
