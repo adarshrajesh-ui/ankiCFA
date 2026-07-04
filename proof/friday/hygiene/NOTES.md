@@ -7,6 +7,7 @@ Owner scope: 6 `just check` failures; CFA deck content + per-card provenance
 `SUBMISSION-CHECKLIST.md`).
 
 ## Setup (respawn — worktree reality)
+
 - `friday/hygiene` is checked out in its own worktree
   `/Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt`; the shared main tree
   (`ankiCFA`) is on `friday/ethics`. Prior-run edits lived in the main tree and
@@ -20,6 +21,7 @@ Owner scope: 6 `just check` failures; CFA deck content + per-card provenance
   is durable on the remote regardless of local resets.
 
 ## AI-OFF discipline
+
 This worktree has **no `.env`**, so every build/test here runs AI-OFF by default
 (no key present → deterministic fallback path). The real key is never
 printed/logged/committed. (In the main tree, use `mv .env .env.bak; <cmd>; mv
@@ -28,6 +30,7 @@ printed/logged/committed. (In the main tree, use `mv .env .env.bak; <cmd>; mv
 ---
 
 ## Increment 1 — Fix the 6 `just check` failures
+
 (status: DONE — committed + pushed; PR below)
 
 Work verified/built on in the `friday/hygiene` **worktree** at
@@ -35,6 +38,7 @@ Work verified/built on in the `friday/hygiene` **worktree** at
 the shared main tree; carried over here byte-identical, `just build` OK).
 
 Fixes (all additive, in-scope):
+
 - `qt/tests/test_cfa_deadline_dialog.py` — the DeadlineDialog is now a thin host
   for the shared `ts/lib/cfa` SvelteKit page; tests stub `AnkiWebView` and assert
   against the REAL `mediasrv._cfa_deadline_payload` (deck scoping, new-card
@@ -54,11 +58,18 @@ Fixes (all additive, in-scope):
 
 BEFORE: `proof/friday/hygiene/00-just-check-before.txt` (full `just check`, exit 1,
 `6 failed, 136 passed`), `inc1-before-6failures.txt`, `inc1-c-mypy-before.txt`.
-AFTER:  `proof/friday/hygiene/inc1-after.txt` — mypy `Success: no issues found in
+AFTER: `proof/friday/hygiene/inc1-after.txt` — mypy `Success: no issues found in
 329 source files`; prettier `All matched files use Prettier code style!`; probe
 files absent; pytest `31 passed, 2 skipped`.
 Tests run AI-OFF (worktree has no `.env`) + `just build` green.
-SHA: `0c18ec672`  PR: https://github.com/adarshrajesh-ui/ankiCFA/pull/25 (#25)
+SHA: `0c18ec672` PR: https://github.com/adarshrajesh-ui/ankiCFA/pull/25 (#25)
+
+Fixup (caught by the final full `just check`): the prior-run
+`test_cfa_deadline_dialog.py` was committed **un-ruff-formatted**, and my own
+`NOTES.md`/`HANDOFF.md` were dprint-dirty. Both fixed (`ruff format` + `dprint
+fmt`); my files are now clean. The full `just check` still fails only on
+pre-existing, out-of-scope non-mine debt — see `HANDOFF.md` section 5 and
+`final-check-summary.txt`.
 
 Note on `proof/gnhf2/f0b-deadline-*.png`: produced by the prior run of the exact
 committed `render_f0b_proof.py`. Re-running it here regenerated the `default`
@@ -67,6 +78,7 @@ environment, so the committed pair (a consistent prior-run capture) is kept. The
 render fix itself is proven by `check:mypy` going 3 errors → 0.
 
 ## Increment 2 — CFA deck content quality + provenance
+
 (status: DONE — committed + pushed on PR #25)
 
 - `tools/cfa/build_cfa_deck.py` — new `reading_from_los` / `render_source_line` /
@@ -83,12 +95,12 @@ render fix itself is proven by `check:mypy` going 3 errors → 0.
   - `cfa/deck/items-derivatives-20260703-hygiene-a22.jsonl` (38 items: forward
     commitments, futures/forwards, swaps, FRAs, binomial + BSM option pricing,
     Greeks/delta-hedging, put-call parity)
-  All `license: authored-original`, exact 6-field schema, no duplicate fronts.
+    All `license: authored-original`, exact 6-field schema, no duplicate fronts.
 - Deck: 630 -> **711 authored items**, now covering **all ten** base topics;
   `topic_weights_for` renormalizes to 1.0 over all ten. `validate_deck.py` green
   (MIN_CARDS=200).
 - "20-card" clarification: there is NO literal 20 default in code — the exam-
-  priority queue returns a *capped weakest-first fetch* (desktop 50-200, mobile
+  priority queue returns a _capped weakest-first fetch_ (desktop 50-200, mobile
   `MAX_SESSION_CARDS=100`), NOT the deck size. Documented in the builder docstring
   (and README/PLATFORM-MATRIX in later increments). See HANDOFF note.
 - Tests (fail without the change): `test_all_ten_level_ii_topics_present`,
@@ -103,6 +115,7 @@ render fix itself is proven by `check:mypy` going 3 errors → 0.
 - SHA: `9e8ad077c`
 
 ## Increment 3 — Retire one-passage refs + PLATFORM-MATRIX
+
 (status: DONE — matrix updated + pushed; one-passage retirement BLOCKED on W3)
 
 - One-passage retirement: **NOT actioned — blocked on W3.** `origin/main` still
@@ -123,10 +136,12 @@ render fix itself is proven by `check:mypy` going 3 errors → 0.
 - SHA: `9c0615895`
 
 ## Increment 4 — README + SUBMISSION-CHECKLIST
+
 (status: DONE — committed + pushed on PR #25)
 
 Both root docs already existed; updated (not created) to match merged reality, no
 overclaims:
+
 - `README.md`:
   - Exam Readiness bullet → **three scores** (Memory/Performance/Readiness) with
     ranges + the full give-up rule (200 reviews / 50% coverage / 30 first
@@ -152,4 +167,5 @@ overclaims:
 ---
 
 ## Cross-scope HANDOFFs
+
 (none yet — see HANDOFF.md if any)

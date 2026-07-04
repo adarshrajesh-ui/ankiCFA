@@ -194,8 +194,12 @@ def test_payload_self_heals_absurd_persisted_date() -> None:
     anki_cfa.set_exam_config(col, exam_date="2099-12-31", topic_weights={})
 
     payload = _deadline_payload(col, deck)
-    assert payload["examDate"] != "2099-12-31", "absurd persisted date must not be trusted"
-    assert payload["examDate"] == cfa._default_exam_date(), "healed to the canonical default"
+    assert payload["examDate"] != "2099-12-31", (
+        "absurd persisted date must not be trusted"
+    )
+    assert payload["examDate"] == cfa._default_exam_date(), (
+        "healed to the canonical default"
+    )
     col.close()
 
 

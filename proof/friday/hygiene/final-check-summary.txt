@@ -1,0 +1,24 @@
+=== FINAL just check status (friday/hygiene worktree, AI-OFF) ===
+date: 2026-07-04T03:51:01Z
+
+Rust: 556 tests run: 556 passed, 0 skipped  (from the full 'just check' run; see final-just-check.txt)
+
+--- MY six in-scope failures: RESOLVED ---
+mypy (was 3 errors in render_f0b_proof.py):
+Success: no issues found in 329 source files
+deadline + installer pytest (was 6 failed):
+31 passed, 2 skipped in 0.51s
+prettier (was 2 svelte pages):
+All matched files use Prettier code style!
+minilints probe files: 0 present (0 = fixed)
+
+--- MY files are lint-clean (no regressions) ---
+5 files already formatted
+my markdown: dprint clean
+
+--- REMAINING full-check failures are ALL pre-existing in origin/main, out-of-scope (NOT mine) ---
+check:ruff   tools/cfa/serve_cfa_pages.py  I001  (origin/main PR #21; NEVER-COMMIT list)
+check:dprint cfa/ui/reference/capture_app.mjs (PR #22)
+check:dprint cfa/ui/reference/app/verify-ethics-crossplatform-NOTES.md (PR #18)
+check:dprint proof/fixes/p1/NOTES.md (PR #17)
+=> see HANDOFF.md section 5. My scope is green; full 'just check' is blocked only by this pre-existing non-mine debt.
