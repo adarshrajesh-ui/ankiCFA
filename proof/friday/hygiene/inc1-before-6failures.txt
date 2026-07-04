@@ -1,0 +1,64 @@
+=== Increment 1 — BEFORE: the 6 just check failures (extracted from 00-just-check-before.txt) ===
+
+--- ninja gate summary ---
+All checks passed!
+[4/7; 4 active; 1.063s] check:minilints
+FAILED: /Users/adarshrajesh/AlphaWeek2/ankiCFA/out/tests/minilints.false 
+/Users/adarshrajesh/AlphaWeek2/ankiCFA/out/rust/debug/minilints check /Users/adarshrajesh/AlphaWeek2/ankiCFA/out/tests/minilints.false
+     Ignored package `cargo-license v0.7.0` is already installed, use --force to override
+missing standard copyright header: "./cfa/ui/reference/.probe2_mm.mjs"
+missing standard copyright header: "./cfa/ui/reference/.probe_mm.mjs"
+[5/7; 3 active; 1.130s] check:format:prettier
+FAILED: /Users/adarshrajesh/AlphaWeek2/ankiCFA/out/tests/prettier.6529351329606104884.fmt 
+/Users/adarshrajesh/AlphaWeek2/ankiCFA/out/rust/release/runner run --stamp=/Users/adarshrajesh/AlphaWeek2/ankiCFA/out/tests/prettier.6529351329606104884.fmt /Users/adarshrajesh/AlphaWeek2/ankiCFA/out/extracted/node/bin/yarn prettier --cache --check "{**/*.svelte,docs-site/**/*.mdx}"
+(node:68827) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:68918) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Checking formatting...
+[warn] ts/lib/cfa/pages/CfaDeadlinePage.svelte
+[warn] ts/lib/cfa/pages/CfaReadinessPage.svelte
+[warn] Code style issues found in 2 files. Run Prettier with --write to fix.
+Failed to run (1): /Users/adarshrajesh/AlphaWeek2/ankiCFA/out/extracted/node/bin/yarn prettier --cache --check {**/*.svelte,docs-site/**/*.mdx}
+[6/7; 2 active; 2.983s] check:mypy
+FAILED: /Users/adarshrajesh/AlphaWeek2/ankiCFA/out/tests/python_typecheck.9705036031357794903 
+/Users/adarshrajesh/AlphaWeek2/ankiCFA/out/rust/release/runner run --stamp=/Users/adarshrajesh/AlphaWeek2/ankiCFA/out/tests/python_typecheck.9705036031357794903 /Users/adarshrajesh/AlphaWeek2/ankiCFA/out/pyenv/bin/mypy pylib qt/aqt qt/tools out/pylib/anki out/qt/_aqt python tools
+tools/cfa/render_f0b_proof.py:86: error: "DeadlineDialog" has no attribute "date_edit"  [attr-defined]
+tools/cfa/render_f0b_proof.py:89: error: "DeadlineDialog" has no attribute "date_edit"  [attr-defined]
+tools/cfa/render_f0b_proof.py:90: error: "DeadlineDialog" has no attribute "_apply_date"  [attr-defined]
+Found 3 errors in 1 file (checked 329 source files)
+Failed to run (1): /Users/adarshrajesh/AlphaWeek2/ankiCFA/out/pyenv/bin/mypy pylib qt/aqt qt/tools out/pylib/anki out/qt/_aqt python tools
+[7/7; 1 active; 4.258s] check:pytest:aqt
+FAILED: /Users/adarshrajesh/AlphaWeek2/ankiCFA/out/tests/python_pytest.6267549634483751550 
+
+--- minilints (missing copyright headers on probe files) ---
+FAILED: /Users/adarshrajesh/AlphaWeek2/ankiCFA/out/tests/minilints.false 
+/Users/adarshrajesh/AlphaWeek2/ankiCFA/out/rust/debug/minilints check /Users/adarshrajesh/AlphaWeek2/ankiCFA/out/tests/minilints.false
+     Ignored package `cargo-license v0.7.0` is already installed, use --force to override
+missing standard copyright header: "./cfa/ui/reference/.probe2_mm.mjs"
+missing standard copyright header: "./cfa/ui/reference/.probe_mm.mjs"
+[5/7; 3 active; 1.130s] check:format:prettier
+
+--- prettier (2 svelte files) ---
+Checking formatting...
+[warn] ts/lib/cfa/pages/CfaDeadlinePage.svelte
+[warn] ts/lib/cfa/pages/CfaReadinessPage.svelte
+[warn] Code style issues found in 2 files. Run Prettier with --write to fix.
+Failed to run (1): /Users/adarshrajesh/AlphaWeek2/ankiCFA/out/extracted/node/bin/yarn prettier --cache --check {**/*.svelte,docs-site/**/*.mdx}
+
+--- mypy (render_f0b_proof stale attrs) ---
+tools/cfa/render_f0b_proof.py:86: error: "DeadlineDialog" has no attribute "date_edit"  [attr-defined]
+tools/cfa/render_f0b_proof.py:89: error: "DeadlineDialog" has no attribute "date_edit"  [attr-defined]
+tools/cfa/render_f0b_proof.py:90: error: "DeadlineDialog" has no attribute "_apply_date"  [attr-defined]
+Found 3 errors in 1 file (checked 329 source files)
+Failed to run (1): /Users/adarshrajesh/AlphaWeek2/ankiCFA/out/pyenv/bin/mypy pylib qt/aqt qt/tools out/pylib/anki out/qt/_aqt python tools
+
+--- pytest summary (6 failed) ---
+=========================== short test summary info ============================
+FAILED qt/tests/test_cfa_deadline_dialog.py::test_dialog_ranks_new_cards_on_fresh_all_new_deck
+FAILED qt/tests/test_cfa_deadline_dialog.py::test_dialog_empty_state_only_when_truly_empty
+FAILED qt/tests/test_cfa_deadline_dialog.py::test_dialog_self_heals_absurd_persisted_date
+FAILED qt/tests/test_cfa_deadline_dialog.py::test_dialog_keeps_sane_persisted_date
+FAILED qt/tests/test_installer.py::test_compile_fails_loudly - subprocess.Cal...
+FAILED qt/tests/test_installer.py::test_build_and_package - subprocess.Called...
+======================== 6 failed, 136 passed in 3.55s =========================

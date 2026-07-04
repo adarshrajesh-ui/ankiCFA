@@ -1,0 +1,224 @@
+Runner not rebuilt.
+[1/4; 4 active; 0.093s] check:format:python:qt
+177 files already formatted
+All checks passed!
+[2/4; 3 active; 0.093s] check:format:python:tools
+25 files already formatted
+Found 1 error (1 fixed, 0 remaining).
+[3/4; 2 active; 0.232s] check:format:dprint
+FAILED: /Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/out/tests/dprint.check 
+/Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/out/rust/release/runner run --stamp=/Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/out/tests/dprint.check /Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/out/node_modules/.bin/dprint check
+from /Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/README.md:
+59 59| ··in·[`qt/aqt/cfa.py`](./qt/aqt/cfa.py).
+60 60| -·**Ethics·minimal-pairs·&·one-passage·cards.**·Hand-authored·ethics·items·that
+61 61| ··force·the·learner·to·pick·a·verdict,·**highlight·the·governing·evidence**,·and
+   62|-··name·the·controlling·CFA·Standard·—·teaching·the·*boundary*·between·confusable
+62   |+··name·the·controlling·CFA·Standard·—·teaching·the·_boundary_·between·confusable
+63 63| ··Standards,·not·just·the·label.·Highlights·are·scored·by·a·deterministic
+64 64| ··span-matching·grader·with·tolerant·partial-credit·tiers,·and·the·Python·and·JS
+65 65| ··graders·are·kept·in·parity·so·desktop·and·mobile·grade·identically.
+...
+69 69| ··deterministic·grader·and·the·AI·editor·button·renders·**disabled·with·a
+70 70| ··tooltip**·—·no·network·calls,·identical·study·experience.
+71 71| -·**CFA·study·menu·&·Peak-on-Exam-Day·planner.**·The·desktop·**CFA**·menu·wires·the
+   72|-··flagship·flows·end-to-end·with·no·dead-ends·—·*Study·Ethics·Minimal-Pairs*,
+   73|-··*Study·Ethics·(One-Passage)*,·*Study·by·Exam·Priority*,·*Exam·Readiness…*,·and·a
+72   |+··flagship·flows·end-to-end·with·no·dead-ends·—·_Study·Ethics·Minimal-Pairs_,
+73   |+··_Study·Ethics·(One-Passage)_,·_Study·by·Exam·Priority_,·_Exam·Readiness…_,·and·a
+74 74| ··**Peak-on-Exam-Day**·deadline·view·that·ranks·which·cards·to·prioritize
+75 75| ··(including·new·cards)·so·recall·peaks·on·your·configured·exam·date.·Each·action
+76 76| ··seeds·its·deck·on·demand·and·enters·review.
+--
+from /Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/proof/friday/hygiene/NOTES.md:
+ 7  7| `SUBMISSION-CHECKLIST.md`).
+ 8  8| 
+ 9  9| ##·Setup
+10   |+
+11 10| -·`git·fetch·origin`·done;·branch·`friday/hygiene`·created·off·`origin/main`.
+12 11| -·PRE-EXISTING·out-of-scope·change·to·`tools/cfa/serve_cfa_pages.py`·(import
+13 12| ··reorder)·was·stashed·as·`stash@{0}`·("preserve·out-of-scope·serve_cfa_pages.py
+...
+16 15| -·`proof/friday/hygiene/`·created.
+17 16| 
+18 17| ##·AI-OFF·discipline
+19   |+
+20 18| Every·`just·check`·/·test·run·is·done·with·`.env`·moved·aside:
+21 19| `mv·.env·.env.bak;·<cmd>;·mv·.env.bak·.env`·(restore·always·runs).
+22 20| The·real·key·is·never·printed/logged/committed.
+...
+24 22| ---
+25 23| 
+26 24| ##·Increment·1·—·Fix·the·6·`just·check`·failures
+27   |+
+28 25| (status:·in·progress)
+29 26| 
+30 27| ##·Increment·2·—·CFA·deck·content·quality·+·provenance
+31   |+
+32 28| (pending)
+33 29| 
+34 30| ##·Increment·3·—·Retire·one-passage·refs·+·PLATFORM-MATRIX
+35   |+
+36 31| (pending)
+37 32| 
+38 33| ##·Increment·4·—·README·+·SUBMISSION-CHECKLIST
+39   |+
+40 34| (pending)
+41 35| 
+42 36| ---
+43 37| 
+44 38| ##·Cross-scope·HANDOFFs
+45   |+
+46 39| (none·yet·—·see·HANDOFF.md·if·any)
+--
+from /Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/cfa/ui/reference/capture_app.mjs:
+27 27| ····for·(const·c·of·candidates)·{
+28 28| ········try·{
+29 29| ············const·mod·=·await·import(c);
+   30|-············if·(mod.chromium)·return·mod.chromium;
+   31|-············if·(mod.default·&&·mod.default.chromium)·return·mod.default.chromium;
+30   |+············if·(mod.chromium)·{·return·mod.chromium;·}
+31   |+············if·(mod.default·&&·mod.default.chromium)·{·return·mod.default.chromium;·}
+32 32| ········}·catch·(e)·{
+33 33| ············errs.push(`${c}:·${e.message·||·e}`);
+34 34| ········}
+...
+78 78| ········const·consoleErrors·=·[];
+79 79| ········const·failed·=·[];
+80 80| ········page.on("console",·(m)·=>·{
+   81|-············if·(m.type()·===·"error")·consoleErrors.push(m.text());
+81   |+············if·(m.type()·===·"error")·{·consoleErrors.push(m.text());·}
+82 82| ········});
+83 83| ········page.on("requestfailed",·(r)·=>·{
+84 84| ············failed.push(`${r.url()}·::·${r.failure()?.errorText·||·"failed"}`);
+85 85| ········});
+86 86| ········page.on("response",·(r)·=>·{
+   87|-············if·(r.status()·>=·400)·failed.push(`${r.url()}·::·HTTP·${r.status()}`);
+87   |+············if·(r.status()·>=·400)·{·failed.push(`${r.url()}·::·HTTP·${r.status()}`);·}
+88 88| ········});
+89 89| 
+90 90| ········let·navError·=·null;
+--
+from /Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/cfa/ui/reference/app/verify-ethics-crossplatform-NOTES.md:
+ 5  5| Restyle·merged·as·PR·#12·(`be9a21449`).·VERIFY-ONLY:·no·template/style·edits.
+ 6  6| 
+ 7  7| ##·Screenshots·(this·dir)
+ 8   |+
+ 9  8| -·`verify-ethics-desktop-front.png`·/·`-desktop-back.png`·—·2000x1520·/·2000x1200·(2x)
+10  9| -·`verify-ethics-android-front.png`·/·`-android-back.png`·—·1080x2400·(real·device)
+11 10| 
+12 11| ##·Capture·method·—·HONEST
+13 12| 
+14 13| ###·Desktop·=·harness·render·(Blink),·NOT·the·live·Qt·window
+15   |+
+16 14| Rendered·the·REAL·`passage_front.html`·/·`passage_back.html`·+·`style.css`·with·**headless
+17 15| Google·Chrome**·via·the·repo's·own·`tools/cfa/render_ethics_restyle.py`·(same·tool·that
+18 16| produced·the·committed·`ethics-restyle-after-*.png`).·Blink·is·the·same·engine·as·the
+...
+22 20| rendered·from·a·seeded·fully-correct·`localStorage`·payload·(the·harness's·normal·method).
+23 21| 
+24 22| ###·Android·=·REAL·emulator,·GENUINE·attempt
+25   |+
+26 23| Emulator·`ankidroid_cfa`·(`emulator-5554`,·Android·14,·1080x2400),·AnkiDroid
+27 24| `com.ichi2.anki.debug`,·System·WebView·**Chrome/113.0.5672.136**.
+28   |+
+29 25| -·The·on-device·deck·still·had·the·PRE-restyle·templates·(on-device·notetype·css=11·070·B,
+30 26| ··none·of·the·restyle/font·markers).·I·rebuilt·the·current·deck·(`just·cfa-mobile-package`,
+31 27| ··byte-identical·templates·to·origin/main)·AND,·to·render·the·current·restyle
+...
+41 37| ··(not·seeded)·attempt.
+42 38| 
+43 39| ##·Fonts·ACTUALLY·LOAD·on·BOTH·platforms·(measured,·not·eyeballed)
+44   |+
+45 40| Via·`document.fonts`·+·DOM·width·probes·at·120px:
+46 41| 
+   42|-|·|·Source·Serif·4·|·IBM·Plex·Sans·|
+   43|-|---|---|---|
+47   |+|······························|·Source·Serif·4······················································|·IBM·Plex·Sans·······································|
+48   |+|·----------------------------·|·-------------------------------------------------------------------·|·---------------------------------------------------·|
+49 44| |·Android·WebView·(Chrome·113)·|·`loaded`,·check=true,·1243px·vs·1235px·generic-serif·→·**distinct**·|·`loaded`·w400+w500,·1162px·vs·1152px·→·**distinct**·|
+   45|-|·Desktop·Blink·(Chrome·150)·|·`loaded`,·check=true,·1243px·vs·1080px·generic-serif·→·**distinct**·|·`loaded`,·1162px·vs·1147px·→·**distinct**·|
+50   |+|·Desktop·Blink·(Chrome·150)···|·`loaded`,·check=true,·1243px·vs·1080px·generic-serif·→·**distinct**·|·`loaded`,·1162px·vs·1147px·→·**distinct**···········|
+51 46| 
+52 47| Source·Serif·4·=·**1243px**·and·IBM·Plex·Sans·=·**1162px**·on·BOTH·→·the·same·bundled
+53 48| data-URI·faces·render·identically·cross-platform.·The·@font-face·data·URIs·work·in
+...
+85 80| "fully·correct"·reveal.
+86 81| 
+87 82| ##·Prioritized·fixes·for·true·cross-platform·parity
+88   |+
+89 83| 1.·**Adopt·Meldrum's·cream·canvas**·(`.card`·bg·~`#f2ede4`,·warm·panel·tint)·so·both
+90 84| ···platforms·match·the·site's·warmth·instead·of·cool·white.·(Biggest·fidelity·lift.)
+91 85| 2.·**CTA·first·impression**·—·give·the·disabled·"Check·answer"·a·subtler·outlined/ghost·look
+--
+from /Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/proof/fixes/p1/NOTES.md:
+250 250| 2.·**Menu·action·+·handler**·—·new·`"Study·Ethics·(One-Passage)"`·action·in·`setup_menu`
+251 251| ···(placed·right·after·"Study·Ethics·Minimal-Pairs"·to·group·the·two·ethics·actions),·wired
+252 252| ···to·a·new·`study_ethics_passages(mw)`·handler.
+    253|-3.·**Entering·review·the·*normal-deck*·way.**·`CFA::Ethics·Passages`·is·a·NORMAL
+253    |+3.·**Entering·review·the·_normal-deck_·way.**·`CFA::Ethics·Passages`·is·a·NORMAL
+254 254| ···(non-filtered)·deck,·so·—·unlike·the·minimal-pairs·sibling·which·uses·`_study_filtered_deck`
+255 255| ···—·the·handler·follows·Anki's·own·overview·"Study"·path:·seed-if-missing·→·`decks.select(did)`
+256 256| ···→·`mw.reset()`·→·`mw.moveToState("review")`.
+...
+302 302| ··**F9·REACHABILITY:·PASS**.
+303 303| -·mypy·on·touched·source·(`qt/aqt/cfa.py`,·`qt/aqt/cfa_seed.py`)·—·**Success:·no·issues·found
+304 304| ··in·2·source·files**.·Official·folder-level·mypy:·16·remaining·errors,·all·pre-existing
+    305|-··baseline·in·files·I·do·not·own·(tools/cfa/*,·cfa/ai/*,·pylib/tests/*,·qt/aqt/cfa_ethics_ai.py);
+305    |+··baseline·in·files·I·do·not·own·(tools/cfa/_,·cfa/ai/_,·pylib/tests/*,·qt/aqt/cfa_ethics_ai.py);
+306 306| ··**none**·in·my·touched·files.
+307 307| -·ruff·check·+·ruff·format·--check·on·touched·files·—·**clean**.
+308 308| 
+...
+364 364| 
+365 365| A·stale/absurd·far-future·exam·date·persisted·in·the·synced·collection·config·(observed:
+366 366| **`2028-08-23`**)·is·shown·and·used·verbatim·by·the·exam-date·picker,·with·no·sanity·check.
+    367|-(The·code·*default*·is·already·the·canonical·near·date·**2026-08-25**·—·confirmed·by·F9's
+367    |+(The·code·_default_·is·already·the·canonical·near·date·**2026-08-25**·—·confirmed·by·F9's
+368 368| `F0b·exam·config·:·{'exam_date':·'2026-08-25'}`·—·so·this·is·runtime·pollution,·not·a·code
+369 369| default·bug.)
+370 370| 
+371 371| ####·Root·cause
+372 372| 
+373 373| `DeadlineDialog._initial_date`·read·`cfg.get("exam_date")·or·_default_exam_date()`·—·i.e.·any
+    374|-persisted·value·was·trusted·blindly;·only·a·*missing*·value·fell·back·to·the·canonical
+374    |+persisted·value·was·trusted·blindly;·only·a·_missing_·value·fell·back·to·the·canonical
+375 375| default.
+376 376| 
+377 377| ####·Fix·(additive,·backward-compatible;·`qt/aqt/cfa.py`·only)
+...
+401 401| ··(persisted·`2099-12-31`·⇒·picker·shows·the·canonical·default),·`test_dialog_keeps_sane_persisted_date`.
+402 402| -·`qt/tests/test_cfa_f0b.py`:·`test_deadline_dialog_renders_without_due_cards`·updated·to·the
+403 403| ··new·honest·empty-state·wording·("No·cards·to·rank·yet");·`test_deadline_dialog_apply_persists_exam_date`
+    404|-··unchanged·(apply·persists·verbatim;·the·guard·is·on·the·*read*·path).
+404    |+··unchanged·(apply·persists·verbatim;·the·guard·is·on·the·_read_·path).
+405 405| 
+406 406| Without·the·change·the·pylib/qt·dialog·tests·ERROR·(the·`deadline_retention_with_new`·/
+407 407| `_sanitized_exam_date`·symbols·don't·exist)·or·FAIL·(all-new·deck·⇒·empty·table;·absurd
+...
+447 447| ##·Item·6·(MEDIUM·#9)·—·F3·"AI·Back"·editor·button·has·no·visible·AI-off·state
+448 448| 
+449 449| **Symptom.**·With·no·`OPENAI_API_KEY`,·the·F3·"AI·Back"·editor·button·was·supposed·to
+    450|-render·*visibly·disabled·with·an·explanatory·tooltip*,·but·it·did·neither:·it·looked/behaved
+450    |+render·_visibly·disabled·with·an·explanatory·tooltip_,·but·it·did·neither:·it·looked/behaved
+451 451| enabled·and·hovering·showed·nothing.
+452 452| 
+453 453| ###·Root·cause·(two·concrete·defects·in·`_button_html()`·in·`qt/aqt/cfa_tab_fill.py`)
+--
+Found 5 not formatted files. Run dprint fmt to fix.
+Failed to run (20): /Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/out/node_modules/.bin/dprint check
+[4/4; 1 active; 3.210s] check:format:prettier
+FAILED: /Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/out/tests/prettier.6529351329606104884.fmt 
+/Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/out/rust/release/runner run --stamp=/Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/out/tests/prettier.6529351329606104884.fmt /Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/out/extracted/node/bin/yarn prettier --cache --check "{**/*.svelte,docs-site/**/*.mdx}"
+(node:36277) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:36288) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Checking formatting...
+[warn] ts/lib/cfa/pages/CfaDeadlinePage.svelte
+[warn] ts/lib/cfa/pages/CfaReadinessPage.svelte
+[warn] Code style issues found in 2 files. Run Prettier with --write to fix.
+Failed to run (1): /Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/out/extracted/node/bin/yarn prettier --cache --check {**/*.svelte,docs-site/**/*.mdx}
+ninja: build stopped: subcommand failed.
+[0m[1m[31m
+Build failed.
+[0m

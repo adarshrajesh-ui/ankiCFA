@@ -21,14 +21,7 @@ Calm by design: weights <= 600, flat cards, 4px/pill radii, an 8px rhythm, and
 the pass/fail/warn semantic triad preserved throughout.
 -->
 <script lang="ts">
-    import {
-        Caption,
-        DataTable,
-        Eyebrow,
-        Hero,
-        PageHeading,
-        StatCard,
-    } from "$lib/cfa";
+    import { Caption, DataTable, Eyebrow, Hero, PageHeading, StatCard } from "$lib/cfa";
     import type { CfaTone, ExamReadinessPayload, ScoreBand } from "$lib/cfa";
     import {
         bandSub,
@@ -70,15 +63,19 @@ the pass/fail/warn semantic triad preserved throughout.
 
 <div class="cfa-app cfa-readiness">
     <div class="cfa-readiness__inner">
-        <PageHeading eyebrow="Exam Readiness" title={data.deckName} eyebrowTone="green" />
+        <PageHeading
+            eyebrow="Exam Readiness"
+            title={data.deckName}
+            eyebrowTone="green"
+        />
 
         {#if data.heroMode === "bayesian_call" && data.heroBayesian}
             {@const hb = data.heroBayesian}
             {@const heroTone = (hb.passed ? "pass" : "fail") satisfies CfaTone}
             {@const heroNote =
-                `Bayesian — the band starts wide and narrows as reviews accrue `
-                + `(${hb.firstExposures} first-seen · ${hb.topicsCovered}/`
-                + `${hb.topicsTotal} topics studied). ${hb.label}.`}
+                `Bayesian — the band starts wide and narrows as reviews accrue ` +
+                `(${hb.firstExposures} first-seen · ${hb.topicsCovered}/` +
+                `${hb.topicsTotal} topics studied). ${hb.label}.`}
             <Hero
                 tone={heroTone}
                 headline={hb.call}
@@ -87,13 +84,15 @@ the pass/fail/warn semantic triad preserved throughout.
             >
                 Estimated exam-weighted accuracy
                 <strong class="cfa-readiness__em">{pct(hb.accuracy)}</strong>
-                <span class="cfa-readiness__muted"
-                    >(95% CI {pct(hb.ciLow)}–{pct(hb.ciHigh)})</span
-                >
-                vs ~{pct(hb.mps)} MPS proxy{#if hb.recall !== null} · est. recall
+                <span class="cfa-readiness__muted">
+                    (95% CI {pct(hb.ciLow)}–{pct(hb.ciHigh)})
+                </span>
+                vs ~{pct(hb.mps)} MPS proxy{#if hb.recall !== null}
+                    · est. recall
                     <strong class="cfa-readiness__em">{pct(hb.recall)}</strong>
-                    <span class="cfa-readiness__muted">(FSRS R, SM-2 fallback)</span
-                    >{/if}
+                    <span class="cfa-readiness__muted">
+                        (FSRS R, SM-2 fallback)
+                    </span>{/if}
             </Hero>
         {:else if data.heroAbstain}
             {@const ha = data.heroAbstain}
@@ -102,9 +101,9 @@ the pass/fail/warn semantic triad preserved throughout.
                 headline="Not enough data — keep studying"
                 note={`${ha.reason} · ${ha.readinessLabel}`}
             >
-                No pass/fail call yet — the estimate stays hidden until there is
-                enough graded review evidence to be honest. It appears here once the
-                give-up threshold is met.
+                No pass/fail call yet — the estimate stays hidden until there is enough
+                graded review evidence to be honest. It appears here once the give-up
+                threshold is met.
             </Hero>
         {/if}
 
@@ -128,15 +127,21 @@ the pass/fail/warn semantic triad preserved throughout.
 
         <section class="cfa-readiness__block">
             <Eyebrow tone="muted">Per-topic recall</Eyebrow>
-            <DataTable columns={TOPIC_COLUMNS} {rows} emptyText="No topics studied yet.">
+            <DataTable
+                columns={TOPIC_COLUMNS}
+                {rows}
+                emptyText="No topics studied yet."
+            >
                 <svelte:fragment slot="cell" let:column let:row>
                     {@const r = row as TopicDisplayRow}
                     {#if column.key === "recall"}
                         <span
                             class="cfa-readiness__recall"
                             class:is-warn={r.recallTone === "warn"}
-                            class:is-faint={r.recallTone === "muted"}>{r.recall}</span
+                            class:is-faint={r.recallTone === "muted"}
                         >
+                            {r.recall}
+                        </span>
                     {:else if column.key === "topic"}
                         {r.topic}
                     {:else if column.key === "weight"}

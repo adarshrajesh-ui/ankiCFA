@@ -1,0 +1,2047 @@
+./ninja pylib qt check
+[1m[92m    Finished[0m `release` profile [optimized] target(s) in 0.36s
+[1/24; 4 active; 0.221s] rslib:i18n
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.16s
+[2/7; 6 active; 0.301s] check:format:dprint
+FAILED: /Users/adarshrajesh/AlphaWeek2/ankiCFA/out/tests/dprint.check 
+/Users/adarshrajesh/AlphaWeek2/ankiCFA/out/rust/release/runner run --stamp=/Users/adarshrajesh/AlphaWeek2/ankiCFA/out/tests/dprint.check /Users/adarshrajesh/AlphaWeek2/ankiCFA/out/node_modules/.bin/dprint check
+from /Users/adarshrajesh/AlphaWeek2/ankiCFA/README.md:
+59 59| ··in·[`qt/aqt/cfa.py`](./qt/aqt/cfa.py).
+60 60| -·**Ethics·minimal-pairs·&·one-passage·cards.**·Hand-authored·ethics·items·that
+61 61| ··force·the·learner·to·pick·a·verdict,·**highlight·the·governing·evidence**,·and
+   62|-··name·the·controlling·CFA·Standard·—·teaching·the·*boundary*·between·confusable
+62   |+··name·the·controlling·CFA·Standard·—·teaching·the·_boundary_·between·confusable
+63 63| ··Standards,·not·just·the·label.·Highlights·are·scored·by·a·deterministic
+64 64| ··span-matching·grader·with·tolerant·partial-credit·tiers,·and·the·Python·and·JS
+65 65| ··graders·are·kept·in·parity·so·desktop·and·mobile·grade·identically.
+...
+69 69| ··deterministic·grader·and·the·AI·editor·button·renders·**disabled·with·a
+70 70| ··tooltip**·—·no·network·calls,·identical·study·experience.
+71 71| -·**CFA·study·menu·&·Peak-on-Exam-Day·planner.**·The·desktop·**CFA**·menu·wires·the
+   72|-··flagship·flows·end-to-end·with·no·dead-ends·—·*Study·Ethics·Minimal-Pairs*,
+   73|-··*Study·Ethics·(One-Passage)*,·*Study·by·Exam·Priority*,·*Exam·Readiness…*,·and·a
+72   |+··flagship·flows·end-to-end·with·no·dead-ends·—·_Study·Ethics·Minimal-Pairs_,
+73   |+··_Study·Ethics·(One-Passage)_,·_Study·by·Exam·Priority_,·_Exam·Readiness…_,·and·a
+74 74| ··**Peak-on-Exam-Day**·deadline·view·that·ranks·which·cards·to·prioritize
+75 75| ··(including·new·cards)·so·recall·peaks·on·your·configured·exam·date.·Each·action
+76 76| ··seeds·its·deck·on·demand·and·enters·review.
+--
+from /Users/adarshrajesh/AlphaWeek2/ankiCFA/proof/friday/hygiene/NOTES.md:
+ 7  7| `SUBMISSION-CHECKLIST.md`).
+ 8  8| 
+ 9  9| ##·Setup
+10   |+
+11 10| -·`git·fetch·origin`·done;·branch·`friday/hygiene`·created·off·`origin/main`.
+12 11| -·PRE-EXISTING·out-of-scope·change·to·`tools/cfa/serve_cfa_pages.py`·(import
+13 12| ··reorder)·was·stashed·as·`stash@{0}`·("preserve·out-of-scope·serve_cfa_pages.py
+...
+16 15| -·`proof/friday/hygiene/`·created.
+17 16| 
+18 17| ##·AI-OFF·discipline
+19   |+
+20 18| Every·`just·check`·/·test·run·is·done·with·`.env`·moved·aside:
+21 19| `mv·.env·.env.bak;·<cmd>;·mv·.env.bak·.env`·(restore·always·runs).
+22 20| The·real·key·is·never·printed/logged/committed.
+...
+24 22| ---
+25 23| 
+26 24| ##·Increment·1·—·Fix·the·6·`just·check`·failures
+27   |+
+28 25| (status:·in·progress)
+29 26| 
+30 27| ##·Increment·2·—·CFA·deck·content·quality·+·provenance
+31   |+
+32 28| (pending)
+33 29| 
+34 30| ##·Increment·3·—·Retire·one-passage·refs·+·PLATFORM-MATRIX
+35   |+
+36 31| (pending)
+37 32| 
+38 33| ##·Increment·4·—·README·+·SUBMISSION-CHECKLIST
+39   |+
+40 34| (pending)
+41 35| 
+42 36| ---
+43 37| 
+44 38| ##·Cross-scope·HANDOFFs
+45   |+
+46 39| (none·yet·—·see·HANDOFF.md·if·any)
+--
+from /Users/adarshrajesh/AlphaWeek2/ankiCFA/cfa/ui/reference/capture_app.mjs:
+27 27| ····for·(const·c·of·candidates)·{
+28 28| ········try·{
+29 29| ············const·mod·=·await·import(c);
+   30|-············if·(mod.chromium)·return·mod.chromium;
+   31|-············if·(mod.default·&&·mod.default.chromium)·return·mod.default.chromium;
+30   |+············if·(mod.chromium)·{·return·mod.chromium;·}
+31   |+············if·(mod.default·&&·mod.default.chromium)·{·return·mod.default.chromium;·}
+32 32| ········}·catch·(e)·{
+33 33| ············errs.push(`${c}:·${e.message·||·e}`);
+34 34| ········}
+...
+78 78| ········const·consoleErrors·=·[];
+79 79| ········const·failed·=·[];
+80 80| ········page.on("console",·(m)·=>·{
+   81|-············if·(m.type()·===·"error")·consoleErrors.push(m.text());
+81   |+············if·(m.type()·===·"error")·{·consoleErrors.push(m.text());·}
+82 82| ········});
+83 83| ········page.on("requestfailed",·(r)·=>·{
+84 84| ············failed.push(`${r.url()}·::·${r.failure()?.errorText·||·"failed"}`);
+85 85| ········});
+86 86| ········page.on("response",·(r)·=>·{
+   87|-············if·(r.status()·>=·400)·failed.push(`${r.url()}·::·HTTP·${r.status()}`);
+87   |+············if·(r.status()·>=·400)·{·failed.push(`${r.url()}·::·HTTP·${r.status()}`);·}
+88 88| ········});
+89 89| 
+90 90| ········let·navError·=·null;
+--
+from /Users/adarshrajesh/AlphaWeek2/ankiCFA/cfa/ui/reference/.probe_mm.mjs:
+ 1   1| //·Temp·probe·(NOT·part·of·deliverables)·to·learn·markmeldrum.com·mobile·DOM.
+     2|-import·{·chromium·}·from·'playwright';
+ 2    |+import·{·chromium·}·from·"playwright";
+ 3   3| 
+     4|-const·URL·=·'https://www.markmeldrum.com/';
+ 4    |+const·URL·=·"https://www.markmeldrum.com/";
+ 5   5| const·UA·=
+     6|-··'Mozilla/5.0·(iPhone;·CPU·iPhone·OS·17_0·like·Mac·OS·X)·AppleWebKit/605.1.15·(KHTML,·like·Gecko)·Version/17.0·Mobile/15E148·Safari/604.1';
+ 6    |+····"Mozilla/5.0·(iPhone;·CPU·iPhone·OS·17_0·like·Mac·OS·X)·AppleWebKit/605.1.15·(KHTML,·like·Gecko)·Version/17.0·Mobile/15E148·Safari/604.1";
+ 7   7| 
+     8|-const·browser·=·await·chromium.launch({·channel:·'chrome',·headless:·true·});
+ 8    |+const·browser·=·await·chromium.launch({·channel:·"chrome",·headless:·true·});
+ 9   9| const·ctx·=·await·browser.newContext({
+    10|-··viewport:·{·width:·390,·height:·844·},
+    11|-··deviceScaleFactor:·3,
+    12|-··isMobile:·true,
+    13|-··hasTouch:·true,
+    14|-··userAgent:·UA,
+10    |+····viewport:·{·width:·390,·height:·844·},
+11    |+····deviceScaleFactor:·3,
+12    |+····isMobile:·true,
+13    |+····hasTouch:·true,
+14    |+····userAgent:·UA,
+15  15| });
+16  16| const·page·=·await·ctx.newPage();
+17  17| const·errors·=·[];
+    18|-page.on('pageerror',·(e)·=>·errors.push('pageerror:·'·+·e.message));
+18    |+page.on("pageerror",·(e)·=>·errors.push("pageerror:·"·+·e.message));
+19  19| 
+20  20| try·{
+    21|-··await·page.goto(URL,·{·waitUntil:·'networkidle',·timeout:·60000·});
+21    |+····await·page.goto(URL,·{·waitUntil:·"networkidle",·timeout:·60000·});
+22  22| }·catch·(e)·{
+    23|-··errors.push('goto·networkidle·failed:·'·+·e.message·+·'·->·retry·load');
+    24|-··await·page.goto(URL,·{·waitUntil:·'load',·timeout:·60000·}).catch((e2)·=>·errors.push('goto·load·failed:·'·+·e2.message));
+23    |+····errors.push("goto·networkidle·failed:·"·+·e.message·+·"·->·retry·load");
+24    |+····await·page.goto(URL,·{·waitUntil:·"load",·timeout:·60000·}).catch((e2)·=>
+25    |+········errors.push("goto·load·failed:·"·+·e2.message)
+26    |+····);
+27  25| }
+28  26| await·page.evaluate(()·=>·document.fonts·&&·document.fonts.ready).catch(()·=>·{});
+29  27| await·page.waitForTimeout(1500);
+30  28| 
+31  29| const·report·=·await·page.evaluate(()·=>·{
+    30|-··const·out·=·{};
+    31|-··out.title·=·document.title;
+    32|-··out.url·=·location.href;
+    33|-··const·txt·=·(el)·=>·(el·?·(el.innerText·||·'').trim().replace(/\s+/g,·'·').slice(0,·90)·:·'');
+    34|-··const·box·=·(el)·=>·{
+    35|-····const·r·=·el.getBoundingClientRect();
+    36|-····return·{·x:·Math.round(r.x),·y:·Math.round(r.y·+·window.scrollY),·w:·Math.round(r.width),·h:·Math.round(r.height)·};
+    37|-··};
+    38|-··//·sectioning·landmarks
+    39|-··out.landmarks·=·[...document.querySelectorAll('header,·nav,·section,·footer,·main,·[role="banner"],·[role="contentinfo"],·[role="navigation"]')].map((el)·=>·({
+    40|-····tag:·el.tagName.toLowerCase(),
+    41|-····id:·el.id·||·'',
+    42|-····cls:·(el.className·&&·el.className.toString().slice(0,·60))·||·'',
+    43|-····heading:·txt(el.querySelector('h1,h2,h3')),
+    44|-····box:·box(el),
+    45|-··}));
+    46|-··//·headings
+    47|-··out.headings·=·[...document.querySelectorAll('h1,h2,h3')].map((h)·=>·({·t:·h.tagName.toLowerCase(),·text:·txt(h),·box:·box(h)·}));
+    48|-··//·tables
+    49|-··out.tables·=·[...document.querySelectorAll('table')].map((t)·=>·({·heading:·txt(t),·box:·box(t)·}));
+    50|-··//·key·texts·present?
+    51|-··const·body·=·document.body.innerText·||·'';
+    52|-··const·probes·=·['Master·the·CFA',·'Lecture·Videos',·'Question·Bank',·'Study·Planner',·'Archive',·'Performance',·'250,000',·'180+',·'Top-rated',·'Top·rated',·'testimonial',·'pricing',·'schedule',·'CFA'];
+    53|-··out.textHits·=·{};
+    54|-··probes.forEach((p)·=>·(out.textHits[p]·=·body.toLowerCase().includes(p.toLowerCase())));
+    55|-··out.scrollHeight·=·document.documentElement.scrollHeight;
+    56|-··out.innerWidth·=·window.innerWidth;
+    57|-··//·buttons·(for·consent·detection)
+    58|-··out.buttons·=·[...document.querySelectorAll('button,·[role="button"],·a')].map((b)·=>·txt(b)).filter(Boolean).slice(0,·60);
+    59|-··return·out;
+32    |+····const·out·=·{};
+33    |+····out.title·=·document.title;
+34    |+····out.url·=·location.href;
+35    |+····const·txt·=·(el)·=>·(el·?·(el.innerText·||·"").trim().replace(/\s+/g,·"·").slice(0,·90)·:·"");
+36    |+····const·box·=·(el)·=>·{
+37    |+········const·r·=·el.getBoundingClientRect();
+38    |+········return·{
+39    |+············x:·Math.round(r.x),
+40    |+············y:·Math.round(r.y·+·window.scrollY),
+41    |+············w:·Math.round(r.width),
+42    |+············h:·Math.round(r.height),
+43    |+········};
+44    |+····};
+45    |+····//·sectioning·landmarks
+46    |+····out.landmarks·=·[
+47    |+········...document.querySelectorAll(
+48    |+············"header,·nav,·section,·footer,·main,·[role=\"banner\"],·[role=\"contentinfo\"],·[role=\"navigation\"]",
+49    |+········),
+50    |+····].map((el)·=>·({
+51    |+········tag:·el.tagName.toLowerCase(),
+52    |+········id:·el.id·||·"",
+53    |+········cls:·(el.className·&&·el.className.toString().slice(0,·60))·||·"",
+54    |+········heading:·txt(el.querySelector("h1,h2,h3")),
+55    |+········box:·box(el),
+56    |+····}));
+57    |+····//·headings
+58    |+····out.headings·=·[...document.querySelectorAll("h1,h2,h3")].map((h)·=>·({
+59    |+········t:·h.tagName.toLowerCase(),
+60    |+········text:·txt(h),
+61    |+········box:·box(h),
+62    |+····}));
+63    |+····//·tables
+64    |+····out.tables·=·[...document.querySelectorAll("table")].map((t)·=>·({·heading:·txt(t),·box:·box(t)·}));
+65    |+····//·key·texts·present?
+66    |+····const·body·=·document.body.innerText·||·"";
+67    |+····const·probes·=·[
+68    |+········"Master·the·CFA",
+69    |+········"Lecture·Videos",
+70    |+········"Question·Bank",
+71    |+········"Study·Planner",
+72    |+········"Archive",
+73    |+········"Performance",
+74    |+········"250,000",
+75    |+········"180+",
+76    |+········"Top-rated",
+77    |+········"Top·rated",
+78    |+········"testimonial",
+79    |+········"pricing",
+80    |+········"schedule",
+81    |+········"CFA",
+82    |+····];
+83    |+····out.textHits·=·{};
+84    |+····probes.forEach((p)·=>·(out.textHits[p]·=·body.toLowerCase().includes(p.toLowerCase())));
+85    |+····out.scrollHeight·=·document.documentElement.scrollHeight;
+86    |+····out.innerWidth·=·window.innerWidth;
+87    |+····//·buttons·(for·consent·detection)
+88    |+····out.buttons·=·[...document.querySelectorAll("button,·[role=\"button\"],·a")].map((b)·=>·txt(b)).filter(Boolean)
+89    |+········.slice(0,·60);
+90    |+····return·out;
+91  60| });
+92  61| 
+    62|-console.log('ERRORS:',·JSON.stringify(errors,·null,·2));
+    63|-console.log('TITLE:',·report.title,·'|·URL:',·report.url,·'|·scrollH:',·report.scrollHeight,·'|·innerW:',·report.innerWidth);
+    64|-console.log('TEXT·HITS:',·JSON.stringify(report.textHits,·null,·2));
+    65|-console.log('LANDMARKS:');
+    66|-report.landmarks.forEach((l,·i)·=>·console.log(`··[${i}]·<${l.tag}>·id="${l.id}"·cls="${l.cls}"·h="${l.heading}"·box=${JSON.stringify(l.box)}`));
+    67|-console.log('HEADINGS:');
+93    |+console.log("ERRORS:",·JSON.stringify(errors,·null,·2));
+94    |+console.log(
+95    |+····"TITLE:",
+96    |+····report.title,
+97    |+····"|·URL:",
+98    |+····report.url,
+99    |+····"|·scrollH:",
+100    |+····report.scrollHeight,
+101    |+····"|·innerW:",
+102    |+····report.innerWidth,
+103    |+);
+104    |+console.log("TEXT·HITS:",·JSON.stringify(report.textHits,·null,·2));
+105    |+console.log("LANDMARKS:");
+106    |+report.landmarks.forEach((l,·i)·=>
+107    |+····console.log(`··[${i}]·<${l.tag}>·id="${l.id}"·cls="${l.cls}"·h="${l.heading}"·box=${JSON.stringify(l.box)}`)
+108    |+);
+109    |+console.log("HEADINGS:");
+110  68| report.headings.forEach((h,·i)·=>·console.log(`··[${i}]·${h.t}:·"${h.text}"·box=${JSON.stringify(h.box)}`));
+    69|-console.log('TABLES:');
+111    |+console.log("TABLES:");
+112  70| report.tables.forEach((t,·i)·=>·console.log(`··[${i}]·"${t.heading}"·box=${JSON.stringify(t.box)}`));
+    71|-console.log('BUTTONS/LINKS:',·JSON.stringify(report.buttons,·null,·2));
+113    |+console.log("BUTTONS/LINKS:",·JSON.stringify(report.buttons,·null,·2));
+114  72| 
+115  73| await·browser.close();
+--
+from /Users/adarshrajesh/AlphaWeek2/ankiCFA/proof/fixes/p2/NOTES.md:
+ 5  5| is·**PSG-01**·(Priya·/·MNPI),·the·F1·one-passage·ethics·card.
+ 6  6| 
+ 7  7| Two·repos:
+ 8   |+
+ 9  8| -·**Desktop·/·shared**·(`ankiCFA`):·the·shared·card·templates·+·JS·+·the·Python·grader·mirror.
+10  9| ··Branch·`cfa/ethics-p2-shared-templates`·off·`origin/main`·(`557a7cc82`),·commit·`5a2abc67f·(rebased·onto·origin/main;·was·de4b41b47)`.
+11 10| -·**Mobile**·(`~/wed/AnkiDroid`):·the·`cfa-bootstrap.apkg`·app·asset·(regenerated·from·the·shared
+...
+29 28| **Root·cause.**·After·a·complete·attempt·(verdict·+·evidence·+·Check),·the·front's·`reveal()`
+30 29| showed·the·Standard·inline·but·only·persisted·the·grade·to·`localStorage`·when·the·learner·tapped
+31 30| "Record·&·continue".·So·tapping·AnkiDroid's·prominent·built-in·**"Show·answer"**·hit·the·back
+   31|-template·with·`cfaEthics:pending·==·null`·→·it·showed·*"Attempt·not·completed·—·the·governing
+   32|-Standard·is·shown·only·after·you·pick·a·verdict·and·highlight·the·evidence"*,·withholding·the
+32   |+template·with·`cfaEthics:pending·==·null`·→·it·showed·_"Attempt·not·completed·—·the·governing
+33   |+Standard·is·shown·only·after·you·pick·a·verdict·and·highlight·the·evidence"_,·withholding·the
+34 33| learning·payload·even·though·the·attempt·was·genuinely·complete.·(Confirmed·in·logcat:·the·back
+35 34| reads·`localStorage.getItem("cfaEthics:pending")`.)
+36 35| 
+37 36| **Fix·(additive).**
+38   |+
+39 37| -·`templates/passage_front.html`·—·`reveal()`·now·persists·the·full·learning·payload
+40 38| ··(`correct`,·`standard`,·`rationale`,·per-span·tiers,·verdict/evidence·summary)·to
+41 39| ··`localStorage`·the·moment·Check·reveals·it,·tagged·with·`itemId`.·"Record·&·continue"
+42 40| ··re-affirms·the·same·payload.
+43 41| -·`templates/passage_back.html`·—·when·a·completed·attempt·for·**this**·card·is·found,·it·reveals
+44 42| ··the·**Governing·Standard·+·rationale·+·per-span·breakdown**·(the·same·payload·as·the·checked
+   43|-··front).·The·`itemId`·guard·means·a·missing/stale·grade·(built-in·Show·Answer·*before*·completing,
+45   |+··front).·The·`itemId`·guard·means·a·missing/stale·grade·(built-in·Show·Answer·_before_·completing,
+46 44| ··or·a·grade·from·another·card)·still·shows·"Attempt·not·completed"·—·**no·answer·leak**.
+47 45| -·`templates/style.css`·—·`.cfa-commit-reveal`·styling·for·the·back·payload.
+48 46| 
+...
+50 48| (mobile·asset:·`~/wed/AnkiDroid`·`cfa/ankidroid-backend-repoint`·—·see·push·status·below).
+51 49| 
+52 50| **Proof·(real·device):**
+53   |+
+54 51| -·Before:·`item1-before.png`·—·complete·attempt·→·built-in·"Show·answer"·→·"Attempt·not·completed".
+55 52| ··(sequence:·`item1-before-01-front.png`,·`-02-attempt.png`,·`-03-checked-inline.png`;
+56 53| ··`item1-before-logcat.txt`.)
+...
+68 65| ##·Item·2·[MEDIUM·#6]·—·Semantic-tolerant·grader·on·mobile·(partial-credit·tiers)
+69 66| 
+70 67| **Root·cause.**·The·shared·deterministic·grader·`cfaGradeSpans`·credits·a·gold·span·only·when
+   68|-**every**·one·of·its·tokens·is·selected.·So·highlighting·*"unreleased·quarterly·earnings"*·(3·of·the
+   69|-5·tokens·of·the·gold·span·*"exact·unreleased·quarterly·earnings·figure"*)·scored·*"Evidence·spans:
+   70|-0·of·2·found···Wrong"*·—·a·materially-correct·highlight·punished·as·a·flat·miss.·The·tolerant·F2
+71   |+**every**·one·of·its·tokens·is·selected.·So·highlighting·_"unreleased·quarterly·earnings"_·(3·of·the
+72   |+5·tokens·of·the·gold·span·_"exact·unreleased·quarterly·earnings·figure"_)·scored·_"Evidence·spans:
+73   |+0·of·2·found···Wrong"_·—·a·materially-correct·highlight·punished·as·a·flat·miss.·The·tolerant·F2
+74 71| grader·was·desktop-only·(LLM,·needs·network).
+75 72| 
+76 73| **Fix·(additive,·deterministic,·offline).**·Added·a·partial-credit·tolerant·grader·to·the·**shared**
+77 74| block·(so·mobile·gets·it·with·no·network):
+78   |+
+79 75| -·`cfaSpanTier(sel,·span)`·→·`"full"`·(every·gold·token·covered;·superset·ok)·/·`"near"`·(selection
+80 76| ··overlaps·≥·half·the·gold·tokens·—·right·idea,·boundaries·off)·/·`"none"`.
+81 77| -·`cfaGradeSpansTolerant(...)`·→·grades·`correct`·(all·full,·within·cap)·/·`somewhat`·(all·matched
+...
+91  87| **Repo/branch/SHA:**·`ankiCFA`·`cfa/ethics-p2-shared-templates`·@·`5a2abc67f·(rebased·onto·origin/main;·was·de4b41b47)`.
+92  88| 
+93  89| **Proof·(real·device):**
+    90|--·Before:·`item2-before.png`·—·PSG-01·+·"unreleased·quarterly·earnings"·→·*"Evidence·spans:·0·of·2
+    91|-··found···Wrong"*.·(`item2-before-01-front.png`,·`-02-attempt.png`.)
+    92|--·After:·`item2-after.png`·—·same·input·→·*"Evidence·spans:·0·of·2·found·(+1·near)···Partial"*,·with
+94    |+
+95    |+-·Before:·`item2-before.png`·—·PSG-01·+·"unreleased·quarterly·earnings"·→·_"Evidence·spans:·0·of·2
+96    |+··found···Wrong"_.·(`item2-before-01-front.png`,·`-02-attempt.png`.)
+97    |+-·After:·`item2-after.png`·—·same·input·→·_"Evidence·spans:·0·of·2·found·(+1·near)···Partial"_,·with
+98  93| ··the·span·marked·`~`·(near).·`item1-after.png`·also·shows·the·`~·exact·unreleased·quarterly·earnings
+99  94| ··figure`·line·in·the·revealed·breakdown.
+100  95| 
+...
+115 110| **SHARED·—·one·implementation,·byte-mirrored,·drives·BOTH·platforms**
+116 111| (`cfa/ethics_pairs/templates/*`·+·`cfa/ethics_pairs/tests/js/*_logic.js`·+·Python·mirror
+117 112| `ethics_scoring.py`):
+118    |+
+119 113| -·Passage·tokenization,·tap/drag·multi-span·highlight·capture,·verdict·capture.
+120 114| -·The·grader:·`cfaTokenize·/·cfaNormalizedTokens·/·cfaFindGold·/·cfaFindGoldSpans·/·cfaSpanCap·/
+121 115| ··cfaGradeSpans`·**and·Item·2's·`cfaSpanTier·/·cfaGradeSpansTolerant`**·—·mirrored·in
+...
+125 119| -·`style.css`.
+126 120| 
+127 121| **PLATFORM-SPECIFIC·—·only·the·glue·that·delivers·the·shared·card·+·optional·desktop·AI**
+128    |+
+129 122| -·**AnkiDroid·(Kotlin)**·—·`AnkiDroid/.../CfaBootstrap.kt`·bundles·`cfa-bootstrap.apkg`·(built·from
+130 123| ··the·shared·templates)·as·an·app·asset·and·auto-imports·it·on·first·launch·via·the·fork·Rust
+131 124| ··engine.·`pycmd`·is·undefined·in·the·AnkiDroid·WebView,·so·the·F2·AI·overlay·never·appears·(the
+...
+142 135| ---
+143 136| 
+144 137| ##·Files·changed·(desktop,·shared)·—·commit·`5a2abc67f·(rebased·onto·origin/main;·was·de4b41b47)`
+145    |+
+146 138| -·`cfa/ethics_pairs/templates/passage_front.html`·(Item·1·persistence·+·Item·2·tolerant·grade·+·tiers)
+147 139| -·`cfa/ethics_pairs/templates/passage_back.html`·(Item·1·Standard/rationale·reveal·+·tiers)
+148 140| -·`cfa/ethics_pairs/templates/style.css`·(back·reveal·+·near-tier·styling)
+...
+152 144| -·`cfa/ethics_pairs/tests/test_passages.py`·(tolerant·tests·+·extended·agreement·matrix)
+153 145| 
+154 146| ##·Mobile·(AnkiDroid)·change
+155    |+
+156 147| -·`AnkiDroid/src/main/assets/cfa/cfa-bootstrap.apkg`·—·regenerated·from·the·fixed·shared·templates
+157 148| ··(630·CFA·notes·+·30·ethics·passages).·Rebuilt·APK·carries·`librsdroid.so`·(fork·engine).
+158 149| 
+...
+210 201| The·mobile·bundle·(`1ef21078e5`)·predated·that·fix,·so·this·re-sync·propagates·it·for·flagship·parity.
+211 202| 
+212 203| **The·fix·(from·`git·diff·5a2abc67f·origin/main`,·both·changes·OUTSIDE·the·CFA-SPAN-SHARED·block):**
+213    |+
+214 204| -·`passage_front.html`:·on·every·fresh·front·render,·`localStorage.removeItem("cfaEthics:pending")`
+215 205| ··("a·new·attempt·discards·any·grade·a·previous·Check·persisted·but·never·Recorded"),·so·only·an
+216 206| ··in-session·Check·on·THIS·card·can·satisfy·the·back's·completion·gate.
+...
+235 225| green).
+236 226| 
+237 227| **On-device·re-proof·(fixed·bundle,·genuine·empty·first-launch):**
+238    |+
+239 228| -·`item3-parity-item1-after.png`·—·PSG-01·complete·attempt·→·bottom·"Show·answer"·reveals·**Governing
+240 229| ··Standard·II(A)**·+·rationale·+·per-span·(Item·1·intact).
+241 230| -·`item3-parity-item2-after.png`·—·"unreleased·quarterly·earnings"·→·**"0·of·2·found·(+1·near)··
+--
+from /Users/adarshrajesh/AlphaWeek2/ankiCFA/cfa/ui/reference/.probe2_mm.mjs:
+ 1   1| //·Temp·probe·#2·(NOT·a·deliverable)·—·deep·structure·for·section·selectors.
+     2|-import·{·chromium·}·from·'playwright';
+     3|-const·URL·=·'https://www.markmeldrum.com/';
+     4|-const·UA·=·'Mozilla/5.0·(iPhone;·CPU·iPhone·OS·17_0·like·Mac·OS·X)·AppleWebKit/605.1.15·(KHTML,·like·Gecko)·Version/17.0·Mobile/15E148·Safari/604.1';
+ 2    |+import·{·chromium·}·from·"playwright";
+ 3    |+const·URL·=·"https://www.markmeldrum.com/";
+ 4    |+const·UA·=
+ 5    |+····"Mozilla/5.0·(iPhone;·CPU·iPhone·OS·17_0·like·Mac·OS·X)·AppleWebKit/605.1.15·(KHTML,·like·Gecko)·Version/17.0·Mobile/15E148·Safari/604.1";
+ 6   5| 
+     6|-const·browser·=·await·chromium.launch({·channel:·'chrome',·headless:·true·});
+     7|-const·ctx·=·await·browser.newContext({·viewport:·{·width:·390,·height:·844·},·deviceScaleFactor:·3,·isMobile:·true,·hasTouch:·true,·userAgent:·UA·});
+ 7    |+const·browser·=·await·chromium.launch({·channel:·"chrome",·headless:·true·});
+ 8    |+const·ctx·=·await·browser.newContext({
+ 9    |+····viewport:·{·width:·390,·height:·844·},
+10    |+····deviceScaleFactor:·3,
+11    |+····isMobile:·true,
+12    |+····hasTouch:·true,
+13    |+····userAgent:·UA,
+14    |+});
+15   8| const·page·=·await·ctx.newPage();
+     9|-await·page.goto(URL,·{·waitUntil:·'load',·timeout:·60000·}).catch((e)·=>·console.log('goto·err',·e.message));
+16    |+await·page.goto(URL,·{·waitUntil:·"load",·timeout:·60000·}).catch((e)·=>·console.log("goto·err",·e.message));
+17  10| await·page.evaluate(()·=>·document.fonts·&&·document.fonts.ready).catch(()·=>·{});
+18  11| await·page.waitForTimeout(2000);
+19  12| //·autoscroll·to·load·lazy·content
+20  13| await·page.evaluate(async·()·=>·{
+    14|-··await·new·Promise((res)·=>·{·let·t·=·0;·const·s·=·500;·const·id·=·setInterval(()·=>·{·window.scrollBy(0,·s);·t·+=·s;·if·(t·>=·document.documentElement.scrollHeight·+·1200)·{·clearInterval(id);·res();·}·},·90);·});
+21    |+····await·new·Promise((res)·=>·{
+22    |+········let·t·=·0;
+23    |+········const·s·=·500;
+24    |+········const·id·=·setInterval(()·=>·{
+25    |+············window.scrollBy(0,·s);
+26    |+············t·+=·s;
+27    |+············if·(t·>=·document.documentElement.scrollHeight·+·1200)·{
+28    |+················clearInterval(id);
+29    |+················res();
+30    |+············}
+31    |+········},·90);
+32    |+····});
+33  15| });
+34  16| await·page.waitForTimeout(800);
+35  17| await·page.evaluate(()·=>·window.scrollTo(0,·0));
+36  18| await·page.waitForTimeout(500);
+37  19| 
+38  20| const·data·=·await·page.evaluate(()·=>·{
+    21|-··const·norm·=·(s)·=>·(s·||·'').replace(/\s+/g,·'·').trim();
+    22|-··const·abox·=·(el)·=>·{·const·r·=·el.getBoundingClientRect();·return·{·x:·Math.round(r.x),·y:·Math.round(r.y·+·window.scrollY),·w:·Math.round(r.width),·h:·Math.round(r.height)·};·};
+    23|-··const·vis·=·(el)·=>·{·const·s·=·getComputedStyle(el);·const·r·=·el.getBoundingClientRect();·return·s.display·!==·'none'·&&·s.visibility·!==·'hidden'·&&·r.width·>·0·&&·r.height·>·0;·};
+    24|-··const·findByText·=·(needle)·=>·[...document.querySelectorAll('h1,h2,h3,h4,span,div,a,p,li')].find((e)·=>·norm(e.textContent).toLowerCase()·===·needle.toLowerCase()·||·norm(e.textContent).toLowerCase().startsWith(needle.toLowerCase()));
+    25|-··const·climbFullWidth·=·(el)·=>·{·let·cur·=·el;·let·best·=·el;·for·(let·i·=·0;·i·<·8·&&·cur;·i++)·{·const·r·=·cur.getBoundingClientRect();·if·(r.width·>=·window.innerWidth·*·0.85·&&·r.height·>·40)·{·best·=·cur;·}·cur·=·cur.parentElement;·}·return·best;·};
+    26|-··const·card·=·(el)·=>·{·//·climb·to·a·card-ish·ancestor·(class·contains·card/col/item/box)
+    27|-····let·cur·=·el;·for·(let·i·=·0;·i·<·6·&&·cur;·i++)·{·const·c·=·(cur.className·||·'').toString().toLowerCase();·if·(/card|col-|column|feature|item|box|tile/.test(c))·return·cur;·cur·=·cur.parentElement;·}·return·el;·};
+    28|-··const·out·=·{};
+39    |+····const·norm·=·(s)·=>·(s·||·"").replace(/\s+/g,·"·").trim();
+40    |+····const·abox·=·(el)·=>·{
+41    |+········const·r·=·el.getBoundingClientRect();
+42    |+········return·{
+43    |+············x:·Math.round(r.x),
+44    |+············y:·Math.round(r.y·+·window.scrollY),
+45    |+············w:·Math.round(r.width),
+46    |+············h:·Math.round(r.height),
+47    |+········};
+48    |+····};
+49    |+····const·vis·=·(el)·=>·{
+50    |+········const·s·=·getComputedStyle(el);
+51    |+········const·r·=·el.getBoundingClientRect();
+52    |+········return·s.display·!==·"none"·&&·s.visibility·!==·"hidden"·&&·r.width·>·0·&&·r.height·>·0;
+53    |+····};
+54    |+····const·findByText·=·(needle)·=>
+55    |+········[...document.querySelectorAll("h1,h2,h3,h4,span,div,a,p,li")].find((e)·=>
+56    |+············norm(e.textContent).toLowerCase()·===·needle.toLowerCase()
+57    |+············||·norm(e.textContent).toLowerCase().startsWith(needle.toLowerCase())
+58    |+········);
+59    |+····const·climbFullWidth·=·(el)·=>·{
+60    |+········let·cur·=·el;
+61    |+········let·best·=·el;
+62    |+········for·(let·i·=·0;·i·<·8·&&·cur;·i++)·{
+63    |+············const·r·=·cur.getBoundingClientRect();
+64    |+············if·(r.width·>=·window.innerWidth·*·0.85·&&·r.height·>·40)·{·best·=·cur;·}
+65    |+············cur·=·cur.parentElement;
+66    |+········}
+67    |+········return·best;
+68    |+····};
+69    |+····const·card·=·(el)·=>·{·//·climb·to·a·card-ish·ancestor·(class·contains·card/col/item/box)
+70    |+········let·cur·=·el;
+71    |+········for·(let·i·=·0;·i·<·6·&&·cur;·i++)·{
+72    |+············const·c·=·(cur.className·||·"").toString().toLowerCase();
+73    |+············if·(/card|col-|column|feature|item|box|tile/.test(c))·{·return·cur;·}
+74    |+············cur·=·cur.parentElement;
+75    |+········}
+76    |+········return·el;
+77    |+····};
+78    |+····const·out·=·{};
+79  29| 
+    30|-··//·Feature·cards
+    31|-··out.features·=·{};
+    32|-··['Lecture·Videos',·'Question·Bank',·'Study·Planner',·'Archive',·'Performance'].forEach((t)·=>·{
+    33|-····const·el·=·findByText(t);
+    34|-····if·(el)·{·const·c·=·card(el);·out.features[t]·=·{·elBox:·abox(el),·cardCls:·norm((c.className·||·'').toString()).slice(0,·70),·cardBox:·abox(c),·cardTag:·c.tagName.toLowerCase()·};·}
+    35|-····else·out.features[t]·=·null;
+    36|-··});
+80    |+····//·Feature·cards
+81    |+····out.features·=·{};
+82    |+····["Lecture·Videos",·"Question·Bank",·"Study·Planner",·"Archive",·"Performance"].forEach((t)·=>·{
+83    |+········const·el·=·findByText(t);
+84    |+········if·(el)·{
+85    |+············const·c·=·card(el);
+86    |+············out.features[t]·=·{
+87    |+················elBox:·abox(el),
+88    |+················cardCls:·norm((c.className·||·"").toString()).slice(0,·70),
+89    |+················cardBox:·abox(c),
+90    |+················cardTag:·c.tagName.toLowerCase(),
+91    |+············};
+92    |+········}·else·{·out.features[t]·=·null;·}
+93    |+····});
+94  37| 
+    38|-··//·Stats·band·container·(climb·from·250,000+)
+    39|-··const·statEl·=·findByText('250,000+');
+    40|-··if·(statEl)·{·const·c·=·climbFullWidth(statEl);·out.stats·=·{·statBox:·abox(statEl),·containerCls:·norm((c.className·||·'').toString()).slice(0,·80),·containerTag:·c.tagName.toLowerCase(),·containerBox:·abox(c)·};·}
+95    |+····//·Stats·band·container·(climb·from·250,000+)
+96    |+····const·statEl·=·findByText("250,000+");
+97    |+····if·(statEl)·{
+98    |+········const·c·=·climbFullWidth(statEl);
+99    |+········out.stats·=·{
+100    |+············statBox:·abox(statEl),
+101    |+············containerCls:·norm((c.className·||·"").toString()).slice(0,·80),
+102    |+············containerTag:·c.tagName.toLowerCase(),
+103    |+············containerBox:·abox(c),
+104    |+········};
+105    |+····}
+106  41| 
+    42|-··//·Hero·carousel·container·+·Next·control
+    43|-··const·heroActive·=·[...document.querySelectorAll('h1')].map((h)·=>·({·text:·norm(h.textContent),·b:·h.getBoundingClientRect()·})).filter((o)·=>·o.b.x·>=·-5·&&·o.b.x·<·window.innerWidth)[0];
+    44|-··const·heroH1·=·[...document.querySelectorAll('h1')].find((h)·=>·{·const·r·=·h.getBoundingClientRect();·return·r.x·>=·-5·&&·r.x·<·window.innerWidth;·});
+    45|-··if·(heroH1)·{·const·c·=·climbFullWidth(heroH1);·out.hero·=·{·activeText:·heroActive·?·heroActive.text·:·'',·containerCls:·norm((c.className·||·'').toString()).slice(0,·90),·containerTag:·c.tagName.toLowerCase(),·containerBox:·abox(c)·};·}
+    46|-··const·nextBtns·=·[...document.querySelectorAll('button,a,[role="button"],span,div')].filter((e)·=>·/next/i.test(e.getAttribute('aria-label')·||·'')·||·/^next$/i.test(norm(e.textContent))).map((e)·=>·({·tag:·e.tagName.toLowerCase(),·aria:·e.getAttribute('aria-label')·||·'',·cls:·norm((e.className·||·'').toString()).slice(0,·60),·txt:·norm(e.textContent).slice(0,·20),·box:·abox(e),·vis:·vis(e)·}));
+    47|-··out.nextControls·=·nextBtns.slice(0,·8);
+107    |+····//·Hero·carousel·container·+·Next·control
+108    |+····const·heroActive·=
+109    |+········[...document.querySelectorAll("h1")].map((h)·=>·({·text:·norm(h.textContent),·b:·h.getBoundingClientRect()·}))
+110    |+············.filter((o)·=>·o.b.x·>=·-5·&&·o.b.x·<·window.innerWidth)[0];
+111    |+····const·heroH1·=·[...document.querySelectorAll("h1")].find((h)·=>·{
+112    |+········const·r·=·h.getBoundingClientRect();
+113    |+········return·r.x·>=·-5·&&·r.x·<·window.innerWidth;
+114    |+····});
+115    |+····if·(heroH1)·{
+116    |+········const·c·=·climbFullWidth(heroH1);
+117    |+········out.hero·=·{
+118    |+············activeText:·heroActive·?·heroActive.text·:·"",
+119    |+············containerCls:·norm((c.className·||·"").toString()).slice(0,·90),
+120    |+············containerTag:·c.tagName.toLowerCase(),
+121    |+············containerBox:·abox(c),
+122    |+········};
+123    |+····}
+124    |+····const·nextBtns·=·[...document.querySelectorAll("button,a,[role=\"button\"],span,div")].filter((e)·=>
+125    |+········/next/i.test(e.getAttribute("aria-label")·||·"")·||·/^next$/i.test(norm(e.textContent))
+126    |+····).map((e)·=>·({
+127    |+········tag:·e.tagName.toLowerCase(),
+128    |+········aria:·e.getAttribute("aria-label")·||·"",
+129    |+········cls:·norm((e.className·||·"").toString()).slice(0,·60),
+130    |+········txt:·norm(e.textContent).slice(0,·20),
+131    |+········box:·abox(e),
+132    |+········vis:·vis(e),
+133    |+····}));
+134    |+····out.nextControls·=·nextBtns.slice(0,·8);
+135  48| 
+    49|-··//·Tables·state
+    50|-··out.tables·=·[...document.querySelectorAll('table')].map((t)·=>·{·const·c·=·getComputedStyle(t);·return·{·cls:·norm((t.className·||·'').toString()).slice(0,·60),·box:·abox(t),·display:·c.display,·vis:·vis(t),·parentCls:·norm(((t.closest('[class]')·||·{}).className·||·'').toString()).slice(0,·60)·};·});
+136    |+····//·Tables·state
+137    |+····out.tables·=·[...document.querySelectorAll("table")].map((t)·=>·{
+138    |+········const·c·=·getComputedStyle(t);
+139    |+········return·{
+140    |+············cls:·norm((t.className·||·"").toString()).slice(0,·60),
+141    |+············box:·abox(t),
+142    |+············display:·c.display,
+143    |+············vis:·vis(t),
+144    |+············parentCls:·norm(((t.closest("[class]")·||·{}).className·||·"").toString()).slice(0,·60),
+145    |+········};
+146    |+····});
+147  51| 
+    52|-··//·Testimonials·/·reviews·detection
+    53|-··const·nodes·=·[...document.querySelectorAll('[class]')].filter((e)·=>·/testimonial|review|quote|rating|star|slider|feedback|student/i.test((e.className·||·'').toString()));
+    54|-··out.testimonialish·=·nodes.slice(0,·12).map((e)·=>·({·tag:·e.tagName.toLowerCase(),·cls:·norm((e.className·||·'').toString()).slice(0,·70),·box:·abox(e),·vis:·vis(e)·}));
+148    |+····//·Testimonials·/·reviews·detection
+149    |+····const·nodes·=·[...document.querySelectorAll("[class]")].filter((e)·=>
+150    |+········/testimonial|review|quote|rating|star|slider|feedback|student/i.test((e.className·||·"").toString())
+151    |+····);
+152    |+····out.testimonialish·=·nodes.slice(0,·12).map((e)·=>·({
+153    |+········tag:·e.tagName.toLowerCase(),
+154    |+········cls:·norm((e.className·||·"").toString()).slice(0,·70),
+155    |+········box:·abox(e),
+156    |+········vis:·vis(e),
+157    |+····}));
+158  55| 
+    56|-··//·Section·headings·map·(y·positions)·for·region·planning
+    57|-··out.headings·=·[...document.querySelectorAll('h1,h2,h3')].map((h)·=>·({·t:·h.tagName.toLowerCase(),·text:·norm(h.textContent).slice(0,·60),·box:·abox(h)·})).filter((h)·=>·h.box.w·>·0);
+159    |+····//·Section·headings·map·(y·positions)·for·region·planning
+160    |+····out.headings·=·[...document.querySelectorAll("h1,h2,h3")].map((h)·=>·({
+161    |+········t:·h.tagName.toLowerCase(),
+162    |+········text:·norm(h.textContent).slice(0,·60),
+163    |+········box:·abox(h),
+164    |+····})).filter((h)·=>·h.box.w·>·0);
+165  58| 
+    59|-··//·Footer
+    60|-··const·f·=·document.querySelector('footer');·out.footer·=·f·?·{·box:·abox(f)·}·:·null;
+    61|-··//·Header·/·hamburger
+    62|-··const·header·=·document.querySelector('#masthead');·out.header·=·header·?·{·box:·abox(header)·}·:·null;
+    63|-··const·burger·=·[...document.querySelectorAll('button,a,[role="button"]')].find((e)·=>·/menu|toggle|hamburger|nav/i.test((e.getAttribute('aria-label')·||·'')·+·'·'·+·(e.className·||·'')));
+    64|-··out.burger·=·burger·?·{·aria:·burger.getAttribute('aria-label')·||·'',·cls:·norm((burger.className·||·'').toString()).slice(0,·60),·box:·abox(burger)·}·:·null;
+    65|-··out.scrollHeight·=·document.documentElement.scrollHeight;
+    66|-··return·out;
+166    |+····//·Footer
+167    |+····const·f·=·document.querySelector("footer");
+168    |+····out.footer·=·f·?·{·box:·abox(f)·}·:·null;
+169    |+····//·Header·/·hamburger
+170    |+····const·header·=·document.querySelector("#masthead");
+171    |+····out.header·=·header·?·{·box:·abox(header)·}·:·null;
+172    |+····const·burger·=·[...document.querySelectorAll("button,a,[role=\"button\"]")].find((e)·=>
+173    |+········/menu|toggle|hamburger|nav/i.test((e.getAttribute("aria-label")·||·"")·+·"·"·+·(e.className·||·""))
+174    |+····);
+175    |+····out.burger·=·burger
+176    |+········?·{
+177    |+············aria:·burger.getAttribute("aria-label")·||·"",
+178    |+············cls:·norm((burger.className·||·"").toString()).slice(0,·60),
+179    |+············box:·abox(burger),
+180    |+········}
+181    |+········:·null;
+182    |+····out.scrollHeight·=·document.documentElement.scrollHeight;
+183    |+····return·out;
+184  67| });
+185  68| 
+186  69| console.log(JSON.stringify(data,·null,·2));
+--
+from /Users/adarshrajesh/AlphaWeek2/ankiCFA/cfa/ui/reference/app/verify-ethics-crossplatform-NOTES.md:
+ 5  5| Restyle·merged·as·PR·#12·(`be9a21449`).·VERIFY-ONLY:·no·template/style·edits.
+ 6  6| 
+ 7  7| ##·Screenshots·(this·dir)
+ 8   |+
+ 9  8| -·`verify-ethics-desktop-front.png`·/·`-desktop-back.png`·—·2000x1520·/·2000x1200·(2x)
+10  9| -·`verify-ethics-android-front.png`·/·`-android-back.png`·—·1080x2400·(real·device)
+11 10| 
+12 11| ##·Capture·method·—·HONEST
+13 12| 
+14 13| ###·Desktop·=·harness·render·(Blink),·NOT·the·live·Qt·window
+15   |+
+16 14| Rendered·the·REAL·`passage_front.html`·/·`passage_back.html`·+·`style.css`·with·**headless
+17 15| Google·Chrome**·via·the·repo's·own·`tools/cfa/render_ethics_restyle.py`·(same·tool·that
+18 16| produced·the·committed·`ethics-restyle-after-*.png`).·Blink·is·the·same·engine·as·the
+...
+22 20| rendered·from·a·seeded·fully-correct·`localStorage`·payload·(the·harness's·normal·method).
+23 21| 
+24 22| ###·Android·=·REAL·emulator,·GENUINE·attempt
+25   |+
+26 23| Emulator·`ankidroid_cfa`·(`emulator-5554`,·Android·14,·1080x2400),·AnkiDroid
+27 24| `com.ichi2.anki.debug`,·System·WebView·**Chrome/113.0.5672.136**.
+28   |+
+29 25| -·The·on-device·deck·still·had·the·PRE-restyle·templates·(on-device·notetype·css=11·070·B,
+30 26| ··none·of·the·restyle/font·markers).·I·rebuilt·the·current·deck·(`just·cfa-mobile-package`,
+31 27| ··byte-identical·templates·to·origin/main)·AND,·to·render·the·current·restyle
+...
+41 37| ··(not·seeded)·attempt.
+42 38| 
+43 39| ##·Fonts·ACTUALLY·LOAD·on·BOTH·platforms·(measured,·not·eyeballed)
+44   |+
+45 40| Via·`document.fonts`·+·DOM·width·probes·at·120px:
+46 41| 
+   42|-|·|·Source·Serif·4·|·IBM·Plex·Sans·|
+   43|-|---|---|---|
+47   |+|······························|·Source·Serif·4······················································|·IBM·Plex·Sans·······································|
+48   |+|·----------------------------·|·-------------------------------------------------------------------·|·---------------------------------------------------·|
+49 44| |·Android·WebView·(Chrome·113)·|·`loaded`,·check=true,·1243px·vs·1235px·generic-serif·→·**distinct**·|·`loaded`·w400+w500,·1162px·vs·1152px·→·**distinct**·|
+   45|-|·Desktop·Blink·(Chrome·150)·|·`loaded`,·check=true,·1243px·vs·1080px·generic-serif·→·**distinct**·|·`loaded`,·1162px·vs·1147px·→·**distinct**·|
+50   |+|·Desktop·Blink·(Chrome·150)···|·`loaded`,·check=true,·1243px·vs·1080px·generic-serif·→·**distinct**·|·`loaded`,·1162px·vs·1147px·→·**distinct**···········|
+51 46| 
+52 47| Source·Serif·4·=·**1243px**·and·IBM·Plex·Sans·=·**1162px**·on·BOTH·→·the·same·bundled
+53 48| data-URI·faces·render·identically·cross-platform.·The·@font-face·data·URIs·work·in
+...
+85 80| "fully·correct"·reveal.
+86 81| 
+87 82| ##·Prioritized·fixes·for·true·cross-platform·parity
+88   |+
+89 83| 1.·**Adopt·Meldrum's·cream·canvas**·(`.card`·bg·~`#f2ede4`,·warm·panel·tint)·so·both
+90 84| ···platforms·match·the·site's·warmth·instead·of·cool·white.·(Biggest·fidelity·lift.)
+91 85| 2.·**CTA·first·impression**·—·give·the·disabled·"Check·answer"·a·subtler·outlined/ghost·look
+--
+from /Users/adarshrajesh/AlphaWeek2/ankiCFA/proof/fixes/p1/NOTES.md:
+250 250| 2.·**Menu·action·+·handler**·—·new·`"Study·Ethics·(One-Passage)"`·action·in·`setup_menu`
+251 251| ···(placed·right·after·"Study·Ethics·Minimal-Pairs"·to·group·the·two·ethics·actions),·wired
+252 252| ···to·a·new·`study_ethics_passages(mw)`·handler.
+    253|-3.·**Entering·review·the·*normal-deck*·way.**·`CFA::Ethics·Passages`·is·a·NORMAL
+253    |+3.·**Entering·review·the·_normal-deck_·way.**·`CFA::Ethics·Passages`·is·a·NORMAL
+254 254| ···(non-filtered)·deck,·so·—·unlike·the·minimal-pairs·sibling·which·uses·`_study_filtered_deck`
+255 255| ···—·the·handler·follows·Anki's·own·overview·"Study"·path:·seed-if-missing·→·`decks.select(did)`
+256 256| ···→·`mw.reset()`·→·`mw.moveToState("review")`.
+...
+302 302| ··**F9·REACHABILITY:·PASS**.
+303 303| -·mypy·on·touched·source·(`qt/aqt/cfa.py`,·`qt/aqt/cfa_seed.py`)·—·**Success:·no·issues·found
+304 304| ··in·2·source·files**.·Official·folder-level·mypy:·16·remaining·errors,·all·pre-existing
+    305|-··baseline·in·files·I·do·not·own·(tools/cfa/*,·cfa/ai/*,·pylib/tests/*,·qt/aqt/cfa_ethics_ai.py);
+305    |+··baseline·in·files·I·do·not·own·(tools/cfa/_,·cfa/ai/_,·pylib/tests/*,·qt/aqt/cfa_ethics_ai.py);
+306 306| ··**none**·in·my·touched·files.
+307 307| -·ruff·check·+·ruff·format·--check·on·touched·files·—·**clean**.
+308 308| 
+...
+364 364| 
+365 365| A·stale/absurd·far-future·exam·date·persisted·in·the·synced·collection·config·(observed:
+366 366| **`2028-08-23`**)·is·shown·and·used·verbatim·by·the·exam-date·picker,·with·no·sanity·check.
+    367|-(The·code·*default*·is·already·the·canonical·near·date·**2026-08-25**·—·confirmed·by·F9's
+367    |+(The·code·_default_·is·already·the·canonical·near·date·**2026-08-25**·—·confirmed·by·F9's
+368 368| `F0b·exam·config·:·{'exam_date':·'2026-08-25'}`·—·so·this·is·runtime·pollution,·not·a·code
+369 369| default·bug.)
+370 370| 
+371 371| ####·Root·cause
+372 372| 
+373 373| `DeadlineDialog._initial_date`·read·`cfg.get("exam_date")·or·_default_exam_date()`·—·i.e.·any
+    374|-persisted·value·was·trusted·blindly;·only·a·*missing*·value·fell·back·to·the·canonical
+374    |+persisted·value·was·trusted·blindly;·only·a·_missing_·value·fell·back·to·the·canonical
+375 375| default.
+376 376| 
+377 377| ####·Fix·(additive,·backward-compatible;·`qt/aqt/cfa.py`·only)
+...
+401 401| ··(persisted·`2099-12-31`·⇒·picker·shows·the·canonical·default),·`test_dialog_keeps_sane_persisted_date`.
+402 402| -·`qt/tests/test_cfa_f0b.py`:·`test_deadline_dialog_renders_without_due_cards`·updated·to·the
+403 403| ··new·honest·empty-state·wording·("No·cards·to·rank·yet");·`test_deadline_dialog_apply_persists_exam_date`
+    404|-··unchanged·(apply·persists·verbatim;·the·guard·is·on·the·*read*·path).
+404    |+··unchanged·(apply·persists·verbatim;·the·guard·is·on·the·_read_·path).
+405 405| 
+406 406| Without·the·change·the·pylib/qt·dialog·tests·ERROR·(the·`deadline_retention_with_new`·/
+407 407| `_sanitized_exam_date`·symbols·don't·exist)·or·FAIL·(all-new·deck·⇒·empty·table;·absurd
+...
+447 447| ##·Item·6·(MEDIUM·#9)·—·F3·"AI·Back"·editor·button·has·no·visible·AI-off·state
+448 448| 
+449 449| **Symptom.**·With·no·`OPENAI_API_KEY`,·the·F3·"AI·Back"·editor·button·was·supposed·to
+    450|-render·*visibly·disabled·with·an·explanatory·tooltip*,·but·it·did·neither:·it·looked/behaved
+450    |+render·_visibly·disabled·with·an·explanatory·tooltip_,·but·it·did·neither:·it·looked/behaved
+451 451| enabled·and·hovering·showed·nothing.
+452 452| 
+453 453| ###·Root·cause·(two·concrete·defects·in·`_button_html()`·in·`qt/aqt/cfa_tab_fill.py`)
+--
+from /Users/adarshrajesh/AlphaWeek2/ankiCFA/cfa/ui/reference/specs/exam-readiness-spec.md:
+ 9  9| >·**This·is·a·spec·only.**·No·source/token/CSS/template·edits,·no·builds/git.·The
+10 10| >·engineer·downstream·implements·it.·**VISUAL·ONLY**·—·preserve·every·string,·all
+11 11| >·data,·and·the·pass·/·fail·/·warn·semantic·triad.·**Token-driven·only**·—·refer·to
+   12|->·tokens·by·name,·never·hardcode·hex·(hex·below·are·the·*reconciled·target·values*
+12   |+>·tokens·by·name,·never·hardcode·hex·(hex·below·are·the·_reconciled·target·values_
+13 13| >·for·reference).
+14 14| 
+15 15| ##·0.·Sources·read·(cite,·don't·guess)
+...
+26 26| ###·What·the·three·site·PNGs·actually·show·(observations·used·throughout)
+27 27| 
+28 28| -·**stats-band.png**·—·Big·numbers·**"250,000+",·"180+",·"Top-rated"**·are·large
+   29|-··**serif,·navy,·weight·400**·(calm,·*not*·bold)·with·a·small·**muted·sans·label
+29   |+··**serif,·navy,·weight·400**·(calm,·_not_·bold)·with·a·small·**muted·sans·label
+30 30| ··stacked·underneath**·("Learners·worldwide·have·studied·with·Meldrum.").·Columns
+31 31| ··are·separated·by·**whitespace·only·—·no·borders,·no·fills,·no·shadows**.·A·serif
+32 32| ··navy·lead-in·("Study·smarter·and·pass·the·first·time.")·sits·to·the·left·in·the
+...
+46 46| 
+47 47| ##·1.·SITE·→·SURFACE·MAP
+48 48| 
+   49|-|·Site·section·(PNG)·|·Observed·trait·to·copy·|·Dialog·element·|·Builder·/·code·site·|
+   50|-|---|---|---|---|
+   51|-|·**hero.png**·|·Serif‑400·navy·heading·over·a·quiet·sans·lead;·eyebrow-style·over-line·elsewhere·on·site·|·**Deck-name·heading**·(eyebrow·"Exam·Readiness"·+·deck-name·title)·|·`page_heading()`·→·`eyebrow()`·+·`title()`·(`cfa_style.py`·138–156)·|
+   52|-|·**hero.png**·(verdict·role)·|·One·big·calm·serif·line·+·a·sans·lead·+·a·small·caveat·|·**Verdict·card**·("likely·pass·/·at·risk"·+·`p=`,·the·lead·stats·line,·the·Bayesian·caveat)·|·`hero()`·(159–185)·via·`_readiness_call_html`·(298–329)·|
+   53|-|·**stats-band.png**·|·**Big·serif‑400·navy·numbers·with·a·small·muted·label·stacked·below;·airy,·chrome-free**·|·(a)·the·**verdict·number**;·(b)·the·**three·honest‑score·bands·→·calm·stat·cards**·(Memory·/·Performance·/·Readiness)·|·verdict·number·in·`hero()`;·`band()`·(188–199)·+·`value_range()`·(202–208)·|
+   54|-|·**feature-cards.png**·|·**White/quiet·cards,·4px·radius,·navy‑600·titles,·muted·body,·generous·padding,·no·loud·borders**;·quiet·table-like·rows·|·**Band‑card·chrome**·+·the·**per‑topic·recall·table**·|·`band()`·chrome;·`dialog_qss()`·table·rules·(80–101);·table·assembly·`cfa.py`·401–430·|
+   55|-|·**feature-cards.png**·/·general·|·Small·**uppercase**·widget·titles·(`--bb-widget-title-text-transform:·uppercase`)·|·**Section·dividers**·("Honest·scores",·"Per-topic·recall")·+·**table·header**·|·`section()`·(218–224);·`QHeaderView::section`·in·`dialog_qss()`·|
+49   |+|·Site·section·(PNG)··············|·Observed·trait·to·copy···································································································|·Dialog·element········································································································|·Builder·/·code·site···································································|
+50   |+|·-------------------------------·|·------------------------------------------------------------------------------------------------------------------------·|·---------------------------------------------------------------------------------------------------------------------·|·-------------------------------------------------------------------------------------·|
+51   |+|·**hero.png**····················|·Serif‑400·navy·heading·over·a·quiet·sans·lead;·eyebrow-style·over-line·elsewhere·on·site·································|·**Deck-name·heading**·(eyebrow·"Exam·Readiness"·+·deck-name·title)····················································|·`page_heading()`·→·`eyebrow()`·+·`title()`·(`cfa_style.py`·138–156)···················|
+52   |+|·**hero.png**·(verdict·role)·····|·One·big·calm·serif·line·+·a·sans·lead·+·a·small·caveat···································································|·**Verdict·card**·("likely·pass·/·at·risk"·+·`p=`,·the·lead·stats·line,·the·Bayesian·caveat)···························|·`hero()`·(159–185)·via·`_readiness_call_html`·(298–329)·······························|
+53   |+|·**stats-band.png**··············|·**Big·serif‑400·navy·numbers·with·a·small·muted·label·stacked·below;·airy,·chrome-free**·································|·(a)·the·**verdict·number**;·(b)·the·**three·honest‑score·bands·→·calm·stat·cards**·(Memory·/·Performance·/·Readiness)·|·verdict·number·in·`hero()`;·`band()`·(188–199)·+·`value_range()`·(202–208)············|
+54   |+|·**feature-cards.png**···········|·**White/quiet·cards,·4px·radius,·navy‑600·titles,·muted·body,·generous·padding,·no·loud·borders**;·quiet·table-like·rows·|·**Band‑card·chrome**·+·the·**per‑topic·recall·table**·································································|·`band()`·chrome;·`dialog_qss()`·table·rules·(80–101);·table·assembly·`cfa.py`·401–430·|
+55   |+|·**feature-cards.png**·/·general·|·Small·**uppercase**·widget·titles·(`--bb-widget-title-text-transform:·uppercase`)········································|·**Section·dividers**·("Honest·scores",·"Per-topic·recall")·+·**table·header**·········································|·`section()`·(218–224);·`QHeaderView::section`·in·`dialog_qss()`·······················|
+56 56| 
+57 57| ---
+58 58| 
+...
+69 69| 
+70 70| ###·2.1·Heading·—·`title()`·(the·deck·name)·→·serif·hero
+71 71| 
+   72|-*Grounds:·hero.png·serif‑400·navy·heading;·brand-computed·heroH1·=·40px/400·serif·`#122B46`.*
+72   |+_Grounds:·hero.png·serif‑400·navy·heading;·brand-computed·heroH1·=·40px/400·serif·`#122B46`._
+73 73| 
+   74|-|·Property·|·Current·|·Target·|·Why·|
+   75|-|---|---|---|---|
+   76|-|·font-family·|·body·sans·(inherited)·|·**`font_heading`**·(Source·Serif·4·serif)·|·Site·h1s·are·serif·|
+   77|-|·font-size·|·`fs_title`·22px·|·**`fs_hero`·≈·28px**·|·"sizes·via·fs_hero≈28·scaled"·—·the·dialog's·one·dominant·heading·|
+   78|-|·font-weight·|·**700**·|·**400**·|·Site·hero/stats·serif·is·weight·**400**,·calm·not·heavy·|
+   79|-|·color·|·`ink`·(#1e293b)·|·**`ink`·#122B46**·(navy·after·reconcile)·|·`--bb-headings-color`·|
+   80|-|·line-height·|·(default)·|·**~1.15**·|·hero.png·~42/40·≈·1.05–1.15·|
+   81|-|·margin·|·`0·0·12px`·|·`0·0·12px`·(keep)·|·—·|
+74   |+|·Property····|·Current···············|·Target····································|·Why·······························································|
+75   |+|·-----------·|·---------------------·|·-----------------------------------------·|·-----------------------------------------------------------------·|
+76   |+|·font-family·|·body·sans·(inherited)·|·**`font_heading`**·(Source·Serif·4·serif)·|·Site·h1s·are·serif················································|
+77   |+|·font-size···|·`fs_title`·22px·······|·**`fs_hero`·≈·28px**······················|·"sizes·via·fs_hero≈28·scaled"·—·the·dialog's·one·dominant·heading·|
+78   |+|·font-weight·|·**700**···············|·**400**···································|·Site·hero/stats·serif·is·weight·**400**,·calm·not·heavy···········|
+79   |+|·color·······|·`ink`·(#1e293b)·······|·**`ink`·#122B46**·(navy·after·reconcile)··|·`--bb-headings-color`·············································|
+80   |+|·line-height·|·(default)·············|·**~1.15**·································|·hero.png·~42/40·≈·1.05–1.15·······································|
+81   |+|·margin······|·`0·0·12px`············|·`0·0·12px`·(keep)·························|·—·································································|
+82 82| 
+83 83| ###·2.2·Eyebrow·—·`eyebrow()`
+84 84| 
+   85|-*Grounds:·hero/stats·let·the·serif·dominate;·site·over-lines/widget·titles·are·quiet·+·uppercase.*
+85   |+_Grounds:·hero/stats·let·the·serif·dominate;·site·over-lines/widget·titles·are·quiet·+·uppercase._
+86 86| 
+   87|-|·Property·|·Current·|·Target·|·Why·|
+   88|-|---|---|---|---|
+   89|-|·text-transform·|·uppercase·|·uppercase·(keep)·|·—·|
+   90|-|·color·|·`primary`·(navy,·saturated)·|·**`muted`·#4D5C6D**·|·Brief:·"eyebrow·(uppercase,·muted…)";·keeps·the·serif·title·dominant·|
+   91|-|·font-size·|·`fs_eyebrow`·11px·|·keep·11px·|·site·pre-title·~12px·scaled·|
+   92|-|·font-weight·|·700·|·**600**·|·calmer·over-line·|
+   93|-|·letter-spacing·|·`.08em`·|·**`.10em`**·|·premium·tracking·on·small·uppercase·|
+   94|-|·margin·|·`0·0·2px`·|·`0·0·4px`·|·8px-scale·breathing·room·|
+87   |+|·Property·······|·Current·····················|·Target··············|·Why··································································|
+88   |+|·--------------·|·---------------------------·|·-------------------·|·--------------------------------------------------------------------·|
+89   |+|·text-transform·|·uppercase···················|·uppercase·(keep)····|·—····································································|
+90   |+|·color··········|·`primary`·(navy,·saturated)·|·**`muted`·#4D5C6D**·|·Brief:·"eyebrow·(uppercase,·muted…)";·keeps·the·serif·title·dominant·|
+91   |+|·font-size······|·`fs_eyebrow`·11px···········|·keep·11px···········|·site·pre-title·~12px·scaled··········································|
+92   |+|·font-weight····|·700·························|·**600**·············|·calmer·over-line·····················································|
+93   |+|·letter-spacing·|·`.08em`·····················|·**`.10em`**·········|·premium·tracking·on·small·uppercase··································|
+94   |+|·margin·········|·`0·0·2px`···················|·`0·0·4px`···········|·8px-scale·breathing·room·············································|
+95 95| 
+96 96| >·Optional·brand·cue:·eyebrow·may·use·**`brand_green`·#009666**·instead·of·muted
+97 97| >·(BRAND.md·line·171·sanctions·green·for·eyebrows).·Lead·with·muted;·green·is·a
+...
+ 99  99| 
+100 100| ###·2.3·Verdict·"hero"·number·+·card·—·`hero()`
+101 101| 
+    102|-*Grounds:·hero.png·(big·calm·serif·+·quiet·lead·+·caveat)·+·feature-cards.png·(4px,·quiet·chrome).*
+102    |+_Grounds:·hero.png·(big·calm·serif·+·quiet·lead·+·caveat)·+·feature-cards.png·(4px,·quiet·chrome)._
+103 103| 
+104 104| Number·/·text:
+105 105| 
+    106|-|·Element·|·Current·|·Target·|·Why·|
+    107|-|---|---|---|---|
+106    |+|·Element······························|·Current································································|·Target·········································································································|·Why···························································|
+107    |+|·------------------------------------·|·----------------------------------------------------------------------·|·--------------------------------------------------------------------------------------------------------------·|·-------------------------------------------------------------·|
+108 108| |·The·call·(`likely·pass`·/·`at·risk`)·|·`fs_hero`·26px,·**weight·800**,·`line-height·1.1`,·color·`pass`/`fail`·|·**`font_heading`·serif,·`fs_hero`·28px,·weight·400**,·line-height·1.1,·color·**`pass`/`fail`·(KEEP·semantic)**·|·Site·big·numbers·are·serif‑**400**;·color·carries·the·verdict·|
+    109|-|·`p=0.NN`·span·|·`fs_lead`,·weight·600,·same·(pass/fail)·color·|·**`fs_lead`·16px,·weight·400,·color·`faint`·#939597**·|·Demote·to·a·muted·sub-figure·like·stats-band·labels·|
+    110|-|·lead·line·(`lead_html`)·|·`fs_body`·14,·`ink`,·margin-top·6px·|·**`fs_body`·15,·`ink`,·margin-top·8px**·|·site·body·16·→·15·dialog-scale;·8px·rhythm·|
+    111|-|·caveat·(`note_html`)·|·`fs_meta`·12,·`warn`,·margin-top·6px·|·keep·`fs_meta`·12,·`warn`,·**margin-top·8px**·|·keep·semantic·caution·tone·|
+109    |+|·`p=0.NN`·span························|·`fs_lead`,·weight·600,·same·(pass/fail)·color··························|·**`fs_lead`·16px,·weight·400,·color·`faint`·#939597**··························································|·Demote·to·a·muted·sub-figure·like·stats-band·labels···········|
+110    |+|·lead·line·(`lead_html`)··············|·`fs_body`·14,·`ink`,·margin-top·6px····································|·**`fs_body`·15,·`ink`,·margin-top·8px**········································································|·site·body·16·→·15·dialog-scale;·8px·rhythm····················|
+111    |+|·caveat·(`note_html`)·················|·`fs_meta`·12,·`warn`,·margin-top·6px···································|·keep·`fs_meta`·12,·`warn`,·**margin-top·8px**··································································|·keep·semantic·caution·tone····································|
+112 112| 
+113 113| Card·chrome:
+114 114| 
+    115|-|·Property·|·Current·|·Target·|·Why·|
+    116|-|---|---|---|---|
+    117|-|·background·|·`pass_soft`·/·`fail_soft`·|·**keep·`pass_soft`·/·`fail_soft`**·(subtle·wash·for·the·one·"verdict")·|·gentle·semantic·fill;·still·calm·|
+    118|-|·border·|·`1px·solid`·**pass/fail**·(loud)·|·**`1px·solid·line`·#E7E9EC**·|·Site·cards·use·a·hairline,·not·a·saturated·ring·|
+    119|-|·border-left·|·`4px·solid`·pass/fail·|·**`3px·solid`·pass/fail**·(semantic·spine)·|·one·restrained·semantic·cue·|
+    120|-|·border-radius·|·**10px**·|·**4px**·(`--bb-block-radius`)·|·feature-cards·corners·are·4px·|
+    121|-|·padding·|·`12px·16px`·|·**`16px·20px`**·(2×/2.5×·8px)·|·site·card·padding·~24px,·scaled·to·dialog·|
+    122|-|·margin·|·`0·0·14px`·|·**`0·0·20px`**·|·toward·the·24px·site·card·gap·|
+115    |+|·Property······|·Current··························|·Target·································································|·Why·············································|
+116    |+|·-------------·|·--------------------------------·|·----------------------------------------------------------------------·|·-----------------------------------------------·|
+117    |+|·background····|·`pass_soft`·/·`fail_soft`········|·**keep·`pass_soft`·/·`fail_soft`**·(subtle·wash·for·the·one·"verdict")·|·gentle·semantic·fill;·still·calm················|
+118    |+|·border········|·`1px·solid`·**pass/fail**·(loud)·|·**`1px·solid·line`·#E7E9EC**···········································|·Site·cards·use·a·hairline,·not·a·saturated·ring·|
+119    |+|·border-left···|·`4px·solid`·pass/fail············|·**`3px·solid`·pass/fail**·(semantic·spine)·····························|·one·restrained·semantic·cue·····················|
+120    |+|·border-radius·|·**10px**·························|·**4px**·(`--bb-block-radius`)··········································|·feature-cards·corners·are·4px···················|
+121    |+|·padding·······|·`12px·16px`······················|·**`16px·20px`**·(2×/2.5×·8px)··········································|·site·card·padding·~24px,·scaled·to·dialog·······|
+122    |+|·margin········|·`0·0·14px`·······················|·**`0·0·20px`**·························································|·toward·the·24px·site·card·gap···················|
+123 123| 
+124 124| >·**Quieter·alt·(max·fidelity):**·background·`bg`/`surface`·(no·tint),·keep·the·3px
+125 125| >·left·rule·+·colored·serif·number·as·the·only·semantic·signals.·Either·is·fine;
+...
+127 127| 
+128 128| ###·2.4·Honest-score·bands·→·calm·stat·cards·—·`band()`·+·`value_range()`
+129 129| 
+    130|-*Grounds:·stats-band.png·=·big·serif‑400·navy·number·**on·top**,·muted·sans·label
+    131|-**below**,·one·per·stat;·feature-cards.png·card·chrome.*
+130    |+_Grounds:·stats-band.png·=·big·serif‑400·navy·number·**on·top**,·muted·sans·label
+131    |+**below**,·one·per·stat;·feature-cards.png·card·chrome._
+132 132| 
+133 133| Convert·each·hairline·**row**·into·a·quiet·**stat·card**,·and·invert·the·order·so
+134 134| the·**value·reads·big·first**·(like·stats-band),·the·**name/meaning·is·the·muted
+...
+136 136| 
+137 137| Card·container·(`band()`·wrapper):
+138 138| 
+    139|-|·Property·|·Current·|·Target·|·Why·|
+    140|-|---|---|---|---|
+    141|-|·background·|·none·(transparent·row)·|·**`surface`·#F3F6F8**·(or·`bg`·#FFFFFF)·|·quiet·stat·card·|
+    142|-|·border·|·`border-top:·1px·line`·only·|·**`1px·solid·line`·#E7E9EC,·all·sides**·|·carded,·not·a·divider·|
+    143|-|·border-radius·|·—·|·**4px**·|·site·block·radius·|
+    144|-|·padding·|·`8px·0`·|·**`16px`**·(2×8)·|·generous·like·site·cards·|
+    145|-|·margin·|·(stacked·flush)·|·**`0·0·12px`**·between·the·three·|·inter-card·gap,·8px-scale·|
+139    |+|·Property······|·Current·····················|·Target··································|·Why·······················|
+140    |+|·-------------·|·---------------------------·|·---------------------------------------·|·-------------------------·|
+141    |+|·background····|·none·(transparent·row)······|·**`surface`·#F3F6F8**·(or·`bg`·#FFFFFF)·|·quiet·stat·card···········|
+142    |+|·border········|·`border-top:·1px·line`·only·|·**`1px·solid·line`·#E7E9EC,·all·sides**·|·carded,·not·a·divider·····|
+143    |+|·border-radius·|·—···························|·**4px**·································|·site·block·radius·········|
+144    |+|·padding·······|·`8px·0`·····················|·**`16px`**·(2×8)························|·generous·like·site·cards··|
+145    |+|·margin········|·(stacked·flush)·············|·**`0·0·12px`**·between·the·three········|·inter-card·gap,·8px-scale·|
+146 146| 
+147 147| Content·order·+·type·inside·each·card:
+148 148| 
+    149|-|·Slot·|·Current·|·Target·|·Why·|
+    150|-|---|---|---|---|
+    151|-|·**1st:·the·value**·(`value_html`·/·`value_range`)·|·shown·2nd,·`fs_lead`·15,·weight·700,·`ink`·|·**shown·1st;·big·calm·number:·`font_heading`·serif,·weight·400,·`fs_title`·22px,·color·`ink`·#122B46**;·midpoint·stays·`muted`/`faint`·`fs_meta`·12·|·stats-band·big·serif‑400·navy·number·|
+    152|-|·**2nd:·name·+·meaning**·|·shown·1st,·name·`fs_body`·**bold**·`ink`·+·meaning·`muted`·|·**shown·2nd·(label):·name·`fs_meta`/`fs_body`·weight·600·`muted`·#4D5C6D;·meaning·`faint`·#939597**·|·stats-band·muted·label·under·the·number·|
+    153|-|·**abstain·case**·(`value_abstain`)·|·"Not·enough·data"·in·`warn`·|·**keep·`warn`**·as·the·big·value·|·preserve·semantic·triad·|
+149    |+|·Slot··············································|·Current····················································|·Target··············································································································································|·Why·····································|
+150    |+|·-------------------------------------------------·|·----------------------------------------------------------·|·---------------------------------------------------------------------------------------------------------------------------------------------------·|·---------------------------------------·|
+151    |+|·**1st:·the·value**·(`value_html`·/·`value_range`)·|·shown·2nd,·`fs_lead`·15,·weight·700,·`ink`·················|·**shown·1st;·big·calm·number:·`font_heading`·serif,·weight·400,·`fs_title`·22px,·color·`ink`·#122B46**;·midpoint·stays·`muted`/`faint`·`fs_meta`·12·|·stats-band·big·serif‑400·navy·number····|
+152    |+|·**2nd:·name·+·meaning**···························|·shown·1st,·name·`fs_body`·**bold**·`ink`·+·meaning·`muted`·|·**shown·2nd·(label):·name·`fs_meta`/`fs_body`·weight·600·`muted`·#4D5C6D;·meaning·`faint`·#939597**·················································|·stats-band·muted·label·under·the·number·|
+153    |+|·**abstain·case**·(`value_abstain`)················|·"Not·enough·data"·in·`warn`································|·**keep·`warn`**·as·the·big·value····················································································································|·preserve·semantic·triad·················|
+154 154| 
+155 155| >·If·reordering·value-above-label·is·undesirable,·keep·source·order·but·still·apply
+156 156| >·the·**card·chrome·+·big·serif·value**;·the·stacked-stat·inversion·is·the
+...
+158 158| 
+159 159| ###·2.5·Per-topic·recall·table·—·`dialog_qss()`·(+·table·assembly)
+160 160| 
+    161|-*Grounds:·feature-cards.png·quiet·cards·(4px,·hairlines,·muted·body);·site·widget
+    162|-titles·uppercase·(`--bb-widget-title-text-transform:·uppercase`).*
+161    |+_Grounds:·feature-cards.png·quiet·cards·(4px,·hairlines,·muted·body);·site·widget
+162    |+titles·uppercase·(`--bb-widget-title-text-transform:·uppercase`)._
+163 163| 
+164 164| `QTableWidget`:
+165 165| 
+    166|-|·Property·|·Current·|·Target·|·Why·|
+    167|-|---|---|---|---|
+    168|-|·border·|·`1px·solid·line`·|·keep,·value·**`line`·#E7E9EC**·|·site·hairline·|
+    169|-|·border-radius·|·**8px**·|·**4px**·|·site·block·radius·|
+    170|-|·gridline-color·|·`line`·|·keep·`line`·#E7E9EC·|·quiet·|
+    171|-|·font-size·|·`fs_body`·14·|·**`fs_body`·15**·|·body·up-scale·|
+    172|-|·alternate-background·|·`surface`·|·keep·**`surface`·#F3F6F8**·(subtle·zebra)·|·quiet·stripes·|
+    173|-|·selection·bg·/·text·|·`primary_soft`·/·`primary`·|·keep·(now·#F3F6F8·/·#122B46)·|·reconciled·|
+166    |+|·Property·············|·Current····················|·Target····································|·Why···············|
+167    |+|·--------------------·|·--------------------------·|·-----------------------------------------·|·-----------------·|
+168    |+|·border···············|·`1px·solid·line`···········|·keep,·value·**`line`·#E7E9EC**············|·site·hairline·····|
+169    |+|·border-radius········|·**8px**····················|·**4px**···································|·site·block·radius·|
+170    |+|·gridline-color·······|·`line`·····················|·keep·`line`·#E7E9EC·······················|·quiet·············|
+171    |+|·font-size············|·`fs_body`·14···············|·**`fs_body`·15**··························|·body·up-scale·····|
+172    |+|·alternate-background·|·`surface`··················|·keep·**`surface`·#F3F6F8**·(subtle·zebra)·|·quiet·stripes·····|
+173    |+|·selection·bg·/·text··|·`primary_soft`·/·`primary`·|·keep·(now·#F3F6F8·/·#122B46)··············|·reconciled········|
+174 174| 
+175 175| `QTableWidget::item`:
+176 176| 
+    177|-|·Property·|·Current·|·Target·|·Why·|
+    178|-|---|---|---|---|
+    179|-|·padding·|·`6px·8px`·|·**`8px·10px`**·(≈40px·comfortable·row·on·8px·scale)·|·site·8px·rhythm;·airier·rows·|
+177    |+|·Property·|·Current···|·Target··············································|·Why··························|
+178    |+|·--------·|·---------·|·---------------------------------------------------·|·----------------------------·|
+179    |+|·padding··|·`6px·8px`·|·**`8px·10px`**·(≈40px·comfortable·row·on·8px·scale)·|·site·8px·rhythm;·airier·rows·|
+180 180| 
+181 181| `QHeaderView::section`·(the·quiet·header):
+182 182| 
+    183|-|·Property·|·Current·|·Target·|·Why·|
+    184|-|---|---|---|---|
+    185|-|·background·|·`surface`·|·keep·**`surface`·#F3F6F8**·|·quiet·header·band·|
+    186|-|·color·|·`muted`·|·keep·**`muted`·#4D5C6D**·(or·`faint`·#939597)·|·muted·header·text·|
+    187|-|·border-bottom·|·`1px·solid·line`·|·keep·#E7E9EC·|·hairline·separator·|
+    188|-|·padding·|·`8px`·|·**`8px·10px`**·|·align·to·row·padding·|
+    189|-|·font-size·|·`fs_meta`·12·|·keep·12·|·small·|
+    190|-|·font-weight·|·600·|·keep·600·|·—·|
+    191|-|·**text-transform**·|·*(none)*·|·**`uppercase`**·|·site·widget·titles·are·uppercase·|
+    192|-|·**letter-spacing**·|·*(none)*·|·**`.06em`**·|·premium·small-caps·tracking·|
+183    |+|·Property···········|·Current··········|·Target········································|·Why······························|
+184    |+|·------------------·|·----------------·|·---------------------------------------------·|·--------------------------------·|
+185    |+|·background·········|·`surface`········|·keep·**`surface`·#F3F6F8**····················|·quiet·header·band················|
+186    |+|·color··············|·`muted`··········|·keep·**`muted`·#4D5C6D**·(or·`faint`·#939597)·|·muted·header·text················|
+187    |+|·border-bottom······|·`1px·solid·line`·|·keep·#E7E9EC··································|·hairline·separator···············|
+188    |+|·padding············|·`8px`············|·**`8px·10px`**································|·align·to·row·padding·············|
+189    |+|·font-size··········|·`fs_meta`·12·····|·keep·12·······································|·small····························|
+190    |+|·font-weight········|·600··············|·keep·600······································|·—································|
+191    |+|·**text-transform**·|·_(none)_·········|·**`uppercase`**·······························|·site·widget·titles·are·uppercase·|
+192    |+|·**letter-spacing**·|·_(none)_·········|·**`.06em`**···································|·premium·small-caps·tracking······|
+193 193| 
+194 194| Table·assembly·note·(`cfa.py`·405–412,·secondary):·keep·`setShowGrid(False)`·and
+195 195| `setAlternatingRowColors(True)`·—·the·zebra·+·header·hairline·+·roomier·rows·carry
+196 196| structure·(no·loud·gridlines),·matching·the·site's·quiet·tables.·Column-0·stretch
+    197|-+·resize-to-contents·(401–412)·is·already·correct;·do·not·change·data/columns.
+197 198| 
+198    |+-·resize-to-contents·(401–412)·is·already·correct;·do·not·change·data/columns.
+199    |+
+200 199| ###·2.6·Section·dividers·+·caption·+·footer·(secondary)
+201 200| 
+202 201| -·`section()`·—·keep·uppercase;·bump·`margin`·`14px·0·4px`·→·**`24px·0·8px`**·for
+--
+from /Users/adarshrajesh/AlphaWeek2/ankiCFA/cfa/ui/reference/specs/deadline-spec.md:
+19 19| that·capture·is·**not·a·data·table**.·The·capture·script
+20 20| (`cfa/ui/reference/capture_site.mjs`,·lines·252–253·and·423–430)·documents·that
+21 21| the·site's·real·schedule/pricing·`<table>`·elements·are·**`display:none`·on·the
+   22|-homepage**,·so·the·`table`·step·fell·through·to·the·first·*visible*·layout
+22   |+homepage**,·so·the·`table`·step·fell·through·to·the·first·_visible_·layout
+23 23| `<table>`·—·the·**footer·link-column·grid**.·`table.png`·and·`footer.png`
+24 24| therefore·show·the·same·region:·quiet·column·captions·(**Programs·/·Pricing·/
+25 25| About·/·Stay·Connected**)·sitting·above·evenly-spaced·link·rows,·a·white·rounded
+26 26| input,·and·a·**navy·"Submit"·pill·button**.
+27 27| 
+   28|-That·is·still·a·usable,·*authoritative*·reference·for·a·table's·**header
+28   |+That·is·still·a·usable,·_authoritative_·reference·for·a·table's·**header
+29 29| quietness,·row·rhythm,·spacing,·and·the·site's·structural·button·color**·—·and·I
+30 30| ground·every·value·below·in·one·of:
+31 31| 
+...
+50 50| 
+51 51| ##·1.·SITE·→·SURFACE·MAP
+52 52| 
+   53|-|·Site·observation·(source)·|·Deadline·surface·|·Direction·|
+   54|-|---|---|---|
+   55|-|·Quiet·column·captions·"Programs·/·Pricing·/·About"·set·apart·above·their·rows;·site·`--bb-widget-title-text-transform:·uppercase`·(`table.png`,·`brand-computed.json`)·|·`QHeaderView::section`·|·Make·the·header·**recede**:·small,·**UPPERCASE**,·muted,·on·the·cool·`surface`·band,·with·a·single·**1px·`line`·bottom·hairline**·—·a·label·strip,·not·a·data·row.·|
+   56|-|·Evenly·spaced,·**rule-less**·link·rows·with·comfortable·vertical·breathing;·feature-card·~20–24px·cell·padding·(`table.png`,·`feature-cards.png`)·|·`QTableWidget`·rows·/·`::item`·|·**Comfortable·row·height**·via·`::item`·padding·on·the·8px·scale;·separate·rows·by·**zebra·tint·only**·(no·per-row·grid·lines).·|
+   57|-|·White·card·surface,·**4px**·radius,·hairline/near-invisible·border,·no·heavy·chrome·(`feature-cards.png`,·`--bb-block-radius:4px`)·|·`QTableWidget`·container·|·White·`bg`,·1px·`line`·border,·**radius·4px**·(down·from·8px);·alt-row·zebra·=·`surface`.·|
+   58|-|·Large·**serif**,·weight-400,·navy·headline·with·tight·leading·(`hero.png`,·`stats-band.png`)·|·`page_heading`·→·`title()`·|·Retype·the·title·in·the·**serif·display**·token,·**weight·400**,·navy·`ink`,·line-height·~1.2.·|
+   59|-|·MM·signature·**green**·accent·on·structure/eyebrows·(`--mm-accent-color·#009666`;·feature-band·`#007E56`)·|·`page_heading`·→·`eyebrow()`·|·Recolor·the·uppercase·eyebrow·to·the·**AA-safe·site·green**·(see·§2.8).·|
+   60|-|·The·one·button·in·`table.png`·is·a·**navy·pill·"Submit"**;·hero·"Explore"·is·a·dark·button;·site's·canonical·primary·CTA·is·the·**orange·pill**·`#DA5C01`·(`brand-computed.json.buttons`)·|·`QPushButton·"Set·exam·date"`·|·Style·as·the·**brand·CTA**.·Recommended:·**navy·`primary`**·(matches·the·observed·Submit·button·**and**·WCAG·AA);·orange·`accent`·documented·as·the·on-brand·alternative·with·its·AA·caveat·(§2.6).·|
+   61|-|·White,·softly-rounded·email·input·on·the·band·(`table.png`/`footer.png`)·|·`QDateEdit`·|·White·`bg`,·1px·`line`·border,·**radius·4px**,·padding·on·8px·scale.·|
+   62|-|·Muted·field·label·("E-mail·Address")·+·quiet·footer·fine-print·(`footer.png`,·`stats-band.png`·captions)·|·date·label·(l.477)·+·footer·(l.514–516)·|·Keep·**muted**·(AA-safe);·do·**not**·drop·to·`faint`·(fails·AA·at·these·sizes).·|
+53   |+|·Site·observation·(source)·································································································································································|·Deadline·surface························|·Direction···························································································································································································|
+54   |+|·-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------·|·---------------------------------------·|·---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------·|
+55   |+|·Quiet·column·captions·"Programs·/·Pricing·/·About"·set·apart·above·their·rows;·site·`--bb-widget-title-text-transform:·uppercase`·(`table.png`,·`brand-computed.json`)····················|·`QHeaderView::section`··················|·Make·the·header·**recede**:·small,·**UPPERCASE**,·muted,·on·the·cool·`surface`·band,·with·a·single·**1px·`line`·bottom·hairline**·—·a·label·strip,·not·a·data·row.··································|
+56   |+|·Evenly·spaced,·**rule-less**·link·rows·with·comfortable·vertical·breathing;·feature-card·~20–24px·cell·padding·(`table.png`,·`feature-cards.png`)·········································|·`QTableWidget`·rows·/·`::item`··········|·**Comfortable·row·height**·via·`::item`·padding·on·the·8px·scale;·separate·rows·by·**zebra·tint·only**·(no·per-row·grid·lines).·····································································|
+57   |+|·White·card·surface,·**4px**·radius,·hairline/near-invisible·border,·no·heavy·chrome·(`feature-cards.png`,·`--bb-block-radius:4px`)························································|·`QTableWidget`·container················|·White·`bg`,·1px·`line`·border,·**radius·4px**·(down·from·8px);·alt-row·zebra·=·`surface`.···········································································································|
+58   |+|·Large·**serif**,·weight-400,·navy·headline·with·tight·leading·(`hero.png`,·`stats-band.png`)······························································································|·`page_heading`·→·`title()`··············|·Retype·the·title·in·the·**serif·display**·token,·**weight·400**,·navy·`ink`,·line-height·~1.2.······································································································|
+59   |+|·MM·signature·**green**·accent·on·structure/eyebrows·(`--mm-accent-color·#009666`;·feature-band·`#007E56`)·················································································|·`page_heading`·→·`eyebrow()`············|·Recolor·the·uppercase·eyebrow·to·the·**AA-safe·site·green**·(see·§2.8).·····························································································································|
+60   |+|·The·one·button·in·`table.png`·is·a·**navy·pill·"Submit"**;·hero·"Explore"·is·a·dark·button;·site's·canonical·primary·CTA·is·the·**orange·pill**·`#DA5C01`·(`brand-computed.json.buttons`)·|·`QPushButton·"Set·exam·date"`···········|·Style·as·the·**brand·CTA**.·Recommended:·**navy·`primary`**·(matches·the·observed·Submit·button·**and**·WCAG·AA);·orange·`accent`·documented·as·the·on-brand·alternative·with·its·AA·caveat·(§2.6).·|
+61   |+|·White,·softly-rounded·email·input·on·the·band·(`table.png`/`footer.png`)··················································································································|·`QDateEdit`·····························|·White·`bg`,·1px·`line`·border,·**radius·4px**,·padding·on·8px·scale.································································································································|
+62   |+|·Muted·field·label·("E-mail·Address")·+·quiet·footer·fine-print·(`footer.png`,·`stats-band.png`·captions)··················································································|·date·label·(l.477)·+·footer·(l.514–516)·|·Keep·**muted**·(AA-safe);·do·**not**·drop·to·`faint`·(fails·AA·at·these·sizes).·····················································································································|
+63 63| 
+64 64| ---
+65 65| 
+...
+ 69  69| hold.·`px`·are·concrete·and·land·on·the·**8px**·spacing·scale.
+ 70  70| 
+ 71  71| ###·2.1·Table·container·—·`QTableWidget`
+ 72    |+
+ 73  72| -·`background:·bg`·→·`#FFFFFF`·(keep).
+ 74  73| -·`border:·1px·solid·line`·→·`#E7E9EC`·(keep).
+ 75  74| -·**`border-radius:·4px`**·(change·from·`8px`)·—·matches·`--bb-block-radius`/`--bb-input-radius`·`4px`;·the·site's·crisp·block·radius·(`feature-cards.png`).
+ 76  75| -·`alternate-background-color:·surface`·→·`#F3F6F8`·(keep·token;·zebra,·§2.4).
+ 77  76| -·`gridline-color:·line`·becomes·moot·with·grid·off·(§2.4);·leave·or·drop.
+ 78  77| -·`font-size:·fs_body`·→·**15px**;·`color:·ink·#122B46`.
+     78|--·Selection:·keep·`selection-background-color:·primary_soft·#F3F6F8`·/·`selection-color:·primary·#122B46`.·*Note:*·post-reconcile·`primary_soft·==·surface`,·so·a·selected·row·reads·like·a·zebra·row;·acceptable·for·a·read-only·table.·Optional·stronger·affordance:·`accent_soft·#FCEBDA`.
+ 79    |+-·Selection:·keep·`selection-background-color:·primary_soft·#F3F6F8`·/·`selection-color:·primary·#122B46`.·_Note:_·post-reconcile·`primary_soft·==·surface`,·so·a·selected·row·reads·like·a·zebra·row;·acceptable·for·a·read-only·table.·Optional·stronger·affordance:·`accent_soft·#FCEBDA`.
+ 80  79| 
+ 81  80| ###·2.2·Table·header·—·`QHeaderView::section`
+ 82    |+
+ 83  81| Grounded·in·the·quiet,·spaced-apart·column·captions·in·`table.png`·and·the·site's
+ 84  82| uppercase·widget-title·convention.
+ 85  83| 
+ 86  84| ```93:101:qt/aqt/cfa_style.py
+     85|-····QHeaderView::section·{
+     86|-········background:·{t["surface"]};
+     87|-········color:·{t["muted"]};
+     88|-········border:·none;
+     89|-········border-bottom:·1px·solid·{t["line"]};
+     90|-········padding:·8px;
+     91|-········font-size:·{t["fs_meta"]}px;
+     92|-········font-weight:·600;
+     93|-····}
+ 87    |+QHeaderView::section·{
+ 88    |+····background:·{t["surface"]};
+ 89    |+····color:·{t["muted"]};
+ 90    |+····border:·none;
+ 91    |+····border-bottom:·1px·solid·{t["line"]};
+ 92    |+····padding:·8px;
+ 93    |+····font-size:·{t["fs_meta"]}px;
+ 94    |+····font-weight:·600;
+ 95    |+}
+ 96  94| ```
+ 97  95| 
+ 98  96| -·`background:·surface`·→·`#F3F6F8`·(keep)·—·the·cool·band·under·the·caption·strip.
+ 99  97| -·`color:·muted`·→·**`#4D5C6D`**·(keep·token).·**Deviation·from·brief's·`#939597`:**·`faint·#939597`·on·`surface`·is·**~2.77:1**·and·**fails·WCAG·AA**;·`muted·#4D5C6D`·on·`surface`·is·**~6.3:1·(AA·pass)**·and·still·reads·clearly·quieter/recessive·than·the·navy·`ink`·cells.·(§6)
+     98|--·**UPPERCASE:**·Qt·Style·Sheets·have·**no·`text-transform`**·—·achieve·it·by·uppercasing·the·*label·strings*·in·`cfa.py`·(§3,·visual-only).·Site·source:·`--bb-widget-title-text-transform:·uppercase`.
+100    |+-·**UPPERCASE:**·Qt·Style·Sheets·have·**no·`text-transform`**·—·achieve·it·by·uppercasing·the·_label·strings_·in·`cfa.py`·(§3,·visual-only).·Site·source:·`--bb-widget-title-text-transform:·uppercase`.
+101  99| -·**Letter-spacing:**·Qt·QSS·has·**no·`letter-spacing`**·—·omit;·documented·as·an·accepted·minor·deviation·from·the·site's·spaced·caps.
+102 100| -·`border-bottom:·1px·solid·line·#E7E9EC`·(keep)·—·the·single·hairline·separating·caption·strip·from·body.
+103 101| -·`border:·none`·(keep)·—·**no·vertical·dividers·between·header·cells**·(matches·the·rule-less·footer·grid).
+...
+105 103| -·`font-size:·fs_meta`·→·**12px**·(site·small·is·13px);·`font-weight:·600`·(keep).
+106 104| 
+107 105| ###·2.3·Row·height·(comfortable)·—·`QTableWidget::item`
+108    |+
+109 106| -·**`padding:·10px·12px`**·(change·from·`6px·8px`)·→·~**40–44px**·row·height.·Grounds·in·the·footer's·comfortable·link-row·rhythm·(`table.png`)·and·feature-card·cell·padding·(~20–24px).·10/12·are·on·the·8px·scale·(8+2·/·8+4)·and·keep·the·dialog·compact.
+110 107| 
+111 108| ###·2.4·Zebra·+·grid
+112    |+
+113 109| -·**Zebra:**·`setAlternatingRowColors(True)`·already·set·(`cfa.py`·l.500)·+·`alternate-background-color:·surface·#F3F6F8`·(QSS·l.90).·Base·rows·=·`bg·#FFFFFF`,·alt·rows·=·`surface·#F3F6F8`·—·a·**subtle**·tint,·matching·the·site's·low-contrast·banding.·No·change·beyond·the·token·reconciliation.
+114 110| -·**Grid·off:**·`setShowGrid(False)`·already·set·(`cfa.py`·l.501)·—·**keep**.·Row·separation·is·**zebra-only**·(no·per-row·hairlines),·matching·the·rule-less·footer·rows.·The·only·hairlines·are·the·container·border·(§2.1)·and·the·header·bottom·border·(§2.2).
+115 111| 
+116 112| ###·2.5·WARN·rows·(recall·<·0.85)·—·**preserve·semantic**
+117    |+
+118 113| ```584:585:qt/aqt/cfa.py
+    114|-················if·column·==·1·and·recall·<·0.85:
+    115|-····················item.setForeground(QColor(cfa_style.WARN))
+119    |+if·column·==·1·and·recall·<·0.85:
+120    |+····item.setForeground(QColor(cfa_style.WARN))
+121 116| ```
+122    |+
+123 117| -·**Keep·exactly.**·`warn`·token·kept·(`#b45309`).·Contrast·verified·AA·on·both·row·backgrounds:·**5.02:1·on·white**,·**4.63:1·on·`surface`**·(§6).·Do·**not**·change·the·0.85·threshold,·the·column,·or·the·coloring·logic.
+124 118| 
+125 119| ###·2.6·Primary·button·—·`QPushButton·"Set·exam·date"`
+126    |+
+127 120| ```102:112:qt/aqt/cfa_style.py
+    121|-····QPushButton·{
+    122|-········background:·{t["primary"]};
+    123|-········color:·#ffffff;
+    124|-········border:·none;
+    125|-········border-radius:·7px;
+    126|-········padding:·7px·14px;
+    127|-········font-weight:·600;
+    128|-········font-family:·{t["font"]};
+    129|-····}
+    130|-····QPushButton:hover·{·background:·#0c3d68;·}
+128    |+QPushButton·{
+129    |+····background:·{t["primary"]};
+130    |+····color:·#ffffff;
+131    |+····border:·none;
+132    |+····border-radius:·7px;
+133    |+····padding:·7px·14px;
+134    |+····font-weight:·600;
+135    |+····font-family:·{t["font"]};
+136    |+}
+137    |+QPushButton:hover·{·background:·#0c3d68;·}
+138 131| ```
+    132|-This·selector·styles·the·dialog's·only·push·button·("Set·exam·date"),·so·it·*is*
+139    |+
+140    |+This·selector·styles·the·dialog's·only·push·button·("Set·exam·date"),·so·it·_is_
+141 133| the·CTA.
+142 134| 
+143 135| **Recommendation·—·navy·`primary`:**
+144    |+
+145 136| -·`background:·primary`·→·**`#122B46`**·(keep·token;·reconciles·to·navy).
+146 137| -·`color:·#FFFFFF`;·`font-weight:·600`;·`font-family:·font`·(IBM·Plex·Sans·via·token).
+147 138| -·**`border-radius:·6px`**·(change·from·`7px`)·—·a·tasteful·rounded·block.·A·true·`100px`·pill·(`--bb-button-radius`)·is·impractical/fragile·on·a·QPushButton·(would·need·`border-radius·≈·½·button·height`,·brittle·across·platforms);·**6px**·echoes·the·site·block·radius·`4px`·and·reads·clean.
+...
+150 141| -·`:disabled`·→·keep·`background:·faint;·color:·surface`.
+151 142| 
+152 143| **Why·navy·over·orange·(justification):**
+    144|-1.·**Grounded·in·`table.png`:**·the·only·button·in·the·reference·asset·is·the·**navy·"Submit"·pill**·—·navy·*is*·the·observed·structural·button.
+153    |+
+154    |+1.·**Grounded·in·`table.png`:**·the·only·button·in·the·reference·asset·is·the·**navy·"Submit"·pill**·—·navy·_is_·the·observed·structural·button.
+155 145| 2.·**WCAG·AA:**·white-on-navy·`#122B46`·≈·**14.4:1**·(pass).·White-on-`accent·#DA5C01`·≈·**3.81:1**·—·**fails·AA**·for·text·<·18px·(the·site's·own·orange·button·shares·this·shortfall).·(§6)
+156 146| 3.·**Token·intent:**·`primary`·=·calm·structural·navy;·using·it·for·the·dialog's·action·keeps·navy·as·structure,·not·decoration.
+157 147| 
+...
+163 153| is·the·recommendation**.
+164 154| 
+165 155| ###·2.7·Date·picker·—·`QDateEdit`
+166    |+
+167 156| -·`border:·1px·solid·line·#E7E9EC`·(keep);·`background:·bg·#FFFFFF`·(keep);·`color:·ink·#122B46`·(keep);·`font-family:·font`·(keep).
+168 157| -·**`border-radius:·4px`**·(change·from·`7px`)·—·site·`--bb-input-radius:·4px`;·matches·the·white·rounded·input·in·`table.png`.
+169 158| -·`padding:·6px·8px`·(keep;·on·8px·scale).·Focus:·leave·hairline·(site·`--bb-input-focus-border-color`·=·`#E7E9EC`,·i.e.·no·color·shift).
+170 159| 
+171 160| ###·2.8·Heading·—·`page_heading`·→·`title()`·+·`eyebrow()`
+172    |+
+173 161| -·**Title**·(`cfa_style.py`·`title()`,·l.147–151):·`font-family:·font_heading`·**[NEW·TOKEN]**·=·`"Source·Serif·4",·Georgia,·"Times·New·Roman",·serif`;·**`font-weight:·400`**·(from·`700`);·`color:·ink·#122B46`;·add·**`line-height:1.2`**;·size·`fs_title`·**22px**·(24px·optional·for·more·hero·presence).·Grounds·in·`hero.png`/`stats-band.png`·(serif,·400,·navy,·tight·leading).
+174 162| -·**Eyebrow**·(`cfa_style.py`·`eyebrow()`,·l.138–144):·keep·11px/700/uppercase;·recolor·`color:·primary`·→·**site·green·`#007E56`**·(`brand-computed.json.colors.featureBandGreen`),·which·surfaces·the·MM·green·signature·**and·passes·AA·(5.10:1·on·white)**.·The·literal·`--mm-accent-color·#009666`·is·**~3.78:1·as·text·(AA-fail·at·11px)**·—·reserve·`#009666`·(`brand_green`·**[NEW·TOKEN]**)·for·**fills·/·rules·/·decorative·accents**,·not·small·text.·(§6)
+175 163| 
+176 164| ###·2.9·Labels·+·footer·(quiet·text)
+177    |+
+178 165| -·**Date·label**·(`cfa.py`·l.476–477):·keep·`color:·MUTED·#4D5C6D`·(6.84:1,·AA).·Optional:·add·`font-size:·{fs_body}px`·for·rhythm.·**Do·not**·switch·to·`faint·#939597`·(3.01:1,·AA-fail).
+179 166| -·**Footer**·(`cfa.py`·l.514–516):·keep·`color:·MUTED·#4D5C6D`,·`font-size:·fs_meta·12px`;·optional·refinement·**`line-height:1.5`**·(site·body·leading).·**Do·not**·switch·to·`faint`·(fine-print·at·12px·would·fail·AA).
+180 167| 
+181 168| ###·2.10·Spacing·(optional,·8px-scale)
+182    |+
+183 169| -·`cfa.py`·l.466·`setContentsMargins(20,18,20,16)`·→·**`(24,20,24,20)`**;·l.467·`setSpacing(10)`·→·**`12`**·to·snap·to·the·8px·rhythm·the·site·uses·throughout·(`BRAND.md`·spacing·scale).·Optional;·purely·visual.
+184 170| 
+185 171| ---
+...
+188 174| 
+189 175| **Visual·only.·Preserve:**·exam-date·persistence·(`_apply_date`),·weakest-first
+190 176| ranking,·all·table·data,·and·the·`recall·<·0.85`·WARN·threshold/coloring.
+    177|-**Parity:**·no·parity-token·*values*·change·here·(Deadline·is·Qt-only,·no·CSS
+191    |+**Parity:**·no·parity-token·_values_·change·here·(Deadline·is·Qt-only,·no·CSS
+192 178| card);·selectors·keep·referencing·the·same·parity·tokens,·so·Py↔CSS·parity·is
+193 179| untouched.
+194 180| 
+    181|-|·#·|·Location·(file···selector/line)·|·Current·|·→·Target·|·Why·(site·source)·|
+    182|-|---|---|---|---|---|
+    183|-|·1·|·`cfa_style.py`···`QTableWidget`·|·`border-radius:·8px`·|·**`4px`**·|·`--bb-block-radius:4px`;·`feature-cards.png`·|
+    184|-|·2·|·`cfa_style.py`···`QTableWidget`·|·`font-size:·fs_body`(14)·|·**15**·(token·reconciles)·|·site·body·16→15·dialog-scale·|
+    185|-|·3·|·`cfa_style.py`···`QTableWidget::item`·|·`padding:·6px·8px`·|·**`10px·12px`**·|·comfortable·rows;·`table.png`/`feature-cards.png`·|
+    186|-|·4·|·`cfa_style.py`···`QHeaderView::section`·|·`padding:·8px`·|·**`8px·12px`**·|·airy·caption·strip;·`table.png`·|
+    187|-|·5·|·`cfa_style.py`···`QHeaderView::section`·|·`color:·muted`(→#4D5C6D)·|·**keep·`muted`**·(not·`faint`)·|·AA·(§6);·brief's·#939597·fails·AA·|
+    188|-|·6·|·`cfa_style.py`···`QPushButton`·|·`background:·primary`;·`border-radius:·7px`;·`padding:·7px·14px`·|·`primary·#122B46`;·**`border-radius:·6px`**;·**`padding:·8px·16px`**·|·navy·Submit·button·in·`table.png`;·AA·|
+    189|-|·7·|·`cfa_style.py`···`QPushButton:hover`·|·`#0c3d68`·(ad-hoc)·|·**`primary_hover`·[NEW]**·`#0C3D68`·|·token-driven,·no·ad-hoc·hex·|
+    190|-|·8·|·`cfa_style.py`···`QDateEdit`·|·`border-radius:·7px`·|·**`4px`**·|·`--bb-input-radius:4px`;·input·in·`table.png`·|
+    191|-|·9·|·`cfa_style.py`···`title()`·(l.147–151)·|·sans,·`font-weight:700`·|·**`font_heading`·[NEW]**,·**`font-weight:400`**,·`line-height:1.2`,·`color:ink`·|·serif·navy·headline;·`hero.png`/`stats-band.png`·|
+    192|-|·10·|·`cfa_style.py`···`eyebrow()`·(l.138–144)·|·`color:·primary`·(navy)·|·**`#007E56`**·(AA-safe·site·green)·|·MM·green·signature;·`--mm-accent-color`·family·|
+    193|-|·11·|·`cfa.py`···l.496–498·`setHorizontalHeaderLabels`·|·Mixed·case·|·**UPPERCASE**·the·3·strings·(`"CARD·ID"`,·`"PREDICTED·RECALL·@·EXAM"`,·`"CAPPED·INTERVAL·(DAYS)"`)·|·Qt·has·no·`text-transform`;·site·caps·captions·|
+    194|-|·12·|·`cfa.py`···`_reload()`·numeric·cells·(l.582–586)·|·default·left·align·|·**right-align**·cols·1·&·2·(`Qt.AlignRight\|AlignVCenter`)·|·site·tables·align·figures;·visual-only·|
+    195|-|·13·|·`cfa.py`···l.477·date·label·|·`color:·MUTED`·|·**keep·MUTED**·(opt.·add·`fs_body`)·|·quiet·field·label;·AA-safe·|
+    196|-|·14·|·`cfa.py`···l.514–516·footer·|·`MUTED`,·`fs_meta`·|·**keep**;·opt.·`line-height:1.5`·|·quiet·fine-print;·AA-safe·|
+    197|-|·15·|·`cfa.py`···l.466–467·margins/spacing·*(optional)*·|·`(20,18,20,16)`,·`10`·|·`(24,20,24,20)`,·`12`·|·8px·rhythm;·`BRAND.md`·scale·|
+    198|-|·—·|·`cfa.py`···l.500·`setAlternatingRowColors(True)`·|·—·|·**keep**·|·zebra·|
+    199|-|·—·|·`cfa.py`···l.501·`setShowGrid(False)`·|·—·|·**keep**·|·rule-less·rows·|
+    200|-|·—·|·`cfa.py`···l.584–585·WARN·|·—·|·**keep**·|·preserve·semantic·|
+195    |+|·#··|·Location·(file···selector/line)···················|·Current··························································|·→·Target···························································································|·Why·(site·source)·································|
+196    |+|·--·|·-------------------------------------------------·|·----------------------------------------------------------------·|·--------------------------------------------------------------------------------------------------·|·-------------------------------------------------·|
+197    |+|·1··|·`cfa_style.py`···`QTableWidget`···················|·`border-radius:·8px`·············································|·**`4px`**··························································································|·`--bb-block-radius:4px`;·`feature-cards.png`······|
+198    |+|·2··|·`cfa_style.py`···`QTableWidget`···················|·`font-size:·fs_body`(14)·········································|·**15**·(token·reconciles)··········································································|·site·body·16→15·dialog-scale······················|
+199    |+|·3··|·`cfa_style.py`···`QTableWidget::item`·············|·`padding:·6px·8px`···············································|·**`10px·12px`**····················································································|·comfortable·rows;·`table.png`/`feature-cards.png`·|
+200    |+|·4··|·`cfa_style.py`···`QHeaderView::section`···········|·`padding:·8px`···················································|·**`8px·12px`**·····················································································|·airy·caption·strip;·`table.png`···················|
+201    |+|·5··|·`cfa_style.py`···`QHeaderView::section`···········|·`color:·muted`(→#4D5C6D)·········································|·**keep·`muted`**·(not·`faint`)·····································································|·AA·(§6);·brief's·#939597·fails·AA·················|
+202    |+|·6··|·`cfa_style.py`···`QPushButton`····················|·`background:·primary`;·`border-radius:·7px`;·`padding:·7px·14px`·|·`primary·#122B46`;·**`border-radius:·6px`**;·**`padding:·8px·16px`**·······························|·navy·Submit·button·in·`table.png`;·AA·············|
+203    |+|·7··|·`cfa_style.py`···`QPushButton:hover`··············|·`#0c3d68`·(ad-hoc)···············································|·**`primary_hover`·[NEW]**·`#0C3D68`································································|·token-driven,·no·ad-hoc·hex·······················|
+204    |+|·8··|·`cfa_style.py`···`QDateEdit`······················|·`border-radius:·7px`·············································|·**`4px`**··························································································|·`--bb-input-radius:4px`;·input·in·`table.png`·····|
+205    |+|·9··|·`cfa_style.py`···`title()`·(l.147–151)············|·sans,·`font-weight:700`··········································|·**`font_heading`·[NEW]**,·**`font-weight:400`**,·`line-height:1.2`,·`color:ink`····················|·serif·navy·headline;·`hero.png`/`stats-band.png`··|
+206    |+|·10·|·`cfa_style.py`···`eyebrow()`·(l.138–144)··········|·`color:·primary`·(navy)··········································|·**`#007E56`**·(AA-safe·site·green)·································································|·MM·green·signature;·`--mm-accent-color`·family····|
+207    |+|·11·|·`cfa.py`···l.496–498·`setHorizontalHeaderLabels`··|·Mixed·case·······················································|·**UPPERCASE**·the·3·strings·(`"CARD·ID"`,·`"PREDICTED·RECALL·@·EXAM"`,·`"CAPPED·INTERVAL·(DAYS)"`)·|·Qt·has·no·`text-transform`;·site·caps·captions····|
+208    |+|·12·|·`cfa.py`···`_reload()`·numeric·cells·(l.582–586)··|·default·left·align···············································|·**right-align**·cols·1·&·2·(`Qt.AlignRight\|AlignVCenter`)·········································|·site·tables·align·figures;·visual-only············|
+209    |+|·13·|·`cfa.py`···l.477·date·label·······················|·`color:·MUTED`···················································|·**keep·MUTED**·(opt.·add·`fs_body`)································································|·quiet·field·label;·AA-safe························|
+210    |+|·14·|·`cfa.py`···l.514–516·footer·······················|·`MUTED`,·`fs_meta`···············································|·**keep**;·opt.·`line-height:1.5`···································································|·quiet·fine-print;·AA-safe·························|
+211    |+|·15·|·`cfa.py`···l.466–467·margins/spacing·_(optional)_·|·`(20,18,20,16)`,·`10`············································|·`(24,20,24,20)`,·`12`··············································································|·8px·rhythm;·`BRAND.md`·scale······················|
+212    |+|·—··|·`cfa.py`···l.500·`setAlternatingRowColors(True)`··|·—································································|·**keep**···························································································|·zebra·············································|
+213    |+|·—··|·`cfa.py`···l.501·`setShowGrid(False)`·············|·—································································|·**keep**···························································································|·rule-less·rows····································|
+214    |+|·—··|·`cfa.py`···l.584–585·WARN·························|·—································································|·**keep**···························································································|·preserve·semantic·································|
+215 201| 
+216 202| ---
+217 203| 
+...
+246 232| 
+247 233| ##·5.·New·tokens·required·(for·the·tokens-reconciliation·station)
+248 234| 
+    235|-|·Token·|·Value·|·Use·here·|·Source·|
+    236|-|---|---|---|---|
+    237|-|·`font_heading`·|·`"Source·Serif·4",·Georgia,·"Times·New·Roman",·serif`·|·`title()`·serif·|·`h1`·(`hero.png`,·`brand-computed.json.typography`)·|
+    238|-|·`brand_green`·|·`#009666`·|·decorative·rules/fills·only·(**not**·small·text·—·3.78:1)·|·`--mm-accent-color`·|
+    239|-|·`primary_hover`·|·`#0C3D68`·|·`QPushButton:hover`·(remove·ad-hoc·hex)·|·darker·navy·of·`primary`·|
+    240|-|·`accent_hover`·|·`#C45301`·|·only·if·orange·button·alt·is·chosen·|·`--bb-primary-button-background-hover`·|
+249    |+|·Token···········|·Value·················································|·Use·here··················································|·Source··············································|
+250    |+|·---------------·|·-----------------------------------------------------·|·---------------------------------------------------------·|·---------------------------------------------------·|
+251    |+|·`font_heading`··|·`"Source·Serif·4",·Georgia,·"Times·New·Roman",·serif`·|·`title()`·serif···········································|·`h1`·(`hero.png`,·`brand-computed.json.typography`)·|
+252    |+|·`brand_green`···|·`#009666`·············································|·decorative·rules/fills·only·(**not**·small·text·—·3.78:1)·|·`--mm-accent-color`·································|
+253    |+|·`primary_hover`·|·`#0C3D68`·············································|·`QPushButton:hover`·(remove·ad-hoc·hex)···················|·darker·navy·of·`primary`····························|
+254    |+|·`accent_hover`··|·`#C45301`·············································|·only·if·orange·button·alt·is·chosen·······················|·`--bb-primary-button-background-hover`··············|
+255 241| 
+    242|-*(Eyebrow·text·uses·`#007E56`·—·the·AA-safe·`featureBandGreen`;·the·tokens
+256    |+_(Eyebrow·text·uses·`#007E56`·—·the·AA-safe·`featureBandGreen`;·the·tokens
+257 243| station·may·expose·it·as·e.g.·`brand_green_text`·or·the·eyebrow·may·reference·it
+    244|-directly.)*
+258    |+directly.)_
+259 245| 
+260 246| ---
+261 247| 
+262 248| ##·6.·WCAG·AA·verification·(contrast·ratios·computed)
+263 249| 
+    250|-|·Pair·|·Ratio·|·Verdict·|
+    251|-|---|---|---|
+    252|-|·`ink·#122B46`·text·on·`bg·#FFFFFF`·(cells)·|·~14.4:1·|·Pass·|
+    253|-|·`ink·#122B46`·on·`surface·#F3F6F8`·(zebra)·|·~13.3:1·|·Pass·|
+    254|-|·White·on·`primary·#122B46`·(**navy·button**)·|·~14.4:1·|·Pass·|
+    255|-|·`muted·#4D5C6D`·on·`bg`·(labels/footer)·|·~6.84:1·|·Pass·|
+    256|-|·`muted·#4D5C6D`·on·`surface`·(**header·text**)·|·~6.30:1·|·Pass·|
+    257|-|·`warn·#b45309`·on·`bg`·(WARN·cell)·|·~5.02:1·|·Pass·|
+    258|-|·`warn·#b45309`·on·`surface`·(WARN·zebra)·|·~4.63:1·|·Pass·|
+    259|-|·`#007E56`·on·`bg`·(**eyebrow**)·|·~5.10:1·|·Pass·|
+    260|-|·`faint·#939597`·on·`surface`·(brief's·header)·|·~2.77:1·|·**Fail**·→·use·`muted`·|
+    261|-|·`#009666`·as·text·on·`bg`·(eyebrow)·|·~3.78:1·|·**Fail**·→·fills/rules·only·|
+    262|-|·White·on·`accent·#DA5C01`·(orange·button)·|·~3.81:1·|·**Fail**·<18px·→·navy·recommended·|
+264    |+|·Pair···········································|·Ratio···|·Verdict···························|
+265    |+|·----------------------------------------------·|·-------·|·---------------------------------·|
+266    |+|·`ink·#122B46`·text·on·`bg·#FFFFFF`·(cells)·····|·~14.4:1·|·Pass······························|
+267    |+|·`ink·#122B46`·on·`surface·#F3F6F8`·(zebra)·····|·~13.3:1·|·Pass······························|
+268    |+|·White·on·`primary·#122B46`·(**navy·button**)···|·~14.4:1·|·Pass······························|
+269    |+|·`muted·#4D5C6D`·on·`bg`·(labels/footer)········|·~6.84:1·|·Pass······························|
+270    |+|·`muted·#4D5C6D`·on·`surface`·(**header·text**)·|·~6.30:1·|·Pass······························|
+271    |+|·`warn·#b45309`·on·`bg`·(WARN·cell)·············|·~5.02:1·|·Pass······························|
+272    |+|·`warn·#b45309`·on·`surface`·(WARN·zebra)·······|·~4.63:1·|·Pass······························|
+273    |+|·`#007E56`·on·`bg`·(**eyebrow**)················|·~5.10:1·|·Pass······························|
+274    |+|·`faint·#939597`·on·`surface`·(brief's·header)··|·~2.77:1·|·**Fail**·→·use·`muted`············|
+275    |+|·`#009666`·as·text·on·`bg`·(eyebrow)············|·~3.78:1·|·**Fail**·→·fills/rules·only·······|
+276    |+|·White·on·`accent·#DA5C01`·(orange·button)······|·~3.81:1·|·**Fail**·<18px·→·navy·recommended·|
+277 263| 
+    264|-**Net:**·every·*recommended*·value·passes·AA;·the·three·fails·are·precisely·why
+278    |+**Net:**·every·_recommended_·value·passes·AA;·the·three·fails·are·precisely·why
+279 265| this·spec·deviates·from·the·brief's·literal·`#939597`·header,·`#009666`·eyebrow
+280 266| text,·and·orange·CTA.
+281 267| 
+--
+from /Users/adarshrajesh/AlphaWeek2/ankiCFA/cfa/ui/reference/specs/ethics-card-spec.md:
+18 18| >·string,·every·data·attribute,·every·`id`,·and·**every·class·name·the·JS·toggles**
+19 19| >·(`sel`,·`committed`,·`locked`,·`pick`,·`pick-<tier>`,·`gold`,·…).·**Token-driven
+20 20| >·only:**·refer·to·`--cfa-*`·variables·by·name;·never·inline·hex.·Hex·shown·below·are
+   21|->·the·*reconciled·target·values*·(for·reference·only)·that·the·tokens·station·is
+21   |+>·the·_reconciled·target·values_·(for·reference·only)·that·the·tokens·station·is
+22 22| >·landing.
+23 23| 
+24 24| ---
+...
+62 62| 
+63 63| ##·1.·Website·section·→·card·element·mapping
+64 64| 
+   65|-|·MM·site·section·(PNG)·|·Trait·to·copy·|·Ethics-card·block·|·Class·hook·(line)·|
+   66|-|---|---|---|---|
+   67|-|·**hero.png**·—·dominant·serif‑400·navy·heading·|·The·card's·"hero"·=·the·**lesson·question**·|·Question·heading·"Is·the·conduct…ethical·or·unethical?"·|·`.cfa-header·h2`·(40),·`.cfa-header`·(39)·|
+   68|-|·**feature-cards.png**·left·over‑line·/·**table.png**·uppercase·column·titles·|·Small·**uppercase**·taxonomy·over‑line·(quiet,·letter-spaced)·|·Cluster·eyebrow·badge·(`{{ClusterTag}}`)·|·`.cfa-cluster`·(41–52)·|
+   69|-|·**feature-cards.png**·—·white·4px·cards,·hairline,·muted·body,·~24px·padding,·left-aligned·|·**Quiet·reading·card**·|·Passage·block·|·`.cfa-passage-wrap`·(171–179),·`.cfa-passage`·(180)·|
+   70|-|·**feature-cards.png**·—·same·quiet·card·|·**Quiet·answer/rationale·card**·|·Post-check·reveal;·AI·block;·back·reveal·|·`.cfa-reveal`·(138–142),·`.cfa-ai`·(243–248),·`.cfa-commit-reveal`·(233–240)·|
+   71|-|·**BRAND**·pricing‑toggle·(4px,·weight·500·answer·toggle)·|·Quiet·**4px·answer-option**·buttons;·selected·state·carries·meaning·|·Verdict·**Ethical·/·Unethical**·buttons·|·`.cfa-verdict-btn`·(183–194),·`.cfa-verdict-btns`·(182)·|
+   72|-|·**hero.png**·"Explore"·pill·+·**BRAND**·primary·button·(**radius·100px·pill**,·weight·500)·|·**Filled·pill**·primary·CTA·|·**Check·answer**·/·**Record·&·continue**·|·`#cfa-check,·#cfa-record-btn`·(128–134),·`.cfa-record`·(168)·|
+   73|-|·**table.png**·uppercase·muted·column·titles·/·**widget·titles·uppercase**·|·Uppercase·quiet·section·labels·|·"Highlight·the·evidence…"·h3;·phrase·count;·"Governing·Standard"·badge·|·`.cfa-highlight-step·h3`·(106),·`.cfa-span-count`·(198),·`.cfa-badge`·(160–164)·|
+   74|-|·**feature-cards.png**·green·pill·CTA·/·**table.png**·green·band·|·**MM·signature·green·`#009666`**·as·the·brand/"correct-evidence"·cue·(never·the·semantic·pass·token)·|·Eyebrow·cue·**and**·the·revealed·**gold-evidence**·outline·|·`.cfa-cluster`·(41),·`.cfa-tok.gold`·(124)·|
+65   |+|·MM·site·section·(PNG)······································································|·Trait·to·copy························································································|·Ethics-card·block······················································|·Class·hook·(line)·······························································|
+66   |+|·------------------------------------------------------------------------------------------·|·----------------------------------------------------------------------------------------------------·|·----------------------------------------------------------------------·|·-------------------------------------------------------------------------------·|
+67   |+|·**hero.png**·—·dominant·serif‑400·navy·heading·············································|·The·card's·"hero"·=·the·**lesson·question**··························································|·Question·heading·"Is·the·conduct…ethical·or·unethical?"················|·`.cfa-header·h2`·(40),·`.cfa-header`·(39)·······································|
+68   |+|·**feature-cards.png**·left·over‑line·/·**table.png**·uppercase·column·titles···············|·Small·**uppercase**·taxonomy·over‑line·(quiet,·letter-spaced)········································|·Cluster·eyebrow·badge·(`{{ClusterTag}}`)·······························|·`.cfa-cluster`·(41–52)··························································|
+69   |+|·**feature-cards.png**·—·white·4px·cards,·hairline,·muted·body,·~24px·padding,·left-aligned·|·**Quiet·reading·card**···············································································|·Passage·block··························································|·`.cfa-passage-wrap`·(171–179),·`.cfa-passage`·(180)·····························|
+70   |+|·**feature-cards.png**·—·same·quiet·card····················································|·**Quiet·answer/rationale·card**······································································|·Post-check·reveal;·AI·block;·back·reveal·······························|·`.cfa-reveal`·(138–142),·`.cfa-ai`·(243–248),·`.cfa-commit-reveal`·(233–240)····|
+71   |+|·**BRAND**·pricing‑toggle·(4px,·weight·500·answer·toggle)···································|·Quiet·**4px·answer-option**·buttons;·selected·state·carries·meaning··································|·Verdict·**Ethical·/·Unethical**·buttons································|·`.cfa-verdict-btn`·(183–194),·`.cfa-verdict-btns`·(182)·························|
+72   |+|·**hero.png**·"Explore"·pill·+·**BRAND**·primary·button·(**radius·100px·pill**,·weight·500)·|·**Filled·pill**·primary·CTA··········································································|·**Check·answer**·/·**Record·&·continue**·······························|·`#cfa-check,·#cfa-record-btn`·(128–134),·`.cfa-record`·(168)····················|
+73   |+|·**table.png**·uppercase·muted·column·titles·/·**widget·titles·uppercase**··················|·Uppercase·quiet·section·labels·······································································|·"Highlight·the·evidence…"·h3;·phrase·count;·"Governing·Standard"·badge·|·`.cfa-highlight-step·h3`·(106),·`.cfa-span-count`·(198),·`.cfa-badge`·(160–164)·|
+74   |+|·**feature-cards.png**·green·pill·CTA·/·**table.png**·green·band····························|·**MM·signature·green·`#009666`**·as·the·brand/"correct-evidence"·cue·(never·the·semantic·pass·token)·|·Eyebrow·cue·**and**·the·revealed·**gold-evidence**·outline·············|·`.cfa-cluster`·(41),·`.cfa-tok.gold`·(124)······································|
+75 75| 
+76 76| ---
+77 77| 
+...
+ 84  84| `--cfa-accent·#DA5C01`,·`--cfa-accent-soft·#FCEBDA`,·`--cfa-pass·#15803d`·/
+ 85  85| `--cfa-pass-soft`,·`--cfa-fail·#b91c1c`·/·`--cfa-fail-soft`.
+ 86  86| **New,·non‑parity·vars·this·card·should·add·to·`:root`**·(see·§6·parity·note·—·these
+     87|-are·*not*·among·the·10·gated·tokens,·so·adding·them·is·safe):·`--cfa-font-heading:
+ 87    |+are·_not_·among·the·10·gated·tokens,·so·adding·them·is·safe):·`--cfa-font-heading:
+ 88  88| "Source·Serif·4",·Georgia,·"Times·New·Roman",·serif;`,·`--cfa-font:·"IBM·Plex·Sans",
+ 89  89| -apple-system,·"Segoe·UI",·Roboto,·"Helvetica·Neue",·Arial,·sans-serif;`,
+ 90  90| `--cfa-brand-green:·#009666;`,·and·(for·the·partial/near·tier,·see·§3)·`--cfa-warn:
+ 91  91| #b45309;`·+·`--cfa-warn-soft`·mirroring·`cfa_style.py`.
+ 92  92| 
+     93|-|·Element·|·Class·|·Current·|·Target·|·Grounds·|
+     94|-|---|---|---|---|---|
+     95|-|·**Base·body·font**·|·`.card`·(26),·`.cfa-commit`·(224)·|·`-apple-system,"Segoe·UI",Roboto,Arial,sans-serif`·|·**`font-family:·var(--cfa-font)`**·(IBM·Plex·Sans·prefix)·|·site·body·=·IBM·Plex·Sans·|
+     96|-|·**Question·heading**·*(the·hero)*·|·`.cfa-header·h2`·(40)·|·`1.15rem`,·browser‑bold,·`--cfa-ink`,·lh·default·|·**`font-family:·var(--cfa-font-heading)`·(serif);·`font-weight:400`;·`font-size:~1.45rem`·(≈23px);·`line-height:1.2`;·color·`var(--cfa-ink)`**·|·hero.png·serif‑400·navy;·heroH1·40/400·scaled·to·a·card·|
+     97|-|·**Cluster·eyebrow**·|·`.cfa-cluster`·(41)·|·monospace·`700`,·`.68rem`,·uppercase,·`--cfa-primary`·on·`--cfa-primary-soft`,·pill·|·**`var(--cfa-font)`·(drop·monospace);·weight·`600`;·`.7rem`;·uppercase;·`letter-spacing:.08em`;·color·`var(--cfa-muted)`**·(optional·`var(--cfa-brand-green)`·MM·cue)·|·table.png·uppercase·muted·labels;·feature-cards·over‑line·|
+     98|-|·**Passage·body**·|·`.cfa-passage`·(180),·`.cfa-passage-wrap`·(171)·|·`1.02rem`,·inherits·`--cfa-ink`·|·**`font-size:1rem`·(≥16px,·no·mobile·zoom);·`line-height:1.6–1.75`;·color·`var(--cfa-ink)`**·(or·soften·to·`var(--cfa-muted)`·=·site·body·`#4D5C6D`)·|·site·body·16/1.5;·extra·leading·so·highlighted·rows·don't·collide·|
+     99|-|·**"Highlight·the·evidence"·h3**·|·`.cfa-highlight-step·h3`·(106)·|·`1rem`,·browser‑bold·|·**`font-size:.8rem`;·weight·`600`;·uppercase;·`letter-spacing:.06em`;·color·`var(--cfa-muted)`**·—·a·quiet·step·label,·not·a·second·heading·|·site·widget·titles·uppercase;·keeps·the·serif·question·dominant·|
+    100|-|·**Instruction·text**·|·`.cfa-highlight-instr`·(107)·|·`.88rem`,·`--cfa-muted`·|·keep·`.88rem`,·**`color:·var(--cfa-muted)`**·|·site·lead·is·calm·muted·sans·|
+    101|-|·**Phrase·count·/·hint**·|·`.cfa-span-count`·(198),·`.cfa-hint`·(135)·|·`.85rem`·muted·/·hardcoded·`#8a8a93`·|·**`.8rem`,·`color:·var(--cfa-faint)`**·(tokenize·the·hint's·hardcoded·grey)·|·muted·metadata·|
+    102|-|·**Verdict·buttons**·|·`.cfa-verdict-btn`·(183)·|·`.95rem`,·weight·`700`·|·**weight·`500–600`,·`.95rem`,·`var(--cfa-font)`**·|·MM·answer-toggle·weight·~500·|
+    103|-|·**Primary·CTA·text**·|·`#cfa-check,·#cfa-record-btn`·(128)·|·`.95rem`,·weight·`700`·|·**weight·`500`,·`.95rem`,·`var(--cfa-font)`,·white**·|·BRAND·primary·button·weight·500·|
+    104|-|·**Grade·line**·|·`.cfa-grade`·(143)·|·`1.2rem`,·weight·`800`,·pass/fail·|·keep·pass/fail·color;·**soften·weight·`800→700`**·(calmer),·optional·`var(--cfa-font-heading)`·|·semantic·call·stays;·calmer·weight·|
+    105|-|·**Governing-Standard·badge·+·text**·|·`.cfa-badge`·(160),·`.cfa-standard`·(159)·|·monospace·badge·on·`--cfa-primary`;·std·`1.05rem/600`·ink·|·badge·`var(--cfa-font)`,·uppercase,·`.68rem`,·on·`var(--cfa-primary)`·(optional·`var(--cfa-brand-green)`);·std·keep·`1.05rem/600·var(--cfa-ink)`·|·uppercase·quiet·label;·navy/green·brand·cue·|
+    106|-|·**Breakdown·/·span-detail·lists**·|·`.cfa-breakdown`·(146),·`.cfa-span-detail`·(214)·|·`.9rem`,·hardcoded·`#555`·|·**`.9rem`,·`color:·var(--cfa-muted)`**·(tokenize)·|·muted·body·|
+ 93    |+|·Element·····························|·Class············································|·Current·············································································|·Target································································································································································|·Grounds···························································|
+ 94    |+|·-----------------------------------·|·------------------------------------------------·|·-----------------------------------------------------------------------------------·|·---------------------------------------------------------------------------------------------------------------------------------------------------------------------·|·-----------------------------------------------------------------·|
+ 95    |+|·**Base·body·font**··················|·`.card`·(26),·`.cfa-commit`·(224)················|·`-apple-system,"Segoe·UI",Roboto,Arial,sans-serif`··································|·**`font-family:·var(--cfa-font)`**·(IBM·Plex·Sans·prefix)·············································································································|·site·body·=·IBM·Plex·Sans·········································|
+ 96    |+|·**Question·heading**·_(the·hero)_···|·`.cfa-header·h2`·(40)····························|·`1.15rem`,·browser‑bold,·`--cfa-ink`,·lh·default····································|·**`font-family:·var(--cfa-font-heading)`·(serif);·`font-weight:400`;·`font-size:~1.45rem`·(≈23px);·`line-height:1.2`;·color·`var(--cfa-ink)`**························|·hero.png·serif‑400·navy;·heroH1·40/400·scaled·to·a·card···········|
+ 97    |+|·**Cluster·eyebrow**·················|·`.cfa-cluster`·(41)······························|·monospace·`700`,·`.68rem`,·uppercase,·`--cfa-primary`·on·`--cfa-primary-soft`,·pill·|·**`var(--cfa-font)`·(drop·monospace);·weight·`600`;·`.7rem`;·uppercase;·`letter-spacing:.08em`;·color·`var(--cfa-muted)`**·(optional·`var(--cfa-brand-green)`·MM·cue)·|·table.png·uppercase·muted·labels;·feature-cards·over‑line·········|
+ 98    |+|·**Passage·body**····················|·`.cfa-passage`·(180),·`.cfa-passage-wrap`·(171)··|·`1.02rem`,·inherits·`--cfa-ink`·····················································|·**`font-size:1rem`·(≥16px,·no·mobile·zoom);·`line-height:1.6–1.75`;·color·`var(--cfa-ink)`**·(or·soften·to·`var(--cfa-muted)`·=·site·body·`#4D5C6D`)··················|·site·body·16/1.5;·extra·leading·so·highlighted·rows·don't·collide·|
+ 99    |+|·**"Highlight·the·evidence"·h3**·····|·`.cfa-highlight-step·h3`·(106)···················|·`1rem`,·browser‑bold································································|·**`font-size:.8rem`;·weight·`600`;·uppercase;·`letter-spacing:.06em`;·color·`var(--cfa-muted)`**·—·a·quiet·step·label,·not·a·second·heading···························|·site·widget·titles·uppercase;·keeps·the·serif·question·dominant···|
+100    |+|·**Instruction·text**················|·`.cfa-highlight-instr`·(107)·····················|·`.88rem`,·`--cfa-muted`·····························································|·keep·`.88rem`,·**`color:·var(--cfa-muted)`**··························································································································|·site·lead·is·calm·muted·sans······································|
+101    |+|·**Phrase·count·/·hint**·············|·`.cfa-span-count`·(198),·`.cfa-hint`·(135)·······|·`.85rem`·muted·/·hardcoded·`#8a8a93`················································|·**`.8rem`,·`color:·var(--cfa-faint)`**·(tokenize·the·hint's·hardcoded·grey)···························································································|·muted·metadata····················································|
+102    |+|·**Verdict·buttons**·················|·`.cfa-verdict-btn`·(183)·························|·`.95rem`,·weight·`700`······························································|·**weight·`500–600`,·`.95rem`,·`var(--cfa-font)`**·····················································································································|·MM·answer-toggle·weight·~500······································|
+103    |+|·**Primary·CTA·text**················|·`#cfa-check,·#cfa-record-btn`·(128)··············|·`.95rem`,·weight·`700`······························································|·**weight·`500`,·`.95rem`,·`var(--cfa-font)`,·white**··················································································································|·BRAND·primary·button·weight·500···································|
+104    |+|·**Grade·line**······················|·`.cfa-grade`·(143)·······························|·`1.2rem`,·weight·`800`,·pass/fail···················································|·keep·pass/fail·color;·**soften·weight·`800→700`**·(calmer),·optional·`var(--cfa-font-heading)`········································································|·semantic·call·stays;·calmer·weight································|
+105    |+|·**Governing-Standard·badge·+·text**·|·`.cfa-badge`·(160),·`.cfa-standard`·(159)········|·monospace·badge·on·`--cfa-primary`;·std·`1.05rem/600`·ink···························|·badge·`var(--cfa-font)`,·uppercase,·`.68rem`,·on·`var(--cfa-primary)`·(optional·`var(--cfa-brand-green)`);·std·keep·`1.05rem/600·var(--cfa-ink)`······················|·uppercase·quiet·label;·navy/green·brand·cue·······················|
+106    |+|·**Breakdown·/·span-detail·lists**···|·`.cfa-breakdown`·(146),·`.cfa-span-detail`·(214)·|·`.9rem`,·hardcoded·`#555`···························································|·**`.9rem`,·`color:·var(--cfa-muted)`**·(tokenize)·····················································································································|·muted·body························································|
+107 107| 
+108 108| ---
+109 109| 
+...
+112 112| ###·3.1·Evidence-highlight·accent·—·the·key·decision
+113 113| 
+114 114| **Use·the·warm·`--cfa-accent`·(orange·`#DA5C01`)·for·the·learner's·active/committed
+    115|-evidence·highlight;·reserve·MM·green·`#009666`·for·the·*revealed·correct·evidence*
+115    |+evidence·highlight;·reserve·MM·green·`#009666`·for·the·_revealed·correct·evidence_
+116 116| and·brand·cue;·keep·pass/fail·for·verdict·correctness.**·Rationale:
+117 117| 
+    118|--·The·card's·semantic·ecosystem·already·spends·**green**·on·*correct/gold*·and·*pass*,
+    119|-··**red**·on·*fail/wrong*,·**amber**·on·*partial/near*.·The·learner's·**neutral,
+118    |+-·The·card's·semantic·ecosystem·already·spends·**green**·on·_correct/gold_·and·_pass_,
+119    |+··**red**·on·_fail/wrong_,·**amber**·on·_partial/near_.·The·learner's·**neutral,
+120 120| ··pre-grade·"I'm·marking·this"**·highlight·needs·a·hue·that·does·**not**·pre-signal
+121 121| ··correctness·—·the·only·free,·on-brand·warm·hue·is·**`--cfa-accent`·orange**.
+122 122| ··(Choosing·green·here·would·collide·with·the·gold-span·green·and·the·pass·token.)
+...
+129 129| the·learner's·picks·**recolor·by·grade·tier**·to·pass/warn/fail;·the·true·evidence·is
+130 130| outlined·in·**brand·green**.
+131 131| 
+    132|-|·Token·slot·|·Class(es)·|·Target·|
+    133|-|---|---|---|
+    134|-|·Live/committed·highlight·|·`.cfa-tok.sel`·(99),·`.cfa-tok.committed`·(206),·`.cfa-tok.pick`·(116)·|·`background:·var(--cfa-accent-soft)`,·`color:·var(--cfa-accent)`·(already·the·intent·—·keep·token-referenced,·no·hardcoded·amber)·|
+    135|-|·Correct·pick·(post-grade)·|·`.cfa-tok.pick-correct`·(117)·|·`var(--cfa-pass-soft)`·fill·/·`var(--cfa-pass)`·text·(**tokenize**·the·hardcoded·`#bff0cf/#14663a`)·|
+    136|-|·Partial/near·pick·|·`.cfa-tok.pick-partial`·(210),·`.pick-somewhat`·(118)·|·`var(--cfa-warn-soft)`·/·`var(--cfa-warn)`·(**add·warn·token**;·replace·hardcoded·`#ffe08a`)·|
+    137|-|·Wrong·pick·|·`.cfa-tok.pick-wrong`·(119)·|·`var(--cfa-fail-soft)`·/·`var(--cfa-fail)`·(**tokenize**·`#f6c9c4/#8f201a`)·|
+    138|-|·**Revealed·correct·evidence**·|·`.cfa-tok.gold`·(124)·|·`box-shadow:·0·0·0·2px·var(--cfa-brand-green)·inset`·(**retarget**·the·hardcoded·`#2e9e5b`·→·MM·green)·|
+132    |+|·Token·slot····················|·Class(es)······························································|·Target····························································································································|
+133    |+|·-----------------------------·|·----------------------------------------------------------------------·|·---------------------------------------------------------------------------------------------------------------------------------·|
+134    |+|·Live/committed·highlight······|·`.cfa-tok.sel`·(99),·`.cfa-tok.committed`·(206),·`.cfa-tok.pick`·(116)·|·`background:·var(--cfa-accent-soft)`,·`color:·var(--cfa-accent)`·(already·the·intent·—·keep·token-referenced,·no·hardcoded·amber)·|
+135    |+|·Correct·pick·(post-grade)·····|·`.cfa-tok.pick-correct`·(117)··········································|·`var(--cfa-pass-soft)`·fill·/·`var(--cfa-pass)`·text·(**tokenize**·the·hardcoded·`#bff0cf/#14663a`)·······························|
+136    |+|·Partial/near·pick·············|·`.cfa-tok.pick-partial`·(210),·`.pick-somewhat`·(118)··················|·`var(--cfa-warn-soft)`·/·`var(--cfa-warn)`·(**add·warn·token**;·replace·hardcoded·`#ffe08a`)······································|
+137    |+|·Wrong·pick····················|·`.cfa-tok.pick-wrong`·(119)············································|·`var(--cfa-fail-soft)`·/·`var(--cfa-fail)`·(**tokenize**·`#f6c9c4/#8f201a`)·······················································|
+138    |+|·**Revealed·correct·evidence**·|·`.cfa-tok.gold`·(124)··················································|·`box-shadow:·0·0·0·2px·var(--cfa-brand-green)·inset`·(**retarget**·the·hardcoded·`#2e9e5b`·→·MM·green)····························|
+139 139| 
+140 140| ###·3.2·Cards·&·chrome·(the·calm·feature-card·look)
+141 141| 
+    142|-|·Block·|·Class·(line)·|·Current·|·Target·|·Grounds·|
+    143|-|---|---|---|---|---|
+    144|-|·**Passage·card**·|·`.cfa-passage-wrap`·(171)·|·`border-radius:12px`,·`1px·solid·var(--cfa-line)`,·`background:var(--cfa-surface)`,·`padding:18px·20px`·|·**`border-radius:4px`**,·keep·`1px·solid·var(--cfa-line)`,·keep·`background:var(--cfa-surface)`,·**`padding:20px·24px`**·|·feature-cards·4px·+·hairline·+·generous·padding·|
+    145|-|·**Reveal·card**·|·`.cfa-reveal`·(138)·|·`border-top:2px·dashed·#d6d6de`,·`padding-top:16px`·|·**quiet·card:·drop·the·dashed·rule·→·`background:var(--cfa-surface)`·(or·bg),·`border:1px·solid·var(--cfa-line)`,·`border-radius:4px`,·`padding:20px·24px`,·`margin-top:24px`**·|·feature-cards·quiet·card,·not·a·worksheet·dashed·line·|
+    146|-|·**Back·reveal**·|·`.cfa-commit-reveal`·(233)·|·`border-top:2px·dashed·#d6d6de`,·`padding-top:14px`·|·same·quiet-card·treatment·as·`.cfa-reveal`·(hairline,·4px,·comfortable·padding)·|·parity·with·front·reveal·|
+    147|-|·**AI·block**·|·`.cfa-ai`·(243)·|·`1px·solid·#cfe0f0`,·`border-radius:10px`,·`background:var(--cfa-primary-soft)`·|·**`border-radius:4px`,·`border:1px·solid·var(--cfa-line)`,·keep·`background:var(--cfa-primary-soft)`**·(tokenize·the·border)·|·4px·block·radius·|
+    148|-|·**Highlight-grade·message**·|·`.cfa-hl-msg`·+·`-correct/-somewhat/-partial/-wrong`·(150–153,·212)·|·hardcoded·soft·washes·|·keep·the·pass/warn/fail·semantic·washes·but·**tokenize**:·`var(--cfa-pass-soft)`/`var(--cfa-warn-soft)`/`var(--cfa-fail-soft)`·bg,·`var(--cfa-line)`→soft·border,·`border-radius:8px→4px`·|·preserve·semantic·tone,·brand·radius·|
+    149|-|·**Detail·markers**·|·`.cfa-span-detail·.found/.near/.missed`·(216–219)·|·`#2e9e5b`/`#b45309`/`#d1453b`·|·`var(--cfa-pass)`/`var(--cfa-warn)`/`var(--cfa-fail)`·|·tokenize;·keep·semantics·|
+142    |+|·Block·······················|·Class·(line)························································|·Current·································································································|·Target····················································································································································································|·Grounds···············································|
+143    |+|·---------------------------·|·-------------------------------------------------------------------·|·-------------------------------------------------------------------------------------------------------·|·-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------·|·-----------------------------------------------------·|
+144    |+|·**Passage·card**············|·`.cfa-passage-wrap`·(171)···········································|·`border-radius:12px`,·`1px·solid·var(--cfa-line)`,·`background:var(--cfa-surface)`,·`padding:18px·20px`·|·**`border-radius:4px`**,·keep·`1px·solid·var(--cfa-line)`,·keep·`background:var(--cfa-surface)`,·**`padding:20px·24px`**··································································|·feature-cards·4px·+·hairline·+·generous·padding·······|
+145    |+|·**Reveal·card**·············|·`.cfa-reveal`·(138)·················································|·`border-top:2px·dashed·#d6d6de`,·`padding-top:16px`·····················································|·**quiet·card:·drop·the·dashed·rule·→·`background:var(--cfa-surface)`·(or·bg),·`border:1px·solid·var(--cfa-line)`,·`border-radius:4px`,·`padding:20px·24px`,·`margin-top:24px`**···········|·feature-cards·quiet·card,·not·a·worksheet·dashed·line·|
+146    |+|·**Back·reveal**·············|·`.cfa-commit-reveal`·(233)··········································|·`border-top:2px·dashed·#d6d6de`,·`padding-top:14px`·····················································|·same·quiet-card·treatment·as·`.cfa-reveal`·(hairline,·4px,·comfortable·padding)···········································································································|·parity·with·front·reveal······························|
+147    |+|·**AI·block**················|·`.cfa-ai`·(243)·····················································|·`1px·solid·#cfe0f0`,·`border-radius:10px`,·`background:var(--cfa-primary-soft)`·························|·**`border-radius:4px`,·`border:1px·solid·var(--cfa-line)`,·keep·`background:var(--cfa-primary-soft)`**·(tokenize·the·border)······························································|·4px·block·radius······································|
+148    |+|·**Highlight-grade·message**·|·`.cfa-hl-msg`·+·`-correct/-somewhat/-partial/-wrong`·(150–153,·212)·|·hardcoded·soft·washes···················································································|·keep·the·pass/warn/fail·semantic·washes·but·**tokenize**:·`var(--cfa-pass-soft)`/`var(--cfa-warn-soft)`/`var(--cfa-fail-soft)`·bg,·`var(--cfa-line)`→soft·border,·`border-radius:8px→4px`·|·preserve·semantic·tone,·brand·radius··················|
+149    |+|·**Detail·markers**··········|·`.cfa-span-detail·.found/.near/.missed`·(216–219)···················|·`#2e9e5b`/`#b45309`/`#d1453b`···········································································|·`var(--cfa-pass)`/`var(--cfa-warn)`/`var(--cfa-fail)`·····································································································································|·tokenize;·keep·semantics······························|
+150 150| 
+151 151| ###·3.3·Buttons
+152 152| 
+    153|-|·Button·|·Class·(line)·|·Current·|·Target·|·Grounds·|
+    154|-|---|---|---|---|---|
+    155|-|·**Verdict·options**·|·`.cfa-verdict-btn`·(183)·|·`border-radius:9px`,·`1px·solid·var(--cfa-line)`,·`#fff`·bg,·`var(--cfa-ink)`,·weight·700·|·**`border-radius:4px`**·(quiet·option),·keep·hairline,·`background:#fff`/`var(--cfa-bg)`,·weight·`500–600`;·**`min-height:44px`**·(mobile·tap);·hover·`border-color:var(--cfa-primary)`·(keep)·|·MM·answer-toggle·4px/500;·AA·tap·target·|
+    156|-|·Verdict·**selected**·|·`.cfa-verdict-btn.sel`·+·`[data-v="ethical"].sel`·/·`[data-v="unethical"].sel`·(191–194)·|·ethical→pass,·unethical→fail·soft·fills·|·**keep**·pass/fail·semantic·mapping,·token-referenced·|·pass/fail·=·verdict·correctness·(guard)·|
+    157|-|·**Primary·CTA**·|·`#cfa-check,·#cfa-record-btn`·(128)·|·`border-radius:9px`,·`background:var(--cfa-primary)`·navy,·weight·700,·**hardcoded·hover·`#0c3d68`**·|·**`border-radius:100px`·(pill)**,·`background:var(--cfa-primary)`·navy,·weight·`500`,·white;·**replace·hardcoded·hover**·with·a·token/derived·navy;·**`min-height:44px`**·|·BRAND·primary·pill·100px;·"structure·not·decoration"·⇒·navy·CTA·|
+    158|-|·**Disabled·CTA**·|·`#cfa-check:disabled`·(134)·|·`var(--cfa-faint)`·|·keep·`var(--cfa-faint)`·|·fine·|
+    159|-|·**Clear·highlights**·|·`#cfa-clear-spans`·(200)·|·`border-radius:7px`,·hairline,·`#fff`·|·**`border-radius:4px`**·(or·pill·for·a·light·"chip"),·keep·hairline/quiet;·ensure·≥`32px`·hit·height·|·quiet·secondary·control·|
+153    |+|·Button···············|·Class·(line)·············································································|·Current······························································································|·Target·························································································································································································|·Grounds·························································|
+154    |+|·--------------------·|·----------------------------------------------------------------------------------------·|·----------------------------------------------------------------------------------------------------·|·----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------·|·---------------------------------------------------------------·|
+155    |+|·**Verdict·options**··|·`.cfa-verdict-btn`·(183)·································································|·`border-radius:9px`,·`1px·solid·var(--cfa-line)`,·`#fff`·bg,·`var(--cfa-ink)`,·weight·700············|·**`border-radius:4px`**·(quiet·option),·keep·hairline,·`background:#fff`/`var(--cfa-bg)`,·weight·`500–600`;·**`min-height:44px`**·(mobile·tap);·hover·`border-color:var(--cfa-primary)`·(keep)·|·MM·answer-toggle·4px/500;·AA·tap·target·························|
+156    |+|·Verdict·**selected**·|·`.cfa-verdict-btn.sel`·+·`[data-v="ethical"].sel`·/·`[data-v="unethical"].sel`·(191–194)·|·ethical→pass,·unethical→fail·soft·fills······························································|·**keep**·pass/fail·semantic·mapping,·token-referenced··········································································································································|·pass/fail·=·verdict·correctness·(guard)·························|
+157    |+|·**Primary·CTA**······|·`#cfa-check,·#cfa-record-btn`·(128)······················································|·`border-radius:9px`,·`background:var(--cfa-primary)`·navy,·weight·700,·**hardcoded·hover·`#0c3d68`**·|·**`border-radius:100px`·(pill)**,·`background:var(--cfa-primary)`·navy,·weight·`500`,·white;·**replace·hardcoded·hover**·with·a·token/derived·navy;·**`min-height:44px`**······················|·BRAND·primary·pill·100px;·"structure·not·decoration"·⇒·navy·CTA·|
+158    |+|·**Disabled·CTA**·····|·`#cfa-check:disabled`·(134)······························································|·`var(--cfa-faint)`···················································································|·keep·`var(--cfa-faint)`········································································································································································|·fine····························································|
+159    |+|·**Clear·highlights**·|·`#cfa-clear-spans`·(200)·································································|·`border-radius:7px`,·hairline,·`#fff`································································|·**`border-radius:4px`**·(or·pill·for·a·light·"chip"),·keep·hairline/quiet;·ensure·≥`32px`·hit·height···························································································|·quiet·secondary·control·········································|
+160 160| 
+161 161| >·**MM-literal·alt·(note,·don't·lead):**·MM's·marketing·**primary**·button·is·**orange
+162 162| >·`#DA5C01`**.·Using·`var(--cfa-accent)`·for·the·Check/Record·fill·is·the·more
+...
+188 188| **8px·rhythm.**·Current·margins·are·an·ad-hoc·mix·(6·/·10·/·12·/·14·/·18·px);
+189 189| normalize·to·the·8px·scale:
+190 190| 
+    191|-|·Class·(line)·|·Current·margin·|·Target·|
+    192|-|---|---|---|
+    193|-|·`.cfa-header`·(39)·|·`margin-bottom:14px`·|·`16px`·|
+    194|-|·`.cfa-passage-wrap`·(171)·|·`margin:12px·0·18px`·|·`16px·0·24px`·|
+    195|-|·`.cfa-verdict-btns`·(182)·|·`margin:4px·0·14px`·|·`8px·0·16px`·|
+    196|-|·`.cfa-highlight-step`·(105)·|·`margin:6px·0·12px`·|·`8px·0·16px`·|
+    197|-|·`.cfa-actions`·(127)·|·`margin:8px·0`·|·`16px·0`·|
+    198|-|·`.cfa-reveal`·(138)·|·`margin-top:18px`·|·`24px`·|
+    199|-|·`.cfa-record`·(168)·|·`margin-top:16px`·|·`24px`·|
+191    |+|·Class·(line)················|·Current·margin·······|·Target········|
+192    |+|·---------------------------·|·--------------------·|·-------------·|
+193    |+|·`.cfa-header`·(39)··········|·`margin-bottom:14px`·|·`16px`········|
+194    |+|·`.cfa-passage-wrap`·(171)···|·`margin:12px·0·18px`·|·`16px·0·24px`·|
+195    |+|·`.cfa-verdict-btns`·(182)···|·`margin:4px·0·14px`··|·`8px·0·16px`··|
+196    |+|·`.cfa-highlight-step`·(105)·|·`margin:6px·0·12px`··|·`8px·0·16px`··|
+197    |+|·`.cfa-actions`·(127)········|·`margin:8px·0`·······|·`16px·0`······|
+198    |+|·`.cfa-reveal`·(138)·········|·`margin-top:18px`····|·`24px`········|
+199    |+|·`.cfa-record`·(168)·········|·`margin-top:16px`····|·`24px`········|
+200 200| 
+201 201| -·**Measure·/·width:**·keep·`.cfa-pair·max-width`·(28)·around·**760–860px**·(site
+202 202| ··inner·text·column·is·540px·—·don't·go·ultra-wide);·it's·`100%`·on·AnkiDroid.·Keep
+...
+270 270| (138),·`.cfa-grade`·(143),·`.cfa-breakdown`·(146),·`.cfa-hl-msg`·+·tiers·(150–153,
+271 271| 212),·`.cfa-span-detail`·+·markers·(214–221),·`.cfa-standard`/`.cfa-badge`·(159–164),
+272 272| `.cfa-rationale`·(165),·`.cfa-record`·(168),·`.cfa-ai*`·(243–252);·back:·`.cfa-commit`
+    273|-+·`.big`·(224–228),·`.cfa-commit-reveal`·(233).·**Do·not**·restyle·the·unused
+    274|-two-case·layout·(`.cfa-cases`/`.cfa-case`/`.cfa-judge*`,·55–113)·—·not·on·this·card.
+273 275| 
+274    |+-·`.big`·(224–228),·`.cfa-commit-reveal`·(233).·**Do·not**·restyle·the·unused
+275    |+··two-case·layout·(`.cfa-cases`/`.cfa-case`/`.cfa-judge*`,·55–113)·—·not·on·this·card.
+276    |+
+277 276| ---
+278 277| 
+279 278| ##·6.·GUARDS·CHECKLIST·(for·the·restyle·engineer)
+--
+from /Users/adarshrajesh/AlphaWeek2/ankiCFA/cfa/ui/reference/specs/menu-chrome-spec.md:
+68 68| 
+69 69| ##·1.·WEBSITE·SECTION·→·CHROME·ELEMENT·MAP
+70 70| 
+   71|-|·Site·section·(PNG)·|·Observed·trait·to·copy·|·Chrome·element·|·Builder·/·code·site·|
+   72|-|---|---|---|---|
+   73|-|·**`nav.png`**·—·white·bar,·quiet·double·box-shadow,·hairline·feel·|·White·surface·+·a·**hairline**·edge,·never·a·heavy·border/shadow·|·**`QMenu`·popup·surface**·(background·+·border·+·radius)·|·`menu·=·QMenu(...)`·`cfa.py`·l.56·→·**new**·`cfa_style.menu_qss()`·|
+   74|-|·**`nav.png`**·—·evenly-spaced·calm·gray·links,·generous·gaps,·list-like·|·**Comfortable·row·padding**,·quiet·**muted/ink**·text,·calm·**hover**·affordance·|·**`QMenu::item`**·rows·+·`:selected`·state·|·`menu.addAction(...)`·`cfa.py`·l.58–68·→·`menu_qss()`·|
+   75|-|·**`nav.png`**·—·hover·turns·links·**teal·`#4C8181`**;·"Sign·In"·dark-teal·|·A·**single·restrained·interaction·cue**·on·the·active/selected·row·|·**`QMenu::item:selected`**·|·`menu_qss()`·(§3.1)·|
+   76|-|·**`nav.png`**·—·the·**green·roundel·+·navy·wordmark**·brand·lockup·+·micro·over-line·|·**Brand-green·uppercase·eyebrow·over·a·navy·serif·title**·=·the·"lockup"·analog·|·**Dialog·`page_heading`**·(`eyebrow()`·+·`title()`)·—·the·**highest-value·shared·win**·|·`page_heading`·l.154–156·→·`eyebrow`·l.138–144·+·`title`·l.147–151·|
+   77|-|·**`nav.png`**·—·nav·links·`#515151`·sans·(IBM·Plex),·regular·weight·|·**IBM·Plex·Sans**·family;·quiet·weight·for·lists·|·Menu·item·text·+·all·chrome·labels·|·`font`·token·(IBM·Plex·prefix)·applied·via·`menu_qss()`·/·`dialog_qss()`·|
+   78|-|·**`feature-cards.png`**·—·navy·**serif‑400**·heading·+·muted·lead·+·green·pill·|·**Serif‑400·navy**·title;·**brand-green**·accent·for·the·over-line·|·`title()`·(serif)·+·`eyebrow()`·(brand·green)·|·`title`·l.147–151;·`eyebrow`·l.138–144·|
+   79|-|·**`feature-cards.png`**·—·white·cards,·**4px**·radius,·generous·padding,·quiet·separation·|·**4px**·radius,·roomy·padding,·whitespace·separation·(no·loud·chrome)·|·`QMenu`·container·radius/padding;·`QMenu::item`·padding·|·`menu_qss()`·(§3.1)·|
+   80|-|·**`feature-cards.png`**·/·general·—·small·**uppercase**·widget·titles·(`--bb-widget-title-text-transform:uppercase`)·|·Small·**uppercase,·tracked**·over-lines·/·dividers·|·`eyebrow()`·+·`section()`·dividers·|·`eyebrow`·l.138–144;·`section`·l.218–224·|
+71   |+|·Site·section·(PNG)···································································································|·Observed·trait·to·copy···························································|·Chrome·element·········································································|·Builder·/·code·site······················································|
+72   |+|·--------------------------------------------------------------------------------------------------------------------·|·--------------------------------------------------------------------------------·|·--------------------------------------------------------------------------------------·|·------------------------------------------------------------------------·|
+73   |+|·**`nav.png`**·—·white·bar,·quiet·double·box-shadow,·hairline·feel····················································|·White·surface·+·a·**hairline**·edge,·never·a·heavy·border/shadow·················|·**`QMenu`·popup·surface**·(background·+·border·+·radius)·······························|·`menu·=·QMenu(...)`·`cfa.py`·l.56·→·**new**·`cfa_style.menu_qss()`·······|
+74   |+|·**`nav.png`**·—·evenly-spaced·calm·gray·links,·generous·gaps,·list-like··············································|·**Comfortable·row·padding**,·quiet·**muted/ink**·text,·calm·**hover**·affordance·|·**`QMenu::item`**·rows·+·`:selected`·state·············································|·`menu.addAction(...)`·`cfa.py`·l.58–68·→·`menu_qss()`····················|
+75   |+|·**`nav.png`**·—·hover·turns·links·**teal·`#4C8181`**;·"Sign·In"·dark-teal············································|·A·**single·restrained·interaction·cue**·on·the·active/selected·row···············|·**`QMenu::item:selected`**·····························································|·`menu_qss()`·(§3.1)······················································|
+76   |+|·**`nav.png`**·—·the·**green·roundel·+·navy·wordmark**·brand·lockup·+·micro·over-line·································|·**Brand-green·uppercase·eyebrow·over·a·navy·serif·title**·=·the·"lockup"·analog··|·**Dialog·`page_heading`**·(`eyebrow()`·+·`title()`)·—·the·**highest-value·shared·win**·|·`page_heading`·l.154–156·→·`eyebrow`·l.138–144·+·`title`·l.147–151·······|
+77   |+|·**`nav.png`**·—·nav·links·`#515151`·sans·(IBM·Plex),·regular·weight··················································|·**IBM·Plex·Sans**·family;·quiet·weight·for·lists·································|·Menu·item·text·+·all·chrome·labels·····················································|·`font`·token·(IBM·Plex·prefix)·applied·via·`menu_qss()`·/·`dialog_qss()`·|
+78   |+|·**`feature-cards.png`**·—·navy·**serif‑400**·heading·+·muted·lead·+·green·pill·······································|·**Serif‑400·navy**·title;·**brand-green**·accent·for·the·over-line···············|·`title()`·(serif)·+·`eyebrow()`·(brand·green)··········································|·`title`·l.147–151;·`eyebrow`·l.138–144···································|
+79   |+|·**`feature-cards.png`**·—·white·cards,·**4px**·radius,·generous·padding,·quiet·separation····························|·**4px**·radius,·roomy·padding,·whitespace·separation·(no·loud·chrome)············|·`QMenu`·container·radius/padding;·`QMenu::item`·padding································|·`menu_qss()`·(§3.1)······················································|
+80   |+|·**`feature-cards.png`**·/·general·—·small·**uppercase**·widget·titles·(`--bb-widget-title-text-transform:uppercase`)·|·Small·**uppercase,·tracked**·over-lines·/·dividers·······························|·`eyebrow()`·+·`section()`·dividers·····················································|·`eyebrow`·l.138–144;·`section`·l.218–224·································|
+81 81| 
+82 82| ---
+83 83| 
+...
+ 90  90| top-level·menus·open·**native·`NSMenu`·popups**.·Native·menus·**ignore·almost·all
+ 91  91| QSS**·(`QMenu::item`·padding,·background,·radius,·`:selected`·fill,·etc.).·So:
+ 92  92| 
+     93|-|·Capability·|·macOS·(native·menubar)·|·Windows·/·Linux·(Qt-drawn)·|·Offscreen·`grab()`·preview·|·Verdict·|
+     94|-|---|---|---|---|---|
+     95|-|·`QMenu`·/·`QMenu::item`·**QSS**·(bg,·border,·radius,·padding,·`:selected`)·|·**Mostly·ignored**·|·**Honored**·|·**Honored**·(Qt-drawn)·|·Ship·it·—·a·real·win·on·Win/Linux;·harmless·no-op·on·macOS·|
+     96|-|·**Per-action·icons**·via·`QAction.setIcon(...)`·|·**Shown**·(left·of·label)·|·Shown·|·Shown·|·**The·only·styling·that·survives·native·macOS**·—·highest·cross-platform·yield·(optional;·needs·assets)·|
+     97|-|·Item·**font-family·/·size**·(IBM·Plex)·|·Partially·/·native·metrics·win·|·Honored·|·Honored·|·Minor;·free·with·the·QSS·|
+     98|-|·**Separators·/·reordering·/·extra·items**·|·n/a·|·n/a·|·n/a·|·**FORBIDDEN**·—·the·test·locks·`len(actions)==4`,·exact·labels·&·order·|
+     99|-|·**Mnemonics**·(`&`)·in·the·4·labels·|·n/a·|·n/a·|·n/a·|·**FORBIDDEN**·—·`a.text()`·is·asserted·exactly·(no·`&`)·|
+    100|-|·Force·Qt-drawn·menubar·(`AA_DontUseNativeMenuBar`)·|·Would·enable·QSS·|·—·|·—·|·**Out·of·scope**·—·app-wide·behavior·change,·breaks·native·macOS·feel·|
+ 93    |+|·Capability·································································|·macOS·(native·menubar)·········|·Windows·/·Linux·(Qt-drawn)·|·Offscreen·`grab()`·preview·|·Verdict·································································································|
+ 94    |+|·--------------------------------------------------------------------------·|·------------------------------·|·--------------------------·|·--------------------------·|·-------------------------------------------------------------------------------------------------------·|
+ 95    |+|·`QMenu`·/·`QMenu::item`·**QSS**·(bg,·border,·radius,·padding,·`:selected`)·|·**Mostly·ignored**·············|·**Honored**················|·**Honored**·(Qt-drawn)·····|·Ship·it·—·a·real·win·on·Win/Linux;·harmless·no-op·on·macOS··············································|
+ 96    |+|·**Per-action·icons**·via·`QAction.setIcon(...)`····························|·**Shown**·(left·of·label)······|·Shown······················|·Shown······················|·**The·only·styling·that·survives·native·macOS**·—·highest·cross-platform·yield·(optional;·needs·assets)·|
+ 97    |+|·Item·**font-family·/·size**·(IBM·Plex)·····································|·Partially·/·native·metrics·win·|·Honored····················|·Honored····················|·Minor;·free·with·the·QSS················································································|
+ 98    |+|·**Separators·/·reordering·/·extra·items**··································|·n/a····························|·n/a························|·n/a························|·**FORBIDDEN**·—·the·test·locks·`len(actions)==4`,·exact·labels·&·order··································|
+ 99    |+|·**Mnemonics**·(`&`)·in·the·4·labels········································|·n/a····························|·n/a························|·n/a························|·**FORBIDDEN**·—·`a.text()`·is·asserted·exactly·(no·`&`)·················································|
+100    |+|·Force·Qt-drawn·menubar·(`AA_DontUseNativeMenuBar`)·························|·Would·enable·QSS···············|·—··························|·—··························|·**Out·of·scope**·—·app-wide·behavior·change,·breaks·native·macOS·feel···································|
+101 101| 
+102 102| **Bottom·line:**·the·native·menu·is·a·**low-yield**·target.·Do·the·safe,
+103 103| cross-platform·things·(a·`menu_qss()`·builder·+·optional·icons)·but·**set
+...
+110 110| inline·`font-family`·/·`font-size`·/·`font-weight`·/·`color`·/·`letter-spacing`·/
+111 111| `text-transform`·/·`margin`·on·`div`/`span`.·**This·is·fully·stylable,·on·every
+112 112| platform,·and·it·is·shared:**·one·edit·to·`eyebrow()`·+·`title()`·upgrades·**every
+    113|-dialog·header**·(Exam·Readiness·*and*·Deadline)·at·once·—·the·biggest,·most-visible
+113    |+dialog·header**·(Exam·Readiness·_and_·Deadline)·at·once·—·the·biggest,·most-visible
+114 114| brand·improvement·per·line·changed.·The·current·header·is·the·opposite·of·the·MM
+115 115| lockup:
+116 116| 
+...
+175 175| ····"""
+176 176| ```
+177 177| 
+    178|-|·Property·|·Current·(unstyled)·|·Target·|·Site·source·|
+    179|-|---|---|---|---|
+    180|-|·`QMenu`·background·|·platform·default·|·**`bg`·#FFFFFF**·|·`nav.png`·white·header·|
+    181|-|·`QMenu`·border·|·platform·default·|·**`1px·solid·line`·#E7E9EC**·(hairline)·|·quiet·header·edge·|
+    182|-|·`QMenu`·border-radius·|·platform·default·|·**6px**·(echoes·`--bb-block-radius:4px`;·slightly·softer·popup·corner)·|·`feature-cards.png`·4px·blocks·|
+    183|-|·`QMenu`·padding·|·default·|·**6px**·(breathing·gutter)·|·airy·nav·|
+    184|-|·`QMenu`·font·|·default·|·**`font`·(IBM·Plex·Sans)**,·`fs_body`·15px·|·nav·links·IBM·Plex·|
+    185|-|·`QMenu::item`·padding·|·tight·default·|·**`8px·28px·8px·14px`**·(comfortable·rows;·right·gutter·reserves·room·for·a·future·check/chevron)·|·`nav.png`·generous·link·spacing·|
+    186|-|·`QMenu::item`·radius·|·—·|·**4px**·(rounded·selection·chip)·|·4px·block·radius·|
+    187|-|·`QMenu::item:selected`·bg·/·text·|·native·highlight·|·**`surface`·#F3F6F8**·fill·+·**`primary`·#122B46**·text·|·calm·nav·hover·(a·single·quiet·cue)·|
+    188|-|·`QMenu::item:disabled`·|·native·|·**`faint`·#939597**·|·quiet·|
+    189|-|·`QMenu::separator`·|·native·|·**`1px·line`**·(only·if·ever·used·—·*not·added·here*,·would·break·the·4-action·test)·|·hairline·|
+178    |+|·Property·························|·Current·(unstyled)·|·Target····························································································|·Site·source·························|
+179    |+|·--------------------------------·|·------------------·|·-------------------------------------------------------------------------------------------------·|·-----------------------------------·|
+180    |+|·`QMenu`·background···············|·platform·default···|·**`bg`·#FFFFFF**··················································································|·`nav.png`·white·header··············|
+181    |+|·`QMenu`·border···················|·platform·default···|·**`1px·solid·line`·#E7E9EC**·(hairline)···························································|·quiet·header·edge···················|
+182    |+|·`QMenu`·border-radius············|·platform·default···|·**6px**·(echoes·`--bb-block-radius:4px`;·slightly·softer·popup·corner)····························|·`feature-cards.png`·4px·blocks······|
+183    |+|·`QMenu`·padding··················|·default············|·**6px**·(breathing·gutter)········································································|·airy·nav····························|
+184    |+|·`QMenu`·font·····················|·default············|·**`font`·(IBM·Plex·Sans)**,·`fs_body`·15px························································|·nav·links·IBM·Plex··················|
+185    |+|·`QMenu::item`·padding············|·tight·default······|·**`8px·28px·8px·14px`**·(comfortable·rows;·right·gutter·reserves·room·for·a·future·check/chevron)·|·`nav.png`·generous·link·spacing·····|
+186    |+|·`QMenu::item`·radius·············|·—··················|·**4px**·(rounded·selection·chip)··································································|·4px·block·radius····················|
+187    |+|·`QMenu::item:selected`·bg·/·text·|·native·highlight···|·**`surface`·#F3F6F8**·fill·+·**`primary`·#122B46**·text···········································|·calm·nav·hover·(a·single·quiet·cue)·|
+188    |+|·`QMenu::item:disabled`···········|·native·············|·**`faint`·#939597**···············································································|·quiet·······························|
+189    |+|·`QMenu::separator`···············|·native·············|·**`1px·line`**·(only·if·ever·used·—·_not·added·here_,·would·break·the·4-action·test)··············|·hairline····························|
+190 190| 
+191 191| >·**Selection·tradeoff·(honest):**·a·light·`surface`·fill·with·navy·text·is·the
+192 192| >·calmest,·most·on-brand·choice·but·is·a·**subtler**·affordance·than·the·OS's
+...
+200 200| does·**not**·change·`a.text()`·or·the·handler,·so·the·locked·test·still·passes.
+201 201| Requires·shipping·four·small·**monochrome**·glyphs·(navy·`#122B46`·/·muted,·~16px):
+202 202| 
+    203|-|·Action·(locked·label)·|·Suggested·glyph·|·Rationale·|
+    204|-|---|---|---|
+    205|-|·"Exam·Readiness…"·|·gauge·/·target·|·a·readiness·"score"·|
+    206|-|·"Study·Ethics·Minimal-Pairs"·|·balance·scale·|·ethics·|
+    207|-|·"Study·by·Exam·Priority"·|·sorted·bars·/·list·|·priority·order·|
+    208|-|·"Peak-on-Exam-Day·(Deadline)…"·|·calendar·/·flag·|·the·exam·date·|
+203    |+|·Action·(locked·label)··········|·Suggested·glyph····|·Rationale···········|
+204    |+|·------------------------------·|·------------------·|·-------------------·|
+205    |+|·"Exam·Readiness…"··············|·gauge·/·target·····|·a·readiness·"score"·|
+206    |+|·"Study·Ethics·Minimal-Pairs"···|·balance·scale······|·ethics··············|
+207    |+|·"Study·by·Exam·Priority"·······|·sorted·bars·/·list·|·priority·order······|
+208    |+|·"Peak-on-Exam-Day·(Deadline)…"·|·calendar·/·flag····|·the·exam·date·······|
+209 209| 
+210 210| Treat·as·an·**optional·second·phase**·(it·introduces·asset·files,·not·just·tokens);
+211 211| keep·icons·quiet·and·consistent.·**Do·not**·color-code·them·by·semantics.
+212 212| 
+213 213| ###·3.3·`eyebrow()`·—·brand·over-line·(the·MM·lockup·micro-label)
+214 214| 
+    215|-*Grounds:·`nav.png`·green·roundel·+·micro·over-line;·`feature-cards.png`·green
+    216|-accent;·site·widget·titles·uppercase.*
+215    |+_Grounds:·`nav.png`·green·roundel·+·micro·over-line;·`feature-cards.png`·green
+216    |+accent;·site·widget·titles·uppercase._
+217 217| 
+    218|-|·Property·|·Current·|·Target·|·Why·|
+    219|-|---|---|---|---|
+    220|-|·text-transform·|·uppercase·|·**uppercase**·(keep)·|·site·caps·convention·|
+    221|-|·color·|·**`primary`**·(saturated·navy)·|·**`brand_green`·AA-safe·`#007E56`**·*(recommended)*·or·**`muted`·#4D5C6D**·|·surface·the·MM·green·signature·(`nav.png`);·AA-safe·(§3.8).·Never·the·semantic·`pass`·green·|
+    222|-|·font-family·|·inherited·sans·|·**`font`·(IBM·Plex·Sans)**·|·brand·body/label·font·|
+    223|-|·font-size·|·`fs_eyebrow`·11·|·keep·**11**·|·site·pre-title·~12px·scaled·|
+    224|-|·font-weight·|·**700**·|·**600**·|·calmer·over-line·|
+    225|-|·letter-spacing·|·`.08em`·|·**`.10em`**·|·premium·tracking·on·small·caps·|
+    226|-|·margin·|·`0·0·2px`·|·**`0·0·4px`**·|·8px-scale·breathing·room·under·the·over-line·|
+218    |+|·Property·······|·Current························|·Target·····································································|·Why·························································································|
+219    |+|·--------------·|·------------------------------·|·--------------------------------------------------------------------------·|·-------------------------------------------------------------------------------------------·|
+220    |+|·text-transform·|·uppercase······················|·**uppercase**·(keep)·······················································|·site·caps·convention········································································|
+221    |+|·color··········|·**`primary`**·(saturated·navy)·|·**`brand_green`·AA-safe·`#007E56`**·_(recommended)_·or·**`muted`·#4D5C6D**·|·surface·the·MM·green·signature·(`nav.png`);·AA-safe·(§3.8).·Never·the·semantic·`pass`·green·|
+222    |+|·font-family····|·inherited·sans·················|·**`font`·(IBM·Plex·Sans)**·················································|·brand·body/label·font·······································································|
+223    |+|·font-size······|·`fs_eyebrow`·11················|·keep·**11**································································|·site·pre-title·~12px·scaled·································································|
+224    |+|·font-weight····|·**700**························|·**600**····································································|·calmer·over-line············································································|
+225    |+|·letter-spacing·|·`.08em`························|·**`.10em`**································································|·premium·tracking·on·small·caps······························································|
+226    |+|·margin·········|·`0·0·2px`······················|·**`0·0·4px`**······························································|·8px-scale·breathing·room·under·the·over-line················································|
+227 227| 
+    228|->·**Consistency·call·(this·is·the·*shared*·builder):**·whatever·color·is·chosen
+228    |+>·**Consistency·call·(this·is·the·_shared_·builder):**·whatever·color·is·chosen
+229 229| >·applies·to·**both**·dialogs.·`exam-readiness-spec.md`·led·with·`muted`;
+230 230| >·`deadline-spec.md`·chose·the·AA-safe·green·`#007E56`.·**Pick·one·for·the·shared
+231 231| >·function.**·Recommendation:·the·**AA-safe·site·green·`#007E56`**·—·it·echoes·the
+...
+235 235| 
+236 236| ###·3.4·`title()`·—·the·navy·serif·heading·(the·wordmark·analog)
+237 237| 
+    238|-*Grounds:·`feature-cards.png`·/·`hero.png`·serif‑400·navy·headings;·brand-computed
+    239|-heroH1·=·40px·/·400·/·Source·Serif·4·/·`#122B46`.*
+238    |+_Grounds:·`feature-cards.png`·/·`hero.png`·serif‑400·navy·headings;·brand-computed
+239    |+heroH1·=·40px·/·400·/·Source·Serif·4·/·`#122B46`._
+240 240| 
+    241|-|·Property·|·Current·|·Target·|·Why·|
+    242|-|---|---|---|---|
+    243|-|·font-family·|·body·sans·(inherited)·|·**`font_heading`**·(Source·Serif·4·serif)·**[NEW]**·|·every·site·`h1`·is·serif·|
+    244|-|·font-size·|·`fs_title`·22·|·**`fs_title`·22**·(24·optional·for·more·presence)·|·dialog-scaled·heading·|
+    245|-|·font-weight·|·**700**·|·**400**·|·site·serif·headings·are·weight·**400**·(calm,·not·heavy)·|
+    246|-|·color·|·`ink`·(#1e293b)·|·**`ink`·#122B46**·(navy·after·reconcile)·|·`--bb-headings-color`·|
+    247|-|·line-height·|·default·|·**~1.2**·|·`hero.png`·tight·leading·|
+    248|-|·margin·|·`0·0·12px`·|·keep·**`0·0·12px`**·|·—·|
+241    |+|·Property····|·Current···············|·Target··············································|·Why······················································|
+242    |+|·-----------·|·---------------------·|·---------------------------------------------------·|·--------------------------------------------------------·|
+243    |+|·font-family·|·body·sans·(inherited)·|·**`font_heading`**·(Source·Serif·4·serif)·**[NEW]**·|·every·site·`h1`·is·serif·································|
+244    |+|·font-size···|·`fs_title`·22·········|·**`fs_title`·22**·(24·optional·for·more·presence)···|·dialog-scaled·heading····································|
+245    |+|·font-weight·|·**700**···············|·**400**·············································|·site·serif·headings·are·weight·**400**·(calm,·not·heavy)·|
+246    |+|·color·······|·`ink`·(#1e293b)·······|·**`ink`·#122B46**·(navy·after·reconcile)············|·`--bb-headings-color`····································|
+247    |+|·line-height·|·default···············|·**~1.2**············································|·`hero.png`·tight·leading·································|
+248    |+|·margin······|·`0·0·12px`············|·keep·**`0·0·12px`**·································|·—························································|
+249 249| 
+250 250| ###·3.5·`section()`·—·quiet·uppercase·divider
+251 251| 
+    252|-*Grounds:·`stats-band.png`·airiness;·site·uppercase·widget·titles.*
+252    |+_Grounds:·`stats-band.png`·airiness;·site·uppercase·widget·titles._
+253 253| 
+254 254| ```218:224:qt/aqt/cfa_style.py
+255 255| def·section(text:·str)·->·str:
+...
+261 261| ····)
+262 262| ```
+263 263| 
+    264|-|·Property·|·Current·|·Target·|·Why·|
+    265|-|---|---|---|---|
+    266|-|·text-transform·/·letter-spacing·|·uppercase·/·`.06em`·|·keep·(uppercase,·**`.06em`**)·|·site·caps·|
+    267|-|·color·|·**`faint`·#939597**·|·**`muted`·#4D5C6D**·|·**AA·fix:**·`faint`·on·white·≈·**3.0:1·(fail)**·for·11px·text;·`muted`·≈·**6.84:1·(pass)**·and·still·recessive·(§3.8)·|
+    268|-|·font-weight·|·700·|·**600**·(optional)·|·match·the·calmer·eyebrow·|
+    269|-|·margin·|·`14px·0·4px`·|·**`24px·0·8px`**·|·the·site's·generous·section·rhythm·(64–80px·scaled·to·a·dialog)·|
+    270|-|·font-family·|·inherited·|·**`font`·(IBM·Plex·Sans)**·|·brand·label·font·|
+264    |+|·Property························|·Current·············|·Target························|·Why···················································································································|
+265    |+|·-------------------------------·|·-------------------·|·-----------------------------·|·---------------------------------------------------------------------------------------------------------------------·|
+266    |+|·text-transform·/·letter-spacing·|·uppercase·/·`.06em`·|·keep·(uppercase,·**`.06em`**)·|·site·caps·············································································································|
+267    |+|·color···························|·**`faint`·#939597**·|·**`muted`·#4D5C6D**···········|·**AA·fix:**·`faint`·on·white·≈·**3.0:1·(fail)**·for·11px·text;·`muted`·≈·**6.84:1·(pass)**·and·still·recessive·(§3.8)·|
+268    |+|·font-weight·····················|·700·················|·**600**·(optional)············|·match·the·calmer·eyebrow······························································································|
+269    |+|·margin··························|·`14px·0·4px`········|·**`24px·0·8px`**··············|·the·site's·generous·section·rhythm·(64–80px·scaled·to·a·dialog)·······················································|
+270    |+|·font-family·····················|·inherited···········|·**`font`·(IBM·Plex·Sans)**····|·brand·label·font······································································································|
+271 271| 
+272 272| ###·3.6·`page_heading()`·wrapper·(no·structural·change)
+273 273| 
+...
+285 285| 
+286 286| ###·3.8·WCAG·AA·verification·(computed;·small-text·threshold·4.5:1)
+287 287| 
+    288|-|·Pair·|·Ratio·|·Verdict·|
+    289|-|---|---|---|
+    290|-|·`ink·#122B46`·on·`bg·#FFFFFF`·(menu·items,·title)·|·~14.4:1·|·Pass·|
+    291|-|·`ink·#122B46`·on·`surface·#F3F6F8`·(selected·item)·|·~13.3:1·|·Pass·|
+    292|-|·`primary·#122B46`·on·`surface·#F3F6F8`·(selected·text)·|·~13.3:1·|·Pass·|
+    293|-|·`muted·#4D5C6D`·on·`bg`·(section·divider,·captions)·|·~6.84:1·|·Pass·|
+    294|-|·`#007E56`·on·`bg`·(recommended·eyebrow·green)·|·~5.1:1·|·Pass·|
+    295|-|·`#145959`·on·`bg`·(site·"Sign·In"·teal,·ref)·|·~8.0:1·|·Pass·|
+    296|-|·**`faint·#939597`·on·`bg`**·(current·section·color)·|·~3.0:1·|·**Fail·→·use·`muted`**·|
+    297|-|·**`#009666`·as·text·on·`bg`**·(literal·MM·green)·|·~3.78:1·|·**Fail·→·fills/rules·only**·|
+    298|-|·**`#4C8181`·on·`bg`**·(nav·hover·teal,·as·menu·text)·|·~4.4:1·|·**Borderline·→·avoid·as·text;·use·surface·fill**·|
+288    |+|·Pair···················································|·Ratio···|·Verdict··········································|
+289    |+|·------------------------------------------------------·|·-------·|·------------------------------------------------·|
+290    |+|·`ink·#122B46`·on·`bg·#FFFFFF`·(menu·items,·title)······|·~14.4:1·|·Pass·············································|
+291    |+|·`ink·#122B46`·on·`surface·#F3F6F8`·(selected·item)·····|·~13.3:1·|·Pass·············································|
+292    |+|·`primary·#122B46`·on·`surface·#F3F6F8`·(selected·text)·|·~13.3:1·|·Pass·············································|
+293    |+|·`muted·#4D5C6D`·on·`bg`·(section·divider,·captions)····|·~6.84:1·|·Pass·············································|
+294    |+|·`#007E56`·on·`bg`·(recommended·eyebrow·green)··········|·~5.1:1··|·Pass·············································|
+295    |+|·`#145959`·on·`bg`·(site·"Sign·In"·teal,·ref)···········|·~8.0:1··|·Pass·············································|
+296    |+|·**`faint·#939597`·on·`bg`**·(current·section·color)····|·~3.0:1··|·**Fail·→·use·`muted`**···························|
+297    |+|·**`#009666`·as·text·on·`bg`**·(literal·MM·green)·······|·~3.78:1·|·**Fail·→·fills/rules·only**······················|
+298    |+|·**`#4C8181`·on·`bg`**·(nav·hover·teal,·as·menu·text)···|·~4.4:1··|·**Borderline·→·avoid·as·text;·use·surface·fill**·|
+299 299| 
+    300|-**Net:**·every·*recommended*·value·passes·AA.·The·three·fails·are·exactly·why·this
+300    |+**Net:**·every·_recommended_·value·passes·AA.·The·three·fails·are·exactly·why·this
+301 301| spec·(a)·moves·`section()`·off·`faint`,·(b)·reserves·`#009666`·for·non-text,·and
+302 302| (c)·uses·a·`surface`·selection·fill·rather·than·teal·hover·text.
+303 303| 
+...
+329 329| `cfa/ui/reference/app/chrome-{before,after}.png`.
+330 330| 
+331 331| **Proposed·scaffold**·—·`tools/cfa/render_menu_chrome_proof.py`·(new·file;·keep·the
+    332|-AGPL·header).·The·**menu·path**·grabs·the·*real*·menu·from·`cfa.setup_menu`·(no
+332    |+AGPL·header).·The·**menu·path**·grabs·the·_real_·menu·from·`cfa.setup_menu`·(no
+333 333| label/handler·changes);·the·**chrome·path**·grabs·the·shared·header·builders·in·a
+334 334| tiny·RichText·`QLabel`·—·**no·collection·needed**,·so·it·isolates·the·eyebrow·+
+335 335| serif·title·+·divider·system:
+...
+426 426| ```
+427 427| 
+428 428| **Capture·caveats·(state·honestly·on·the·shot):**
+429    |+
+430 429| 1.·`menu.grab()`·renders·the·**Qt-drawn**·menu,·which·**honors·QSS**·—·this·is·the
+431 430| ···correct·preview·for·the·`menu_qss()`·restyle·**and**·what·Windows/Linux·users
+    431|-···see.·**It·is·*not*·what·macOS·shows**·(native·`NSMenu`·ignores·QSS);·note·this
+432    |+···see.·**It·is·_not_·what·macOS·shows**·(native·`NSMenu`·ignores·QSS);·note·this
+433 432| ···on·the·`menu-after.png`.
+434 433| 2.·If·`menu.grab()`·ever·yields·an·empty/degenerate·pixmap,·the·`popup()`·+
+435 434| ···`processEvents()`·(above)·forces·correct·geometry;·an·alternative·is
+...
+450 449| ··hairline·list·the·site·nav·implies.
+451 450| -·**macOS·shows·a·native·menu·regardless.**·The·single·biggest·"gap·that·cannot·be
+452 451| ··closed·with·QSS":·on·the·reviewer's·macOS·the·dropdown·stays·native·—·confirm·the
+    452|-··before·*and*·after·macOS·shots·look·~identical,·and·that·the·**QSS·win·shows·only
+453    |+··before·_and_·after·macOS·shots·look·~identical,·and·that·the·**QSS·win·shows·only
+454 453| ··in·the·offscreen/Win/Linux·grab**.·Icons·(if·added)·are·the·one·visible·macOS
+455 454| ··change.
+456 455| -·**No·icons.**·Actions·are·text-only;·the·site·brand·leans·on·the·green·roundel
+...
+489 488| ······`study_by_exam_priority`·/·`show_deadline`·remain·the·callables
+490 489| ······(`test_cfa_menu_handlers_exist`).·No·separators·/·reordering·/·new·items.
+491 490| -·[·]·**Visual·only.**·Only·stylesheets·(`menu_qss()`),·inline·HTML·styles·in·the
+    491|-······builders,·and·*optional*·`QAction.setIcon`·—·**no·logic,·data,·or·string
+492    |+······builders,·and·_optional_·`QAction.setIcon`·—·**no·logic,·data,·or·string
+493 492| ······changes**·(icons·don't·alter·`text()`).
+494 493| -·[·]·**Token-driven.**·All·values·reference·`TOKENS`·/·`--cfa-*`;·**no·inline
+495 494| ······hex**.·New·tokens·(`font_heading`,·`brand_green`,·IBM·Plex·`font`·prefix)·are
+--
+Found 12 not formatted files. Run dprint fmt to fix.
+Failed to run (20): /Users/adarshrajesh/AlphaWeek2/ankiCFA/out/node_modules/.bin/dprint check
+[3/7; 5 active; 0.371s] check:ruff
+All checks passed!
+[4/7; 4 active; 1.063s] check:minilints
+FAILED: /Users/adarshrajesh/AlphaWeek2/ankiCFA/out/tests/minilints.false 
+/Users/adarshrajesh/AlphaWeek2/ankiCFA/out/rust/debug/minilints check /Users/adarshrajesh/AlphaWeek2/ankiCFA/out/tests/minilints.false
+     Ignored package `cargo-license v0.7.0` is already installed, use --force to override
+missing standard copyright header: "./cfa/ui/reference/.probe2_mm.mjs"
+missing standard copyright header: "./cfa/ui/reference/.probe_mm.mjs"
+[5/7; 3 active; 1.130s] check:format:prettier
+FAILED: /Users/adarshrajesh/AlphaWeek2/ankiCFA/out/tests/prettier.6529351329606104884.fmt 
+/Users/adarshrajesh/AlphaWeek2/ankiCFA/out/rust/release/runner run --stamp=/Users/adarshrajesh/AlphaWeek2/ankiCFA/out/tests/prettier.6529351329606104884.fmt /Users/adarshrajesh/AlphaWeek2/ankiCFA/out/extracted/node/bin/yarn prettier --cache --check "{**/*.svelte,docs-site/**/*.mdx}"
+(node:68827) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:68918) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Checking formatting...
+[warn] ts/lib/cfa/pages/CfaDeadlinePage.svelte
+[warn] ts/lib/cfa/pages/CfaReadinessPage.svelte
+[warn] Code style issues found in 2 files. Run Prettier with --write to fix.
+Failed to run (1): /Users/adarshrajesh/AlphaWeek2/ankiCFA/out/extracted/node/bin/yarn prettier --cache --check {**/*.svelte,docs-site/**/*.mdx}
+[6/7; 2 active; 2.983s] check:mypy
+FAILED: /Users/adarshrajesh/AlphaWeek2/ankiCFA/out/tests/python_typecheck.9705036031357794903 
+/Users/adarshrajesh/AlphaWeek2/ankiCFA/out/rust/release/runner run --stamp=/Users/adarshrajesh/AlphaWeek2/ankiCFA/out/tests/python_typecheck.9705036031357794903 /Users/adarshrajesh/AlphaWeek2/ankiCFA/out/pyenv/bin/mypy pylib qt/aqt qt/tools out/pylib/anki out/qt/_aqt python tools
+tools/cfa/render_f0b_proof.py:86: error: "DeadlineDialog" has no attribute "date_edit"  [attr-defined]
+tools/cfa/render_f0b_proof.py:89: error: "DeadlineDialog" has no attribute "date_edit"  [attr-defined]
+tools/cfa/render_f0b_proof.py:90: error: "DeadlineDialog" has no attribute "_apply_date"  [attr-defined]
+Found 3 errors in 1 file (checked 329 source files)
+Failed to run (1): /Users/adarshrajesh/AlphaWeek2/ankiCFA/out/pyenv/bin/mypy pylib qt/aqt qt/tools out/pylib/anki out/qt/_aqt python tools
+[7/7; 1 active; 4.258s] check:pytest:aqt
+FAILED: /Users/adarshrajesh/AlphaWeek2/ankiCFA/out/tests/python_pytest.6267549634483751550 
+/Users/adarshrajesh/AlphaWeek2/ankiCFA/out/rust/release/runner run --stamp=/Users/adarshrajesh/AlphaWeek2/ankiCFA/out/tests/python_pytest.6267549634483751550 --env="PYTHONPATH=pylib:/Users/adarshrajesh/AlphaWeek2/ankiCFA/out/pylib:/Users/adarshrajesh/AlphaWeek2/ankiCFA/out/qt:/Users/adarshrajesh/AlphaWeek2/ankiCFA/out/qt/tools:." --env="ANKI_TEST_MODE=1" /Users/adarshrajesh/AlphaWeek2/ankiCFA/out/pyenv/bin/pytest -p no:cacheprovider qt/tests
+============================= test session starts ==============================
+platform darwin -- Python 3.13.13, pytest-8.4.1, pluggy-1.6.0
+rootdir: /Users/adarshrajesh/AlphaWeek2/ankiCFA/qt
+configfile: pyproject.toml
+plugins: mock-3.15.1, anyio-4.13.0
+collected 142 items
+
+qt/tests/test_addons.py ...........                                      [  7%]
+qt/tests/test_cfa_deadline_dialog.py FF.FF                               [ 11%]
+qt/tests/test_cfa_ethics_ai.py .......                                   [ 16%]
+qt/tests/test_cfa_f0b.py ...........                                     [ 23%]
+qt/tests/test_cfa_f4_dialog.py ......                                    [ 28%]
+qt/tests/test_cfa_f5_style.py .............                              [ 37%]
+qt/tests/test_cfa_menu.py ....                                           [ 40%]
+qt/tests/test_cfa_tab_fill.py .......................                    [ 56%]
+qt/tests/test_i18n.py ..                                                 [ 57%]
+qt/tests/test_installer.py .........F................F                   [ 76%]
+qt/tests/test_mediasrv.py .................................              [100%]
+
+=================================== FAILURES ===================================
+______________ test_dialog_ranks_new_cards_on_fresh_all_new_deck _______________
+
+    def test_dialog_ranks_new_cards_on_fresh_all_new_deck() -> None:
+        col = _empty_col()
+        deck = _add_new_cards(col, "CFA", 5)
+        col.decks.set_current(deck)
+        assert len(col.find_cards("deck:CFA is:new")) == 5
+        assert len(col.find_cards("deck:CFA is:due")) == 0
+    
+        mw = _StandInMW(col)
+>       dlg = cfa.DeadlineDialog(mw)  # type: ignore[arg-type]
+              ^^^^^^^^^^^^^^^^^^^^^^
+
+qt/tests/test_cfa_deadline_dialog.py:79: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+qt/aqt/cfa.py:457: in __init__
+    self.web.load_sveltekit_page(f"cfa-deadline/{int(deck_id)}")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <aqt.webview.AnkiWebView object at 0x11eeecd70>
+path = 'cfa-deadline/1783134099018'
+
+    def load_sveltekit_page(self, path: str) -> None:
+        from aqt import mw
+    
+        self.set_open_links_externally(True)
+        if theme_manager.night_mode:
+            extra = "#night"
+        else:
+            extra = ""
+    
+        if hmr_mode:
+            server = "http://127.0.0.1:5173/"
+        else:
+>           server = mw.serverURL()
+                     ^^^^^^^^^^^^
+E           AttributeError: 'NoneType' object has no attribute 'serverURL'
+
+qt/aqt/webview.py:900: AttributeError
+________________ test_dialog_empty_state_only_when_truly_empty _________________
+
+    def test_dialog_empty_state_only_when_truly_empty() -> None:
+        # The honest empty state still appears when the deck genuinely has no cards.
+        col = _empty_col()
+        deck = col.decks.id("CFA")  # created, but no cards added
+        col.decks.set_current(deck)
+    
+        mw = _StandInMW(col)
+>       dlg = cfa.DeadlineDialog(mw)  # type: ignore[arg-type]
+              ^^^^^^^^^^^^^^^^^^^^^^
+
+qt/tests/test_cfa_deadline_dialog.py:100: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+qt/aqt/cfa.py:457: in __init__
+    self.web.load_sveltekit_page(f"cfa-deadline/{int(deck_id)}")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <aqt.webview.AnkiWebView object at 0x11f21b4d0>
+path = 'cfa-deadline/1783134099314'
+
+    def load_sveltekit_page(self, path: str) -> None:
+        from aqt import mw
+    
+        self.set_open_links_externally(True)
+        if theme_manager.night_mode:
+            extra = "#night"
+        else:
+            extra = ""
+    
+        if hmr_mode:
+            server = "http://127.0.0.1:5173/"
+        else:
+>           server = mw.serverURL()
+                     ^^^^^^^^^^^^
+E           AttributeError: 'NoneType' object has no attribute 'serverURL'
+
+qt/aqt/webview.py:900: AttributeError
+_________________ test_dialog_self_heals_absurd_persisted_date _________________
+
+    def test_dialog_self_heals_absurd_persisted_date() -> None:
+        col = _empty_col()
+        deck = _add_new_cards(col, "CFA", 2)
+        col.decks.set_current(deck)
+        # Runtime pollution: a far-future date persisted in the synced config.
+        anki_cfa.set_exam_config(col, exam_date="2099-12-31", topic_weights={})
+    
+        mw = _StandInMW(col)
+>       dlg = cfa.DeadlineDialog(mw)  # type: ignore[arg-type]
+              ^^^^^^^^^^^^^^^^^^^^^^
+
+qt/tests/test_cfa_deadline_dialog.py:146: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+qt/aqt/cfa.py:457: in __init__
+    self.web.load_sveltekit_page(f"cfa-deadline/{int(deck_id)}")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <aqt.webview.AnkiWebView object at 0x11f21bd90>
+path = 'cfa-deadline/1783134099327'
+
+    def load_sveltekit_page(self, path: str) -> None:
+        from aqt import mw
+    
+        self.set_open_links_externally(True)
+        if theme_manager.night_mode:
+            extra = "#night"
+        else:
+            extra = ""
+    
+        if hmr_mode:
+            server = "http://127.0.0.1:5173/"
+        else:
+>           server = mw.serverURL()
+                     ^^^^^^^^^^^^
+E           AttributeError: 'NoneType' object has no attribute 'serverURL'
+
+qt/aqt/webview.py:900: AttributeError
+____________________ test_dialog_keeps_sane_persisted_date _____________________
+
+    def test_dialog_keeps_sane_persisted_date() -> None:
+        col = _empty_col()
+        deck = _add_new_cards(col, "CFA", 2)
+        col.decks.set_current(deck)
+        # A sane near-future date (30 days out) must survive untouched.
+        sane = (date.today() + timedelta(days=30)).isoformat()
+        anki_cfa.set_exam_config(col, exam_date=sane, topic_weights={})
+    
+        mw = _StandInMW(col)
+>       dlg = cfa.DeadlineDialog(mw)  # type: ignore[arg-type]
+              ^^^^^^^^^^^^^^^^^^^^^^
+
+qt/tests/test_cfa_deadline_dialog.py:163: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+qt/aqt/cfa.py:457: in __init__
+    self.web.load_sveltekit_page(f"cfa-deadline/{int(deck_id)}")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <aqt.webview.AnkiWebView object at 0x11f2b0410>
+path = 'cfa-deadline/1783134099341'
+
+    def load_sveltekit_page(self, path: str) -> None:
+        from aqt import mw
+    
+        self.set_open_links_externally(True)
+        if theme_manager.night_mode:
+            extra = "#night"
+        else:
+            extra = ""
+    
+        if hmr_mode:
+            server = "http://127.0.0.1:5173/"
+        else:
+>           server = mw.serverURL()
+                     ^^^^^^^^^^^^
+E           AttributeError: 'NoneType' object has no attribute 'serverURL'
+
+qt/aqt/webview.py:900: AttributeError
+__________________________ test_compile_fails_loudly ___________________________
+
+mocker = <pytest_mock.plugin.MockerFixture object at 0x11efcb0e0>
+out_dir = PosixPath('/private/var/folders/nk/kq2nv0sn1xzdhvwd_fv1c8000000gn/T/pytest-of-adarshrajesh/pytest-87/test_compile_fails_loudly0')
+cmd_args = Namespace(version='0.0.1', aqt_wheel=PosixPath('/private/var/folders/nk/kq2nv0sn1xzdhvwd_fv1c8000000gn/T/pytest-of-ada.../T/pytest-of-adarshrajesh/pytest-87/test_compile_fails_loudly0/dummy_package-0.1.0-py3-none-any.whl'), skip_fcitx=True)
+
+    def test_compile_fails_loudly(
+        mocker, out_dir: Path, cmd_args: argparse.Namespace
+    ) -> None:
+        mocker.patch("compileall.compile_dir", return_value=False)
+        with pytest.raises(RuntimeError):
+>           build(cmd_args)
+
+qt/tests/test_installer.py:140: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+qt/tools/build_installer.py:195: in build
+    subprocess.check_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+popenargs = (['/Users/adarshrajesh/AlphaWeek2/ankiCFA/out/pyenv/bin/python', '-m', 'briefcase', 'build', '-C', 'version="0.0.1"', ...],)
+kwargs = {'cwd': PosixPath('/private/var/folders/nk/kq2nv0sn1xzdhvwd_fv1c8000000gn/T/pytest-of-adarshrajesh/pytest-87/test_compile_fails_loudly0')}
+retcode = 200
+cmd = ['/Users/adarshrajesh/AlphaWeek2/ankiCFA/out/pyenv/bin/python', '-m', 'briefcase', 'build', '-C', 'version="0.0.1"', ...]
+
+    def check_call(*popenargs, **kwargs):
+        """Run command with arguments.  Wait for command to complete.  If
+        the exit code was zero then return, otherwise raise
+        CalledProcessError.  The CalledProcessError object will have the
+        return code in the returncode attribute.
+    
+        The arguments are the same as for the call function.  Example:
+    
+        check_call(["ls", "-l"])
+        """
+        retcode = call(*popenargs, **kwargs)
+        if retcode:
+            cmd = kwargs.get("args")
+            if cmd is None:
+                cmd = popenargs[0]
+>           raise CalledProcessError(retcode, cmd)
+E           subprocess.CalledProcessError: Command '['/Users/adarshrajesh/AlphaWeek2/ankiCFA/out/pyenv/bin/python', '-m', 'briefcase', 'build', '-C', 'version="0.0.1"', '-C', 'requires=["/private/var/folders/nk/kq2nv0sn1xzdhvwd_fv1c8000000gn/T/pytest-of-adarshrajesh/pytest-87/test_compile_fails_loudly0/dummy_package-0.1.0-py3-none-any.whl[qt,audio]","/private/var/folders/nk/kq2nv0sn1xzdhvwd_fv1c8000000gn/T/pytest-of-adarshrajesh/pytest-87/test_compile_fails_loudly0/dummy_package-0.1.0-py3-none-any.whl"]', '-C', 'template="/Users/adarshrajesh/AlphaWeek2/ankiCFA/qt/installer/mac-template"', '--update', '--update-requirements', '--update-resources', '--update-support', '--log']' returned non-zero exit status 200.
+
+../../.local/share/uv/python/cpython-3.13.13-macos-aarch64-none/lib/python3.13/subprocess.py:419: CalledProcessError
+----------------------------- Captured stdout call -----------------------------
+
+[anki] Generating application template...
+Using app template: /Users/adarshrajesh/AlphaWeek2/ankiCFA/qt/installer/mac-template, branch v0.4.2
+
+Unable to clone application template; is the template path '/Users/adarshrajesh/AlphaWeek2/ankiCFA/qt/installer/mac-template' correct?
+Saving log... started
+
+Log saved to /private/var/folders/nk/kq2nv0sn1xzdhvwd_fv1c8000000gn/T/pytest-of-adarshrajesh/pytest-87/test_compile_fails_loudly0/logs/briefcase.2026_07_03-22_01_41.build.log
+
+Saving log... done
+____________________________ test_build_and_package ____________________________
+
+out_dir = PosixPath('/private/var/folders/nk/kq2nv0sn1xzdhvwd_fv1c8000000gn/T/pytest-of-adarshrajesh/pytest-87/test_build_and_package0')
+cmd_args = Namespace(version='0.0.1', aqt_wheel=PosixPath('/private/var/folders/nk/kq2nv0sn1xzdhvwd_fv1c8000000gn/T/pytest-of-ada...0gn/T/pytest-of-adarshrajesh/pytest-87/test_build_and_package0/dummy_package-0.1.0-py3-none-any.whl'), skip_fcitx=True)
+
+    def test_build_and_package(out_dir: Path, cmd_args: argparse.Namespace) -> None:
+>       build(cmd_args)
+
+qt/tests/test_installer.py:244: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+qt/tools/build_installer.py:195: in build
+    subprocess.check_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+popenargs = (['/Users/adarshrajesh/AlphaWeek2/ankiCFA/out/pyenv/bin/python', '-m', 'briefcase', 'build', '-C', 'version="0.0.1"', ...],)
+kwargs = {'cwd': PosixPath('/private/var/folders/nk/kq2nv0sn1xzdhvwd_fv1c8000000gn/T/pytest-of-adarshrajesh/pytest-87/test_build_and_package0')}
+retcode = 200
+cmd = ['/Users/adarshrajesh/AlphaWeek2/ankiCFA/out/pyenv/bin/python', '-m', 'briefcase', 'build', '-C', 'version="0.0.1"', ...]
+
+    def check_call(*popenargs, **kwargs):
+        """Run command with arguments.  Wait for command to complete.  If
+        the exit code was zero then return, otherwise raise
+        CalledProcessError.  The CalledProcessError object will have the
+        return code in the returncode attribute.
+    
+        The arguments are the same as for the call function.  Example:
+    
+        check_call(["ls", "-l"])
+        """
+        retcode = call(*popenargs, **kwargs)
+        if retcode:
+            cmd = kwargs.get("args")
+            if cmd is None:
+                cmd = popenargs[0]
+>           raise CalledProcessError(retcode, cmd)
+E           subprocess.CalledProcessError: Command '['/Users/adarshrajesh/AlphaWeek2/ankiCFA/out/pyenv/bin/python', '-m', 'briefcase', 'build', '-C', 'version="0.0.1"', '-C', 'requires=["/private/var/folders/nk/kq2nv0sn1xzdhvwd_fv1c8000000gn/T/pytest-of-adarshrajesh/pytest-87/test_build_and_package0/dummy_package-0.1.0-py3-none-any.whl[qt,audio]","/private/var/folders/nk/kq2nv0sn1xzdhvwd_fv1c8000000gn/T/pytest-of-adarshrajesh/pytest-87/test_build_and_package0/dummy_package-0.1.0-py3-none-any.whl"]', '-C', 'template="/Users/adarshrajesh/AlphaWeek2/ankiCFA/qt/installer/mac-template"', '--update', '--update-requirements', '--update-resources', '--update-support', '--log']' returned non-zero exit status 200.
+
+../../.local/share/uv/python/cpython-3.13.13-macos-aarch64-none/lib/python3.13/subprocess.py:419: CalledProcessError
+----------------------------- Captured stdout call -----------------------------
+
+[anki] Generating application template...
+Using app template: /Users/adarshrajesh/AlphaWeek2/ankiCFA/qt/installer/mac-template, branch v0.4.2
+
+Unable to clone application template; is the template path '/Users/adarshrajesh/AlphaWeek2/ankiCFA/qt/installer/mac-template' correct?
+Saving log... started
+
+Log saved to /private/var/folders/nk/kq2nv0sn1xzdhvwd_fv1c8000000gn/T/pytest-of-adarshrajesh/pytest-87/test_build_and_package0/logs/briefcase.2026_07_03-22_01_41.build.log
+
+Saving log... done
+=========================== short test summary info ============================
+FAILED qt/tests/test_cfa_deadline_dialog.py::test_dialog_ranks_new_cards_on_fresh_all_new_deck
+FAILED qt/tests/test_cfa_deadline_dialog.py::test_dialog_empty_state_only_when_truly_empty
+FAILED qt/tests/test_cfa_deadline_dialog.py::test_dialog_self_heals_absurd_persisted_date
+FAILED qt/tests/test_cfa_deadline_dialog.py::test_dialog_keeps_sane_persisted_date
+FAILED qt/tests/test_installer.py::test_compile_fails_loudly - subprocess.Cal...
+FAILED qt/tests/test_installer.py::test_build_and_package - subprocess.Called...
+======================== 6 failed, 136 passed in 3.55s =========================
+Release of profile requested but WebEnginePage still not deleted. Expect troubles !
+Release of profile requested but WebEnginePage still not deleted. Expect troubles !
+Failed to run (1): /Users/adarshrajesh/AlphaWeek2/ankiCFA/out/pyenv/bin/pytest -p no:cacheprovider qt/tests
+ninja: build stopped: subcommand failed.
+[0m[1m[31m
+Build failed.
+[0merror: recipe `check` failed on line 35 with exit code 1

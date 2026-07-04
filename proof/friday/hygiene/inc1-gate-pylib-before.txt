@@ -1,0 +1,16 @@
+===== pylib/tests AI-off =====
+........................................................................ [ 37%]
+........................................................................ [ 75%]
+..............................................                           [100%]
+=============================== warnings summary ===============================
+pylib/tests/test_models.py:255
+  /Users/adarshrajesh/AlphaWeek2/ankiCFA/pylib/tests/test_models.py:255: SyntaxWarning: invalid escape sequence '\('
+    q5 = "text with \(x^2\) jax"
+
+pylib/tests/test_models.py:257
+  /Users/adarshrajesh/AlphaWeek2/ankiCFA/pylib/tests/test_models.py:257: SyntaxWarning: invalid escape sequence '\('
+    "{{{{c1::{}}}}} \(2^2\) {{{{c2::{}}}}} \(2^{{{{c3::{}}}}}\) \(x^3\) {{{{c4::{}}}}} {{{{c5::{}}}}}".format(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+190 passed, 2 warnings in 28.25s
+pylib exit=0

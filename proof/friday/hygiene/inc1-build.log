@@ -1,0 +1,5 @@
+[1m[92m    Finished[0m `release` profile [optimized] target(s) in 0.33s
+[1/1; 1 active; 0.066s] qt:aqt:data:web:sveltekit
+[0m[1m[32m
+Build succeeded in 0.13s.
+[0mBUILD_EXIT=0

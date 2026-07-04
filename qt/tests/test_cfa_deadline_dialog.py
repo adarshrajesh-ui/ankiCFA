@@ -1,17 +1,28 @@
 # Copyright: Ankitects Pty Ltd and contributors
 # License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
 
-"""item5 / MEDIUM #8 — the desktop "Peak-on-Exam-Day" (DeadlineDialog) fixes.
+"""item5 / MEDIUM #8 — the desktop "Peak-on-Exam-Day" (DeadlineDialog) behaviour.
 
-Two defects, both driven here against the real ``aqt.cfa.DeadlineDialog`` on an
-offscreen Qt:
+The DeadlineDialog is now a thin *host* for the shared ``ts/lib/cfa`` SvelteKit
+page (``cfa-deadline/<deckId>``): the exam-date picker and the weakest-first
+ranking moved out of the Qt body and into the web view + the
+``mediasrv._cfa_deadline_payload`` handler. Under ``ANKI_TEST_MODE`` there is no
+running mediasrv (``aqt.mw`` is ``None``), so constructing the dialog stubs the
+``AnkiWebView`` — the dialog logic under test is the deck scoping + the payload,
+not QtWebEngine.
 
-* 5B — a fresh profile whose cards are all NEW used to dead-end on "No due cards
-  to rank yet" because the ranking excluded new cards. The dialog now ranks new
-  cards (recall 0.0, weakest first) via ``anki.cfa.deadline_retention_with_new``
-  and its header honestly says so.
+Two defects stay covered, now asserted against the REAL payload the page renders
+(the exact data the old Qt body computed):
+
+* 5B — a fresh profile whose cards are all NEW must NOT dead-end on "No due cards
+  to rank yet": the payload ranks new cards (recall 0.0, weakest first) via
+  ``anki.cfa.deadline_retention_with_new`` and reports ``headerMode == "ranked"``.
 * 5A — an absurd/far-future persisted exam date is self-healed back to the
-  canonical default instead of being trusted verbatim; a sane date is untouched.
+  canonical default (``_sanitized_exam_date``) instead of being trusted verbatim;
+  a sane date is left untouched.
+
+Plus a host-level check that the dialog constructs and points its web view at the
+current deck's ``cfa-deadline/<deckId>`` page.
 """
 
 from __future__ import annotations
@@ -22,7 +33,7 @@ from datetime import date, timedelta
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
-from PyQt6.QtWidgets import QApplication, QLabel, QTableWidget, QWidget
+from PyQt6.QtWidgets import QApplication, QWidget
 
 from anki import cfa as anki_cfa
 from anki.collection import Collection
@@ -52,6 +63,33 @@ class _StandInMW(QWidget):
         self.col = col
 
 
+class _StubWeb(QWidget):
+    """Lightweight stand-in for ``AnkiWebView`` — records the SvelteKit path.
+
+    The real web view needs a running mediasrv (``aqt.mw.serverURL()``), which
+    does not exist under ``ANKI_TEST_MODE``; the dialog only needs *something*
+    widget-shaped that exposes ``load_sveltekit_page`` + ``cleanup``.
+    """
+
+    last_path: str | None = None
+
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__()
+        self.loaded_path: str | None = None
+
+    def load_sveltekit_page(self, path: str) -> None:
+        self.loaded_path = path
+        _StubWeb.last_path = path
+
+    def cleanup(self) -> None:
+        pass
+
+
+def _stub_webview(monkeypatch) -> None:
+    _StubWeb.last_path = None
+    monkeypatch.setattr(cfa, "AnkiWebView", _StubWeb)
+
+
 def _add_new_cards(col: Collection, deck_name: str, n: int) -> DeckId:
     """Add ``n`` brand-new (never-reviewed) cards to ``deck_name``; return did."""
     nt = col.models.by_name("Basic")
@@ -65,47 +103,60 @@ def _add_new_cards(col: Collection, deck_name: str, n: int) -> DeckId:
     return deck
 
 
+def _deadline_payload(col: Collection, deck: DeckId) -> dict:
+    """The REAL payload the SvelteKit deadline page renders for ``deck``."""
+    from aqt import mediasrv
+
+    return mediasrv._cfa_deadline_payload(col, int(deck))
+
+
+# --- host: the dialog constructs and scopes the page to the current deck -----
+
+
+def test_dialog_hosts_deadline_page_for_current_deck(monkeypatch) -> None:
+    _stub_webview(monkeypatch)
+    col = _empty_col()
+    deck = _add_new_cards(col, "CFA", 3)
+    col.decks.set_current(deck)
+
+    mw = _StandInMW(col)
+    dlg = cfa.DeadlineDialog(mw)  # type: ignore[arg-type]
+    assert isinstance(dlg.web, _StubWeb)
+    # The dialog scopes the SvelteKit page to the current deck, unchanged.
+    assert dlg.web.loaded_path == f"cfa-deadline/{int(deck)}"
+    dlg.reject()
+    col.close()
+
+
 # --- 5B: new cards are ranked, and the header is honest about it -------------
 
 
-def test_dialog_ranks_new_cards_on_fresh_all_new_deck() -> None:
+def test_payload_ranks_new_cards_on_fresh_all_new_deck() -> None:
     col = _empty_col()
     deck = _add_new_cards(col, "CFA", 5)
     col.decks.set_current(deck)
     assert len(col.find_cards("deck:CFA is:new")) == 5
     assert len(col.find_cards("deck:CFA is:due")) == 0
 
-    mw = _StandInMW(col)
-    dlg = cfa.DeadlineDialog(mw)  # type: ignore[arg-type]
-    table = dlg.findChild(QTableWidget)
-    assert table is not None
-    assert table.rowCount() == 5, "fresh all-new deck must not dead-end empty"
-
-    text = " ".join(lbl.text() for lbl in dlg.findChildren(QLabel))
-    # The header honestly discloses that new cards are counted as weakest.
-    assert "recall 0.0" in text
-    assert "unstudied" in text.lower()
-    assert "No cards to rank yet" not in text
-    dlg.close()
+    payload = _deadline_payload(col, deck)
+    # A fresh all-new deck must NOT dead-end empty: all five new cards are ranked.
+    assert payload["cardCount"] == 5, "fresh all-new deck must not dead-end empty"
+    assert payload["headerMode"] == "ranked"
+    # New (unstudied) cards are treated as maximally weak: recall 0.0, on top.
+    assert all(row["predictedRecall"] == 0.0 for row in payload["rows"])
     col.close()
 
 
-def test_dialog_empty_state_only_when_truly_empty() -> None:
+def test_payload_empty_state_only_when_truly_empty() -> None:
     # The honest empty state still appears when the deck genuinely has no cards.
     col = _empty_col()
     deck = col.decks.id("CFA")  # created, but no cards added
     col.decks.set_current(deck)
 
-    mw = _StandInMW(col)
-    dlg = cfa.DeadlineDialog(mw)  # type: ignore[arg-type]
-    table = dlg.findChild(QTableWidget)
-    assert table is not None
-    assert table.rowCount() == 0
-
-    text = " ".join(lbl.text() for lbl in dlg.findChildren(QLabel))
-    assert "No cards to rank yet" in text
-    assert "new cards first" in text.lower(), "empty hint stays honest about order"
-    dlg.close()
+    payload = _deadline_payload(col, deck)
+    assert payload["cardCount"] == 0
+    assert payload["headerMode"] == "empty"
+    assert payload["rows"] == []
     col.close()
 
 
@@ -135,23 +186,20 @@ def test_sanitized_exam_date_pure() -> None:
     assert cfa._sanitized_exam_date(beyond, today=today) == default
 
 
-def test_dialog_self_heals_absurd_persisted_date() -> None:
+def test_payload_self_heals_absurd_persisted_date() -> None:
     col = _empty_col()
     deck = _add_new_cards(col, "CFA", 2)
     col.decks.set_current(deck)
     # Runtime pollution: a far-future date persisted in the synced config.
     anki_cfa.set_exam_config(col, exam_date="2099-12-31", topic_weights={})
 
-    mw = _StandInMW(col)
-    dlg = cfa.DeadlineDialog(mw)  # type: ignore[arg-type]
-    shown = dlg.date_edit.date().toString("yyyy-MM-dd")
-    assert shown != "2099-12-31", "absurd persisted date must not be trusted"
-    assert shown == cfa._default_exam_date(), "healed to the canonical default"
-    dlg.close()
+    payload = _deadline_payload(col, deck)
+    assert payload["examDate"] != "2099-12-31", "absurd persisted date must not be trusted"
+    assert payload["examDate"] == cfa._default_exam_date(), "healed to the canonical default"
     col.close()
 
 
-def test_dialog_keeps_sane_persisted_date() -> None:
+def test_payload_keeps_sane_persisted_date() -> None:
     col = _empty_col()
     deck = _add_new_cards(col, "CFA", 2)
     col.decks.set_current(deck)
@@ -159,9 +207,6 @@ def test_dialog_keeps_sane_persisted_date() -> None:
     sane = (date.today() + timedelta(days=30)).isoformat()
     anki_cfa.set_exam_config(col, exam_date=sane, topic_weights={})
 
-    mw = _StandInMW(col)
-    dlg = cfa.DeadlineDialog(mw)  # type: ignore[arg-type]
-    shown = dlg.date_edit.date().toString("yyyy-MM-dd")
-    assert shown == sane, "a sane persisted exam date is left untouched"
-    dlg.close()
+    payload = _deadline_payload(col, deck)
+    assert payload["examDate"] == sane, "a sane persisted exam date is left untouched"
     col.close()

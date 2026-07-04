@@ -95,8 +95,8 @@ SetCfaExamDate RPC.
         {#if isEmpty}
             <Notice tone="warn" text="No due cards to rank yet." />
             <Caption>
-                Set your exam date and review a few cards — once cards fall due,
-                their predicted exam-day recall is ranked weakest-first here.
+                Set your exam date and review a few cards — once cards fall due, their
+                predicted exam-day recall is ranked weakest-first here.
             </Caption>
         {:else}
             <DataTable

@@ -1,0 +1,4 @@
+===== tools/tests AI-off =====
+....                                                                     [100%]
+4 passed in 0.01s
+tools exit=0
