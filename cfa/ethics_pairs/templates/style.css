@@ -302,6 +302,10 @@
 .cfa-ai-head { font-size: .95rem; margin-bottom: 6px; }
 .cfa-ai-badge { background: var(--cfa-primary); color: #fff; }
 .cfa-ai-explain { font-size: .92rem; line-height: 1.45; }
+.cfa-ai-coach { font-size: .92rem; line-height: 1.5; margin-top: 8px; padding: 8px 10px;
+  border-left: 3px solid var(--cfa-accent); background: rgba(218,92,1,.06); border-radius: 4px; }
+.cfa-ai-tip { font-size: .88rem; line-height: 1.45; margin-top: 6px; color: var(--cfa-muted); }
+.nightMode .cfa-ai-coach { background: rgba(218,92,1,.12); }
 .cfa-ai-spans { margin-top: 8px; }
 
 /* =========================================================================

@@ -366,3 +366,46 @@ def test_eval_with_oracle_llm_hits_threshold():
     assert report["ran_ai"] is True
     assert report["grade_agreement"] >= 0.8
     assert report["grade_agreement"] > report["deterministic_baseline_agreement"]
+
+
+# --- richer, tailored feedback (coaching + study tip) ------------------------
+
+
+def _rich_complete(**_):
+    return {
+        "ok": True,
+        "model": "gpt-4o-mini",
+        "error": None,
+        "text": (
+            '{"verdict_correct": true, "highlight_grade": "partial", "confidence": 0.8,'
+            ' "standard": "II(A) Material Nonpublic Information",'
+            ' "explanation": "missed the trading phrase",'
+            ' "coaching": "Your unethical call is right; highlight the trade-before-public phrase.",'
+            ' "study_tip": "Drill spotting the ACT of trading on MNPI.",'
+            ' "spans": [{"phrase": "x", "matched": false, "note": "the MNPI"}]}'
+        ),
+    }
+
+
+def test_ai_result_carries_tailored_coaching_and_tip():
+    r = grade_semantic(
+        "passage", "unethical", "unethical",
+        [{"phrase": "x", "rationale": "MNPI"}], ["x"],
+        complete_fn=_rich_complete,
+    )
+    assert r["source"] == "ai"
+    assert "highlight" in r["coaching"].lower() or "unethical" in r["coaching"].lower()
+    assert r["study_tip"]
+    assert r["confidence"] == 0.8
+    assert r["standard"] == "II(A) Material Nonpublic Information"
+
+
+def test_fallback_coaching_nudges_to_ai():
+    r = grade_fallback(
+        "passage", "unethical", "unethical",
+        [{"phrase": "x", "rationale": "MNPI"}], ["x"],
+        standard="II(A)",
+    )
+    assert r["source"] == "fallback"
+    assert "AI grading" in r["coaching"]  # explicitly points to the AI upgrade
+    assert "study_tip" in r

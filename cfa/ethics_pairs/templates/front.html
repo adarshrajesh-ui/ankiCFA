@@ -547,6 +547,21 @@
       learnerSpans: learnerSpanTexts(),
       selectionIndices: effSel
     };
+    // Desktop: the Python pycmd bridge holds the key and grades (its callback
+    // returns the JSON). AnkiDroid has no pycmd callback, so the phone fetches
+    // the server-side AI proxy directly (cleartext to the sync host is permitted
+    // by the app's network-security config). Either path renders the SAME rich AI
+    // feedback; on any failure the deterministic reveal stands.
+    if (/android/i.test(navigator.userAgent || "")) {
+      try {
+        fetch("http://10.0.2.2:27702/cfa/grade", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": "Bearer cfa-ai-proxy" },
+          body: JSON.stringify(payload)
+        }).then(function (r) { return r.json(); }).then(function (resp) { renderAiGrade(resp); }).catch(function () {});
+      } catch (e) { /* proxy down: deterministic reveal stands */ }
+      return;
+    }
     try {
       pycmd("cfaGradeEthics:" + JSON.stringify(payload), function (resp) { renderAiGrade(resp); });
     } catch (e) { /* AI-off / no bridge: deterministic reveal stands */ }
@@ -593,11 +608,15 @@
     }
     var g = (resp.grade || "").toString();
     var standard = resp.standard || srcText("standard");
+    var conf = (typeof resp.confidence === "number")
+      ? " \u00b7 confidence " + Math.round(resp.confidence * 100) + "%" : "";
     box.innerHTML =
       '<div class="cfa-ai-head"><span class="cfa-badge cfa-ai-badge">AI feedback</span>' +
-        "Graded by AI" + (standard ? " \u00b7 " + esc(standard) : "") + "</div>" +
+        "Graded by AI" + (standard ? " \u00b7 " + esc(standard) : "") + conf + "</div>" +
       '<div class="cfa-ai-grade">Semantic grade: <b>' + esc(g.charAt(0).toUpperCase() + g.slice(1)) + "</b></div>" +
       '<div class="cfa-ai-explain">' + esc(resp.explanation || "") + "</div>" +
+      (resp.coaching ? '<div class="cfa-ai-coach">' + esc(resp.coaching) + "</div>" : "") +
+      (resp.study_tip ? '<div class="cfa-ai-tip"><b>Study tip:</b> ' + esc(resp.study_tip) + "</div>" : "") +
       (spansHtml ? '<ul class="cfa-span-detail cfa-ai-spans">' + spansHtml + "</ul>" : "");
     box.hidden = false;
   }

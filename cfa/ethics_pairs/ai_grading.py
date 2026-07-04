@@ -46,31 +46,45 @@ from ethics_scoring import (
 GRADES = ("correct", "somewhat", "partial", "wrong")
 
 _SYSTEM_PROMPT = (
-    "You are a CFA Institute Code and Standards grader. A learner read one "
-    "passage, judged the conduct Ethical or Unethical, and highlighted the "
-    "phrase(s) they believe are the evidence for that judgment. You are given "
-    "the passage, the learner's verdict, the correct verdict, the learner's "
-    "highlighted phrases, and the authored GOLD evidence spans (each with a "
-    "rationale). Grade the highlight SEMANTICALLY, not by exact wording.\n\n"
+    "You are a CFA Institute Code and Standards tutor grading AND coaching one "
+    "learner. They read a passage, judged the conduct Ethical or Unethical, and "
+    "highlighted the phrase(s) they believe are the evidence. You get the "
+    "passage, their verdict, the correct verdict, their highlighted phrases, and "
+    "the authored GOLD evidence spans (each with a rationale). Grade the "
+    "highlight SEMANTICALLY (meaning, not exact wording) and give feedback that "
+    "is PERSONAL to THIS learner's actual answer — the whole point is that AI "
+    "grading is more useful than an exact-match check.\n\n"
     "Tolerance rules (the error margin):\n"
     "- A gold span counts as MATCHED if any learner phrase refers to the same "
-    "underlying fact/evidence, even with different words, tense, paraphrase, "
-    "or slightly different boundaries.\n"
-    "- Do NOT require exact token overlap. Reward the right idea.\n"
+    "underlying fact/evidence — different words, tense, paraphrase, or slightly "
+    "different boundaries all count. Reward the right idea; never require exact "
+    "token overlap.\n"
     "- Extra learner phrases that are not evidence are tolerated unless they "
-    "dominate the answer (many irrelevant phrases -> at best 'somewhat').\n\n"
+    "dominate (many irrelevant phrases -> at best 'somewhat').\n\n"
     "Highlight grade (about the spans ONLY, independent of the verdict):\n"
     "- 'correct'  : every gold span is matched and the selection is focused.\n"
-    "- 'somewhat' : every gold span is matched but the learner also highlighted "
-    "a lot of irrelevant text.\n"
+    "- 'somewhat' : every gold span is matched but also lots of irrelevant text.\n"
     "- 'partial'  : at least one but not all gold spans are matched.\n"
     "- 'wrong'    : no gold span is matched.\n\n"
+    "Feedback rules — make it TAILORED, not generic:\n"
+    "- Quote or reference the learner's OWN highlighted words when praising or "
+    "correcting them.\n"
+    "- Name the specific CFA Standard at issue and, in one plain-language "
+    "sentence, WHY the gold evidence is decisive here.\n"
+    "- If their verdict was wrong, explain the misread; if right but the "
+    "highlight was off, say what stronger evidence to point to.\n"
+    "- The study tip must be concrete and specific to THIS Standard/skill.\n\n"
     "Reply with ONLY a JSON object, no prose, no code fence:\n"
     '{"verdict_correct": <true|false>, '
     '"highlight_grade": "correct|somewhat|partial|wrong", '
+    '"confidence": <0.0-1.0>, '
+    '"standard": "<the governing CFA Standard code and name you identify>", '
     '"explanation": "<=40 words: what evidence was nailed and what was missed", '
+    '"coaching": "<=70 words: personal feedback that references the learner\'s own '
+    "verdict + highlighted words and the Standard; this is the payoff for AI grading>\", "
+    '"study_tip": "<=25 words: one concrete next step for this Standard/skill", '
     '"spans": [{"phrase": "<gold phrase>", "matched": <true|false>, '
-    '"note": "<short>"}]}'
+    '"note": "<why THIS phrase is (or is not) the decisive evidence>"}]}'
 )
 
 
@@ -187,6 +201,14 @@ def grade_fallback(
         f"Matched {found} of {total} evidence span(s) by exact-phrase overlap "
         "(deterministic AI-off grade)."
     )
+    # Terse deterministic feedback — deliberately thinner than the AI path so the
+    # value of enabling AI grading (personal coaching + a targeted tip) is clear.
+    std_txt = f" (Standard {standard})" if standard else ""
+    coaching = (
+        "Deterministic grade by exact-phrase overlap. Turn on AI grading for "
+        f"feedback tailored to your verdict and highlight{std_txt}."
+    )
+    study_tip = f"Review the evidence for Standard {standard}." if standard else ""
     return {
         "ok": False,
         "source": "fallback",
@@ -194,6 +216,9 @@ def grade_fallback(
         "verdict_correct": res["verdict_correct"],
         "correct": res["correct"],
         "explanation": explanation,
+        "coaching": coaching,
+        "study_tip": study_tip,
+        "confidence": None,
         "per_span": per_span,
         "error": error,
         "model": None,
@@ -315,6 +340,14 @@ def grade_semantic(
         per_span = [{"phrase": p, "matched": False, "note": ""} for p in phrases]
 
     explanation = str(parsed.get("explanation", "")).strip() or "Graded by AI."
+    coaching = str(parsed.get("coaching", "")).strip()
+    study_tip = str(parsed.get("study_tip", "")).strip()
+    # Model may refine the named Standard; fall back to the card-supplied one.
+    ai_standard = str(parsed.get("standard", "")).strip() or standard
+    try:
+        confidence = float(parsed.get("confidence"))
+    except (TypeError, ValueError):
+        confidence = None
     return {
         "ok": True,
         "source": "ai",
@@ -322,11 +355,14 @@ def grade_semantic(
         "verdict_correct": ai_verdict_correct,
         "correct": correct,
         "explanation": explanation,
+        "coaching": coaching,
+        "study_tip": study_tip,
+        "confidence": confidence,
         "per_span": per_span,
         "error": None,
         "model": result.get("model"),
         "item_id": item_id,
-        "standard": standard,
+        "standard": ai_standard,
     }
 
 
