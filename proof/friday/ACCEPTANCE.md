@@ -1,0 +1,43 @@
+# ankiCFA — Acceptance D1–D7 (status @ Phase-0 spine)
+
+This maps each acceptance item to concrete evidence. Phase-0 (the shared spine,
+`friday/phase0`) is **done and pushed**; items that depend on the worker tabs
+(W1–W6) landing and on the desktop⇄mobile integration build are marked
+**GATED** with exactly what unblocks them. Nothing here is asserted without a
+runnable check or a file pointer — GATED means "not yet demonstrable," not
+"assumed done."
+
+Legend: ✅ done & evidenced · 🟡 mechanism done, UI/e2e at integration · ⛔ gated.
+
+| # | Requirement | Status | Evidence / what unblocks it |
+|---|---|---|---|
+| **Build green** | `just build`/checks green | 🟡 | Rust: `cargo test -p anki` clean; 150 scheduler + 3 `cfa_scores` tests pass. `.so` builds (`cargo build -p rsbridge --features native-tls`). Changed Python ruff-clean. Full `just check` (mypy/ts/all suites) runs at integration on the merge host. |
+| **Scores parity** | desktop == mobile == old Python | ✅ (desktop) / ⛔ (mobile) | `just cfa-parity-test`: RPC == `anki.cfa._py_*` field-by-field to **1e-9** (`proof/friday/phase0/parity-rpc-vs-cfapy.txt`). Mobile reads the *same* Rust engine — GATED on the AAR rebuild after merge (§ mobile below). |
+| **D1** | AI names a source | 🟡 | Provenance schema `{source,standard,item_id,model,rationale}` fixed in `docs/cfa/AI-PROVENANCE.md`. AI features emitting it per item = W-grading; verify once wired (needs a key, off by default). |
+| **D2** | eval-before-serve reports accuracy + wrong-answer-rate vs baseline at 0.80 cutoff | ⛔ | Eval harness exists (`cfa/eval/`, `just cfa-eval`). Turning the CLI into a serve-time **gate** at 0.80 + wrong-answer-rate is a worker deliverable; verify its numbers at integration (AI-off prints the deterministic baseline). |
+| **D3** | deterministic score AI-off + in-app toggle | ✅ (engine+toggle) / 🟡 (toggle UI) | Scores are AI-free ⇒ deterministic: parity gate is exact and reproducible AI-off (`.env` absent in the test env). In-app toggle mechanism: `cfa_ai_enabled`+per-feature `col.conf` keys, `ai_feature_enabled = key AND master AND feature`, default OFF — `just cfa-ai-toggle-test` (7 tests). The settings *control* on Home = W-desktop. |
+| **D4** | REAL two-way sync round-trip (emulator→desktop and reverse), recorded, no double-count | 🟡 harness / ⛔ recording | Harness done: `just cfa-syncserver` + `docs/cfa/SYNC-SETUP.md` (fixed creds, `10.0.2.2` for emulator). Double-count fix **tested** (per-(card,day) dedup: `just cfa-parity-test`, Rust `double_count_fix_*`). The screen recording needs the mobile app rebuilt with the RPC + a running emulator — GATED on integration. |
+| **D5** | offline-then-sync | ⛔ | Same harness as D4; recording GATED on integration (procedure in SYNC-SETUP.md §4). |
+| **D6** | phone shows 3 scores w/ ranges + give-up | ⛔ | Engine + response shape done (ranges + `abstain`/`reason` are fields of `ComputeCfaScoresResponse`). Seam `CfaScoresProvider` exists on mobile. GATED on: merge → rebuild AAR (`cfa_build_fork_engine.sh`) → wire typed `col.backend.computeCfaScores` → emulator screenshot. |
+| **D7** | eval numbers + phone→desktop recording | ⛔ | = D2 numbers + D4 recording; both GATED as above. |
+| **Fresh-seed reachability** | desktop AND mobile | 🟡 desktop / ⛔ mobile | Desktop reachability tooling exists (`tools/cfa/f9_reachability.py`, `just cfa-f9-gate`); re-run at integration on merged main. Mobile GATED on the app build. |
+
+## Mobile integration step (unblocks the ⛔ items)
+
+1. Merge `friday/phase0` → `main` (Phase-0 first, per NATIVE-CFA-SPEC §6).
+2. Rebuild the backend AAR from merged `main`:
+   `Anki-Android-Backend/cfa_build_fork_engine.sh` → regenerates
+   `GeneratedBackend.kt` with `computeCfaScores` + `librsdroid.so`.
+3. Wire `CfaScoresProvider.scores(col)` to the typed
+   `col.backend.computeCfaScores(...)` (seam + `SOURCE_RPC` already present), map
+   to `CfaScores`; `bash scripts/verify_mobile.sh`.
+4. Boot emulator + desktop against `just cfa-syncserver`; record D4/D5, screenshot
+   D6, run `cfa-eval` for D2/D7 numbers.
+
+## What Phase-0 guarantees today (reproducible now)
+
+- `just cfa-parity-test` — RPC == Python to 1e-9 + double-count fix.
+- `just cfa-ai-toggle-test` — the 3-key AI gate, default OFF.
+- `cargo test -p anki --lib cfa_scores` — 3 engine tests (abstain / happy / dedup).
+- `just cfa-scores-test`, `cfa-f4-test`, `cfa-types-test` — 54 CFA tests via the
+  shared engine, AI-off.
