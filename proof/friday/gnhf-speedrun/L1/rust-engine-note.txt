@@ -1,0 +1,43 @@
+# A12 evidence — Unify Rust-change note (docs/cfa/RUST_ENGINE_NOTE.md)
+# captured 2026-07-04T22:59:17Z
+
+== Authoritative CFA Rust test run (24 tests) ==
+running 24 tests
+test scheduler::cfa_deadline::tests::capped_interval_is_min_of_fsrs_interval_and_days_to_exam ... ok
+test scheduler::cfa_deadline::tests::days_until_is_signed_and_rounds_toward_zero ... ok
+test scheduler::cfa_scores::tests::abstains_on_empty_collection_but_bayesian_still_answers ... ok
+test scheduler::cfa_deadline::tests::empty_deck_returns_empty ... ok
+test scheduler::cfa_deadline::tests::fetch_limit_truncates_after_sorting ... ok
+test scheduler::service::tests::exam_queue_includes_new_cards ... ok
+test scheduler::cfa_deadline::tests::never_reviewed_card_is_treated_as_weakest ... ok
+test scheduler::cfa_deadline::tests::suggested_interval_is_capped_at_days_to_exam ... ok
+test scheduler::cfa_deadline::tests::recall_drops_as_the_exam_moves_farther_out ... ok
+test scheduler::cfa_deadline::tests::exam_in_the_past_caps_all_intervals_at_zero ... ok
+test scheduler::cfa_deadline::tests::deadline_retention_is_read_only_and_preserves_undo ... ok
+test scheduler::cfa_deadline::tests::lower_predicted_recall_sorts_first ... ok
+test scheduler::service::tests::exam_queue_empty_deck_returns_empty ... ok
+test scheduler::cfa_scores::tests::double_count_fix_dedups_same_day_reviews ... ok
+test scheduler::service::tests::exam_queue_is_read_only_and_preserves_undo ... ok
+test scheduler::service::tests::exam_queue_mixes_new_and_due_cards ... ok
+test scheduler::service::tests::exam_queue_type_multiplier_differentiates_equal_weakness_cards ... ok
+test scheduler::service::tests::exam_queue_untyped_card_defaults_to_unit_multiplier ... ok
+test scheduler::service::tests::exam_queue_orders_by_topic_weight ... ok
+test scheduler::service::tests::exam_queue_zero_weight_topic_sinks_to_bottom ... ok
+test scheduler::service::tests::exam_queue_urgency_is_monotonic_in_days_to_exam ... ok
+test scheduler::service::tests::exam_queue_weaker_card_ranks_first_for_equal_weight ... ok
+test scheduler::service::tests::verification_probe_suspended_new_card_excluded_from_exam_queue ... ok
+test scheduler::cfa_scores::tests::happy_path_produces_all_scores ... ok
+test result: ok. 24 passed; 0 failed; 0 ignored; 0 measured; 520 filtered out; finished in 0.08s
+
+== Per-RPC test breakdown (documented in the note) ==
+BuildExamQueue   (service/mod.rs)   : 11 exam-queue tests (11 test fns named *exam_queue*; the plain fn exam_queue() builder is a helper, not a test)
+DeadlineRetention(cfa_deadline.rs)  : 10 tests
+ComputeCfaScores (cfa_scores.rs)    : 3 tests
+
+== Doc-consistency guard (stdlib, no build) ==
+......                                                                   [100%]
+6 passed in 0.01s
+
+== Full cfa-eval-test suite still green ==
+..............................................................           [100%]
+62 passed in 14.50s

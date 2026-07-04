@@ -177,6 +177,11 @@ cfa-eval-test:
 cfa-model-docs-test:
     {{ py }} -m pytest cfa/eval/tests/test_model_docs.py -q
 
+# A12: docs/cfa/RUST_ENGINE_NOTE.md (all 3 read-only Rust RPCs + why-Rust +
+# upstream files + merge difficulty) must not drift from the Rust test counts.
+cfa-rust-note-test:
+    {{ py }} -m pytest cfa/eval/tests/test_rust_engine_note.py -q
+
 # A1: AI grader vs simpler baselines (deterministic-span, TF-IDF, LLM). AI-off
 # reports both baselines honestly; with a key the LLM must beat both or it fails.
 cfa-baseline-compare *args:
