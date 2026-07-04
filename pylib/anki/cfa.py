@@ -1151,8 +1151,11 @@ def _py_bayesian_readiness(
 # pure-Python reference, so scores never disappear.
 
 
-def _pb_opt(msg: Any, name: str) -> Optional[float]:
-    """Read a proto3 ``optional`` field, returning None when it is unset."""
+def _pb_opt(msg: Any, name: str) -> Any:
+    """Read a proto3 ``optional`` field, returning None when it is unset.
+
+    Polymorphic over the field type (the ``double`` score fields and the
+    ``string`` ``last_review_at``), so the return type is ``Any``."""
     return getattr(msg, name) if msg.HasField(name) else None
 
 
