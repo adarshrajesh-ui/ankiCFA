@@ -83,6 +83,44 @@ CANONICAL_TOPICS: list[str] = [
     "los::quant",
 ]
 
+# Human-readable CFA topic-area names for the ``los::<slug>`` tag prefixes.
+# Topics are keyed internally by their ``los::`` join-key tag (see
+# CANONICAL_TOPICS), but the readiness UI should read as CFA topic areas rather
+# than raw slugs. This maps the bare slug (the text after ``los::``) to its
+# canonical name; unknown slugs fall back to a title-cased form of the slug (see
+# :func:`topic_display_name`), so a newly-authored topic is still readable
+# without a code change. Presentation only — the raw tag stays the join key.
+TOPIC_DISPLAY_NAMES: dict[str, str] = {
+    "ethics": "Ethics & Professional Standards",
+    "quant": "Quantitative Methods",
+    "econ": "Economics",
+    "fra": "Financial Reporting & Analysis",
+    "corp": "Corporate Issuers",
+    "equity": "Equity Investments",
+    "fixed_income": "Fixed Income",
+    "fi": "Fixed Income",
+    "derivatives": "Derivatives",
+    "altinv": "Alternative Investments",
+    "portmgmt": "Portfolio Management",
+}
+
+
+def topic_display_name(topic: str) -> str:
+    """Human-readable CFA topic-area name for a ``los::<slug>`` tag prefix.
+
+    Strips the ``los::`` prefix and maps the slug to its canonical CFA topic
+    name (see :data:`TOPIC_DISPLAY_NAMES`). An unknown slug falls back to a
+    title-cased form of the slug (``los::my_topic`` -> "My Topic") so a new
+    topic is still readable without a code change. Purely presentational: the
+    raw ``los::`` tag remains the join key everywhere else.
+    """
+    slug = topic[len(TOPIC_PREFIX) :] if topic.startswith(TOPIC_PREFIX) else topic
+    slug = slug.split("::", 1)[0]
+    if slug in TOPIC_DISPLAY_NAMES:
+        return TOPIC_DISPLAY_NAMES[slug]
+    words = slug.replace("_", " ").replace("-", " ").split()
+    return " ".join(word.capitalize() for word in words) if words else topic
+
 
 def readiness_topic_prefixes(weights: dict[str, float]) -> list[str]:
     """Topic prefixes for the CFA-readiness scores, as a canonical list.

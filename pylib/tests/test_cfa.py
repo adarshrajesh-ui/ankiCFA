@@ -382,3 +382,28 @@ def test_memory_score_config_topic_total_matches_configured_topics():
     assert len(score.topics) == 8
     assert score.topics_covered == 1
     col.close()
+
+
+def test_topic_display_name_maps_canonical_slugs_and_falls_back():
+    # Every canonical topic slug resolves to a readable CFA topic-area name (no
+    # raw ``los::`` slug ever surfaces in the UI).
+    expected = {
+        "los::ethics": "Ethics & Professional Standards",
+        "los::quant": "Quantitative Methods",
+        "los::econ": "Economics",
+        "los::fra": "Financial Reporting & Analysis",
+        "los::corp": "Corporate Issuers",
+        "los::equity": "Equity Investments",
+        "los::altinv": "Alternative Investments",
+        "los::portmgmt": "Portfolio Management",
+    }
+    for slug in cfa.CANONICAL_TOPICS:
+        assert cfa.topic_display_name(slug) == expected[slug]
+    # A sub-tag resolves to its top-level topic name (longest-prefix join key).
+    assert (
+        cfa.topic_display_name("los::fra::goodwill") == "Financial Reporting & Analysis"
+    )
+    # An unknown slug falls back to a title-cased, human-readable form.
+    assert cfa.topic_display_name("los::my_new-topic") == "My New Topic"
+    # A bare (prefix-less) slug is handled too.
+    assert cfa.topic_display_name("derivatives") == "Derivatives"
