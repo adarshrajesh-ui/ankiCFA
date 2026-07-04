@@ -1,17 +1,20 @@
-<!-- CFA Ethics Minimal-Pair — FRONT (question) template.
-     Renders both vignettes co-presented as tap-to-highlight paragraphs, captures two conform/violate
-     judgments, and — instead of a multiple-choice step — asks the learner to HIGHLIGHT the exact
-     decisive phrase (in the vignette that makes it a violation) by tapping the first and last word
-     (or dragging). Only after Check does the card reveal the grade, the gold phrase, the governing
-     Standard and the rationale. The governing Standard is NEVER visible before the attempt: it lives
-     inside the hidden `.cfa-src` block and is injected into the reveal panel only on Check.
+<!-- CFA Ethics Minimal-Pair — FRONT (question) template (multi-span flagship).
+     Renders both near-identical vignettes co-presented as tap/drag-to-highlight paragraphs, captures
+     a conform/violate judgment on EACH, and — in the vignette the learner deems a VIOLATION — asks
+     them to highlight EVERY decisive span (there may be SEVERAL non-contiguous phrases: the material
+     fact AND the wrongful act). Only after Check does the card grade the two verdicts + the
+     multi-span highlight (with deterministic partial-credit tiers), reveal the gold spans, the
+     governing Standard, and the per-span rationale. The governing Standard is NEVER visible before
+     the attempt: it lives inside the hidden `.cfa-src` block and is injected only on Check.
 
-     Highlight tokenization + grading are computed in JS in the CFA-HIGHLIGHT-SHARED block below,
-     which is mirrored byte-for-byte in cfa/ethics_pairs/tests/js/highlight_logic.js and, in Python,
-     in ethics_scoring.py (tokenize / normalized_tokens / find_gold_indices / grade_highlight). This
-     guarantees identical grades on desktop Anki and AnkiDroid. -->
+     Highlight tokenization + multi-span grading are computed in JS in the CFA-SPAN-SHARED block
+     below, mirrored BYTE-FOR-BYTE (ignoring indentation) in cfa/ethics_pairs/tests/js/passage_logic.js
+     and, in Python, in ethics_scoring.py (tokenize / normalized_tokens / find_gold_indices /
+     find_gold_spans / span_cap / grade_spans / span_tier / grade_spans_tolerant). tests/test_highlight.py
+     enforces the copy match and the Python<->JS agreement, so grades are identical on desktop Anki and
+     AnkiDroid. This is the SAME shared grader the one-passage card uses. -->
 
-<div class="cfa-pair" data-pairid="{{PairId}}">
+<div class="cfa-pair cfa-pair-multispan" data-pairid="{{PairId}}">
 
   <!-- Hidden source fields: read by JS, never shown until reveal. -->
   <div class="cfa-src">
@@ -22,6 +25,7 @@
     <div data-role="vignetteB">{{VignetteB}}</div>
     <div data-role="decisivePhrase">{{DecisivePhrase}}</div>
     <div data-role="decisiveCase">{{DecisivePhraseCase}}</div>
+    <div data-role="goldSpans">{{GoldSpans}}</div>
     <div data-role="standard">{{Standard}}</div>
     <div data-role="rationale">{{Rationale}}</div>
   </div>
@@ -34,14 +38,20 @@
   <div class="cfa-cases" id="cfa-cases"><!-- panels injected (order shuffled per pair) --></div>
 
   <div class="cfa-highlight-step">
-    <h3>Highlight the phrase that makes it a violation</h3>
+    <h3>Highlight every phrase that makes it a violation</h3>
     <p class="cfa-highlight-instr">In the case you consider a <b>violation</b>, tap the <b>first word</b>
-      then the <b>last word</b> of the decisive phrase (or drag across it). Tap again to restart.</p>
+      then the <b>last word</b> of each decisive phrase (or drag across it). There may be
+      <b>several separate phrases</b> — the material fact <i>and</i> the wrongful act. Tap inside a
+      highlighted phrase to remove it.</p>
+    <div class="cfa-span-controls">
+      <span class="cfa-span-count" id="cfa-span-count">0 phrases highlighted</span>
+      <button type="button" id="cfa-clear-spans">Clear highlights</button>
+    </div>
   </div>
 
   <div class="cfa-actions">
     <button type="button" id="cfa-check" disabled>Check answer</button>
-    <p class="cfa-hint" id="cfa-hint">Judge <b>both</b> cases and highlight the decisive phrase to continue.</p>
+    <p class="cfa-hint" id="cfa-hint">Judge <b>both</b> cases and highlight the decisive phrase(s) to continue.</p>
   </div>
 
   <div class="cfa-reveal" id="cfa-reveal" hidden></div>
@@ -53,16 +63,20 @@
 
 <script>
 (function () {
-  var root = document.querySelector(".cfa-pair");
+  var root = document.querySelector(".cfa-pair-multispan");
   if (!root || root.dataset.cfaInit) return;
   root.dataset.cfaInit = "1";
 
-  // === CFA-HIGHLIGHT-SHARED-START ===
-  // Mirrored byte-for-byte in cfa/ethics_pairs/tests/js/highlight_logic.js and (in Python) in
-  // ethics_scoring.py. test_highlight.py enforces the JS<->JS copy match and the Python<->JS
-  // behavioural agreement. Do NOT edit one copy without the others.
-  var CFA_HIGHLIGHT_CAP_SLACK = 5;
-  var CFA_STRIP_CHARS = ".,;:!?\"'()[]{}\u2026-\u2013\u2014\u2018\u2019\u201c\u201d";
+  // A fresh front render is a new attempt: discard any grade a previous Check persisted but never
+  // Recorded, so only an in-session Check on THIS card can satisfy the back's completion gate.
+  try { localStorage.removeItem("cfaEthics:pending"); } catch (e) {}
+
+  // === CFA-SPAN-SHARED-START ===
+  // Mirrored byte-for-byte (ignoring indentation) in cfa/ethics_pairs/tests/js/passage_logic.js and
+  // (in Python) in ethics_scoring.py. tests/test_passages.py enforces the copy match and the
+  // Python<->JS behavioural agreement. Do NOT edit one copy without the others.
+  var CFA_SPAN_CAP_SLACK = 4;
+  var CFA_STRIP_CHARS = ".,;:!?\"'()[]{}…-–—‘’“”";
   function cfaStripToken(tok) {
     var s = 0, e = tok.length;
     while (s < e && CFA_STRIP_CHARS.indexOf(tok.charAt(s)) !== -1) s++;
@@ -80,8 +94,8 @@
     for (var i = 0; i < toks.length; i++) out.push(cfaStripToken(toks[i]));
     return out;
   }
-  function cfaFindGold(vignette, gold) {
-    var v = cfaNormalizedTokens(vignette), g = cfaNormalizedTokens(gold);
+  function cfaFindGold(passage, gold) {
+    var v = cfaNormalizedTokens(passage), g = cfaNormalizedTokens(gold);
     if (g.length === 0) return [];
     for (var start = 0; start + g.length <= v.length; start++) {
       var ok = true;
@@ -96,20 +110,82 @@
     }
     return [];
   }
-  function cfaDefaultCap(goldLen) { return goldLen + CFA_HIGHLIGHT_CAP_SLACK; }
-  function cfaGradeHighlight(selectionIndices, goldIndices, cap) {
-    if (cap == null) cap = cfaDefaultCap(goldIndices.length);
+  function cfaFindGoldSpans(passage, phrases) {
+    var out = [];
+    for (var i = 0; i < phrases.length; i++) out.push(cfaFindGold(passage, phrases[i]));
+    return out;
+  }
+  function cfaSpanCap(goldTokenCount, nSpans) {
+    return goldTokenCount + CFA_SPAN_CAP_SLACK * Math.max(1, nSpans);
+  }
+  function cfaGradeSpans(selectionIndices, goldSpans, cap) {
     var sel = {}, selCount = 0, i;
     for (i = 0; i < selectionIndices.length; i++) {
       if (!sel[selectionIndices[i]]) { sel[selectionIndices[i]] = true; selCount++; }
     }
-    if (selCount === 0) return "wrong";
-    for (i = 0; i < goldIndices.length; i++) {
-      if (!sel[goldIndices[i]]) return "wrong";
+    var perSpan = [], allGold = {}, allGoldCount = 0, found = 0;
+    for (var s = 0; s < goldSpans.length; s++) {
+      var span = goldSpans[s], covered = span.length > 0, k;
+      for (k = 0; k < span.length; k++) {
+        if (!allGold[span[k]]) { allGold[span[k]] = true; allGoldCount++; }
+        if (!sel[span[k]]) covered = false;
+      }
+      perSpan.push(covered);
+      if (covered) found++;
     }
-    return selCount <= cap ? "correct" : "somewhat";
+    var total = goldSpans.length;
+    if (cap == null) cap = cfaSpanCap(allGoldCount, total);
+    var widthOk = selCount <= cap;
+    var grade;
+    if (selCount === 0 || found === 0) grade = "wrong";
+    else if (found < total) grade = "partial";
+    else if (!widthOk) grade = "somewhat";
+    else grade = "correct";
+    return { grade: grade, found: found, total: total, per_span: perSpan, width_ok: widthOk, cap: cap };
   }
-  // === CFA-HIGHLIGHT-SHARED-END ===
+  // --- Item 2: deterministic partial-credit tolerance (mobile has no network, so no F2 AI here) ---
+  // The strict cfaGradeSpans above only credits a gold span when EVERY one of its tokens is selected,
+  // so a materially-correct highlight with different boundaries (e.g. "unreleased quarterly earnings"
+  // for the gold "exact unreleased quarterly earnings figure") scored a flat "wrong". cfaSpanTier adds
+  // deterministic tolerance: a span is "full" when every gold token is covered (superset ok), "near"
+  // when the selection overlaps at least half the gold tokens (right idea, boundaries off), else
+  // "none". cfaGradeSpansTolerant then awards partial-credit tiers instead of harsh binary matching,
+  // mirroring the desktop F2 grader's tolerance while staying fully offline + deterministic.
+  function cfaSpanTier(sel, span) {
+    if (span.length === 0) return "none";
+    var inter = 0, k;
+    for (k = 0; k < span.length; k++) if (sel[span[k]]) inter++;
+    if (inter === span.length) return "full";
+    if (inter > 0 && inter * 2 >= span.length) return "near";
+    return "none";
+  }
+  function cfaGradeSpansTolerant(selectionIndices, goldSpans, cap) {
+    var sel = {}, selCount = 0, i;
+    for (i = 0; i < selectionIndices.length; i++) {
+      if (!sel[selectionIndices[i]]) { sel[selectionIndices[i]] = true; selCount++; }
+    }
+    var perSpan = [], allGold = {}, allGoldCount = 0, full = 0, near = 0;
+    for (var s = 0; s < goldSpans.length; s++) {
+      var span = goldSpans[s], k;
+      for (k = 0; k < span.length; k++) {
+        if (!allGold[span[k]]) { allGold[span[k]] = true; allGoldCount++; }
+      }
+      var tier = cfaSpanTier(sel, span);
+      perSpan.push(tier);
+      if (tier === "full") full++;
+      else if (tier === "near") near++;
+    }
+    var total = goldSpans.length, matched = full + near;
+    if (cap == null) cap = cfaSpanCap(allGoldCount, total);
+    var widthOk = selCount <= cap;
+    var grade;
+    if (selCount === 0 || matched === 0) grade = "wrong";
+    else if (matched < total) grade = "partial";
+    else if (full === total && widthOk) grade = "correct";
+    else grade = "somewhat";
+    return { grade: grade, found: full, near: near, matched: matched, total: total, per_span: perSpan, width_ok: widthOk, cap: cap };
+  }
+  // === CFA-SPAN-SHARED-END ===
 
   function esc(s) { return (s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
   function srcText(role) {
@@ -124,6 +200,22 @@
   var decisivePhrase = srcText("decisivePhrase");
   var decisiveCase = (srcText("decisiveCase") || "A").toUpperCase() === "B" ? "B" : "A";
 
+  // The multi-span answer key on the violating vignette: [{phrase, rationale}]. Falls back to the
+  // legacy single decisive phrase when GoldSpans is empty (older banks), so the card always grades.
+  var goldPhrases = [];
+  var goldRationales = [];
+  try {
+    var parsed = JSON.parse(srcText("goldSpans") || "[]");
+    for (var gi = 0; gi < parsed.length; gi++) {
+      goldPhrases.push(parsed[gi].phrase);
+      goldRationales.push(parsed[gi].rationale || "");
+    }
+  } catch (e) { goldPhrases = []; }
+  if (goldPhrases.length === 0 && decisivePhrase) {
+    goldPhrases = [decisivePhrase];
+    goldRationales = [srcText("rationale")];
+  }
+
   // Deterministic PRNG seeded by PairId -> stable case order (no positional tell, stable tests).
   function xmur3(str) {
     var h = 1779033703 ^ str.length;
@@ -136,14 +228,15 @@
   var rand = mulberry32(xmur3(pairId)());
 
   var judged = { A: null, B: null };
-  // Active selection: which vignette (A/B), the anchor word, and the current [start,end] range.
-  var sel = { caseId: null, anchor: null, start: null, end: null, done: false };
+  // Committed spans PER CASE: { A: [{lo,hi}], B: [{lo,hi}] }. Only spans in the decisive case count.
+  var spansByCase = { A: [], B: [] };
+  var anchor = { caseId: null, i: null };   // pending first-tap for the next span, or null
   var revealed = false;
-  // Drag bookkeeping: on a real drag we set the range live and suppress the trailing click.
   var drag = { on: false, moved: false, caseId: null, anchor: null };
+  var pendingGrade = null;
 
-  // Render the two cases in a pair-stable shuffled left/right order; each vignette is tokenized
-  // into tappable word spans whose data-i matches the shared tokenizer's indices.
+  // Render the two cases in a pair-stable shuffled left/right order; each vignette is tokenized into
+  // tappable word spans whose data-i matches the shared tokenizer's indices.
   var order = rand() < 0.5 ? ["A", "B"] : ["B", "A"];
   var casesEl = root.querySelector("#cfa-cases");
   order.forEach(function (caseId, idx) {
@@ -166,41 +259,74 @@
 
   var checkBtn = root.querySelector("#cfa-check");
   var hint = root.querySelector("#cfa-hint");
-  function hasSelection() { return sel.caseId !== null && sel.start !== null; }
-  function complete() { return judged.A && judged.B && hasSelection(); }
-  function updateCheck() { checkBtn.disabled = !complete(); hint.style.display = complete() ? "none" : ""; }
+  var countEl = root.querySelector("#cfa-span-count");
 
+  function panelOf(caseId) { return root.querySelector('.cfa-case[data-case="' + caseId + '"]'); }
   function caseOf(el) { var p = el.closest(".cfa-case"); return p ? p.dataset.case : null; }
   function tokIndex(el) { return parseInt(el.dataset.i, 10); }
+  function totalSpans() { return spansByCase.A.length + spansByCase.B.length; }
+  function selectionIndices(caseId) {
+    var out = [], arr = spansByCase[caseId];
+    for (var s = 0; s < arr.length; s++) for (var i = arr[s].lo; i <= arr[s].hi; i++) out.push(i);
+    return out;
+  }
+  function hasSelection() { return totalSpans() > 0; }
+  function complete() { return judged.A && judged.B && hasSelection(); }
+  function updateCheck() {
+    checkBtn.disabled = !complete();
+    hint.style.display = complete() ? "none" : "";
+    var n = totalSpans();
+    countEl.textContent = n + (n === 1 ? " phrase highlighted" : " phrases highlighted");
+  }
 
-  function paintSelection() {
+  function paint() {
     root.querySelectorAll(".cfa-tok.sel").forEach(function (x) { x.classList.remove("sel"); });
-    if (!hasSelection()) return;
-    var panel = root.querySelector('.cfa-case[data-case="' + sel.caseId + '"]');
-    if (!panel) return;
-    var lo = Math.min(sel.start, sel.end), hi = Math.max(sel.start, sel.end);
-    panel.querySelectorAll(".cfa-tok").forEach(function (x) {
-      var i = tokIndex(x);
-      if (i >= lo && i <= hi) x.classList.add("sel");
+    ["A", "B"].forEach(function (caseId) {
+      var panel = panelOf(caseId);
+      if (!panel) return;
+      var arr = spansByCase[caseId];
+      panel.querySelectorAll(".cfa-tok").forEach(function (x) {
+        var i = tokIndex(x);
+        for (var s = 0; s < arr.length; s++) {
+          if (i >= arr[s].lo && i <= arr[s].hi) { x.classList.add("sel"); break; }
+        }
+        if (anchor.caseId === caseId && anchor.i === i) x.classList.add("sel");
+      });
     });
   }
 
-  function setRange(caseId, anchor, other) {
-    sel.caseId = caseId; sel.anchor = anchor;
-    sel.start = Math.min(anchor, other); sel.end = Math.max(anchor, other);
+  function spanIndexAt(caseId, i) {
+    var arr = spansByCase[caseId];
+    for (var s = 0; s < arr.length; s++) if (i >= arr[s].lo && i <= arr[s].hi) return s;
+    return -1;
   }
 
-  // Tap-to-select: first tap anchors a single word; second tap in the same vignette extends to a
-  // range; any tap after a completed range (or a tap in the other vignette) starts a new anchor.
-  function onTap(el) {
-    var c = caseOf(el), i = tokIndex(el);
-    if (c === null || isNaN(i)) return;
-    if (!sel.done && sel.caseId === c && sel.anchor !== null) {
-      setRange(c, sel.anchor, i); sel.done = true;
-    } else {
-      sel.caseId = c; sel.anchor = i; sel.start = i; sel.end = i; sel.done = false;
+  function commitSpan(caseId, a, b) {
+    var lo = Math.min(a, b), hi = Math.max(a, b);
+    var arr = spansByCase[caseId], kept = [];
+    for (var s = 0; s < arr.length; s++) {
+      if (arr[s].hi < lo || arr[s].lo > hi) kept.push(arr[s]);
+      else { lo = Math.min(lo, arr[s].lo); hi = Math.max(hi, arr[s].hi); }
     }
-    paintSelection(); updateCheck();
+    kept.push({ lo: lo, hi: hi });
+    spansByCase[caseId] = kept;
+  }
+
+  // Tap logic: tapping inside a committed span removes it; else first tap anchors, second tap in the
+  // SAME case commits a new span; a tap in the other case (or the anchor word again) restarts/commits.
+  function onTap(caseId, i) {
+    if (anchor.caseId === null) {
+      var s = spanIndexAt(caseId, i);
+      if (s !== -1) { spansByCase[caseId].splice(s, 1); paint(); updateCheck(); return; }
+      anchor.caseId = caseId; anchor.i = i;
+    } else if (anchor.caseId === caseId) {
+      commitSpan(caseId, anchor.i, i);
+      anchor.caseId = null; anchor.i = null;
+    } else {
+      // switched vignette before completing a span: start fresh in the new case
+      anchor.caseId = caseId; anchor.i = i;
+    }
+    paint(); updateCheck();
   }
 
   root.addEventListener("click", function (ev) {
@@ -213,16 +339,16 @@
       updateCheck();
       return;
     }
+    if (ev.target.id === "cfa-clear-spans") { spansByCase = { A: [], B: [] }; anchor = { caseId: null, i: null }; paint(); updateCheck(); return; }
     var tk = ev.target.closest(".cfa-tok");
     if (tk) {
       if (drag.moved) { drag.moved = false; return; } // this click just concluded a drag
-      onTap(tk);
+      var c = caseOf(tk), i = tokIndex(tk);
+      if (c !== null && !isNaN(i)) onTap(c, i);
     }
   });
 
-  // Drag-to-select (pointer events work with mouse on desktop and touch on AnkiDroid). We only
-  // commit a range once the pointer actually moves onto another token, so pure taps fall through
-  // to the click handler above (keeping tap-then-tap working identically on every platform).
+  // Drag-to-select one span (pointer events work with mouse on desktop and touch on AnkiDroid).
   root.addEventListener("pointerdown", function (ev) {
     if (revealed) return;
     var tk = ev.target.closest(".cfa-tok");
@@ -235,13 +361,30 @@
     var tk = over && over.closest ? over.closest(".cfa-tok") : null;
     if (!tk || caseOf(tk) !== drag.caseId) return;
     var i = tokIndex(tk);
-    if (i === drag.anchor && !drag.moved) return; // no movement yet
+    if (i === drag.anchor && !drag.moved) return;
     drag.moved = true;
-    setRange(drag.caseId, drag.anchor, i); sel.done = true;
-    paintSelection(); updateCheck();
+    // Live preview of the in-progress span in this case without committing until pointerup.
+    var panel = panelOf(drag.caseId);
+    root.querySelectorAll(".cfa-tok.sel").forEach(function (x) { x.classList.remove("sel"); });
+    paint();
+    var lo = Math.min(drag.anchor, i), hi = Math.max(drag.anchor, i);
+    if (panel) panel.querySelectorAll(".cfa-tok").forEach(function (x) {
+      var ti = tokIndex(x);
+      if (ti >= lo && ti <= hi) x.classList.add("sel");
+    });
   });
-  function endDrag() { drag.on = false; }
-  root.addEventListener("pointerup", endDrag);
+  root.addEventListener("pointerup", function (ev) {
+    if (!drag.on || revealed) { drag.on = false; return; }
+    drag.on = false;
+    if (drag.moved) {
+      var over = document.elementFromPoint(ev.clientX, ev.clientY);
+      var tk = over && over.closest ? over.closest(".cfa-tok") : null;
+      var end = tk && caseOf(tk) === drag.caseId ? tokIndex(tk) : drag.anchor;
+      commitSpan(drag.caseId, drag.anchor, end);
+      anchor.caseId = null; anchor.i = null;
+      paint(); updateCheck();
+    }
+  });
   root.addEventListener("pointercancel", function () { drag.on = false; drag.moved = false; });
 
   checkBtn.addEventListener("click", function () { if (complete()) reveal(); });
@@ -251,19 +394,17 @@
     var aOK = judged.A === answers.A;
     var bOK = judged.B === answers.B;
 
-    var goldIdx = cfaFindGold(vignettes[decisiveCase], decisivePhrase);
-    var cap = cfaDefaultCap(goldIdx.length);
-    var effSel = [];
-    if (hasSelection() && sel.caseId === decisiveCase) {
-      var lo = Math.min(sel.start, sel.end), hi = Math.max(sel.start, sel.end);
-      for (var i = lo; i <= hi; i++) effSel.push(i);
-    }
-    var hl = cfaGradeHighlight(effSel, goldIdx, cap);
+    var vign = vignettes[decisiveCase];
+    var goldSpans = cfaFindGoldSpans(vign, goldPhrases);
+    // Only spans highlighted in the decisive (violating) vignette count toward the highlight grade.
+    var effSel = selectionIndices(decisiveCase);
+    var res = cfaGradeSpansTolerant(effSel, goldSpans, null);
+    var hl = res.grade;
     var correct = aOK && bOK && hl === "correct";
 
-    // Per-case verdicts + lock the judge buttons.
+    // Per-case verdicts + lock the judge buttons and tokens.
     order.forEach(function (caseId) {
-      var panel = root.querySelector('.cfa-case[data-case="' + caseId + '"]');
+      var panel = panelOf(caseId);
       var ok = judged[caseId] === answers[caseId];
       panel.classList.add(ok ? "correct" : "wrong");
       var v = document.createElement("div");
@@ -274,32 +415,55 @@
     root.querySelectorAll(".cfa-judge-btn").forEach(function (x) { x.disabled = true; });
     root.querySelectorAll(".cfa-tok").forEach(function (x) { x.classList.add("locked"); });
 
-    // Recolor the learner's pick, then always paint the true gold phrase in the decisive vignette.
-    root.querySelectorAll(".cfa-tok.sel").forEach(function (x) { x.classList.remove("sel"); x.classList.add("pick", "pick-" + hl); });
-    var goldPanel = root.querySelector('.cfa-case[data-case="' + decisiveCase + '"]');
+    // Recolor the learner's picks by grade tier in the decisive vignette; then paint the true gold.
+    var selSet = {};
+    for (var i = 0; i < effSel.length; i++) selSet[effSel[i]] = true;
+    var goldPanel = panelOf(decisiveCase);
     if (goldPanel) {
+      goldPanel.querySelectorAll(".cfa-tok.sel").forEach(function (x) { x.classList.remove("sel"); });
       goldPanel.querySelectorAll(".cfa-tok").forEach(function (x) {
-        if (goldIdx.indexOf(tokIndex(x)) !== -1) x.classList.add("gold");
+        if (selSet[tokIndex(x)]) x.classList.add("pick", "pick-" + hl);
+      });
+      var goldSet = {};
+      for (var s = 0; s < goldSpans.length; s++) for (var j = 0; j < goldSpans[s].length; j++) goldSet[goldSpans[s][j]] = true;
+      goldPanel.querySelectorAll(".cfa-tok").forEach(function (x) {
+        if (goldSet[tokIndex(x)]) x.classList.add("gold");
       });
     }
+    // Any spans the learner marked in the CONFORMING vignette were off-target: mark them wrong.
+    var otherCase = decisiveCase === "A" ? "B" : "A";
+    var otherPanel = panelOf(otherCase);
+    if (otherPanel) otherPanel.querySelectorAll(".cfa-tok.sel").forEach(function (x) { x.classList.remove("sel"); x.classList.add("pick", "pick-wrong"); });
 
     var messages = {
-      correct: "Correct — you found it.",
-      somewhat: "Close — right region, but you only needed these words.",
-      wrong: "Not the deciding phrase — here it is."
+      correct: "Correct — you found every decisive phrase.",
+      somewhat: "Right evidence — your boundaries were close, or you highlighted more than you needed.",
+      partial: "Partial credit — you matched some evidence (a close match counts), but missed at least one phrase.",
+      wrong: "Not the deciding phrase — here are the phrases that matter."
     };
+
+    // Per-span tier breakdown: ✓ full match, ~ near (materially-overlapping) match, ✗ missed.
+    var detail = "";
+    for (var g = 0; g < goldPhrases.length; g++) {
+      var tier = res.per_span[g];
+      var mk = tier === "full" ? "\u2713" : (tier === "near" ? "~" : "\u2717");
+      var cls = tier === "full" ? "found" : (tier === "near" ? "near" : "missed");
+      detail += '<li><span class="' + cls + '">' + mk +
+        '</span> <span class="cfa-span-quote">' + esc(goldPhrases[g]) + "</span> — " + esc(goldRationales[g]) + "</li>";
+    }
 
     var rv = root.querySelector("#cfa-reveal");
     rv.innerHTML =
       '<div class="cfa-grade ' + (correct ? "ok" : "no") + '">' + (correct ? "\u2713 Fully correct" : "\u2717 Not fully correct") + "</div>" +
       '<ul class="cfa-breakdown">' +
         "<li>Case judgments: A " + (aOK ? "\u2713" : "\u2717") + " \u00b7 B " + (bOK ? "\u2713" : "\u2717") + "</li>" +
-        "<li>Decisive phrase: " + hl.charAt(0).toUpperCase() + hl.slice(1) + " " + (hl === "correct" ? "\u2713" : "\u2717") + "</li>" +
+        "<li>Decisive phrases: " + res.found + " of " + res.total + " found" + (res.near ? " (+" + res.near + " near)" : "") + " \u00b7 " + hl.charAt(0).toUpperCase() + hl.slice(1) + "</li>" +
       "</ul>" +
-      '<div class="cfa-hl-msg cfa-hl-' + hl + '">' + esc(messages[hl]) +
-        ' <span class="cfa-gold-phrase">' + esc(decisivePhrase) + "</span></div>" +
+      '<div class="cfa-hl-msg cfa-hl-' + hl + '">' + esc(messages[hl]) + "</div>" +
+      '<ul class="cfa-span-detail">' + detail + "</ul>" +
       '<div class="cfa-standard"><span class="cfa-badge">Governing Standard</span>' + esc(srcText("standard")) + "</div>" +
-      '<div class="cfa-rationale">' + esc(srcText("rationale")) + "</div>";
+      '<div class="cfa-rationale">' + esc(srcText("rationale")) + "</div>" +
+      '<div class="cfa-ai" id="cfa-ai" hidden></div>';
     rv.hidden = false;
 
     checkBtn.disabled = true;
@@ -307,11 +471,118 @@
     hint.style.display = "none";
 
     root.dataset.correct = correct ? "1" : "0";
+
+    // INC5: persist the completed-attempt grade + the full structured learning payload NOW (not only
+    // on "Record & continue"), tagged with pairId so the back only honors THIS card's attempt. This
+    // is what lets the reflexive built-in "Show answer" reveal the governing Standard + rationale
+    // instead of the "Attempt not completed" dead-end. See proof/friday/ethics/HANDOFF.md (→ W5).
+    pendingGrade = {
+      pairId: pairId,
+      itemId: pairId,
+      cluster: cluster,
+      completed: true,
+      correct: correct,
+      standard: srcText("standard"),
+      rationale: srcText("rationale"),
+      source: "fallback",
+      verdicts: {
+        A: { judged: judged.A, answer: answers.A, ok: aOK },
+        B: { judged: judged.B, answer: answers.B, ok: bOK }
+      },
+      decisiveCase: decisiveCase,
+      highlight: hl,
+      found: res.found,
+      near: res.near,
+      total: res.total,
+      selectionIndices: effSel,
+      spans: []
+    };
+    for (var pi = 0; pi < goldPhrases.length; pi++) {
+      pendingGrade.spans.push({
+        phrase: goldPhrases[pi],
+        rationale: goldRationales[pi],
+        tier: res.per_span[pi],
+        matched: res.per_span[pi] !== "none",
+        lo: goldSpans[pi] && goldSpans[pi].length ? goldSpans[pi][0] : null,
+        hi: goldSpans[pi] && goldSpans[pi].length ? goldSpans[pi][goldSpans[pi].length - 1] : null
+      });
+    }
+    try { localStorage.setItem("cfaEthics:pending", JSON.stringify(pendingGrade)); } catch (e) {}
+
     root.querySelector("#cfa-record").hidden = false;
+
+    // INC2: on desktop, ask Python for a SEMANTIC grade (tolerant of paraphrase / different
+    // boundaries) and append an AI-feedback block naming the governing Standard. Additive — the
+    // deterministic grade above already stands, so AI-off / AnkiDroid lose nothing. The bridge falls
+    // back to the deterministic grade when the OpenAI key is absent, so the block only shows when AI
+    // actually ran. Uses the SAME payload shape the one-passage card sends (passage = the violating
+    // vignette), so the desktop bridge needs no change (see HANDOFF.md → bridge owner).
+    requestAiGrade(effSel);
+  }
+
+  function learnerSpanTexts() {
+    var toks = cfaTokenize(vignettes[decisiveCase]);
+    var out = [], arr = spansByCase[decisiveCase];
+    for (var s = 0; s < arr.length; s++) {
+      var parts = [];
+      for (var i = arr[s].lo; i <= arr[s].hi; i++) if (toks[i] != null) parts.push(toks[i]);
+      if (parts.length) out.push(parts.join(" "));
+    }
+    return out;
+  }
+
+  function requestAiGrade(effSel) {
+    if (typeof pycmd === "undefined") return;
+    var goldSpansPayload = [];
+    for (var i = 0; i < goldPhrases.length; i++) {
+      goldSpansPayload.push({ phrase: goldPhrases[i], rationale: goldRationales[i] });
+    }
+    var payload = {
+      itemId: pairId,
+      standard: srcText("standard"),
+      passage: vignettes[decisiveCase],
+      answerVerdict: "violate",
+      judgedVerdict: judged[decisiveCase] === "violate" ? "violate" : (judged[decisiveCase] || ""),
+      goldSpans: goldSpansPayload,
+      learnerSpans: learnerSpanTexts(),
+      selectionIndices: effSel
+    };
+    try {
+      pycmd("cfaGradeEthics:" + JSON.stringify(payload), function (resp) { renderAiGrade(resp); });
+    } catch (e) { /* AI-off / no bridge: deterministic reveal stands */ }
+  }
+
+  function renderAiGrade(resp) {
+    var box = root.querySelector("#cfa-ai");
+    if (!box || !resp || resp.source !== "ai") return; // only show when AI actually graded
+    // Upgrade the persisted payload's provenance so W5 records the AI source + named Standard.
+    if (pendingGrade) {
+      pendingGrade.source = "ai";
+      if (resp.standard) pendingGrade.standard = resp.standard;
+      try { localStorage.setItem("cfaEthics:pending", JSON.stringify(pendingGrade)); } catch (e) {}
+    }
+    var spansHtml = "";
+    var ps = resp.per_span || [];
+    for (var i = 0; i < ps.length; i++) {
+      var m = ps[i].matched;
+      spansHtml += '<li><span class="' + (m ? "found" : "missed") + '">' + (m ? "\u2713" : "\u2717") +
+        '</span> <span class="cfa-span-quote">' + esc(ps[i].phrase) + "</span>" +
+        (ps[i].note ? " — " + esc(ps[i].note) : "") + "</li>";
+    }
+    var g = (resp.grade || "").toString();
+    var standard = resp.standard || srcText("standard");
+    box.innerHTML =
+      '<div class="cfa-ai-head"><span class="cfa-badge cfa-ai-badge">AI feedback</span>' +
+        "Graded by AI" + (standard ? " \u00b7 " + esc(standard) : "") + "</div>" +
+      '<div class="cfa-ai-grade">Semantic grade: <b>' + esc(g.charAt(0).toUpperCase() + g.slice(1)) + "</b></div>" +
+      '<div class="cfa-ai-explain">' + esc(resp.explanation || "") + "</div>" +
+      (spansHtml ? '<ul class="cfa-span-detail cfa-ai-spans">' + spansHtml + "</ul>" : "");
+    box.hidden = false;
   }
 
   root.querySelector("#cfa-record-btn").addEventListener("click", function () {
-    var grade = { pairId: pairId, cluster: cluster, correct: root.dataset.correct === "1" };
+    var grade = pendingGrade ||
+      { pairId: pairId, itemId: pairId, cluster: cluster, correct: root.dataset.correct === "1", completed: true };
     try { localStorage.setItem("cfaEthics:pending", JSON.stringify(grade)); } catch (e) {}
     if (typeof pycmd !== "undefined") {
       pycmd("ans"); // show the answer side, which auto-rates via the relay

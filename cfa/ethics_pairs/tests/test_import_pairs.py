@@ -46,10 +46,11 @@ def test_jsonl_to_notes_roundtrip():
             assert stats["created"] == 30
             assert stats["updated"] == 0
 
-            # note type has exactly the 12 contract fields, in order
+            # note type has exactly the contract fields (incl. the multi-span GoldSpans), in order
             model = col.models.by_name(nt.NOTETYPE_NAME)
             assert model is not None
             assert [f["name"] for f in model["flds"]] == nt.FIELDS
+            assert "GoldSpans" in nt.FIELDS
 
             # deck exists (sibling of main deck) and every card lives in it
             did = col.decks.id_for_name(nt.DECK_NAME)
@@ -93,6 +94,18 @@ def test_jsonl_to_notes_roundtrip():
                 )
                 assert note["Standard"] == html.escape(p["standard"], quote=False)
                 assert note["ClusterTag"] == f"cluster::{p['cluster']}"
+
+                # GoldSpans carries the multi-span answer key as JSON (mirrors one-passage). It parses
+                # back to the authored spans and every phrase is verbatim in the violating vignette.
+                import json as _json
+
+                spans = _json.loads(note["GoldSpans"])
+                assert spans and all("phrase" in s and "rationale" in s for s in spans)
+                assert [s["phrase"] for s in spans] == [
+                    g["phrase"] for g in import_pairs.gold_spans_for(p)
+                ]
+                for s in spans:
+                    assert s["phrase"] in _vign
 
                 # tags: the los:: ethics tag and the cluster:: tag are present
                 assert p["los_tags"][0] in note.tags
