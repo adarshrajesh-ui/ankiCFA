@@ -61,7 +61,7 @@ the one-passage duplication. Keep Python<->JS grader parity byte-for-byte.
 - **Handoffs:** e2e test update (`ts/tests/e2e/ethics_pairs_flow.test.ts`) → HANDOFF.md.
 
 ### INC2 — AI semantic grade + provenance wired into the pairs card
-- **Commit:** `<INC2_SHA>`
+- **Commit:** `cad869342`
 - **Gap (before):** `ai_grading.grade_semantic`/`grade_fallback` results carried no `standard`/
   `item_id`, so the card could not render "Graded by AI · II(A) …" from the grader's provenance.
   Evidence: `item2-before-noai.png` (deterministic reveal, no AI block).
@@ -87,3 +87,27 @@ the one-passage duplication. Keep Python<->JS grader parity byte-for-byte.
   regression; that test is out of scope.
 - **Handoffs:** optional 2-line bridge change to forward `itemId`/`standard` into `grade_semantic`
   → HANDOFF.md (card already degrades gracefully without it).
+
+### INC3 — minimal-pairs is the seeded + bundled ethics deck on BOTH platforms
+- **Commit:** `<INC3_SHA>`
+- **Gap (before):** desktop seeded `CFA::Ethics Pairs` (via `seed_collection.py` → `import_pairs`,
+  already correct) but the mobile builder bundled the one-passage `CFA::Ethics Passages` deck — a
+  cross-platform split. Evidence: `item3-before-apkg-summary.txt`
+  ("30 ethics passages (CFA::Ethics Passages)").
+- **Fix (after):** `build_mobile_package.py` now bundles `CFA::Ethics Pairs` (via `import_pairs`),
+  mirroring the desktop seeder — one identical ethics flagship on both platforms. Regenerated the
+  mobile bootstrap apkg. Evidence: `item3-after-apkg-summary.txt`
+  ("30 ethics minimal-pairs (CFA::Ethics Pairs)"), `cfa-mobile-pairs.apkg` (the rebuilt asset,
+  399,651 bytes), `item3-mobile-card.png` (a bundled MISREP pair rendered + graded 3-of-3 at a
+  412px mobile viewport). Re-import verified: decks are `CFA Level II` + `CFA::Ethics Pairs`, NO
+  `CFA::Ethics Passages`; ethics notes carry the multi-span `GoldSpans` JSON key.
+- **Files:** `tools/cfa/build_mobile_package.py` (bundle pairs; summary keys `ethics_notes` +
+  `ethics_notetype`), `tools/cfa/tests/test_build_mobile_package.py` (assert Pairs deck + notetype +
+  the multi-span GoldSpans flagship; assert Passages deck absent).
+- **Tests added/updated:** `test_package_bundles_both_decks` (Pairs deck + notetype),
+  `test_reimport_roundtrip_contains_both_decks` (Pairs present, Passages absent),
+  `test_bundled_ethics_is_the_multispan_flagship` (GoldSpans key present) — all fail on the old
+  passages-bundling builder.
+- **Verification:** `just cfa-f7-test` 4 passed · `just cfa-seed-test` 3 passed (desktop pairs
+  seeding unaffected) · apkg re-import verified · `just build` green · ruff clean.
+- **Desktop seeding:** already `CFA::Ethics Pairs` (confirmed, no change needed).

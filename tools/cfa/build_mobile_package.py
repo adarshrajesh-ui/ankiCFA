@@ -6,9 +6,16 @@
 Bundles the two CFA study decks the phone should ship with into ONE importable
 Anki package (``.apkg``):
 
-* ``CFA Level II``         — the authored deck (cfa/deck/*.jsonl)
-* ``CFA::Ethics Passages`` — the F1 one-passage multi-span ethics deck (with its
-                             tap/drag highlight card template + shared grader JS)
+* ``CFA Level II``      — the authored deck (cfa/deck/*.jsonl)
+* ``CFA::Ethics Pairs`` — the two-vignette minimal-pairs ethics FLAGSHIP (with its
+                          multi-span tap/drag highlight card template + shared
+                          partial-credit grader JS)
+
+This bundles the SAME single ethics flagship the desktop first-launch seeder
+seeds (``tools/cfa/seed_collection.py`` → ``import_pairs``), so desktop and mobile
+ship the one, identical ethics deck. (Previously the phone bundled the one-passage
+``CFA::Ethics Passages`` deck while desktop seeded pairs — that duplication is
+retired here; see proof/friday/ethics INC3/INC4.)
 
 The whole collection is exported (``did = None``) so both decks, their
 note-types, and the ethics card's HTML/CSS/JS templates travel together. The
@@ -47,12 +54,16 @@ def _ensure_import_paths() -> None:
 def build_package(col_path: str, apkg_path: str) -> dict:
     """Seed a collection with both CFA decks and export it to ``apkg_path``.
 
+    Bundles the authored ``CFA Level II`` deck plus the ``CFA::Ethics Pairs``
+    minimal-pairs flagship (via ``import_pairs``), exactly mirroring the desktop
+    first-launch seeder so both platforms ship the one identical ethics deck.
+
     Returns a summary dict. ``col_path`` must not already exist (a fresh build).
     """
     _ensure_import_paths()
 
     import build_cfa_deck  # tools/cfa
-    import passages as ethics_passages  # cfa/ethics_pairs
+    import import_pairs as ethics_pairs  # cfa/ethics_pairs
 
     from anki.collection import Collection
     from anki.exporting import AnkiPackageExporter
@@ -60,8 +71,8 @@ def build_package(col_path: str, apkg_path: str) -> dict:
     col = Collection(col_path)
     try:
         deck_stats = build_cfa_deck.add_deck_notes(col)
-        passages = ethics_passages.load_passages()
-        ethics_stats = ethics_passages.import_passages(col, passages)
+        pairs = ethics_pairs.load_pairs()
+        ethics_stats = ethics_pairs.import_pairs(col, pairs)
 
         # Export the WHOLE collection (did=None) so both decks + their
         # note-types + the ethics card templates travel together.
@@ -74,8 +85,9 @@ def build_package(col_path: str, apkg_path: str) -> dict:
             "apkg": apkg_path,
             "cfa_notes": deck_stats["notes_added"],
             "topics": len(deck_stats["topic_weights"]),
-            "ethics_passages": ethics_stats["total"],
+            "ethics_notes": ethics_stats["total"],
             "ethics_deck": ethics_stats["deck"],
+            "ethics_notetype": ethics_stats["notetype"],
         }
     finally:
         col.close()
@@ -110,7 +122,7 @@ def main(argv=None) -> int:
     print(
         f"Built {summary['apkg']} ({size} bytes): "
         f"{summary['cfa_notes']} CFA notes / {summary['topics']} topics + "
-        f"{summary['ethics_passages']} ethics passages ({summary['ethics_deck']})."
+        f"{summary['ethics_notes']} ethics minimal-pairs ({summary['ethics_deck']})."
     )
     return 0
 
