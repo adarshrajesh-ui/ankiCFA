@@ -88,9 +88,12 @@ def test_offline_same_card_dual_review_revlog_distinct_not_inflated(server):
     assert raw == 2, "both reviews must persist in revlog (no silent merge)"
     assert deduped == 1, "per-(card,day) dedup must NOT inflate give-up totals"
 
-    # Naive memory_score() still counts raw rows today — document the contract gap.
+    # Integrated contract (D4): memory_score() now dedups per-(card, day) via the
+    # shared engine, so the same card reviewed offline on two devices is NOT
+    # double-counted toward give-up totals. Raw revlog rows are still preserved
+    # (asserted above): no lost reviews, no inflated counts.
     score = cfa.memory_score(desktop)
-    assert score.graded_reviews == raw
+    assert score.graded_reviews == deduped
 
 
 def test_dedup_would_fail_if_naive_count_used_for_giveup(server):
@@ -110,25 +113,34 @@ def test_dedup_would_fail_if_naive_count_used_for_giveup(server):
 
 
 def test_different_days_both_count(server):
-    """Sanity: reviews on different collection days both count after dedup."""
+    """Sanity: reviews on different collection days both count after dedup.
+
+    Dedup is per-(card, collection-day): two reviews of one card on two
+    *different* days must count as 2, never collapse to 1 (same-day dedup is
+    covered by the tests above). This exercises the day-bucketing of
+    ``deduped_graded_review_count`` directly.
+
+    It deliberately does NOT re-sync a hand-edited revlog row: rewriting a
+    revlog primary key via raw SQL does not bump ``usn``, so whether that edit
+    survives a subsequent sync is nondeterministic (it can trigger a
+    full-download that discards the local edit). That made this check racy
+    without adding real sync coverage — same-card dual-device sync + dedup is
+    already proven above.
+    """
     desktop, d_auth, phone, p_auth, cid = _paired_one_card(server)
     _review(desktop, cid, 3)
-    cs.sync(desktop, d_auth)
-    cs.sync(phone, p_auth)
 
-    # Simulate "previous collection day" by backdating the only revlog row 2 days.
+    # Backdate that review 2 collection-days so the next one lands on a
+    # different day bucket.
     rid = cs.revlog_events(desktop, cid)[0].reviewed_at_ms
     day_back_ms = int((desktop.crt - 2 * 86400) * 1000)
     desktop.db.execute("update revlog set id = ? where id = ?", day_back_ms, rid)
-    cs.sync(desktop, d_auth)
-    cs.sync(phone, p_auth)
 
-    _review(phone, cid, 4)
-    cs.sync(phone, p_auth)
-    cs.sync(desktop, d_auth)
+    # A second review "today" on the same card.
+    _review(desktop, cid, 4)
 
-    assert cs.deduped_graded_review_count(desktop) == 2
     assert cs.raw_graded_review_count(desktop) == 2
+    assert cs.deduped_graded_review_count(desktop) == 2  # two distinct days
 
 
 # --------------------------------------------------------------------------
