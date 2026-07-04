@@ -113,6 +113,72 @@ def test_ai_off_wrong_verdict_never_correct():
     assert res["verdict_correct"] is False and res["correct"] is False
 
 
+# ------------------------------------------------------- INC2: provenance (standard + item_id)
+
+
+def test_fallback_carries_item_id_and_standard():
+    # AI-off fallback must still echo the provenance the card supplied, so the UI can name the
+    # governing Standard even without AI. (Before INC2 these keys did not exist in the result.)
+    res = A.grade_semantic(
+        PASSAGE,
+        "unethical",
+        "unethical",
+        GOLD,
+        [g["phrase"] for g in GOLD],
+        complete_fn=_off_client,
+        item_id="SMD-01",
+        standard="II(A) Material Nonpublic Information",
+    )
+    assert res["source"] == "fallback"
+    assert res["item_id"] == "SMD-01"
+    assert res["standard"] == "II(A) Material Nonpublic Information"
+
+
+def test_ai_path_carries_item_id_and_standard():
+    oracle = _oracle_client(
+        json.dumps({"highlight_grade": "correct", "explanation": "ok", "spans": []})
+    )
+    res = A.grade_semantic(
+        PASSAGE,
+        "unethical",
+        "unethical",
+        GOLD,
+        [g["phrase"] for g in GOLD],
+        complete_fn=oracle,
+        item_id="SMD-01",
+        standard="II(A) Material Nonpublic Information",
+    )
+    assert res["source"] == "ai"
+    assert res["item_id"] == "SMD-01"
+    assert res["standard"] == "II(A) Material Nonpublic Information"
+
+
+def test_provenance_defaults_are_empty_strings_not_missing():
+    # When the card supplies no provenance, the keys are present but empty (stable schema).
+    res = A.grade_semantic(
+        PASSAGE, "unethical", "unethical", GOLD, [], complete_fn=_off_client
+    )
+    assert res["item_id"] == "" and res["standard"] == ""
+
+
+def test_standard_never_leaks_into_prompt_but_flows_to_result():
+    # The provenance Standard is result-only metadata; it must NOT be injected into the LLM prompt.
+    oracle = _oracle_client(json.dumps({"highlight_grade": "correct", "spans": []}))
+    res = A.grade_semantic(
+        PASSAGE,
+        "unethical",
+        "unethical",
+        GOLD,
+        ["sells the company"],
+        complete_fn=oracle,
+        item_id="SMD-01",
+        standard="II(A) Material Nonpublic Information",
+    )
+    blob = oracle.last["system"] + "\n" + oracle.last["user"]
+    assert "II(A) Material Nonpublic Information" not in blob
+    assert res["standard"] == "II(A) Material Nonpublic Information"
+
+
 # ---------------------------------------------------------------- semantic path
 
 

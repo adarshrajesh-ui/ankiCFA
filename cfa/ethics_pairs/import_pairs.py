@@ -25,12 +25,16 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import ethics_notetype as nt  # noqa: E402
-from ethics_scoring import find_gold_indices  # noqa: E402
+from ethics_scoring import (  # noqa: E402
+    find_gold_indices,
+    find_gold_spans,
+    grade_spans,
+)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DEFAULT_PAIRS = os.path.join(HERE, "pairs.jsonl")
 
-# jsonl key -> note field (distractors handled separately).
+# jsonl key -> note field (distractors + gold_spans handled separately).
 _FIELD_MAP = {
     "pair_id": "PairId",
     "vignette_a": "VignetteA",
@@ -45,6 +49,27 @@ _FIELD_MAP = {
 }
 
 _REQUIRED = set(_FIELD_MAP) | {"cluster", "los_tags", "distractors"}
+
+
+def gold_spans_for(pair: dict) -> list[dict]:
+    """The multi-span answer key on the violating vignette as ``[{phrase, rationale}]``.
+
+    Uses the authored ``gold_spans`` when present; otherwise derives a single-span key from the
+    legacy ``decisive_phrase`` (with ``decisive_fact``/``rationale`` as the span rationale) so older
+    banks without ``gold_spans`` still grade. This is the multi-span flagship's answer key and is
+    JSON-encoded into the ``GoldSpans`` note field, exactly mirroring the one-passage card.
+    """
+    spans = pair.get("gold_spans")
+    if isinstance(spans, list) and spans:
+        return [
+            {"phrase": s["phrase"], "rationale": s.get("rationale", "")} for s in spans
+        ]
+    return [
+        {
+            "phrase": pair["decisive_phrase"],
+            "rationale": pair.get("decisive_fact") or pair.get("rationale", ""),
+        }
+    ]
 
 
 def load_pairs(path: str = DEFAULT_PAIRS) -> list[dict]:
@@ -76,6 +101,7 @@ def load_pairs(path: str = DEFAULT_PAIRS) -> list[dict]:
             if not p["los_tags"]:
                 raise ValueError(f"{path}:{lineno}: need at least one los:: tag")
             _validate_decisive_phrase(p, path, lineno)
+            _validate_gold_spans(p, path, lineno)
             pairs.append(p)
     return pairs
 
@@ -109,6 +135,70 @@ def _validate_decisive_phrase(p: dict, path: str, lineno: int) -> None:
         )
 
 
+def _validate_gold_spans(p: dict, path: str, lineno: int) -> None:
+    """Validate the optional multi-span ``gold_spans`` key on the violating vignette.
+
+    When present, every span phrase must be a NON-EMPTY verbatim, token-locatable substring of the
+    VIOLATING vignette; spans must NOT overlap each other; the union must grade ``"correct"`` under
+    the deterministic multi-span grader; and the union must COVER the legacy ``decisive_phrase`` (so
+    the legacy single-phrase contract still holds). Mirrors the one-passage bank's validation so the
+    authored answer key is internally consistent with the AI-off fallback the learner is graded by.
+    Absent ``gold_spans`` is allowed (the importer derives a single-span key from the legacy field).
+    """
+    spans = p.get("gold_spans")
+    if spans is None:
+        return
+    if not isinstance(spans, list) or not spans:
+        raise ValueError(f"{path}:{lineno}: gold_spans, if present, must be a non-empty list")
+    case = p["decisive_phrase_case"]
+    vignette = p["vignette_a"] if case == "A" else p["vignette_b"]
+    phrases = []
+    for j, span in enumerate(spans):
+        if not isinstance(span, dict) or "phrase" not in span or "rationale" not in span:
+            raise ValueError(
+                f"{path}:{lineno}: gold_spans[{j}] must have 'phrase' and 'rationale'"
+            )
+        phrase = span["phrase"]
+        if not isinstance(phrase, str) or not phrase.strip():
+            raise ValueError(f"{path}:{lineno}: gold_spans[{j}].phrase empty")
+        if phrase not in vignette:
+            raise ValueError(
+                f"{path}:{lineno}: gold_spans[{j}].phrase not a verbatim substring of "
+                f"vignette_{case.lower()}: {phrase!r}"
+            )
+        if not find_gold_indices(vignette, phrase):
+            raise ValueError(
+                f"{path}:{lineno}: gold_spans[{j}].phrase not token-locatable in "
+                f"vignette_{case.lower()}: {phrase!r}"
+            )
+        phrases.append(phrase)
+
+    runs = find_gold_spans(vignette, phrases)
+    used: set[int] = set()
+    for j, run in enumerate(runs):
+        s = set(run)
+        if used & s:
+            raise ValueError(
+                f"{path}:{lineno}: gold_spans[{j}] overlaps an earlier span: {phrases[j]!r}"
+            )
+        used |= s
+
+    perfect = [i for run in runs for i in run]
+    grade = grade_spans(perfect, runs)["grade"]
+    if grade != "correct":
+        raise ValueError(
+            f"{path}:{lineno}: union of gold_spans grades {grade!r}, expected 'correct'"
+        )
+
+    # The legacy decisive_phrase must be covered by the union of the gold spans, so the multi-span
+    # key is a strict superset of the single-phrase contract.
+    dp_idx = find_gold_indices(vignette, p["decisive_phrase"])
+    if not dp_idx or not set(dp_idx).issubset(used):
+        raise ValueError(
+            f"{path}:{lineno}: gold_spans union must cover the legacy decisive_phrase"
+        )
+
+
 def _tags_for(pair: dict) -> list[str]:
     return list(pair["los_tags"]) + [
         f"cluster::{pair['cluster']}",
@@ -120,6 +210,14 @@ def _set_fields(note, pair: dict) -> None:
     for jkey, field in _FIELD_MAP.items():
         note[field] = html.escape(str(pair[jkey]), quote=False)
     note["ClusterTag"] = f"cluster::{pair['cluster']}"
+    # GoldSpans holds the multi-span answer key as JSON; the template parses it with JSON.parse and
+    # never displays it before the attempt (it lives in the hidden .cfa-src block). Mirrors the
+    # one-passage GoldSpans field exactly. Only added when the note type carries the field, so an
+    # older note type (missing GoldSpans) still imports; ensure_notetype adds it on refresh.
+    if "GoldSpans" in note:
+        note["GoldSpans"] = html.escape(
+            json.dumps(gold_spans_for(pair), ensure_ascii=False), quote=False
+        )
     for i, d in enumerate(pair["distractors"], 1):
         note[f"DistractorFact{i}"] = html.escape(str(d), quote=False)
 

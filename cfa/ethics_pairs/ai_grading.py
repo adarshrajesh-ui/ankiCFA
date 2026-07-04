@@ -151,11 +151,18 @@ def grade_fallback(
     learner_spans: Sequence[str] = (),
     selection_indices: Optional[Sequence[int]] = None,
     error: str = "ai_off",
+    *,
+    item_id: str = "",
+    standard: str = "",
 ) -> dict:
     """The deterministic F1 grade, shaped like :func:`grade_semantic`'s result.
 
     This is the AI-OFF fallback. It is a pure re-projection of
     ``grade_passage_attempt`` — no LLM, no network — so it always succeeds.
+
+    ``item_id`` and ``standard`` are echoed straight back into the result (they are
+    provenance the card supplies) so the UI can render the named governing Standard
+    even on the fallback path (``"Graded by AI"`` only when ``source == "ai"``).
     """
     phrases = [g.get("phrase", "") for g in gold_spans]
     gold_runs = find_gold_spans(passage, phrases)
@@ -190,6 +197,8 @@ def grade_fallback(
         "per_span": per_span,
         "error": error,
         "model": None,
+        "item_id": item_id,
+        "standard": standard,
     }
 
 
@@ -204,13 +213,20 @@ def grade_semantic(
     max_tokens: int = 400,
     timeout: float = 30.0,
     complete_fn=None,
+    item_id: str = "",
+    standard: str = "",
 ) -> dict:
-    """Grade a one-passage ethics attempt with semantic tolerance, or fall back.
+    """Grade a one-passage / minimal-pair ethics attempt with semantic tolerance, or fall back.
 
     ``learner_spans`` are the TEXT of the phrases the learner highlighted;
     ``gold_spans`` are the authored ``{phrase, rationale}`` dicts. On any
     problem (AI off, network error, cost cap, unparseable reply) this returns
     the deterministic F1 grade with ``source == "fallback"``. Never raises.
+
+    ``item_id`` and ``standard`` are PROVENANCE the card supplies and are echoed
+    into the result on BOTH paths, so the UI can render the named governing
+    Standard (e.g. "Graded by AI · II(A) Material Nonpublic Information"). The key
+    is NEVER placed in the prompt or any returned value.
 
     ``complete_fn`` is an injection point for tests; production passes ``None``
     and the shared :mod:`cfa.ai.llm_client` is used.
@@ -231,6 +247,8 @@ def grade_semantic(
                 learner_spans,
                 selection_indices,
                 error="llm_client_unavailable",
+                item_id=item_id,
+                standard=standard,
             )
 
     system = _SYSTEM_PROMPT
@@ -254,6 +272,8 @@ def grade_semantic(
             learner_spans,
             selection_indices,
             error=(result or {}).get("error", "ai_unavailable"),
+            item_id=item_id,
+            standard=standard,
         )
 
     parsed = _extract_json(result.get("text", ""))
@@ -266,6 +286,8 @@ def grade_semantic(
             learner_spans,
             selection_indices,
             error="unparseable_response",
+            item_id=item_id,
+            standard=standard,
         )
 
     grade = _clean_grade(parsed.get("highlight_grade"), "wrong")
@@ -303,6 +325,8 @@ def grade_semantic(
         "per_span": per_span,
         "error": None,
         "model": result.get("model"),
+        "item_id": item_id,
+        "standard": standard,
     }
 
 

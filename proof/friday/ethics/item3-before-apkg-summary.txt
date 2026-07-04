@@ -1,0 +1,1 @@
+Built /tmp/cfa-mobile-before.apkg (387651 bytes): 630 CFA notes / 8 topics + 30 ethics passages (CFA::Ethics Passages).

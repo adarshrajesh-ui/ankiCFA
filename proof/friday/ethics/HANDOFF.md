@@ -1,0 +1,185 @@
+# friday/ethics — cross-scope HANDOFF
+
+From: **W-ethics** (branch `friday/ethics`). These changes live OUTSIDE the ethics workstream's
+edit scope, so they are written here for the owning workstream to apply. Nothing here is required
+for the ethics card to work AI-off/deterministically on desktop or mobile — the flagship is
+self-contained. These are polish/retirement items.
+
+---
+
+## → W1 (desktop shell / menu — `qt/aqt/cfa.py`) — RETIRE the one-passage menu action
+
+INCREMENT 4. There must be ONE ethics feature. The minimal-pairs deck (`CFA::Ethics Pairs`) is now
+the single seeded + bundled ethics deck. Remove the "Study Ethics (One-Passage)" action so the
+one-passage flagship is no longer exposed.
+
+**Exact change in `qt/aqt/cfa.py`:** delete these two lines from `build_cfa_menu` (currently lines
+62–63):
+
+```python
+    passages = menu.addAction("Study Ethics (One-Passage)")
+    qconnect(passages.triggered, lambda: study_ethics_passages(mw))
+```
+
+Then the now-unused `study_ethics_passages(mw)` function (currently starting ~line 215) can be
+deleted, or kept but marked deprecated (it is only referenced by the deleted menu line). If it is
+kept, add a leading comment: `# DEPRECATED (friday/ethics INC4): one-passage retired; minimal-pairs
+is the single ethics flagship. Not wired into the menu.` The `ETHICS_PASSAGES_DECK_NAME` constant
+can stay (harmless) or be removed with the function.
+
+`qt/tests/test_cfa_menu.py` asserts the menu's actions — after removing the action, update that test
+so it no longer expects "Study Ethics (One-Passage)" (it should still expect "Study Ethics
+Minimal-Pairs"). That test file is out of the ethics scope too, so it is W1's to update.
+
+The "Study Ethics Minimal-Pairs" action (`study_ethics_pairs`, filters to `CFA::Ethics Pairs`) is
+the single ethics entry point and needs no change.
+
+**Also (same retirement, out of ethics scope):** once the menu action is gone, the on-demand
+one-passage seeder becomes dead code. In `qt/aqt/cfa_seed.py`, `ensure_ethics_passages_deck(col)`
+(preloads `CFA::Ethics Passages`) is only called by the removed `study_ethics_passages` action and is
+explicitly NOT part of the first-launch seeder, so removing the action fully retires it. Delete
+`ensure_ethics_passages_deck` (and its import of `passages`) or leave it with a leading
+`# DEPRECATED (friday/ethics INC4): one-passage retired.` comment. Any test in
+`qt/tests/test_cfa_f0b.py` that exercises `study_ethics_passages` / `ensure_ethics_passages_deck`
+should be removed/updated by W1 as part of the same change.
+
+The one-passage CONTENT + pipeline in the ethics scope (`cfa/ethics_pairs/passages.py`,
+`passages.jsonl`, `templates/passage_front.html` / `passage_back.html`, `tests/test_passages.py`,
+`tests/js/passage_logic.js`) is intentionally KEPT (harmless; the shared multi-span grader now lives
+in the SPAN block that both cards use, and `test_passages.py` still guards it). It is simply no longer
+seeded, bundled (INC3), or exposed (this handoff) — so there is ONE ethics feature.
+
+---
+
+## → W1 or bridge owner (`qt/aqt/cfa_ethics_ai.py`) — OPTIONAL provenance passthrough
+
+INCREMENT 2. The pairs card sends the SAME `cfaGradeEthics:` payload shape the one-passage card
+sends, so **no change is required** — the bridge already grades it and returns
+`{source, grade, verdict_correct, correct, explanation, per_span, error, model}`.
+
+`ai_grading.grade_semantic` / `grade_fallback` now take (and echo) `item_id` + `standard` keyword
+args so the result carries provenance the card can render as "Graded by AI · II(A) …". The card
+ALWAYS renders the named Standard from its own `{{Standard}}` field as a fallback (see
+`renderAiGrade`: `resp.standard || srcText("standard")`), so **no bridge edit is required for the
+Standard to appear**. The block only shows when `resp.source === "ai"`.
+
+**Optional (to have `ai_grading`'s result carry the provenance too):** in
+`qt/aqt/cfa_ethics_ai.py::handle_grade_request`, forward the two payload keys into `grade_semantic`:
+
+```python
+    item_id = str(payload.get("itemId", ""))
+    standard = str(payload.get("standard", ""))
+    ...
+    return grade_semantic(
+        passage, answer_verdict, judged_verdict, gold_spans,
+        [str(p) for p in learner_spans],
+        selection_indices=[int(i) for i in selection] if selection else None,
+        item_id=item_id, standard=standard,   # <-- add these two
+    )
+```
+
+(and pass `item_id=item_id, standard=standard` to the defensive `grade_fallback(...)` in the except
+branch). The pairs `front.html` already includes `itemId` + `standard` in the `cfaGradeEthics:`
+payload. This is a 2-line enhancement, not required for correctness.
+
+If the bridge owner wants to *enforce* the AI master/grading toggles server-side (col.conf keys
+`cfa_ai_enabled` + `cfa_ai_grading_enabled`): gate `handle_grade_request` so it returns the
+deterministic fallback (`grade_fallback(...)` with `error="ai_disabled"`) when either toggle is
+absent/false, before calling `grade_semantic`. The card already degrades gracefully (it only shows
+the AI block when `resp.source === "ai"`), so this is defense-in-depth, not required for correctness.
+
+---
+
+## → W5 (persistence / `card.custom_data` via the bridge) — attempt-detail payload shape
+
+INCREMENT 5. The pairs card emits a structured attempt-detail payload on every completed attempt,
+both to `localStorage["cfaEthics:pending"]` and (unchanged) via `pycmd("ans")` / `pycmd("ease3|1")`.
+W5 should read this payload (e.g. in a `webview_did_receive_js_message` handler or by reading the
+localStorage relay the back template already consumes) and persist it into `card.custom_data` (which
+syncs). Do NOT block review on it; it is additive telemetry.
+
+**Exact payload shape** (JSON object, `localStorage["cfaEthics:pending"]`, set the moment the front
+reveals the grade — see the pairs `front.html` `reveal()`):
+
+```jsonc
+{
+  "pairId": "SMD-01",          // note PairId (stable id of the item)
+  "itemId": "SMD-01",          // alias of pairId, for parity with the one-passage payload
+  "cluster": "cluster::suitability-mnpi-diligence",
+  "completed": true,           // gate: back only honors a completed attempt for this card
+  "correct": true,             // overall deterministic grade (both verdicts right AND highlight "correct")
+  "standard": "II(A) Material Nonpublic Information",  // named governing Standard
+  "rationale": "Standard II(A) prohibits acting on material nonpublic information …",  // overall rationale
+  "source": "fallback",        // "ai" once the AI feedback returns, else "fallback" (deterministic)
+  "verdicts": {                // per-case conform/violate verdict + correctness
+    "A": {"judged": "violate", "answer": "violate", "ok": true},
+    "B": {"judged": "conform", "answer": "conform", "ok": true}
+  },
+  "decisiveCase": "A",         // which vignette holds the decisive (violating) spans
+  "highlight": "correct",      // multi-span grade tier: correct|somewhat|partial|wrong
+  "found": 2,                  // # gold spans FULLY covered
+  "near": 0,                   // # gold spans NEAR-matched (materially overlapping)
+  "total": 2,                  // # gold spans authored on the violating vignette
+  "selectionIndices": [24,25,26,27,28,42,43,44,45,46,47,48,49,50], // union of token indices highlighted in the decisive vignette
+  "spans": [                   // per-span detail (token index range within the decisive vignette)
+    {
+      "phrase": "exact unreleased quarterly earnings figure",
+      "rationale": "…why this is the MNPI…",
+      "tier": "full",          // full|near|none
+      "matched": true,         // tier !== "none"
+      "lo": 24, "hi": 28       // inclusive token-index range of the GOLD span (decisive vignette)
+    },
+    { "phrase": "sells the company out of her clients' portfolios", "rationale": "…", "tier": "full", "matched": true, "lo": 42, "hi": 50 }
+  ]
+}
+```
+
+Notes for W5:
+- Token indices are into the **decisive vignette** tokenized by the shared `cfaTokenize` (whitespace
+  split). They are stable for a given item's authored text.
+- The `source` field is `"fallback"` at reveal time and is upgraded to `"ai"` in-place if/when the
+  desktop AI bridge returns an `ai` grade (the card re-persists the payload with `source:"ai"` and
+  the AI per-span notes). If you snapshot at `pycmd("ans")` time you'll usually get `"fallback"`
+  (the AI call is async); snapshotting from the localStorage value the back reads is fine either way.
+- Suggested `custom_data` key namespace: `{"cfaEthics": { …the object above… }}`. Keep it small;
+  `custom_data` is size-limited and syncs.
+
+---
+
+## → e2e owner (`ts/tests/e2e/ethics_pairs_flow.test.ts`) — update to the multi-span flow
+
+INCREMENT 1. The minimal-pair card is now a MULTI-SPAN highlight (the learner highlights EVERY
+decisive span in the violating vignette, graded with partial-credit tiers), not a single contiguous
+phrase. The existing Playwright e2e test highlights only the single `decisive_phrase` and asserts
+"Fully correct"; under multi-span that is now a *partial* grade (1 of N spans), so the test needs a
+small update. `just build` (this workstream's per-increment gate) does NOT run e2e — the e2e suite
+runs via `just test-e2e` — so this does not block the flagship, but the test should be brought in
+line. `ts/tests/e2e/` is outside the ethics edit scope, hence this handoff.
+
+Exact changes in `ts/tests/e2e/ethics_pairs_flow.test.ts`:
+- The card now reads a `GoldSpans` field (JSON `[{phrase, rationale}]`); add it to the `fields` map
+  in `renderFront` (parse from `pair.gold_spans`, JSON-stringify into `{{GoldSpans}}`), OR leave it
+  empty to exercise the legacy single-phrase fallback. To test the real flagship, pass the real
+  `gold_spans`.
+- Instead of highlighting only `decisive_phrase`, highlight EVERY gold span: for each
+  `pair.gold_spans[k].phrase`, compute its `findGoldIndices` run in the violating vignette and
+  tap first+last word (the same tap-first/tap-last commits one span each).
+- The painted-selection class is still `.cfa-tok.sel` (unchanged), so the `toHaveCount` assertion
+  should sum the token counts of ALL highlighted spans.
+- After Check, the reveal still contains `pair.standard` and "Fully correct" once every span is
+  highlighted with the correct verdicts; it also now contains "Decisive phrases: N of N found".
+  `pair.decisive_phrase` is still shown (it is covered by the gold spans), so that assertion holds.
+
+A minimal, correct replacement test body is available from the pairs `front.html` reveal contract;
+the token-locator helpers already in the file (`findGoldIndices`) are sufficient — just loop over
+`pair.gold_spans`.
+
+## Status of handoffs
+- [ ] W1: remove "Study Ethics (One-Passage)" menu action in `qt/aqt/cfa.py`; retire the dead
+      `ensure_ethics_passages_deck` in `qt/aqt/cfa_seed.py`; update `qt/tests/test_cfa_menu.py` +
+      `qt/tests/test_cfa_f0b.py`.
+- [ ] W1/bridge: (optional) forward `itemId`/`standard` into `grade_semantic` and/or enforce AI
+      toggles (`cfa_ai_enabled` + `cfa_ai_grading_enabled`) in `handle_grade_request`.
+- [ ] W5: persist the attempt-detail payload (shape above; emitted by the pairs `front.html`, live-
+      verified in `proof/friday/ethics/item5-emitted-payload.json`) into `card.custom_data`.
+- [ ] e2e owner: update `ts/tests/e2e/ethics_pairs_flow.test.ts` to the multi-span highlight flow.

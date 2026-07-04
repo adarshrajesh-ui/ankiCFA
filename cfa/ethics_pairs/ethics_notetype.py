@@ -23,11 +23,14 @@ DECK_NAME = "CFA::Ethics Pairs"
 # Field order is significant: PairId is the sort field. These names are the contract the card
 # templates ({{PairId}}, {{VignetteA}}, ...) and the importer rely on.
 #
-# The review flow is an in-vignette HIGHLIGHT interaction: the learner highlights the decisive
-# phrase directly in the paragraph. ``DecisivePhrase`` is the EXACT verbatim substring of the
-# relevant vignette that flips the answer, and ``DecisivePhraseCase`` ("A"/"B") says which vignette
-# holds it. The legacy ``DecisiveFact``/``DistractorFact*`` fields are kept (additive-only) so
-# existing notes and the importer round-trip test stay valid.
+# The review flow is an in-vignette MULTI-SPAN HIGHLIGHT interaction: the learner highlights EVERY
+# decisive span directly in the VIOLATING vignette. ``GoldSpans`` holds the authored answer key as a
+# JSON array ``[{"phrase":..,"rationale":..}, ..]`` of the decisive spans in that vignette (mirrors
+# the one-passage ``GoldSpans`` contract), and ``DecisivePhraseCase`` ("A"/"B") says which vignette
+# holds them. The legacy ``DecisivePhrase`` (a single verbatim phrase, always one of / covered by the
+# gold spans), ``DecisiveFact`` and ``DistractorFact*`` fields are kept (additive-only) so existing
+# notes and the importer round-trip test stay valid; when ``GoldSpans`` is empty the importer derives
+# a single-span key from ``DecisivePhrase`` so older banks still grade.
 FIELDS = [
     "PairId",
     "ClusterTag",
@@ -38,6 +41,7 @@ FIELDS = [
     "DecisiveFact",
     "DecisivePhrase",
     "DecisivePhraseCase",
+    "GoldSpans",
     "DistractorFact1",
     "DistractorFact2",
     "DistractorFact3",

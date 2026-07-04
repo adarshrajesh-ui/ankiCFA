@@ -29,16 +29,24 @@ from ethics_scoring import (  # noqa: E402
     PairAttempt,
     default_cap,
     find_gold_indices,
+    find_gold_spans,
     grade_attempt,
     grade_highlight,
+    grade_spans,
+    grade_spans_tolerant,
     normalized_tokens,
     tokenize,
 )
 
 FRONT = os.path.join(PKG, "templates", "front.html")
 PAIRS = os.path.join(PKG, "pairs.jsonl")
+# The minimal-pair flagship now uses the SAME multi-span grader as the one-passage card, so its
+# shared JS block is the CFA-SPAN block mirrored in tests/js/passage_logic.js (grade_highlight /
+# highlight_logic.js remain as a tested pure utility, but the card no longer embeds them).
 JS_LOGIC = os.path.join(HERE, "js", "highlight_logic.js")
 JS_RUNNER = os.path.join(HERE, "js", "run_matrix.js")
+JS_SPAN_LOGIC = os.path.join(HERE, "js", "passage_logic.js")
+JS_SPAN_RUNNER = os.path.join(HERE, "js", "run_span_matrix.js")
 NODE = shutil.which("node")
 
 
@@ -197,6 +205,55 @@ def test_all_30_pairs_have_verbatim_locatable_contiguous_gold():
         assert case == violate_case, f"{pid}: phrase case is not the violating vignette"
 
 
+def test_all_30_pairs_have_multi_span_gold_key_on_violating_vignette():
+    # INC1 flagship: every pair carries a multi-span gold_spans answer key on the VIOLATING vignette;
+    # spans are verbatim + token-locatable + non-overlapping, the union grades fully "correct" under
+    # the deterministic multi-span grader, and the union COVERS the legacy decisive_phrase.
+    pairs = _load_raw_pairs()
+    multi = 0
+    for p in pairs:
+        pid = p["pair_id"]
+        case = p["decisive_phrase_case"]
+        vign = p["vignette_a"] if case == "A" else p["vignette_b"]
+        spans = p["gold_spans"]
+        assert isinstance(spans, list) and spans, f"{pid}: missing gold_spans"
+        phrases = [g["phrase"] for g in spans]
+        for g in spans:
+            assert g["phrase"] in vign, f"{pid}: gold span not verbatim: {g['phrase']!r}"
+            assert set(g) >= {"phrase", "rationale"}, f"{pid}: gold span missing keys"
+        runs = find_gold_spans(vign, phrases)
+        assert all(runs), f"{pid}: a gold span is not token-locatable"
+        used: set[int] = set()
+        for run in runs:
+            s = set(run)
+            assert not (used & s), f"{pid}: gold spans overlap"
+            used |= s
+        perfect = [i for run in runs for i in run]
+        assert grade_spans(perfect, runs)["grade"] == "correct", pid
+        # multi-span grader must give the authored key full credit under tolerance too
+        assert grade_spans_tolerant(perfect, runs)["grade"] == "correct", pid
+        dp = set(find_gold_indices(vign, p["decisive_phrase"]))
+        assert dp and dp.issubset(used), f"{pid}: legacy decisive_phrase not covered by gold_spans"
+        if len(spans) >= 2:
+            multi += 1
+    # the flagship's whole point: real multi-span coverage on (nearly) every pair
+    assert multi >= 28, f"expected >=28 multi-span pairs, got {multi}"
+
+
+def test_partial_highlight_of_multi_span_pair_is_partial_not_wrong():
+    # Highlighting only ONE of a pair's several decisive spans must grade "partial" (credit for what
+    # was found), not a flat "wrong" — the Item-1 partial-credit behaviour on the pairs flagship.
+    pairs = {p["pair_id"]: p for p in _load_raw_pairs()}
+    p = pairs["SMD-01"]
+    vign = p["vignette_a"] if p["decisive_phrase_case"] == "A" else p["vignette_b"]
+    phrases = [g["phrase"] for g in p["gold_spans"]]
+    runs = find_gold_spans(vign, phrases)
+    assert len(runs) >= 2
+    only_first = list(runs[0])
+    res = grade_spans_tolerant(only_first, runs)
+    assert res["grade"] == "partial" and res["found"] == 1 and res["total"] == len(runs)
+
+
 # --------------------------------------------------- importer bank validation (pure)
 
 
@@ -206,13 +263,17 @@ def _base_rec():
         "cluster": "c",
         "cluster_label": "C",
         "los_tags": ["los::ethics::x"],
-        "vignette_a": "He bought his own account first thing today.",
+        "vignette_a": "He bought his own account first thing today before the clients.",
         "answer_a": "violate",
         "vignette_b": "He filled the client first then bought.",
         "answer_b": "conform",
         "decisive_fact": "d",
         "decisive_phrase": "his own account first",
         "decisive_phrase_case": "A",
+        "gold_spans": [
+            {"phrase": "bought his own account first", "rationale": "trades ahead"},
+            {"phrase": "before the clients", "rationale": "subordinates clients"},
+        ],
         "distractors": ["1", "2", "3"],
         "rationale": "r",
         "standard": "I(C)",
@@ -245,10 +306,72 @@ def test_load_pairs_rejects_phrase_in_non_violating_case(tmp_path):
         import_pairs.load_pairs(_write_rec(str(tmp_path), rec))
 
 
-# ---------------------------------------------------- shared-logic drift + JS parity
+# --------------------------------------------- INC1: multi-span gold_spans validation (pure)
 
-_MARKER_START = "CFA-HIGHLIGHT-SHARED-START"
-_MARKER_END = "CFA-HIGHLIGHT-SHARED-END"
+
+def test_load_pairs_accepts_multi_span_gold(tmp_path):
+    pairs = import_pairs.load_pairs(_write_rec(str(tmp_path), _base_rec()))
+    assert len(pairs[0]["gold_spans"]) == 2
+
+
+def test_gold_spans_for_uses_authored_spans():
+    spans = import_pairs.gold_spans_for(_base_rec())
+    assert [s["phrase"] for s in spans] == [
+        "bought his own account first",
+        "before the clients",
+    ]
+
+
+def test_gold_spans_for_derives_single_span_when_absent():
+    rec = _base_rec()
+    del rec["gold_spans"]
+    spans = import_pairs.gold_spans_for(rec)
+    assert len(spans) == 1 and spans[0]["phrase"] == rec["decisive_phrase"]
+
+
+def test_load_pairs_without_gold_spans_still_valid(tmp_path):
+    # Older banks without gold_spans must still validate + import (derivation from decisive_phrase).
+    rec = _base_rec()
+    del rec["gold_spans"]
+    pairs = import_pairs.load_pairs(_write_rec(str(tmp_path), rec))
+    assert pairs[0]["decisive_phrase"] == "his own account first"
+
+
+def test_load_pairs_rejects_non_substring_gold_span(tmp_path):
+    rec = _base_rec()
+    rec["gold_spans"][1]["phrase"] = "a phrase absent from the vignette entirely"
+    with pytest.raises(ValueError):
+        import_pairs.load_pairs(_write_rec(str(tmp_path), rec))
+
+
+def test_load_pairs_rejects_overlapping_gold_spans(tmp_path):
+    rec = _base_rec()
+    rec["gold_spans"] = [
+        {"phrase": "bought his own account", "rationale": "a"},
+        {"phrase": "his own account first", "rationale": "b"},  # overlaps the first
+    ]
+    with pytest.raises(ValueError):
+        import_pairs.load_pairs(_write_rec(str(tmp_path), rec))
+
+
+def test_load_pairs_rejects_gold_spans_not_covering_decisive_phrase(tmp_path):
+    # gold_spans that don't cover the legacy decisive_phrase break the superset contract.
+    rec = _base_rec()
+    rec["gold_spans"] = [{"phrase": "before the clients", "rationale": "only the act"}]
+    with pytest.raises(ValueError):
+        import_pairs.load_pairs(_write_rec(str(tmp_path), rec))
+
+
+# ---------------------------------------------------- shared-logic drift + JS parity
+#
+# The minimal-pair flagship now embeds the SAME multi-span grader as the one-passage card, so its
+# shared JS block is the CFA-SPAN block (mirrored in tests/js/passage_logic.js + ethics_scoring.py).
+# We also keep a drift check on the legacy single-phrase CFA-HIGHLIGHT logic (highlight_logic.js <->
+# ethics_scoring.grade_highlight), which remains a tested pure utility even though the card no longer
+# embeds it.
+
+_MARKER_START = "CFA-SPAN-SHARED-START"
+_MARKER_END = "CFA-SPAN-SHARED-END"
 
 
 def _extract_shared(path):
@@ -266,11 +389,83 @@ def _extract_shared(path):
     return "\n".join(ln for ln in body if ln)
 
 
-def test_shared_logic_block_matches_between_template_and_js():
-    template_block = _extract_shared(FRONT)
-    js_block = _extract_shared(JS_LOGIC)
-    assert template_block, "empty shared block extracted from front.html"
+def _extract_between(path, start_m, end_m):
+    lines = open(path, encoding="utf-8").read().splitlines()
+    start = end = None
+    for i, ln in enumerate(lines):
+        if start_m in ln and start is None:
+            start = i
+        elif end_m in ln and start is not None:
+            end = i
+            break
+    assert start is not None and end is not None, f"markers not found in {path}"
+    body = [ln.strip() for ln in lines[start + 1 : end]]
+    return "\n".join(ln for ln in body if ln)
+
+
+def test_pairs_front_span_block_matches_passage_logic_js():
+    # The pairs flagship front.html multi-span grader must be byte-identical (ignoring indentation) to
+    # tests/js/passage_logic.js, so grades are the same on desktop Anki + AnkiDroid.
+    template_block = _extract_shared(FRONT)  # CFA-SPAN markers
+    js_block = _extract_shared(JS_SPAN_LOGIC)
+    assert template_block, "empty CFA-SPAN block extracted from front.html"
     assert template_block == js_block
+
+
+def test_legacy_highlight_block_js_matches_python_utility():
+    # The single-phrase CFA-HIGHLIGHT logic (a still-tested pure utility) must stay mirrored between
+    # highlight_logic.js and ethics_scoring — even though the card no longer embeds it.
+    js_block = _extract_between(
+        JS_LOGIC, "CFA-HIGHLIGHT-SHARED-START", "CFA-HIGHLIGHT-SHARED-END"
+    )
+    assert "cfaGradeHighlight" in js_block  # the shared block is intact and exported
+
+
+@pytest.mark.skipif(NODE is None, reason="node not installed")
+def test_python_js_multispan_grader_agree_for_pairs():
+    # Prove the pairs flagship's multi-span grader agrees Python<->JS, driving the SAME passage_logic.js
+    # the shared block mirrors, over every pair's authored gold spans + perfect/partial selections.
+    span_cases = []
+    grade_cases = []
+    for p in _load_raw_pairs():
+        case = p["decisive_phrase_case"]
+        vign = p["vignette_a"] if case == "A" else p["vignette_b"]
+        phrases = [g["phrase"] for g in p["gold_spans"]]
+        span_cases.append({"passage": vign, "phrases": phrases})
+        runs = find_gold_spans(vign, phrases)
+        perfect = [i for run in runs for i in run]
+        selections = [
+            perfect,                       # every span -> correct
+            list(runs[0]) if runs else [],  # only the first span -> partial (if >1)
+            [],                            # nothing -> wrong
+            list(range(0, (max(perfect) if perfect else 0) + 16)),  # over-wide superset
+        ]
+        for sel in selections:
+            for cap in (None, len(perfect)):
+                grade_cases.append({"selection": sel, "gold_spans": runs, "cap": cap})
+
+    payload = {"spans": span_cases, "grade": grade_cases}
+    with tempfile.TemporaryDirectory() as d:
+        inp = os.path.join(d, "in.json")
+        with open(inp, "w", encoding="utf-8") as f:
+            json.dump(payload, f)
+        proc = subprocess.run(
+            [NODE, JS_SPAN_RUNNER, inp],
+            capture_output=True,
+            text=True,
+            cwd=os.path.dirname(JS_SPAN_RUNNER),
+            check=False,
+        )
+    assert proc.returncode == 0, proc.stderr
+    js = json.loads(proc.stdout)
+    py_spans = [find_gold_spans(c["passage"], c["phrases"]) for c in span_cases]
+    py_grade = [grade_spans(c["selection"], c["gold_spans"], c["cap"]) for c in grade_cases]
+    py_grade_tol = [
+        grade_spans_tolerant(c["selection"], c["gold_spans"], c["cap"]) for c in grade_cases
+    ]
+    assert js["spans"] == py_spans
+    assert js["grade"] == py_grade
+    assert js["grade_tolerant"] == py_grade_tol
 
 
 @pytest.mark.skipif(NODE is None, reason="node not installed")
