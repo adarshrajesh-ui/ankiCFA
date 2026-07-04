@@ -404,41 +404,64 @@ def _ai_enabled() -> bool:
 
 
 def _fill_back_action(editor: Any) -> None:
-    """Editor button/shortcut handler: fill the EMPTY side (front<->back).
+    """Button / shortcut / Tab-key handler: fill the EMPTY side (front<->back).
 
-    Front filled -> drafts the back; back filled -> drafts the front. Runs after
-    the note is saved; only ever fills an empty field (never overwrites)."""
+    Saves the editor first (so just-typed text is seen — essential for the Tab
+    key, which fires before the field blur-saves), then fills. Only ever fills an
+    empty field. SILENT when AI is off or there is nothing to fill, so it can be
+    wired to Tab without nagging on every keypress; a tooltip appears only on a
+    real draft or a real failure."""
     from aqt.utils import tooltip
 
-    note = getattr(editor, "note", None)
-    if note is None:
-        return
+    # AI off -> do nothing quietly (Tab must still just navigate).
     if not _ai_enabled():
-        tooltip(
-            "AI is off — set OPENAI_API_KEY to enable AI Fill.", parent=editor.widget
-        )
         return
 
-    result = fill_note(note)
-    status = result["status"]
-    if status == "filled":
-        # Reflect the new field + provenance tag in the web view.
-        editor.loadNote()
-        side = "back" if result.get("target") == "back" else "front"
-        tooltip(
-            f"Drafted the {side} with AI · tagged ai-generated", parent=editor.widget
-        )
-    elif status == "nothing_to_fill":
-        tooltip(
-            "Type one side and leave the other empty, then AI Fill generates it.",
-            parent=editor.widget,
-        )
-    elif status == "single_field":
-        tooltip(
-            "This note type has no separate front/back to fill.", parent=editor.widget
-        )
-    else:  # ai_unavailable / no_note
-        tooltip("AI Fill is unavailable right now — try again.", parent=editor.widget)
+    def _do() -> None:
+        note = getattr(editor, "note", None)
+        if note is None:
+            return
+        result = fill_note(note)
+        status = result["status"]
+        if status == "filled":
+            editor.loadNote()  # reflect the new field + provenance tag
+            side = "back" if result.get("target") == "back" else "front"
+            tooltip(
+                f"Drafted the {side} with AI · tagged ai-generated",
+                parent=editor.widget,
+            )
+        elif status == "ai_unavailable":
+            tooltip("AI Fill is unavailable right now — try again.", parent=editor.widget)
+        # nothing_to_fill / single_field / no_note -> silent (Tab just navigated)
+
+    # Persist the current field text first so front/back are fresh, then fill.
+    saver = getattr(editor, "call_after_note_saved", None)
+    if callable(saver):
+        saver(_do, keepFocus=True)
+    else:  # pragma: no cover - very old editor without the save helper
+        _do()
+
+
+# --- Tab-key trigger (editor JS) --------------------------------------------
+
+# Injected into the editor webview: on a plain Tab, ALSO ask Python to fill the
+# empty side. We do NOT preventDefault, so Tab still navigates fields normally;
+# the Python handler no-ops unless exactly one of front/back is filled, so this
+# is safe to fire on every Tab.
+_TAB_JS = (
+    "(function(){if(window.__cfaTabFillKey)return;window.__cfaTabFillKey=true;"
+    "document.addEventListener('keydown',function(e){"
+    "if(e.key==='Tab'&&!e.shiftKey&&!e.ctrlKey&&!e.altKey&&!e.metaKey){"
+    "try{pycmd('" + FILL_CMD + "');}catch(_){}}}, true);})();"
+)
+
+
+def _on_editor_init(editor: Any) -> None:
+    """gui_hooks.editor_did_init: install the Tab-key trigger in the webview."""
+    try:
+        editor.web.eval(_TAB_JS)
+    except Exception:  # pragma: no cover - defensive; never break editor init
+        pass
 
 
 def _button_html(enabled: bool) -> str:
@@ -505,6 +528,7 @@ def register() -> None:
     from aqt import gui_hooks
 
     gui_hooks.editor_did_init_buttons.append(_on_init_buttons)
+    gui_hooks.editor_did_init.append(_on_editor_init)
     _REGISTERED = True
 
 

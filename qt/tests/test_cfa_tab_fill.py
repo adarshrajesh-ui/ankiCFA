@@ -360,3 +360,62 @@ def test_draft_field_both_directions():
     assert draft_field("Q", "back", complete_fn=_ok_complete("A"))["ok"] is True
     r = draft_field("A", "front", complete_fn=_ok_complete("Q?"))
     assert r["ok"] is True and r["target"] == "front"
+
+
+# --- Tab-key trigger --------------------------------------------------------
+
+
+def test_tab_js_fires_fill_without_preventing_default():
+    import aqt.cfa_tab_fill as tf
+
+    js = tf._TAB_JS
+    assert "'Tab'" in js
+    assert tf.FILL_CMD in js
+    assert "pycmd" in js
+    assert "preventDefault" not in js  # Tab must still navigate fields normally
+
+
+def test_on_editor_init_injects_tab_js():
+    import aqt.cfa_tab_fill as tf
+
+    class FakeWeb:
+        def __init__(self):
+            self.evald: list = []
+
+        def eval(self, js):
+            self.evald.append(js)
+
+    class FakeEditor:
+        def __init__(self):
+            self.web = FakeWeb()
+
+    ed = FakeEditor()
+    tf._on_editor_init(ed)
+    assert any(tf.FILL_CMD in j for j in ed.web.evald)
+
+
+def test_fill_action_silent_and_no_save_when_ai_off(monkeypatch):
+    import aqt.cfa_tab_fill as tf
+
+    monkeypatch.setattr(tf, "_ai_enabled", lambda: False)
+    saved: list = []
+
+    class FakeEditor:
+        note = FakeNote(["Front", "Back"], ["Q", ""])
+        widget = None
+
+        def call_after_note_saved(self, cb, keepFocus=False):
+            saved.append(True)
+            cb()
+
+    tf._fill_back_action(FakeEditor())
+    assert saved == []  # AI off -> returns before saving; no fill attempted
+
+
+def test_register_wires_editor_did_init():
+    import aqt.cfa_tab_fill as tf
+    from aqt import gui_hooks
+
+    tf._REGISTERED = False
+    tf.register()
+    assert tf._on_editor_init in gui_hooks.editor_did_init._hooks
