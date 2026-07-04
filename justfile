@@ -134,11 +134,6 @@ cfa-parity-test:
 cfa-ai-toggle-test:
     {{ py }} -m pytest cfa/ai/tests/test_toggle.py -q
 
-# Phase-0 spine: long-running fixed-credential LAN sync server for a REAL desktop<->phone round-trip (Ctrl-C to stop). See docs/cfa/SYNC-SETUP.md
-cfa-syncserver:
-    {{ ninja }} pylib
-    {{ py }} tools/cfa/syncserver.py
-
 # Feature F4: Bayesian readiness — SM-2 recall fallback + 95% credible band + explicit pass/fail call (no give-up wall)
 cfa-f4-test:
     {{ ninja }} pylib
