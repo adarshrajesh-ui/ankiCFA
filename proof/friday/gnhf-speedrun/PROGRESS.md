@@ -7,7 +7,7 @@ Legend: TODO / WIP / DONE (evidence path) / BLOCKED (root cause).
 ## Phase A — features
 | Item | Status | Evidence |
 |------|--------|----------|
-| A1 AI-beats-baseline | TODO | |
+| A1 AI-beats-baseline | DONE | `cfa/eval/baseline_compare.py` + 6 tests (`just cfa-eval-test`) + `just cfa-baseline-compare`; evidence `L1/baseline-compare.txt`. 3-way: deterministic-span 0.733, TF-IDF 0.933, LLM SKIPPED (AI OFF, honest). Gate `llm>max(baselines)` proven by oracle test (passes) + losing-AI test (fails) |
 | A2 wrong-answer-rate gate | TODO | |
 | A3 memory calibration (Brier/logloss/chart) | TODO | |
 | A4 performance-model accuracy | TODO | |

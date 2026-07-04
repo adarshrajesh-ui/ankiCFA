@@ -166,6 +166,11 @@ cfa-eval-leakage:
 cfa-eval-test:
     {{ py }} -m pytest cfa/eval/tests -q
 
+# A1: AI grader vs simpler baselines (deterministic-span, TF-IDF, LLM). AI-off
+# reports both baselines honestly; with a key the LLM must beat both or it fails.
+cfa-baseline-compare *args:
+    {{ py }} cfa/eval/baseline_compare.py {{ args }}
+
 # Feature 8: content-type-aware weighting — equal-weakness cards of different item types get different exam-queue multipliers
 cfa-types-test:
     {{ ninja }} pylib

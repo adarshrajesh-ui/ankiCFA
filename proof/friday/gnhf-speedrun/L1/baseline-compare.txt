@@ -1,0 +1,13 @@
+======================================================================
+A1 — AI grader vs simpler baselines (ethics-highlight, 30 items)
+======================================================================
+attempts                 : 30
+tf-idf match threshold   : 0.30 cosine
+
+grade agreement with the human 4-way label (higher is better):
+  deterministic-span     : 0.733   (exact-phrase, AI-off)
+  TF-IDF keyword         : 0.933   (simpler baseline)
+  LLM (semantic)         :  ---    (AI OFF — no OPENAI_API_KEY)
+
+AI OFF: no OPENAI_API_KEY, so the 'AI beats the baseline' assertion is SKIPPED. The two baselines above are the honest AI-off numbers; the deterministic-span grader is what actually ships when AI is off.
+======================================================================
