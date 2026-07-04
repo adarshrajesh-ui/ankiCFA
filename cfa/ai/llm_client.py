@@ -155,8 +155,8 @@ def ai_enabled() -> bool:
 # The key-presence check above is necessary but not sufficient: a user with a
 # key configured must still be able to turn AI OFF in the app, per-feature, and
 # have that choice sync to the phone. That switch lives in the collection
-# config (three keys, all default OFF so the app is deterministic out of the
-# box), and the effective gate for any AI feature is:
+# config (three keys, all default ON — AI-first; without a key the app is still
+# deterministic), and the effective gate for any AI feature is:
 #
 #     ai_feature_enabled(feature) == key_present AND master AND feature
 #
@@ -184,14 +184,15 @@ def key_present() -> bool:
 def _read_conf(feature_key: str, col: object, conf: Optional[dict]) -> dict:
     """Resolve the master + per-feature toggle values from ``conf`` or ``col``.
 
-    Missing keys default to False, so AI is OFF unless explicitly enabled."""
+    Missing keys default to True (AI-first): AI is ON unless explicitly turned
+    off. Without an API key the feature still degrades deterministically."""
     if conf is not None:
         return conf
     if col is not None:
         get = col.get_config  # type: ignore[attr-defined]
         return {
-            CONF_AI_MASTER: get(CONF_AI_MASTER, False),
-            feature_key: get(feature_key, False),
+            CONF_AI_MASTER: get(CONF_AI_MASTER, True),
+            feature_key: get(feature_key, True),
         }
     return {}
 
@@ -216,9 +217,9 @@ def ai_feature_enabled(
         return False
     feature_key = AI_FEATURE_KEYS[feature]
     resolved = _read_conf(feature_key, col, conf)
-    if not bool(resolved.get(CONF_AI_MASTER, False)):
+    if not bool(resolved.get(CONF_AI_MASTER, True)):
         return False
-    return bool(resolved.get(feature_key, False))
+    return bool(resolved.get(feature_key, True))
 
 
 def ai_toggle_state(*, col: object = None, conf: Optional[dict] = None) -> dict:
@@ -230,15 +231,15 @@ def ai_toggle_state(*, col: object = None, conf: Optional[dict] = None) -> dict:
     if conf is None and col is not None:
         get = col.get_config  # type: ignore[attr-defined]
         conf = {
-            CONF_AI_MASTER: get(CONF_AI_MASTER, False),
-            CONF_AI_GRADING: get(CONF_AI_GRADING, False),
-            CONF_AI_TABFILL: get(CONF_AI_TABFILL, False),
+            CONF_AI_MASTER: get(CONF_AI_MASTER, True),
+            CONF_AI_GRADING: get(CONF_AI_GRADING, True),
+            CONF_AI_TABFILL: get(CONF_AI_TABFILL, True),
         }
     conf = conf or {}
     kp = key_present()
-    master = bool(conf.get(CONF_AI_MASTER, False))
-    grading = bool(conf.get(CONF_AI_GRADING, False))
-    tabfill = bool(conf.get(CONF_AI_TABFILL, False))
+    master = bool(conf.get(CONF_AI_MASTER, True))
+    grading = bool(conf.get(CONF_AI_GRADING, True))
+    tabfill = bool(conf.get(CONF_AI_TABFILL, True))
     return {
         "key_present": kp,
         "master": master,

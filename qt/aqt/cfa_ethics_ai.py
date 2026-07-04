@@ -32,19 +32,43 @@ _MSG_PREFIX = "cfaGradeEthics:"
 
 # ai_grading lives under cfa/ethics_pairs (a PEP-420 namespace dir, imported by
 # path here so aqt does not depend on the repo layout being importable).
-_ETHICS_DIR = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
-    "cfa",
-    "ethics_pairs",
-)
+_REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+_ETHICS_DIR = os.path.join(_REPO_ROOT, "cfa", "ethics_pairs")
 
 
 def _ensure_path() -> None:
-    if _ETHICS_DIR not in sys.path and os.path.isdir(_ETHICS_DIR):
-        sys.path.insert(0, _ETHICS_DIR)
+    # The repo root MUST be on sys.path so ``ai_grading``'s
+    # ``from cfa.ai.llm_client import complete`` resolves — without it the LLM is
+    # unreachable and every grade silently degrades to the deterministic
+    # fallback (the "always fallback" bug). ``cfa/ethics_pairs`` is also added so
+    # ``import ai_grading`` works as a top-level module.
+    for path in (_REPO_ROOT, _ETHICS_DIR):
+        if path and os.path.isdir(path) and path not in sys.path:
+            sys.path.insert(0, path)
 
 
-def handle_grade_request(payload: dict[str, Any]) -> dict[str, Any]:
+def _grading_ai_enabled() -> bool:
+    """Whether the ethics AI grading toggle is ON (default ON).
+
+    Reads the shared col.conf toggle via the collection; defaults ON so ethics
+    grading uses AI out of the box, and returns True when the collection is
+    unavailable (grade_semantic still falls back safely if the key/call fails)."""
+    try:
+        import aqt
+
+        from aqt.cfa_ai_settings import ai_active
+
+        col = getattr(getattr(aqt, "mw", None), "col", None)
+        if col is None:
+            return True
+        return bool(ai_active(col, "grading"))
+    except Exception:  # pragma: no cover - defensive; never block grading
+        return True
+
+
+def handle_grade_request(
+    payload: dict[str, Any], *, force_fallback: bool = False
+) -> dict[str, Any]:
     """Grade one attempt payload from the card JS. Never raises.
 
     Expected payload keys (all optional-tolerant):
@@ -52,6 +76,10 @@ def handle_grade_request(payload: dict[str, Any]) -> dict[str, Any]:
         goldSpans: [{phrase, rationale}], learnerSpans: [str],
         selectionIndices: [int]
     Returns the ``ai_grading.grade_semantic`` result dict (JSON-serializable).
+
+    When ``force_fallback`` is True (the AI grading toggle is OFF), the
+    deterministic F1 grade is returned directly with ``error == "ai_off"`` — no
+    LLM call — so turning AI off is instant and offline.
     """
     _ensure_path()
     try:
@@ -80,6 +108,26 @@ def handle_grade_request(payload: dict[str, Any]) -> dict[str, Any]:
     selection = payload.get("selectionIndices")
     if not isinstance(selection, list):
         selection = None
+    spans = [str(p) for p in learner_spans]
+    sel = [int(i) for i in selection] if selection else None
+    item_id = str(payload.get("itemId", ""))
+    standard = str(payload.get("standard", ""))
+
+    if force_fallback:
+        # AI toggled OFF: deterministic grade, no network. error="ai_off" tells
+        # the card this is an intentional off-state (not a failure), so it does
+        # not show an "AI unavailable" warning.
+        return grade_fallback(
+            passage,
+            answer_verdict,
+            judged_verdict,
+            gold_spans,
+            spans,
+            sel,
+            error="ai_off",
+            item_id=item_id,
+            standard=standard,
+        )
 
     try:
         return grade_semantic(
@@ -87,8 +135,10 @@ def handle_grade_request(payload: dict[str, Any]) -> dict[str, Any]:
             answer_verdict,
             judged_verdict,
             gold_spans,
-            [str(p) for p in learner_spans],
-            selection_indices=[int(i) for i in selection] if selection else None,
+            spans,
+            selection_indices=sel,
+            item_id=item_id,
+            standard=standard,
         )
     except (
         Exception
@@ -98,8 +148,11 @@ def handle_grade_request(payload: dict[str, Any]) -> dict[str, Any]:
             answer_verdict,
             judged_verdict,
             gold_spans,
-            [str(p) for p in learner_spans],
+            spans,
+            sel,
             error=f"bridge_error:{type(exc).__name__}",
+            item_id=item_id,
+            standard=standard,
         )
 
 
@@ -124,7 +177,7 @@ def _on_js_message(
             payload = {}
     except ValueError:
         payload = {}
-    result = handle_grade_request(payload)
+    result = handle_grade_request(payload, force_fallback=not _grading_ai_enabled())
     return (True, json.dumps(result))
 
 

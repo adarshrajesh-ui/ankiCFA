@@ -1,9 +1,12 @@
 # ankiCFA — proof artifacts
 
-CFA Level II study app, forked from Anki (AGPL-3.0-or-later). No AI features.
+CFA Level II study app, forked from Anki (AGPL-3.0-or-later). Optional AI layer
+(key-gated; scores are always AI-free).
 
-- **Work branch:** `chore/wed-proof` (see `git log` for the commit hash).
-- **Upstream baseline it builds from:** `b431cb1265f81abe8e18eff9c8839f3a25aae665` (branch main).
+**Friday acceptance bundle:** [`friday/ACCEPTANCE.md`](./friday/ACCEPTANCE.md) (D1–D7,
+fully evidenced) · [`friday/REPORT.md`](./friday/REPORT.md).
+
+**Earlier gates:** [GATE.md](./GATE.md) (build smoke) · [`gnhf/`](./gnhf/) · [`gnhf2/`](./gnhf2/).
 
 ## Build & run gate — PASS
 

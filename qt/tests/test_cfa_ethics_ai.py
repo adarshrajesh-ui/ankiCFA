@@ -16,6 +16,8 @@ import pytest
 pytest.importorskip("aqt")
 
 from aqt.cfa_ethics_ai import (  # noqa: E402
+    _ensure_path,
+    _grading_ai_enabled,
     _on_js_message,
     handle_grade_request,
     register,
@@ -52,12 +54,29 @@ def _payload(**over):
 
 
 def test_handle_grade_request_fallback_correct():
-    res = handle_grade_request(_payload())
-    # AI off in CI -> deterministic fallback, exact selection grades correct
+    # force_fallback -> deterministic path, no network, regardless of any key.
+    res = handle_grade_request(_payload(), force_fallback=True)
     assert res["source"] == "fallback"
+    assert res["error"] == "ai_off"
     assert res["grade"] == "correct" and res["correct"] is True
     # must be JSON-serializable (it is sent to JS as a string)
     json.dumps(res)
+
+
+def test_ensure_path_makes_llm_client_importable():
+    # Regression: the "always deterministic fallback" bug was ai_grading's
+    # `from cfa.ai.llm_client import complete` failing because the repo root was
+    # not on sys.path. _ensure_path() must fix that.
+    import importlib
+
+    _ensure_path()
+    mod = importlib.import_module("cfa.ai.llm_client")
+    assert hasattr(mod, "complete")
+
+
+def test_grading_ai_enabled_defaults_on():
+    # With no live collection, ethics AI grading defaults ON (AI-first).
+    assert _grading_ai_enabled() is True
 
 
 def test_handle_grade_request_wrong_verdict():

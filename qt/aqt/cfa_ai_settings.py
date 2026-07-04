@@ -12,8 +12,9 @@ Reads/writes the shared AI-toggle contract in ``col.conf``:
 AI runs for a feature only when the master switch AND that feature toggle are on
 AND an OpenAI API key is configured; otherwise the feature uses its deterministic
 fallback. This module owns the UI + persistence only — the AI modules read these
-keys through their own gate (never touched here). Defaults are OFF, so AI is off
-by default even when a key is present.
+keys through their own gate (never touched here). Defaults are ON (AI-first): with
+a key, ethics grading + tab-fill use the model out of the box; without a key,
+every feature still degrades deterministically.
 """
 
 from __future__ import annotations
@@ -35,11 +36,15 @@ CFA_AI_TABFILL = "cfa_ai_tabfill_enabled"
 
 
 def get_ai_toggles(col) -> dict[str, bool]:
-    """Read the three AI toggles (all default OFF)."""
+    """Read the three AI toggles (all default ON — AI-first).
+
+    AI is default-ON so ethics grading + tab-fill use the model out of the box;
+    without an API key every feature still degrades to its deterministic
+    fallback, and any switch can be turned off here."""
     return {
-        "master": bool(col.get_config(CFA_AI_MASTER, False)),
-        "grading": bool(col.get_config(CFA_AI_GRADING, False)),
-        "tabfill": bool(col.get_config(CFA_AI_TABFILL, False)),
+        "master": bool(col.get_config(CFA_AI_MASTER, True)),
+        "grading": bool(col.get_config(CFA_AI_GRADING, True)),
+        "tabfill": bool(col.get_config(CFA_AI_TABFILL, True)),
     }
 
 
@@ -83,7 +88,7 @@ class CfaAiSettingsDialog(QDialog):
             "AI runs for a feature only when the master switch AND that feature "
             "are on AND an OpenAI API key is configured. Otherwise every feature "
             "uses its deterministic fallback — identical, offline behaviour. "
-            "Defaults are off."
+            "AI is on by default."
         )
         note.setWordWrap(True)
 

@@ -52,13 +52,15 @@ def _mw(col: Collection) -> _MW:
     return w
 
 
-def test_defaults_all_off() -> None:
+def test_defaults_all_on() -> None:
+    # AI-first: with no keys set, all toggles read ON (a key is still required
+    # for a real call; without one the features fall back deterministically).
     col = _empty_col()
     try:
         assert ai.get_ai_toggles(col) == {
-            "master": False,
-            "grading": False,
-            "tabfill": False,
+            "master": True,
+            "grading": True,
+            "tabfill": True,
         }
     finally:
         col.close()

@@ -29,8 +29,21 @@ job. Same one-keystroke "fill the back" intent, no lost navigation.
 
 from __future__ import annotations
 
+import os
 import re
+import sys
 from typing import Any, Callable, Optional
+
+# The repo root (qt/aqt/cfa_tab_fill.py -> 3 up) MUST be on sys.path so
+# ``from cfa.ai.llm_client import ...`` resolves in the running app; otherwise
+# AI Back silently reports "AI is off" even with a working key.
+_REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+
+def _ensure_repo_root() -> None:
+    if os.path.isdir(_REPO_ROOT) and _REPO_ROOT not in sys.path:
+        sys.path.insert(0, _REPO_ROOT)
+
 
 # --- provenance + configuration ---------------------------------------------
 
@@ -154,6 +167,7 @@ def draft_back(
         return {"ok": False, "text": "", "error": "empty_front", "model": None}
 
     if complete_fn is None:
+        _ensure_repo_root()
         from cfa.ai.llm_client import complete as complete_fn  # type: ignore
 
     system, user = build_messages(front_text, notetype_name)
@@ -280,6 +294,7 @@ def fill_note_back(
 
 
 def _ai_enabled() -> bool:
+    _ensure_repo_root()
     try:
         from cfa.ai.llm_client import ai_enabled
 

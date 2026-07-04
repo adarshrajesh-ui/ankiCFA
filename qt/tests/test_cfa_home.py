@@ -57,9 +57,10 @@ def test_home_payload_shape() -> None:
 def test_home_ai_flag_reflects_config() -> None:
     col = _empty_col()
     try:
-        assert mediasrv._cfa_home_payload(col)["aiEnabled"] is False
-        col.set_config("cfa_ai_enabled", True)
+        # AI-first: defaults ON when unset.
         assert mediasrv._cfa_home_payload(col)["aiEnabled"] is True
+        col.set_config("cfa_ai_enabled", False)
+        assert mediasrv._cfa_home_payload(col)["aiEnabled"] is False
     finally:
         col.close()
 

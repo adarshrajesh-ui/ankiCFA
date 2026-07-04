@@ -921,10 +921,10 @@ def _cfa_home_payload(col: Collection) -> dict[str, Any]:
     cfg = cfa.get_exam_config(col) or {}
     payload["examDate"] = cfg.get("exam_date")
     payload["daysToExam"] = cfa.days_to_exam(col)
-    # AI is ON only if the master toggle is present AND true (contract default:
-    # OFF). The Home surface only reports the master state; per-feature toggles
-    # live in AI settings.
-    payload["aiEnabled"] = bool(col.get_config("cfa_ai_enabled", False))
+    # Master AI state for the Home chip (contract default: ON / AI-first). The
+    # Home surface only reports the master state; per-feature toggles live in AI
+    # settings. Without an API key, features still degrade deterministically.
+    payload["aiEnabled"] = bool(col.get_config("cfa_ai_enabled", True))
     return payload
 
 

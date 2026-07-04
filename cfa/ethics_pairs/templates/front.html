@@ -554,7 +554,29 @@
 
   function renderAiGrade(resp) {
     var box = root.querySelector("#cfa-ai");
-    if (!box || !resp || resp.source !== "ai") return; // only show when AI actually graded
+    if (!box || !resp) return;
+    if (resp.source !== "ai") {
+      // AI was ON but the call fell back to the deterministic grade — say so,
+      // with the reason. Stay silent only when AI is intentionally OFF ("ai_off").
+      var err = (resp.error || "").toString();
+      if (err && err !== "ai_off") {
+        var reasons = {
+          no_api_key: "no OpenAI API key configured",
+          cost_cap_exceeded: "AI cost cap reached",
+          unparseable_response: "unexpected AI response",
+          llm_client_unavailable: "AI module unavailable",
+          empty_completion: "empty AI response"
+        };
+        box.innerHTML =
+          '<div class="cfa-ai-head"><span class="cfa-badge cfa-ai-badge">AI</span>' +
+            "⚠ AI unavailable — showing the deterministic grade</div>" +
+          '<div class="cfa-ai-explain">Reason: ' +
+            esc(reasons[err] || err.replace(/_/g, " ")) +
+            ". The grade above is the exact offline (deterministic) grade.</div>";
+        box.hidden = false;
+      }
+      return;
+    }
     // Upgrade the persisted payload's provenance so W5 records the AI source + named Standard.
     if (pendingGrade) {
       pendingGrade.source = "ai";
