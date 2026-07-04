@@ -1,0 +1,7 @@
+DESKTOP first-run seeder (seed_collection.py) ethics deck : CFA::Ethics Pairs
+MOBILE bootstrap apkg (build_mobile_package.py) ethics deck: CFA::Ethics Pairs ( CFA Ethics Minimal-Pair )
+apkg contains CFA::Ethics Pairs   : True
+apkg contains CFA::Ethics Passages: False (retired)
+
+RESULT: ONE ethics flagship deck (CFA::Ethics Pairs) is both seeded (desktop) and bundled (mobile).
+One-passage (CFA::Ethics Passages) is no longer seeded or bundled; desktop menu action retirement -> W1 (HANDOFF.md).

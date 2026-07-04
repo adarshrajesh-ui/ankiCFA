@@ -89,7 +89,7 @@ the one-passage duplication. Keep Python<->JS grader parity byte-for-byte.
   → HANDOFF.md (card already degrades gracefully without it).
 
 ### INC3 — minimal-pairs is the seeded + bundled ethics deck on BOTH platforms
-- **Commit:** `<INC3_SHA>`
+- **Commit:** `9a1e0a30f`
 - **Gap (before):** desktop seeded `CFA::Ethics Pairs` (via `seed_collection.py` → `import_pairs`,
   already correct) but the mobile builder bundled the one-passage `CFA::Ethics Passages` deck — a
   cross-platform split. Evidence: `item3-before-apkg-summary.txt`
@@ -111,3 +111,25 @@ the one-passage duplication. Keep Python<->JS grader parity byte-for-byte.
 - **Verification:** `just cfa-f7-test` 4 passed · `just cfa-seed-test` 3 passed (desktop pairs
   seeding unaffected) · apkg re-import verified · `just build` green · ruff clean.
 - **Desktop seeding:** already `CFA::Ethics Pairs` (confirmed, no change needed).
+
+### INC4 — retire the one-passage duplication (ONE ethics feature)
+- **Commit:** `<INC4_SHA>`
+- **Gap (before):** the one-passage flow was a parallel ethics feature — bundled on mobile (fixed in
+  INC3) and exposed via the desktop "Study Ethics (One-Passage)" menu action + its on-demand seeder
+  (`qt/aqt/cfa_seed.py::ensure_ethics_passages_deck`), both OUT OF SCOPE. Evidence:
+  `item3-before-apkg-summary.txt` (mobile bundled Passages).
+- **Fix (after):** within scope, the one-passage is no longer seeded (seed_collection.py → pairs) or
+  bundled (INC3 → pairs); a source-level retirement guard now prevents the mobile builder from ever
+  re-bundling one-passage. The desktop menu action + dead on-demand seeder retirement is handed to
+  W1 with the exact edits. The one-passage CONTENT/pipeline in scope
+  (`passages.py`/`passages.jsonl`/`passage_*.html`/`test_passages.py`/`passage_logic.js`) is KEPT
+  (harmless; still guards the shared multi-span grader). Evidence: `item4-retirement-summary.txt`
+  (one ethics deck `CFA::Ethics Pairs` seeded + bundled; Passages absent from the apkg).
+- **Files:** `tools/cfa/build_mobile_package.py` (docstring), `tools/cfa/tests/test_build_mobile_package.py`
+  (`test_builder_targets_the_minimal_pairs_flagship_not_one_passage` guard).
+- **Tests added:** the source-level retirement guard (fails if `import passages` /
+  `CFA::Ethics Passages` reappears in the builder).
+- **Verification:** `just cfa-f7-test` 5 passed · `just build` green · ruff clean.
+- **Handoffs (W1):** remove "Study Ethics (One-Passage)" menu action in `qt/aqt/cfa.py`; retire
+  `ensure_ethics_passages_deck` in `qt/aqt/cfa_seed.py`; update `qt/tests/test_cfa_menu.py` +
+  `qt/tests/test_cfa_f0b.py`. Exact edits in HANDOFF.md.

@@ -38,6 +38,19 @@ build_mobile_package = _load(
 )
 
 
+def test_builder_targets_the_minimal_pairs_flagship_not_one_passage():
+    """INC4 retirement guard: the mobile builder must bundle the minimal-pairs flagship, and must not
+    reference the retired one-passage importer. This is a source-level guard so a future edit that
+    re-introduces the one-passage bundling fails fast, independent of a pylib build.
+    """
+    src = open(
+        os.path.join(TOOLS_CFA, "build_mobile_package.py"), encoding="utf-8"
+    ).read()
+    assert "import import_pairs" in src
+    assert "import passages" not in src  # the one-passage importer is retired here
+    assert "CFA::Ethics Passages" not in src
+
+
 @pytest.fixture()
 def built_apkg(tmp_path):
     pytest.importorskip("anki")

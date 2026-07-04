@@ -34,6 +34,21 @@ Minimal-Pairs"). That test file is out of the ethics scope too, so it is W1's to
 The "Study Ethics Minimal-Pairs" action (`study_ethics_pairs`, filters to `CFA::Ethics Pairs`) is
 the single ethics entry point and needs no change.
 
+**Also (same retirement, out of ethics scope):** once the menu action is gone, the on-demand
+one-passage seeder becomes dead code. In `qt/aqt/cfa_seed.py`, `ensure_ethics_passages_deck(col)`
+(preloads `CFA::Ethics Passages`) is only called by the removed `study_ethics_passages` action and is
+explicitly NOT part of the first-launch seeder, so removing the action fully retires it. Delete
+`ensure_ethics_passages_deck` (and its import of `passages`) or leave it with a leading
+`# DEPRECATED (friday/ethics INC4): one-passage retired.` comment. Any test in
+`qt/tests/test_cfa_f0b.py` that exercises `study_ethics_passages` / `ensure_ethics_passages_deck`
+should be removed/updated by W1 as part of the same change.
+
+The one-passage CONTENT + pipeline in the ethics scope (`cfa/ethics_pairs/passages.py`,
+`passages.jsonl`, `templates/passage_front.html` / `passage_back.html`, `tests/test_passages.py`,
+`tests/js/passage_logic.js`) is intentionally KEPT (harmless; the shared multi-span grader now lives
+in the SPAN block that both cards use, and `test_passages.py` still guards it). It is simply no longer
+seeded, bundled (INC3), or exposed (this handoff) — so there is ONE ethics feature.
+
 ---
 
 ## → W1 or bridge owner (`qt/aqt/cfa_ethics_ai.py`) — OPTIONAL provenance passthrough

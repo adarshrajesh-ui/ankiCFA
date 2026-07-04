@@ -13,9 +13,9 @@ Anki package (``.apkg``):
 
 This bundles the SAME single ethics flagship the desktop first-launch seeder
 seeds (``tools/cfa/seed_collection.py`` → ``import_pairs``), so desktop and mobile
-ship the one, identical ethics deck. (Previously the phone bundled the one-passage
-``CFA::Ethics Passages`` deck while desktop seeded pairs — that duplication is
-retired here; see proof/friday/ethics INC3/INC4.)
+ship the one, identical ethics deck. (Previously the phone bundled the retired
+one-passage ethics deck while desktop seeded pairs — that duplication is retired
+here; see proof/friday/ethics INC3/INC4.)
 
 The whole collection is exported (``did = None``) so both decks, their
 note-types, and the ethics card's HTML/CSS/JS templates travel together. The
