@@ -222,6 +222,24 @@ cfa-ablation *args:
 cfa-ablation-test:
     {{ py }} -m pytest tools/cfa/tests/test_ablation_harness.py -q
 
+# A9: one-command latency benchmark on a ~50k-card deck against the REAL built
+# backend (offline, no AI). Builds a 50,000-card CFA collection, then reports
+# p50/p95/worst for next-card, answerCard ack, dashboard first-load/refresh
+# (compute_cfa_scores), and a real incremental sync vs a local anki-sync-server.
+bench *args:
+    {{ ninja }} pylib
+    PYTHONPATH="out/pylib:pylib" {{ py }} tools/cfa/bench.py {{ args }}
+
+# A9: fast CI smoke of the benchmark (600 cards, 60 reps, no sync).
+bench-smoke:
+    {{ ninja }} pylib
+    PYTHONPATH="out/pylib:pylib" {{ py }} tools/cfa/bench.py --smoke
+
+# A9: benchmark test suite (percentile/Stat math, deck build, per-op passes).
+cfa-bench-test:
+    {{ ninja }} pylib
+    PYTHONPATH="out/pylib:cfa/ethics_pairs" ANKI_TEST_MODE=1 {{ py }} -m pytest tools/cfa/tests/test_bench.py -q
+
 # Feature 8: content-type-aware weighting — equal-weakness cards of different item types get different exam-queue multipliers
 cfa-types-test:
     {{ ninja }} pylib

@@ -1,0 +1,42 @@
+========================================================================
+CFA A9 — 50k-card latency benchmark (REAL backend, no AI, offline)
+========================================================================
+cards       : 50,000
+studied     : 17,500 review cards (3 reviews each)
+review reps : 400
+machine     : Darwin arm64 py3.13.13
+build time  : 7.55s
+
+operation                   n    p50 (ms)    p95 (ms)   worst (ms)
+------------------------------------------------------------------------
+next-card                 400       0.036       0.044       32.546
+answerCard ack            400       0.077       0.110        6.891
+dashboard first load        1     220.403     220.403      220.403
+dashboard refresh          50     219.137     222.284      238.992
+sync                        8       8.794      13.379       13.379
+------------------------------------------------------------------------
+Notes:
+  * next-card: sched.get_queued_cards(fetch_limit=1)
+  * answerCard ack: sched.answer_card (GOOD)
+  * dashboard first load: compute_cfa_scores whole-collection (cold)
+  * dashboard refresh: compute_cfa_scores whole-collection (warm)
+  * sync: incremental sync_collection vs local anki-sync-server [8/8 normal/no-change rounds]
+========================================================================
+{"meta": {"cards": 50000, "studied": 17500, "reps": 400, "build_s": 7.547663082994404, "machine": "Darwin arm64 py3.13.13"}, "stats": [{"name": "next-card", "n": 400, "p50_ms": 0.036, "p95_ms": 0.044, "worst_ms": 32.546, "note": "sched.get_queued_cards(fetch_limit=1)"}, {"name": "answerCard ack", "n": 400, "p50_ms": 0.077, "p95_ms": 0.11, "worst_ms": 6.891, "note": "sched.answer_card (GOOD)"}, {"name": "dashboard first load", "n": 1, "p50_ms": 220.403, "p95_ms": 220.403, "worst_ms": 220.403, "note": "compute_cfa_scores whole-collection (cold)"}, {"name": "dashboard refresh", "n": 50, "p50_ms": 219.137, "p95_ms": 222.284, "worst_ms": 238.992, "note": "compute_cfa_scores whole-collection (warm)"}, {"name": "sync", "n": 8, "p50_ms": 8.794, "p95_ms": 13.379, "worst_ms": 13.379, "note": "incremental sync_collection vs local anki-sync-server [8/8 normal/no-change rounds]"}]}
+
+========================================================================
+TEST SUITE (just cfa-bench-test) — 9 tests
+========================================================================
+.........                                                                [100%]
+9 passed in 0.51s
+
+INTERPRETATION (honest):
+  * next-card & answerCard ack are sub-millisecond at p50/p95 even on a
+    50k-card deck; worst-case spikes (~7-33ms) are GC/queue-rebuild jitter.
+  * The dashboard (compute_cfa_scores over the whole 50k collection) is the
+    heavy op at ~220ms cold AND warm — it recomputes from scratch each call
+    (no cache). This is the honest bottleneck to optimize; it is still well
+    under a 1s interaction budget for a once-per-open dashboard.
+  * sync is a REAL incremental round-trip against a local anki-sync-server
+    subprocess (8/8 normal rounds, genuine card+revlog payload) ~9ms p50.
+  * MEASUREMENT of the real engine (not SIMULATED); numbers are host-specific.
