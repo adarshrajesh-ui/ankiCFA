@@ -75,6 +75,9 @@ def setup_menu(mw: AnkiQt) -> None:
     ai_settings = menu.addAction("AI Settings…")
     qconnect(ai_settings.triggered, lambda: _open_ai_settings(mw))
 
+    connect_sync = menu.addAction("Connect to CFA Sync server")
+    qconnect(connect_sync.triggered, lambda: _connect_cfa_sync(mw))
+
     logout = menu.addAction("Log out of Sync…")
     qconnect(logout.triggered, lambda: logout_of_sync(mw))
 
@@ -167,6 +170,13 @@ def _open_ai_settings(mw: AnkiQt) -> None:
     from aqt.cfa_ai_settings import open_ai_settings
 
     open_ai_settings(mw)
+
+
+def _connect_cfa_sync(mw: AnkiQt) -> None:
+    # Lazy import keeps aqt.cfa import-light.
+    from aqt.cfa_sync_connect import connect_cfa_sync
+
+    connect_cfa_sync(mw)
 
 
 def show_exam_readiness(mw: AnkiQt) -> None:

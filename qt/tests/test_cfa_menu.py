@@ -37,10 +37,10 @@ def _make_menu() -> "tuple[QWidget, object]":
     return mw, mw._cfa_menu  # type: ignore[attr-defined]
 
 
-def test_cfa_menu_has_seven_actions() -> None:
+def test_cfa_menu_has_eight_actions() -> None:
     _mw, menu = _make_menu()
     actions = menu.actions()
-    assert len(actions) == 7
+    assert len(actions) == 8
 
 
 def test_cfa_menu_action_labels() -> None:
@@ -53,6 +53,7 @@ def test_cfa_menu_action_labels() -> None:
         "Study by Exam Priority",
         "Peak-on-Exam-Day (Deadline)…",
         "AI Settings…",
+        "Connect to CFA Sync server",
         "Log out of Sync…",
     ]
 
@@ -74,6 +75,61 @@ def test_toolbar_exposes_logout_link() -> None:
 
     assert callable(getattr(Toolbar, "_cfaLogoutLinkHandler", None))
     assert callable(cfa_mod.logout_of_sync)
+
+
+def test_toolbar_and_menu_expose_connect_sync() -> None:
+    # One-click "Connect" (top bar) + "Connect to CFA Sync server" (menu) both
+    # route to the shared one-click connector.
+    from aqt.cfa_sync_connect import connect_cfa_sync
+    from aqt.toolbar import Toolbar
+
+    assert callable(getattr(Toolbar, "_cfaConnectLinkHandler", None))
+    assert callable(connect_cfa_sync)
+
+    _mw, menu = _make_menu()
+    labels = [a.text() for a in menu.actions()]
+    assert "Connect to CFA Sync server" in labels
+
+
+def test_connect_cfa_sync_configures_and_syncs(monkeypatch) -> None:
+    # connect_cfa_sync points the profile at the CFA server, logs in (storing the
+    # minted hkey + username), and kicks off the normal GUI sync.
+    from aqt import cfa_sync_connect as cc
+    import aqt.utils as u
+
+    monkeypatch.setattr(u, "tooltip", lambda *a, **k: None)
+    monkeypatch.setattr(u, "showWarning", lambda *a, **k: None)
+
+    calls: dict = {}
+
+    class Col:
+        def sync_login(self, user, password, endpoint):
+            calls["login"] = (user, password, endpoint)
+            return SimpleNamespace(hkey="HKEY123")
+
+    class PM:
+        def set_custom_sync_url(self, url):
+            calls["url"] = url
+
+        def set_sync_key(self, key):
+            calls["key"] = key
+
+        def set_sync_username(self, name):
+            calls["user"] = name
+
+    class MW:
+        pm = PM()
+        col = Col()
+
+        def on_sync_button_clicked(self):
+            calls["synced"] = True
+
+    cc.connect_cfa_sync(MW())  # type: ignore[arg-type]
+    assert calls["url"] == cc.CFA_SYNC_URL
+    assert calls["login"] == (cc.CFA_SYNC_USER, cc.CFA_SYNC_PASS, cc.CFA_SYNC_URL)
+    assert calls["key"] == "HKEY123"
+    assert calls["user"] == cc.CFA_SYNC_USER
+    assert calls.get("synced") is True
 
 
 def test_cfa_menu_single_ethics_entry_is_minimal_pairs() -> None:

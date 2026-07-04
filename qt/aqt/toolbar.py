@@ -380,6 +380,18 @@ class Toolbar:
 
         links.append(self._create_sync_link())
 
+        # CFA fork: one-click "Connect" wires this desktop to the local CFA sync
+        # server and logs in — no trip through Preferences > Syncing.
+        links.append(
+            self.create_link(
+                "cfa_connect",
+                "Connect",
+                self._cfaConnectLinkHandler,
+                tip="Connect this desktop to the CFA sync server and sync",
+                id="cfa_connect",
+            )
+        )
+
         # CFA fork: an always-visible Log out entry right after Sync, so logging
         # out / switching the synced login never requires hunting through
         # Preferences > Syncing.
@@ -468,6 +480,11 @@ class Toolbar:
         import aqt.cfa
 
         aqt.cfa.show_exam_readiness(self.mw)
+
+    def _cfaConnectLinkHandler(self) -> None:
+        from aqt.cfa_sync_connect import connect_cfa_sync
+
+        connect_cfa_sync(self.mw)
 
     def _cfaLogoutLinkHandler(self) -> None:
         import aqt.cfa
