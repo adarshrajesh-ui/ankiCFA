@@ -220,6 +220,16 @@ cfa-syncserver *args:
     {{ ninja }} pylib
     {{ py }} tools/cfa/sync_server.py serve {{ args }}
 
+# Mobile AI: server-side AI proxy so AnkiDroid gets AI without holding the key.
+# Runs alongside the sync server (host 0.0.0.0 port 27702; emulator -> 10.0.2.2:27702).
+# Token via CFA_AI_PROXY_TOKEN (NOT the OpenAI key). Runs until Ctrl-C.
+cfa-ai-proxy *args:
+    PYTHONPATH="cfa/ethics_pairs:." {{ py }} tools/cfa/ai_proxy.py {{ args }}
+
+# Mobile AI: unit tests for the AI proxy (deterministic; injected LLM, no network).
+cfa-ai-proxy-test:
+    PYTHONPATH="cfa/ethics_pairs:." {{ py }} -m pytest cfa/ai/tests/test_ai_proxy.py -q
+
 # Feature 9: no-double-count + ethics-custom_data-round-trip tests over a real sync server (extends cfa-sync-test).
 cfa-sync-dedup-test:
     {{ ninja }} pylib
