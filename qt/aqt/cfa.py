@@ -75,6 +75,9 @@ def setup_menu(mw: AnkiQt) -> None:
     ai_settings = menu.addAction("AI Settings…")
     qconnect(ai_settings.triggered, lambda: _open_ai_settings(mw))
 
+    logout = menu.addAction("Log out of Sync…")
+    qconnect(logout.triggered, lambda: _logout_of_sync(mw))
+
     # Keep a reference so the menu (and its slots) survive garbage collection.
     mw._cfa_menu = menu  # type: ignore[attr-defined]
     mw.form.menubar.addMenu(menu)
@@ -115,6 +118,40 @@ def setup_menu(mw: AnkiQt) -> None:
         _register_tab_fill()
     except Exception:
         pass
+
+
+def _logout_of_sync(mw: AnkiQt) -> None:
+    """Log out of the sync account (AnkiWeb or self-hosted) from the CFA menu.
+
+    A discoverable one-click logout: the stock button lives in
+    Preferences > Syncing and only shows once logged in, which is easy to miss.
+    Clears the stored sync credentials (keeps the custom server URL) so the next
+    sync prompts for login again. The media cache is re-flagged so a fresh login
+    re-checks media, mirroring the stock logout.
+    """
+    from aqt.utils import askUser, showInfo, tooltip
+
+    if mw.pm.sync_auth() is None:
+        showInfo(
+            "You're not logged in to a sync account.",
+            parent=mw,
+            title="ankiCFA — Sync",
+        )
+        return
+    if not askUser(
+        "Log out of the sync account? You'll need to log in again to sync "
+        "(your custom sync-server URL is kept).",
+        parent=mw,
+        title="Log out of Sync",
+    ):
+        return
+    mw.pm.clear_sync_auth()
+    try:
+        if mw.col is not None:
+            mw.col.media.force_resync()
+    except Exception:
+        pass
+    tooltip("Logged out of sync. Open Sync to log in again.", parent=mw)
 
 
 def _open_ai_settings(mw: AnkiQt) -> None:

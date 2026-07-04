@@ -37,10 +37,10 @@ def _make_menu() -> "tuple[QWidget, object]":
     return mw, mw._cfa_menu  # type: ignore[attr-defined]
 
 
-def test_cfa_menu_has_six_actions() -> None:
+def test_cfa_menu_has_seven_actions() -> None:
     _mw, menu = _make_menu()
     actions = menu.actions()
-    assert len(actions) == 6
+    assert len(actions) == 7
 
 
 def test_cfa_menu_action_labels() -> None:
@@ -53,7 +53,17 @@ def test_cfa_menu_action_labels() -> None:
         "Study by Exam Priority",
         "Peak-on-Exam-Day (Deadline)…",
         "AI Settings…",
+        "Log out of Sync…",
     ]
+
+
+def test_cfa_menu_has_logout_entry_and_handler() -> None:
+    from aqt import cfa as cfa_mod
+
+    _mw, menu = _make_menu()
+    labels = [a.text() for a in menu.actions()]
+    assert "Log out of Sync…" in labels
+    assert callable(cfa_mod._logout_of_sync)
 
 
 def test_cfa_menu_single_ethics_entry_is_minimal_pairs() -> None:
@@ -81,3 +91,53 @@ def test_cfa_menu_handlers_exist() -> None:
         "show_deadline",
     ):
         assert callable(getattr(cfa, name))
+
+
+def test_logout_clears_auth_when_confirmed(monkeypatch) -> None:
+    from aqt import cfa as cfa_mod
+    import aqt.utils as u
+
+    monkeypatch.setattr(u, "askUser", lambda *a, **k: True)
+    monkeypatch.setattr(u, "tooltip", lambda *a, **k: None)
+    monkeypatch.setattr(u, "showInfo", lambda *a, **k: None)
+    cleared: list = []
+
+    class PM:
+        def sync_auth(self):
+            return object()  # logged in
+
+        def clear_sync_auth(self):
+            cleared.append(True)
+
+    class Media:
+        def force_resync(self):
+            pass
+
+    mw = SimpleNamespace(pm=PM(), col=SimpleNamespace(media=Media()))
+    cfa_mod._logout_of_sync(mw)  # type: ignore[arg-type]
+    assert cleared == [True]
+
+
+def test_logout_noop_when_not_logged_in(monkeypatch) -> None:
+    from aqt import cfa as cfa_mod
+    import aqt.utils as u
+
+    info: list = []
+    monkeypatch.setattr(u, "showInfo", lambda *a, **k: info.append(True))
+
+    def _no_ask(*a, **k):
+        raise AssertionError("must not prompt when already logged out")
+
+    monkeypatch.setattr(u, "askUser", _no_ask)
+    cleared: list = []
+
+    class PM:
+        def sync_auth(self):
+            return None  # not logged in
+
+        def clear_sync_auth(self):
+            cleared.append(True)
+
+    mw = SimpleNamespace(pm=PM(), col=None)
+    cfa_mod._logout_of_sync(mw)  # type: ignore[arg-type]
+    assert cleared == [] and info == [True]
