@@ -1,0 +1,15 @@
+=== integration/friday @ b799a8233 — VERIFICATION (AI-off) ===
+merged branches (in order): ethics(W3) sync(W5) desktop-shell(W1) hygiene(W6) on phase0 spine
+
+-- rust (cargo test -p anki --lib) --
+test result: ok. 544 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 5.52s
+
+-- CFA python suites (test_cfa/scores/parity/f4/seed) --
+49 passed in 1.24s
+
+-- D2 gate (ethics AI-grading eval, AI-off baseline) --
+attempts            : 30
+active grader       : deterministic fallback (AI OFF)
+grade agreement     : 0.733
+overall accuracy    : 0.733
+AI OFF: no OPENAI_API_KEY, so the LLM >= 0.80 assertion is SKIPPED. The deterministic fallback graded every attempt; its agreement is reported above and is the honest AI-off number.

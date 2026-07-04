@@ -1,0 +1,18 @@
+====================================================================
+F2 ethics-highlight grading eval — human-labeled gold-set
+====================================================================
+attempts            : 30
+active grader       : LLM (semantic)
+grade agreement     : 0.833
+overall accuracy    : 0.833
+deterministic base  : 0.733 (frozen preview, for contrast)
+
+confusion (rows=human, cols=grader):
+               correct  somewhat   partial     wrong
+    correct         22         0         4         0
+   somewhat          1         0         0         0
+    partial          0         0         2         0
+      wrong          0         0         0         1
+
+LLM agreement 0.833 >= threshold 0.80 -> PASS
+====================================================================
