@@ -111,7 +111,7 @@ AFTER:  `inc3-dedup-test.log` (4 passed, AI-off)
 
 HANDOFF: orchestrator must apply dedup in `memory_score()` (currently raw count).
 
-Commit: 2cbc9b5a7
+Commit: b0b89aaa8
 
 ---
 
@@ -126,7 +126,7 @@ AFTER:  `inc4-offline-01-front.png` (airplane + reviewer),
         `inc4-after-synced.png`, `inc4-phone-sync-log.txt` (Full Upload),
         `offline-then-sync.mp4`, `inc4-desktop-revlog-after.txt` (new id)
 
-Commit: cec659cea
+Commit: 6c9af060e
 
 ---
 
@@ -143,4 +143,4 @@ desktop full-download reads identical namespace. `INC5_CROSS_DEVICE PASS`.
 
 HANDOFF: full W3 payload too large for custom_data; AnkiDroid bridge still needed.
 
-Commit: 9adce1202
+Commit: 87cbcf8d4
