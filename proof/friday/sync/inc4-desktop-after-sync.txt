@@ -1,0 +1,31 @@
+CFA_DESKTOP_SYNC {
+  "endpoint": "http://127.0.0.1:27701/",
+  "username": "cfa",
+  "sync_result": "FULL_SYNC",
+  "before": {
+    "cards": 660,
+    "notes": 660,
+    "revlog": 262,
+    "decks": [
+      "CFA",
+      "CFA Exam Priority",
+      "CFA Level II",
+      "CFA::Ethics Passages",
+      "Default",
+      "y"
+    ]
+  },
+  "after": {
+    "cards": 660,
+    "notes": 660,
+    "revlog": 262,
+    "decks": [
+      "CFA",
+      "CFA Exam Priority",
+      "CFA Level II",
+      "CFA::Ethics Passages",
+      "Default",
+      "y"
+    ]
+  }
+}
