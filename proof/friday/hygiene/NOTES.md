@@ -100,10 +100,27 @@ render fix itself is proven by `check:mypy` going 3 errors → 0.
   AFTER: `proof/friday/hygiene/inc2-after.txt`.
 - Leakage: additive study cards only (fixed-income/derivatives); does not touch
   the ethics AI eval, so `proof/verify2-20260703/eval-leakage.txt` is unaffected.
-- SHA: (filled after commit)
+- SHA: `9e8ad077c`
 
 ## Increment 3 — Retire one-passage refs + PLATFORM-MATRIX
-(pending)
+(status: DONE — matrix updated + pushed; one-passage retirement BLOCKED on W3)
+
+- One-passage retirement: **NOT actioned — blocked on W3.** `origin/main` still
+  ships/enhances the one-passage surface (#10, #12, F7); the retirement is only on
+  the unmerged `friday/ethics` branch (`0b6a0c389`). Per protocol I left all
+  one-passage refs intact. See `HANDOFF.md` section 1 for the follow-up.
+- `docs/cfa/PLATFORM-MATRIX.md`: added a 📱 **Native mobile** tier and updated the
+  exam-readiness row — the fork's AnkiDroid (`friday/mobile`, [Anki-Android PR #1])
+  now has a native **Exam Readiness** screen (3 scores + ranges + abstain +
+  per-topic). Verified against the mobile workstream's on-device screencap
+  (`proof/friday/mobile/inc2-readiness-populated.png`) + its NOTES. NO OVERCLAIM:
+  scores are a deterministic on-device scorer (RPC pending), and the mobile
+  exam-priority action / exam-config editor / minimal-pairs are marked in-progress
+  only. dprint check clean.
+- Coordination facts: `git fetch origin` + `git log origin/main` confirmed no
+  one-passage removal; AnkiDroid `friday/mobile` confirmed to carry the committed
+  `Cfa*` activities + `CfaScorerTest`; screenshot confirms three scores.
+- SHA: (filled after commit)
 
 ## Increment 4 — README + SUBMISSION-CHECKLIST
 (pending)

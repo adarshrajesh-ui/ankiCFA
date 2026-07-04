@@ -1,0 +1,27 @@
+=== Increment 3 — AFTER: PLATFORM-MATRIX update + one-passage coordination ===
+date: 2026-07-04T03:44:08Z
+
+--- one-passage retirement coordination: origin/main STILL ships it (blocked on W3) ---
+be9a21449 feat(cfa): restyle ethics one-passage card toward the markmeldrum.com web look (#12)
+73bfea57b fix(cfa): add desktop "Study Ethics (One-Passage)" action seeding CFA::Ethics Passages (#10)
+3d4a33d2f fix(ethics): reveal governing Standard on completed passage attempts and add tolerant span grader (#6)
+126a29823 gnhf 10: Implemented and proved Feature F7 (Android mobile CFA experience) on a real arm64 emulator running the fork Rust engine: both CFA decks bundled as an app asset and auto-imported on first launch, with the one-passage ethics card rendering and its multi-span highlight + deterministic grader working on-device — validated via the documented fallback gate with 3 new green tests and 8 adb screenshots + logcat proof.
+0b8ef5d37 gnhf 4: Implemented, tested, and proved Feature F1 (ethics one-passage multi-span redesign) additively: 30 re-authored passages with 73 evidence spans, a deterministic multi-span grader mirrored Python↔JS, a validator+importer, and two rendered card proofs — validated via the documented fallback gate with 72 green ethics tests.
+
+--- the retirement exists only on the unmerged friday/ethics branch ---
+0b6a0c389 friday/ethics INC4: retire the one-passage duplication (one ethics feature)
+
+--- mobile reality: AnkiDroid friday/mobile committed Cfa surfaces ---
+AnkiDroid/src/main/java/com/ichi2/anki/CfaBootstrap.kt
+AnkiDroid/src/main/java/com/ichi2/anki/CfaExamConfigActivity.kt
+AnkiDroid/src/main/java/com/ichi2/anki/CfaExamPriorityActivity.kt
+AnkiDroid/src/main/java/com/ichi2/anki/CfaExamReadinessActivity.kt
+AnkiDroid/src/main/java/com/ichi2/anki/cfa/CfaExamConfig.kt
+AnkiDroid/src/main/java/com/ichi2/anki/cfa/CfaExamQueue.kt
+AnkiDroid/src/main/java/com/ichi2/anki/cfa/CfaScores.kt
+AnkiDroid/src/main/java/com/ichi2/anki/cfa/CfaScoresProvider.kt
+AnkiDroid/src/test/java/com/ichi2/anki/CfaBrandingTest.kt
+AnkiDroid/src/test/java/com/ichi2/anki/cfa/CfaScorerTest.kt
+
+--- dprint check on the updated matrix ---
+dprint: clean
