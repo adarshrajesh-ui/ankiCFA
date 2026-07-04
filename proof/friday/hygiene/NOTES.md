@@ -67,7 +67,40 @@ environment, so the committed pair (a consistent prior-run capture) is kept. The
 render fix itself is proven by `check:mypy` going 3 errors → 0.
 
 ## Increment 2 — CFA deck content quality + provenance
-(pending)
+(status: DONE — committed + pushed on PR #25)
+
+- `tools/cfa/build_cfa_deck.py` — new `reading_from_los` / `render_source_line` /
+  `back_with_source`: every built study card now carries a visible NAMED SOURCE
+  footer (`Source: CFA Level II > <topic> > <reading>`, derived from the item's
+  `los::` tag). Additive — appended after the authored Back, never replacing it.
+  Propagates everywhere via `add_deck_notes` (desktop seeder, mobile package,
+  standalone build all route through it).
+- Authored the two MISSING Level II topics (the `cfa/deck/*.jsonl` glob had 8 of
+  10 — fixed-income + derivatives were absent):
+  - `cfa/deck/items-fixed-income-20260703-hygiene-a21.jsonl` (43 items:
+    term-structure, arbitrage-free valuation, embedded options, credit analysis,
+    CDS)
+  - `cfa/deck/items-derivatives-20260703-hygiene-a22.jsonl` (38 items: forward
+    commitments, futures/forwards, swaps, FRAs, binomial + BSM option pricing,
+    Greeks/delta-hedging, put-call parity)
+  All `license: authored-original`, exact 6-field schema, no duplicate fronts.
+- Deck: 630 -> **711 authored items**, now covering **all ten** base topics;
+  `topic_weights_for` renormalizes to 1.0 over all ten. `validate_deck.py` green
+  (MIN_CARDS=200).
+- "20-card" clarification: there is NO literal 20 default in code — the exam-
+  priority queue returns a *capped weakest-first fetch* (desktop 50-200, mobile
+  `MAX_SESSION_CARDS=100`), NOT the deck size. Documented in the builder docstring
+  (and README/PLATFORM-MATRIX in later increments). See HANDOFF note.
+- Tests (fail without the change): `test_all_ten_level_ii_topics_present`,
+  `test_render_source_line_names_topic_and_reading`,
+  `test_back_with_source_is_additive_and_preserves_content`, and the
+  collection-build test now asserts each card Back carries its named source.
+  `just cfa-deck-test` -> 13 passed; `just build` green; ruff+mypy clean.
+- BEFORE: `00-just-check-before.txt` era deck = 630/8-topics (validator).
+  AFTER: `proof/friday/hygiene/inc2-after.txt`.
+- Leakage: additive study cards only (fixed-income/derivatives); does not touch
+  the ethics AI eval, so `proof/verify2-20260703/eval-leakage.txt` is unaffected.
+- SHA: (filled after commit)
 
 ## Increment 3 — Retire one-passage refs + PLATFORM-MATRIX
 (pending)
