@@ -113,7 +113,7 @@ the one-passage duplication. Keep Python<->JS grader parity byte-for-byte.
 - **Desktop seeding:** already `CFA::Ethics Pairs` (confirmed, no change needed).
 
 ### INC4 — retire the one-passage duplication (ONE ethics feature)
-- **Commit:** `<INC4_SHA>`
+- **Commit:** `0b6a0c389`
 - **Gap (before):** the one-passage flow was a parallel ethics feature — bundled on mobile (fixed in
   INC3) and exposed via the desktop "Study Ethics (One-Passage)" menu action + its on-demand seeder
   (`qt/aqt/cfa_seed.py::ensure_ethics_passages_deck`), both OUT OF SCOPE. Evidence:
@@ -133,3 +133,26 @@ the one-passage duplication. Keep Python<->JS grader parity byte-for-byte.
 - **Handoffs (W1):** remove "Study Ethics (One-Passage)" menu action in `qt/aqt/cfa.py`; retire
   `ensure_ethics_passages_deck` in `qt/aqt/cfa_seed.py`; update `qt/tests/test_cfa_menu.py` +
   `qt/tests/test_cfa_f0b.py`. Exact edits in HANDOFF.md.
+
+### INC5 — persist attempt-detail hooks (structured payload for W5 custom_data)
+- **Commit:** `<INC5_SHA>`
+- **Gap (before):** the front stashed only `{ pairId, cluster, correct }` in localStorage — no
+  verdicts, spans, tiers, grade tier, or source/standard provenance. W5 could persist only pass/fail.
+  Evidence: `item5-payload-before-after.md` (the old 3-field payload).
+- **Fix (after):** the pairs `front.html` `reveal()` now emits the FULL structured attempt detail to
+  `localStorage["cfaEthics:pending"]` (and via the `pycmd` relay the back reads) — per-case verdicts,
+  highlight span token-index ranges (`lo`/`hi`), per-span tiers (full/near/none), overall grade
+  tier, `found`/`near`/`total`, `selectionIndices`, `source` (upgraded to `"ai"` in place when the AI
+  bridge returns), named `standard`, `rationale`, `pairId`/`itemId`. The exact shape is documented in
+  HANDOFF.md (→ W5). Evidence: `item5-emitted-payload.json` (captured LIVE by driving the real card
+  in headless Chrome and reading localStorage).
+- **Files:** `templates/front.html` (payload emit — landed in INC1, documented + tested here),
+  `tools/cfa/render_pairs_attempt.py` (driver dumps the emitted payload for verification),
+  `tests/test_attempt_payload.py` (NEW).
+- **Tests added:** `test_front_emits_full_payload_shape_on_perfect_attempt`,
+  `test_front_emits_partial_grade_on_partial_attempt` — drive the REAL card headlessly and assert the
+  documented payload shape + values (perfect → full/correct; partial → partial credit; emitted
+  per-span ranges equal the deterministic gold runs). Skip if no Chrome.
+- **Verification:** `just cfa-test` 113 passed (AI-off, `.env` aside) · `just build` green · ruff
+  clean.
+- **Handoffs (W5):** persist the payload into `card.custom_data` → HANDOFF.md.

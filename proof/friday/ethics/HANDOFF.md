@@ -109,6 +109,7 @@ reveals the grade — see the pairs `front.html` `reveal()`):
   "completed": true,           // gate: back only honors a completed attempt for this card
   "correct": true,             // overall deterministic grade (both verdicts right AND highlight "correct")
   "standard": "II(A) Material Nonpublic Information",  // named governing Standard
+  "rationale": "Standard II(A) prohibits acting on material nonpublic information …",  // overall rationale
   "source": "fallback",        // "ai" once the AI feedback returns, else "fallback" (deterministic)
   "verdicts": {                // per-case conform/violate verdict + correctness
     "A": {"judged": "violate", "answer": "violate", "ok": true},
@@ -174,7 +175,11 @@ the token-locator helpers already in the file (`findGoldIndices`) are sufficient
 `pair.gold_spans`.
 
 ## Status of handoffs
-- [ ] W1: remove "Study Ethics (One-Passage)" menu action + update `qt/tests/test_cfa_menu.py`.
-- [ ] W1/bridge: (optional) enforce AI toggles in `handle_grade_request`.
-- [ ] W5: persist the attempt-detail payload into `card.custom_data`.
+- [ ] W1: remove "Study Ethics (One-Passage)" menu action in `qt/aqt/cfa.py`; retire the dead
+      `ensure_ethics_passages_deck` in `qt/aqt/cfa_seed.py`; update `qt/tests/test_cfa_menu.py` +
+      `qt/tests/test_cfa_f0b.py`.
+- [ ] W1/bridge: (optional) forward `itemId`/`standard` into `grade_semantic` and/or enforce AI
+      toggles (`cfa_ai_enabled` + `cfa_ai_grading_enabled`) in `handle_grade_request`.
+- [ ] W5: persist the attempt-detail payload (shape above; emitted by the pairs `front.html`, live-
+      verified in `proof/friday/ethics/item5-emitted-payload.json`) into `card.custom_data`.
 - [ ] e2e owner: update `ts/tests/e2e/ethics_pairs_flow.test.ts` to the multi-span highlight flow.

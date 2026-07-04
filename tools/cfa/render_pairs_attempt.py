@@ -154,6 +154,12 @@ def _driver_script(answer_a: str, answer_b: str, decisive_case: str, span_ranges
         "  });"
         "  var check=root.querySelector('#cfa-check');"
         "  if(check&&!check.disabled){tap(check);}"
+        "  setTimeout(dumpPayload,120);"  # after reveal persists the payload
+        "}"
+        "function dumpPayload(){"
+        "  var pre=document.getElementById('cfa-emitted-payload');"
+        "  if(!pre){pre=document.createElement('pre');pre.id='cfa-emitted-payload';pre.style.display='none';document.body.appendChild(pre);}"
+        "  try{pre.textContent=localStorage.getItem('cfaEthics:pending')||'';}catch(e){pre.textContent='';}"
         "}"
         "if(document.readyState==='complete'||document.readyState==='interactive'){setTimeout(run,60);}"
         "else{document.addEventListener('DOMContentLoaded',function(){setTimeout(run,60);});}"
