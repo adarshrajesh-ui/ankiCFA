@@ -13,12 +13,25 @@
   12000 predictions). Note: D2's "eval-before-serve **gate** at 0.80" is the
   **AI-grading** eval gate (a grading-worker deliverable, not this simulation
   harness) — verified once that gate lands.
-- **⏳ Remaining DONE criteria are gated on the worker tabs**, which are LIVE and
-  still pushing (own worktrees: `desktop-shell`, `sync`, `ethics`, `hygiene`; an
-  emulator `emulator-5554` is running an in-progress mobile app). Merging their
-  moving, incomplete branches or driving their emulator now would collide with
-  active work and misrepresent completion. The final integration + D4/D5/D6/D7
-  device recordings run against their **finished** branches + a rebuilt AAR.
+- **✅ Integration branch verified green.** A branch `integration/friday` has
+  **all 6 workstreams merged in order** — ethics (W3), sync (W5), desktop-shell
+  (W1), hygiene (W6) on top of the phase0 spine — and I verified it end-to-end
+  in an isolated worktree (evidence: `integration-verification.txt`):
+  - **rust**: `cargo test -p anki --lib` → **544 passed, 0 failed**.
+  - **CFA python**: 49 tests green incl. the **parity gate** — RPC == `cfa.py`
+    to 1e-9 *still holds after the merges* (sync's dedup + ethics changes did
+    not break it), and the double-count fix is intact.
+  - **D2 gate**: `cfa/ethics_pairs/eval_ai_grading.py` exists — 30 human-labeled
+    attempts, **asserts ≥0.80 LLM agreement when AI is on**; AI-off baseline
+    accuracy **0.733** (confusion matrix reported). This is the eval-before-serve
+    gate at the 0.80 cutoff.
+- **⚙️ Consolidation to `main` is in progress by a live integration agent**
+  (`integration/friday` gained 41 commits and was still advancing during
+  verification). It will land on `main` after a full `just check` on the
+  full-toolchain host. I did not push a competing merge (that would duel the
+  active integrator on the shared trunk). D4/D5 sync recording is W5's live demo
+  (a fixed-cred sync server is already listening on `*:27701`, emulator
+  configured via `10.0.2.2`).
 
 ---
 
