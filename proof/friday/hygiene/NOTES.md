@@ -120,10 +120,34 @@ render fix itself is proven by `check:mypy` going 3 errors → 0.
 - Coordination facts: `git fetch origin` + `git log origin/main` confirmed no
   one-passage removal; AnkiDroid `friday/mobile` confirmed to carry the committed
   `Cfa*` activities + `CfaScorerTest`; screenshot confirms three scores.
-- SHA: (filled after commit)
+- SHA: `9c0615895`
 
 ## Increment 4 — README + SUBMISSION-CHECKLIST
-(pending)
+(status: DONE — committed + pushed on PR #25)
+
+Both root docs already existed; updated (not created) to match merged reality, no
+overclaims:
+- `README.md`:
+  - Exam Readiness bullet → **three scores** (Memory/Performance/Readiness) with
+    ranges + the full give-up rule (200 reviews / 50% coverage / 30 first
+    exposures); notes the same three scores now render natively on the phone.
+  - AI bullet → master gate is key presence (`ai_enabled()`); two AI features each
+    with a deterministic fallback; the **three col.conf toggles**
+    (`cfa_ai_enabled` / `cfa_ai_grading_enabled` / `cfa_ai_tabfill_enabled`) as the
+    layered control, with the in-app toggle UI "landing on a companion branch"
+    (honest — the keys are not on origin/main yet).
+  - Deck bullet → 711 original items across all ten topics (fixed income +
+    derivatives called out), per-card named source, deck-size-vs-fetch-limit note.
+  - Mobile section → native ankiCFA Exam Readiness screen (on-device scorer) +
+    the F8 sync round-trip proof; points at PLATFORM-MATRIX for the honest split.
+- `SUBMISSION-CHECKLIST.md` (root, already present): post-F9 hygiene-pass note
+  (PR #25); mobile caveat now records the native Exam Readiness screen; item count
+  660/630 → **711 across all ten topics**; AI-off caveat gains the 3-key toggle
+  contract.
+- dprint check clean on README + SUBMISSION-CHECKLIST + PLATFORM-MATRIX.
+- No new code test: docs-only increment; the numeric/topic claims are backed by
+  Inc-2's tests (all-ten-topics, validator 711) and the PLATFORM-MATRIX evidence.
+- SHA: (filled after commit)
 
 ---
 

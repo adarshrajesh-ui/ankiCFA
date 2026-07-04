@@ -49,37 +49,56 @@ without an API key.
   writes, FSRS scheduling and undo history stay valid. Implemented once in the
   shared Rust core so it is available to every platform — see
   [docs/cfa/RUST_ENGINE_NOTE.md](./docs/cfa/RUST_ENGINE_NOTE.md).
-- **Exam Readiness — an honest memory score.** A **CFA → Exam Readiness…** menu in
-  the desktop GUI reports per-topic average FSRS retrievability as a **range**
-  (mean ± spread) rather than a single overconfident number, alongside topic
-  coverage %, data freshness, and an **enforced give-up rule**: no score until
-  **≥ 200 graded reviews AND ≥ 50 % topic coverage** (otherwise it shows "not
-  enough data"), and it **abstains outright if a high-weight topic has been
-  skipped**. Implemented in [`pylib/anki/cfa.py`](./pylib/anki/cfa.py) with the UI
-  in [`qt/aqt/cfa.py`](./qt/aqt/cfa.py).
+- **Exam Readiness — three honest scores, not one overconfident number.** A
+  **CFA → Exam Readiness…** menu in the desktop GUI reports **Memory**
+  (FSRS retrievability), **Performance** (graded accuracy), and an overall
+  **Readiness** score — each as a **range/credible interval** — alongside
+  per-topic recall, topic coverage %, and data freshness. An **enforced give-up
+  rule** abstains ("not enough data") until **≥ 200 graded reviews**, **≥ 50 %
+  topic coverage**, and **≥ 30 first exposures**, and abstains outright if a
+  high-weight topic has been skipped. Implemented in
+  [`pylib/anki/cfa.py`](./pylib/anki/cfa.py) with the desktop UI in
+  [`qt/aqt/cfa.py`](./qt/aqt/cfa.py); the fork's AnkiDroid now renders the **same
+  three scores natively on the phone** (see the mobile note and
+  [docs/cfa/PLATFORM-MATRIX.md](./docs/cfa/PLATFORM-MATRIX.md)).
 - **Ethics minimal-pairs & one-passage cards.** Hand-authored ethics items that
   force the learner to pick a verdict, **highlight the governing evidence**, and
-  name the controlling CFA Standard — teaching the *boundary* between confusable
+  name the controlling CFA Standard — teaching the _boundary_ between confusable
   Standards, not just the label. Highlights are scored by a deterministic
   span-matching grader with tolerant partial-credit tiers, and the Python and JS
   graders are kept in parity so desktop and mobile grade identically.
-- **Optional AI layer (OFF by default).** With an `OPENAI_API_KEY` present, ethics
-  highlights can be graded semantically and card backs drafted from the front in
-  the editor ("AI Back"). With **no key**, semantic grading falls back to the
-  deterministic grader and the AI editor button renders **disabled with a
-  tooltip** — no network calls, identical study experience.
+- **Optional AI layer (OFF by default).** The **master gate is your own key**:
+  `cfa.ai.llm_client.ai_enabled()` returns true only when an `OPENAI_API_KEY` is
+  present (no network call to decide), so with **no key** the whole AI layer is
+  off. Two AI features sit behind it, each with a deterministic fallback: (1)
+  **semantic grading** of ethics highlights → falls back to the deterministic
+  span grader; (2) editor **"AI Back"** card-back drafting → renders **disabled
+  with a tooltip**. The layered control is **three toggles** — a master
+  `cfa_ai_enabled` plus per-feature `cfa_ai_grading_enabled` and
+  `cfa_ai_tabfill_enabled` in `col.conf`, so an AI path runs only when the key is
+  present **and** its toggle is on; the in-app toggle UI for these is landing on a
+  companion branch. Either way, AI-off behaves exactly like an AI-free build.
 - **CFA study menu & Peak-on-Exam-Day planner.** The desktop **CFA** menu wires the
-  flagship flows end-to-end with no dead-ends — *Study Ethics Minimal-Pairs*,
-  *Study Ethics (One-Passage)*, *Study by Exam Priority*, *Exam Readiness…*, and a
+  flagship flows end-to-end with no dead-ends — _Study Ethics Minimal-Pairs_,
+  _Study Ethics (One-Passage)_, _Study by Exam Priority_, _Exam Readiness…_, and a
   **Peak-on-Exam-Day** deadline view that ranks which cards to prioritize
   (including new cards) so recall peaks on your configured exam date. Each action
   seeds its deck on demand and enters review.
 - **UI overhaul.** A shared CFA design system (calm, finance-desk aesthetic
   inspired by markmeldrum.com) restyles the ethics card and the
   readiness/deadline surfaces through SvelteKit web views.
-- **CFA Level II deck.** Hand-authored content spanning the ten topic areas, tagged
-  `los::<topic>::<reading>`. Build it with
-  [`tools/cfa/build_cfa_deck.py`](./tools/cfa/build_cfa_deck.py).
+- **CFA Level II deck.** **711 hand-authored, original items** (`license:
+  authored-original`, no copyrighted CFA Institute text) spanning **all ten**
+  Level II topic areas — ethics, quant, economics, FRA, corporate issuers,
+  equity, **fixed income**, **derivatives**, alternative investments, and
+  portfolio management — each tagged `los::<topic>::<reading>`. Every built card
+  carries a **visible named source** footer (`Source: CFA Level II > <topic> >
+  <reading>`), so a study card's provenance mirrors the AI provenance line. Build
+  it with [`tools/cfa/build_cfa_deck.py`](./tools/cfa/build_cfa_deck.py); validate
+  with [`cfa/deck/validate_deck.py`](./cfa/deck/validate_deck.py). Note: the
+  "Study by Exam Priority" queue returns a **capped, weakest-first fetch** (a
+  session limit, e.g. 100 on mobile), **not** the deck size — the deck stays
+  > 200 cards.
 - **Stock review loop.** Standard Anki review runs unchanged on the deck.
 
 ## Building & running
@@ -142,6 +161,19 @@ build: the Rust backend is compiled for Android and packaged with the Kotlin/Jav
 app into an APK. **Exact build commands, toolchain versions, and CFA-specific mobile
 wiring are owned and documented by the AnkiDroid fleet in that fork's own README**
 — refer to it for the authoritative mobile build steps.
+
+The fork's AnkiDroid is branded **ankiCFA** and is adding **native CFA screens**.
+The **Exam Readiness** screen (the same three scores — Memory / Performance /
+Readiness — with ranges, abstain, and per-topic recall) is proven on a real arm64
+emulator; on device those scores currently come from a **deterministic on-device
+scorer** (the shared `computeCfaScores` RPC is not yet exposed). The **content**
+(decks, note-types, ethics cards) and the **exam config** reach the phone over the
+**shared Rust sync engine** — the desktop → self-hosted `anki-sync-server` →
+fresh-phone round-trip is proven in
+[`proof/gnhf2/f8-persistence-report.txt`](./proof/gnhf2/f8-persistence-report.txt).
+[docs/cfa/PLATFORM-MATRIX.md](./docs/cfa/PLATFORM-MATRIX.md) is the authoritative,
+no-overclaim split of what runs where (and what is still landing on the mobile
+branch).
 
 ## Architecture overview
 
