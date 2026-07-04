@@ -91,4 +91,56 @@ customizations reset/diverge the on-device collection) — filed in
 
 Tooling added: `tools/cfa/phone_sync.sh` (reliable cold-launch + uiautomator-
 located Sync tap + logcat outcome), extended `tools/cfa/desktop_sync.py`
-(review/dump). Commit: <inc2-sha>
+(review/dump). Commit: e5642098d
+
+---
+
+## Increment 3 — no double-count (revlog distinct, dedup for scoring) ✅
+
+**Flagship test:** `test_offline_same_card_dual_review_revlog_distinct_not_inflated`
+in `pylib/tests/test_cfa_sync_dedup.py` — same card reviewed offline on desktop
+AND phone → **2 distinct revlog rows** on both sides after sync, but
+`deduped_graded_review_count()` == 1 (per-(card, day) dedup does NOT inflate
+give-up totals). Also `test_dedup_would_fail_if_naive_count_used_for_giveup`.
+
+Helpers in `pylib/anki/cfa_sync.py`: `raw_graded_review_count`,
+`deduped_graded_review_count`, `_collection_day`.
+
+BEFORE: `inc3-before-dedup-contract.txt` (naive count would double-count)
+AFTER:  `inc3-dedup-test.log` (4 passed, AI-off)
+
+HANDOFF: orchestrator must apply dedup in `memory_score()` (currently raw count).
+
+Commit: <inc3-sha>
+
+---
+
+## Increment 4 — D5 offline-then-sync ✅
+
+Airplane mode ON → review ethics card → airplane OFF → sync → desktop pull.
+Offline review revlog **1783138068339** lands on desktop (see
+`inc4-offline-delta.txt`, `inc4-desktop-revlog-after.txt`).
+
+BEFORE: `inc4-before-deckpicker.png`, `inc4-desktop-revlog-before.txt` (262 rows)
+AFTER:  `inc4-offline-01-front.png` (airplane + reviewer),
+        `inc4-after-synced.png`, `inc4-phone-sync-log.txt` (Full Upload),
+        `offline-then-sync.mp4`, `inc4-desktop-revlog-after.txt` (new id)
+
+Commit: <inc4-sha>
+
+---
+
+## Increment 5 — ethics attempt detail via card.custom_data ✅
+
+**Desktop hook:** `qt/aqt/cfa_ethics_sync.py` reads `localStorage["cfaEthics:pending"]`
+on `reviewer_did_show_answer`, compacts via `compact_ethics_payload()`, writes
+`card.custom_data["cfaEthic"]` (Anki keys ≤8 bytes, total ≤100 bytes).
+
+**Machine test:** `test_ethics_custom_data_roundtrips_through_sync_server`
+**Cross-device proof:** `inc5-ethics-customdata-proof.txt` — phone sets
+`{"cfaEthic":{"id":"SMD-01","ok":true,"hl":"correct","src":"fb",...}}`, syncs,
+desktop full-download reads identical namespace. `INC5_CROSS_DEVICE PASS`.
+
+HANDOFF: full W3 payload too large for custom_data; AnkiDroid bridge still needed.
+
+Commit: <inc5-sha>
