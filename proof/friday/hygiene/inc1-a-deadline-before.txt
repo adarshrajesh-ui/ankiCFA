@@ -1,0 +1,167 @@
+===== (a) deadline dialog test AI-off =====
+FF.FF                                                                    [100%]
+=================================== FAILURES ===================================
+______________ test_dialog_ranks_new_cards_on_fresh_all_new_deck _______________
+
+    def test_dialog_ranks_new_cards_on_fresh_all_new_deck() -> None:
+        col = _empty_col()
+        deck = _add_new_cards(col, "CFA", 5)
+        col.decks.set_current(deck)
+        assert len(col.find_cards("deck:CFA is:new")) == 5
+        assert len(col.find_cards("deck:CFA is:due")) == 0
+    
+        mw = _StandInMW(col)
+>       dlg = cfa.DeadlineDialog(mw)  # type: ignore[arg-type]
+              ^^^^^^^^^^^^^^^^^^^^^^
+
+qt/tests/test_cfa_deadline_dialog.py:79: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+qt/aqt/cfa.py:457: in __init__
+    self.web.load_sveltekit_page(f"cfa-deadline/{int(deck_id)}")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <aqt.webview.AnkiWebView object at 0x10bdd2c10>
+path = 'cfa-deadline/1783134231871'
+
+    def load_sveltekit_page(self, path: str) -> None:
+        from aqt import mw
+    
+        self.set_open_links_externally(True)
+        if theme_manager.night_mode:
+            extra = "#night"
+        else:
+            extra = ""
+    
+        if hmr_mode:
+            server = "http://127.0.0.1:5173/"
+        else:
+>           server = mw.serverURL()
+                     ^^^^^^^^^^^^
+E           AttributeError: 'NoneType' object has no attribute 'serverURL'
+
+qt/aqt/webview.py:900: AttributeError
+________________ test_dialog_empty_state_only_when_truly_empty _________________
+
+    def test_dialog_empty_state_only_when_truly_empty() -> None:
+        # The honest empty state still appears when the deck genuinely has no cards.
+        col = _empty_col()
+        deck = col.decks.id("CFA")  # created, but no cards added
+        col.decks.set_current(deck)
+    
+        mw = _StandInMW(col)
+>       dlg = cfa.DeadlineDialog(mw)  # type: ignore[arg-type]
+              ^^^^^^^^^^^^^^^^^^^^^^
+
+qt/tests/test_cfa_deadline_dialog.py:100: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+qt/aqt/cfa.py:457: in __init__
+    self.web.load_sveltekit_page(f"cfa-deadline/{int(deck_id)}")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <aqt.webview.AnkiWebView object at 0x10be1d8b0>
+path = 'cfa-deadline/1783134232206'
+
+    def load_sveltekit_page(self, path: str) -> None:
+        from aqt import mw
+    
+        self.set_open_links_externally(True)
+        if theme_manager.night_mode:
+            extra = "#night"
+        else:
+            extra = ""
+    
+        if hmr_mode:
+            server = "http://127.0.0.1:5173/"
+        else:
+>           server = mw.serverURL()
+                     ^^^^^^^^^^^^
+E           AttributeError: 'NoneType' object has no attribute 'serverURL'
+
+qt/aqt/webview.py:900: AttributeError
+_________________ test_dialog_self_heals_absurd_persisted_date _________________
+
+    def test_dialog_self_heals_absurd_persisted_date() -> None:
+        col = _empty_col()
+        deck = _add_new_cards(col, "CFA", 2)
+        col.decks.set_current(deck)
+        # Runtime pollution: a far-future date persisted in the synced config.
+        anki_cfa.set_exam_config(col, exam_date="2099-12-31", topic_weights={})
+    
+        mw = _StandInMW(col)
+>       dlg = cfa.DeadlineDialog(mw)  # type: ignore[arg-type]
+              ^^^^^^^^^^^^^^^^^^^^^^
+
+qt/tests/test_cfa_deadline_dialog.py:146: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+qt/aqt/cfa.py:457: in __init__
+    self.web.load_sveltekit_page(f"cfa-deadline/{int(deck_id)}")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <aqt.webview.AnkiWebView object at 0x10be1e2b0>
+path = 'cfa-deadline/1783134232220'
+
+    def load_sveltekit_page(self, path: str) -> None:
+        from aqt import mw
+    
+        self.set_open_links_externally(True)
+        if theme_manager.night_mode:
+            extra = "#night"
+        else:
+            extra = ""
+    
+        if hmr_mode:
+            server = "http://127.0.0.1:5173/"
+        else:
+>           server = mw.serverURL()
+                     ^^^^^^^^^^^^
+E           AttributeError: 'NoneType' object has no attribute 'serverURL'
+
+qt/aqt/webview.py:900: AttributeError
+____________________ test_dialog_keeps_sane_persisted_date _____________________
+
+    def test_dialog_keeps_sane_persisted_date() -> None:
+        col = _empty_col()
+        deck = _add_new_cards(col, "CFA", 2)
+        col.decks.set_current(deck)
+        # A sane near-future date (30 days out) must survive untouched.
+        sane = (date.today() + timedelta(days=30)).isoformat()
+        anki_cfa.set_exam_config(col, exam_date=sane, topic_weights={})
+    
+        mw = _StandInMW(col)
+>       dlg = cfa.DeadlineDialog(mw)  # type: ignore[arg-type]
+              ^^^^^^^^^^^^^^^^^^^^^^
+
+qt/tests/test_cfa_deadline_dialog.py:163: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+qt/aqt/cfa.py:457: in __init__
+    self.web.load_sveltekit_page(f"cfa-deadline/{int(deck_id)}")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <aqt.webview.AnkiWebView object at 0x10be1ea30>
+path = 'cfa-deadline/1783134232234'
+
+    def load_sveltekit_page(self, path: str) -> None:
+        from aqt import mw
+    
+        self.set_open_links_externally(True)
+        if theme_manager.night_mode:
+            extra = "#night"
+        else:
+            extra = ""
+    
+        if hmr_mode:
+            server = "http://127.0.0.1:5173/"
+        else:
+>           server = mw.serverURL()
+                     ^^^^^^^^^^^^
+E           AttributeError: 'NoneType' object has no attribute 'serverURL'
+
+qt/aqt/webview.py:900: AttributeError
+=========================== short test summary info ============================
+FAILED qt/tests/test_cfa_deadline_dialog.py::test_dialog_ranks_new_cards_on_fresh_all_new_deck
+FAILED qt/tests/test_cfa_deadline_dialog.py::test_dialog_empty_state_only_when_truly_empty
+FAILED qt/tests/test_cfa_deadline_dialog.py::test_dialog_self_heals_absurd_persisted_date
+FAILED qt/tests/test_cfa_deadline_dialog.py::test_dialog_keeps_sane_persisted_date
+4 failed, 1 passed in 0.68s
+Release of profile requested but WebEnginePage still not deleted. Expect troubles !
+a exit=1

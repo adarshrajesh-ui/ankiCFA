@@ -1,0 +1,1399 @@
+./ninja pylib qt check
+[1m[92m    Finished[0m `release` profile [optimized] target(s) in 0.33s
+[1/16; 16 active; 0.104s] check:format:python:qt
+FAILED: /Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/out/tests/python_format.check.10801519689516895166 
+/Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/out/rust/release/runner run --stamp=/Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/out/tests/python_format.check.10801519689516895166 /Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/out/pyenv/bin/ruff format --check qt/aqt/__init__.py qt/aqt/_macos_helper.py qt/aqt/about.py qt/aqt/addcards.py qt/aqt/addons.py qt/aqt/ankihub.py qt/aqt/browser/__init__.py qt/aqt/browser/browser.py qt/aqt/browser/card_info.py qt/aqt/browser/find_and_replace.py qt/aqt/browser/find_duplicates.py qt/aqt/browser/layout.py qt/aqt/browser/previewer.py qt/aqt/browser/sidebar/__init__.py qt/aqt/browser/sidebar/item.py qt/aqt/browser/sidebar/model.py qt/aqt/browser/sidebar/searchbar.py qt/aqt/browser/sidebar/toolbar.py qt/aqt/browser/sidebar/tree.py qt/aqt/browser/table/__init__.py qt/aqt/browser/table/model.py qt/aqt/browser/table/state.py qt/aqt/browser/table/table.py qt/aqt/cfa.py qt/aqt/cfa_ethics_ai.py qt/aqt/cfa_seed.py qt/aqt/cfa_style.py qt/aqt/cfa_tab_fill.py qt/aqt/changenotetype.py qt/aqt/clayout.py qt/aqt/colors.py qt/aqt/customstudy.py qt/aqt/dbcheck.py qt/aqt/debug_console.py qt/aqt/deckbrowser.py qt/aqt/deckchooser.py qt/aqt/deckconf.py qt/aqt/deckdescription.py qt/aqt/deckoptions.py qt/aqt/editcurrent.py qt/aqt/editor.py qt/aqt/emptycards.py qt/aqt/errors.py qt/aqt/exporting.py qt/aqt/fields.py qt/aqt/filtered_deck.py qt/aqt/flags.py qt/aqt/forms/__init__.py qt/aqt/forms/about.py qt/aqt/forms/addcards.py qt/aqt/forms/addfield.py qt/aqt/forms/addmodel.py qt/aqt/forms/addonconf.py qt/aqt/forms/addons.py qt/aqt/forms/browser.py qt/aqt/forms/browserdisp.py qt/aqt/forms/browseropts.py qt/aqt/forms/changemap.py qt/aqt/forms/changemodel.py qt/aqt/forms/clayout_top.py qt/aqt/forms/customstudy.py qt/aqt/forms/dconf.py qt/aqt/forms/debug.py qt/aqt/forms/editcurrent.py qt/aqt/forms/edithtml.py qt/aqt/forms/emptycards.py qt/aqt/forms/exporting.py qt/aqt/forms/fields.py qt/aqt/forms/filtered_deck.py qt/aqt/forms/finddupes.py qt/aqt/forms/findreplace.py qt/aqt/forms/forget.py qt/aqt/forms/getaddons.py qt/aqt/forms/importing.py qt/aqt/forms/main.py qt/aqt/forms/modelopts.py qt/aqt/forms/models.py qt/aqt/forms/preferences.py qt/aqt/forms/preview.py qt/aqt/forms/profiles.py qt/aqt/forms/progress.py qt/aqt/forms/reposition.py qt/aqt/forms/setgroup.py qt/aqt/forms/setlang.py qt/aqt/forms/stats.py qt/aqt/forms/studydeck.py qt/aqt/forms/synclog.py qt/aqt/forms/taglimit.py qt/aqt/forms/template.py qt/aqt/forms/widgets.py qt/aqt/gui_hooks.py qt/aqt/import_export/__init__.py qt/aqt/import_export/exporting.py qt/aqt/import_export/import_dialog.py qt/aqt/import_export/importing.py qt/aqt/importing.py qt/aqt/legacy.py qt/aqt/log.py qt/aqt/main.py qt/aqt/mediacheck.py qt/aqt/mediasrv.py qt/aqt/mediasync.py qt/aqt/modelchooser.py qt/aqt/models.py qt/aqt/mpv.py qt/aqt/notetypechooser.py qt/aqt/operations/__init__.py qt/aqt/operations/card.py qt/aqt/operations/collection.py qt/aqt/operations/deck.py qt/aqt/operations/note.py qt/aqt/operations/notetype.py qt/aqt/operations/scheduling.py qt/aqt/operations/tag.py qt/aqt/overview.py qt/aqt/package.py qt/aqt/preferences.py qt/aqt/profiles.py qt/aqt/progress.py qt/aqt/props.py qt/aqt/qt/__init__.py qt/aqt/qt/qt6.py qt/aqt/reviewer.py qt/aqt/schema_change_tracker.py qt/aqt/sound.py qt/aqt/stats.py qt/aqt/studydeck.py qt/aqt/stylesheets.py qt/aqt/switch.py qt/aqt/sync.py qt/aqt/tagedit.py qt/aqt/taglimit.py qt/aqt/taskman.py qt/aqt/theme.py qt/aqt/toolbar.py qt/aqt/tts.py qt/aqt/undo.py qt/aqt/update.py qt/aqt/url_schemes.py qt/aqt/utils.py qt/aqt/webview.py qt/aqt/widgetgallery.py qt/aqt/winpaths.py qt/audio/anki_audio/__init__.py qt/audio/hatch_build.py qt/audio/version.py qt/hatch_build.py qt/installer/app/src/anki/__init__.py qt/installer/app/src/anki/__main__.py qt/installer/app/src/anki/app.py qt/installer/briefcase_plugins/src/briefcase_plugins/__init__.py qt/installer/briefcase_plugins/src/briefcase_plugins/platforms/__init__.py qt/installer/briefcase_plugins/src/briefcase_plugins/platforms/linux/__init__.py qt/installer/briefcase_plugins/src/briefcase_plugins/platforms/linux/zip.py qt/mac/anki_mac_helper/__init__.py qt/mac/helper_build.py qt/runanki.py qt/tests/__init__.py qt/tests/launch_anki_for_e2e.py qt/tests/qwebengine_csp_smoke.py qt/tests/test_addons.py qt/tests/test_cfa_deadline_dialog.py qt/tests/test_cfa_ethics_ai.py qt/tests/test_cfa_f0b.py qt/tests/test_cfa_f4_dialog.py qt/tests/test_cfa_f5_style.py qt/tests/test_cfa_menu.py qt/tests/test_cfa_tab_fill.py qt/tests/test_i18n.py qt/tests/test_installer.py qt/tests/test_mediasrv.py qt/tools/build_installer.py qt/tools/build_qrc.py qt/tools/build_ui.py qt/tools/color_svg.py qt/tools/extract_sass_vars.py qt/tools/genhooks_gui.py "&&" /Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/out/pyenv/bin/ruff check --select I --fix qt/aqt/__init__.py qt/aqt/_macos_helper.py qt/aqt/about.py qt/aqt/addcards.py qt/aqt/addons.py qt/aqt/ankihub.py qt/aqt/browser/__init__.py qt/aqt/browser/browser.py qt/aqt/browser/card_info.py qt/aqt/browser/find_and_replace.py qt/aqt/browser/find_duplicates.py qt/aqt/browser/layout.py qt/aqt/browser/previewer.py qt/aqt/browser/sidebar/__init__.py qt/aqt/browser/sidebar/item.py qt/aqt/browser/sidebar/model.py qt/aqt/browser/sidebar/searchbar.py qt/aqt/browser/sidebar/toolbar.py qt/aqt/browser/sidebar/tree.py qt/aqt/browser/table/__init__.py qt/aqt/browser/table/model.py qt/aqt/browser/table/state.py qt/aqt/browser/table/table.py qt/aqt/cfa.py qt/aqt/cfa_ethics_ai.py qt/aqt/cfa_seed.py qt/aqt/cfa_style.py qt/aqt/cfa_tab_fill.py qt/aqt/changenotetype.py qt/aqt/clayout.py qt/aqt/colors.py qt/aqt/customstudy.py qt/aqt/dbcheck.py qt/aqt/debug_console.py qt/aqt/deckbrowser.py qt/aqt/deckchooser.py qt/aqt/deckconf.py qt/aqt/deckdescription.py qt/aqt/deckoptions.py qt/aqt/editcurrent.py qt/aqt/editor.py qt/aqt/emptycards.py qt/aqt/errors.py qt/aqt/exporting.py qt/aqt/fields.py qt/aqt/filtered_deck.py qt/aqt/flags.py qt/aqt/forms/__init__.py qt/aqt/forms/about.py qt/aqt/forms/addcards.py qt/aqt/forms/addfield.py qt/aqt/forms/addmodel.py qt/aqt/forms/addonconf.py qt/aqt/forms/addons.py qt/aqt/forms/browser.py qt/aqt/forms/browserdisp.py qt/aqt/forms/browseropts.py qt/aqt/forms/changemap.py qt/aqt/forms/changemodel.py qt/aqt/forms/clayout_top.py qt/aqt/forms/customstudy.py qt/aqt/forms/dconf.py qt/aqt/forms/debug.py qt/aqt/forms/editcurrent.py qt/aqt/forms/edithtml.py qt/aqt/forms/emptycards.py qt/aqt/forms/exporting.py qt/aqt/forms/fields.py qt/aqt/forms/filtered_deck.py qt/aqt/forms/finddupes.py qt/aqt/forms/findreplace.py qt/aqt/forms/forget.py qt/aqt/forms/getaddons.py qt/aqt/forms/importing.py qt/aqt/forms/main.py qt/aqt/forms/modelopts.py qt/aqt/forms/models.py qt/aqt/forms/preferences.py qt/aqt/forms/preview.py qt/aqt/forms/profiles.py qt/aqt/forms/progress.py qt/aqt/forms/reposition.py qt/aqt/forms/setgroup.py qt/aqt/forms/setlang.py qt/aqt/forms/stats.py qt/aqt/forms/studydeck.py qt/aqt/forms/synclog.py qt/aqt/forms/taglimit.py qt/aqt/forms/template.py qt/aqt/forms/widgets.py qt/aqt/gui_hooks.py qt/aqt/import_export/__init__.py qt/aqt/import_export/exporting.py qt/aqt/import_export/import_dialog.py qt/aqt/import_export/importing.py qt/aqt/importing.py qt/aqt/legacy.py qt/aqt/log.py qt/aqt/main.py qt/aqt/mediacheck.py qt/aqt/mediasrv.py qt/aqt/mediasync.py qt/aqt/modelchooser.py qt/aqt/models.py qt/aqt/mpv.py qt/aqt/notetypechooser.py qt/aqt/operations/__init__.py qt/aqt/operations/card.py qt/aqt/operations/collection.py qt/aqt/operations/deck.py qt/aqt/operations/note.py qt/aqt/operations/notetype.py qt/aqt/operations/scheduling.py qt/aqt/operations/tag.py qt/aqt/overview.py qt/aqt/package.py qt/aqt/preferences.py qt/aqt/profiles.py qt/aqt/progress.py qt/aqt/props.py qt/aqt/qt/__init__.py qt/aqt/qt/qt6.py qt/aqt/reviewer.py qt/aqt/schema_change_tracker.py qt/aqt/sound.py qt/aqt/stats.py qt/aqt/studydeck.py qt/aqt/stylesheets.py qt/aqt/switch.py qt/aqt/sync.py qt/aqt/tagedit.py qt/aqt/taglimit.py qt/aqt/taskman.py qt/aqt/theme.py qt/aqt/toolbar.py qt/aqt/tts.py qt/aqt/undo.py qt/aqt/update.py qt/aqt/url_schemes.py qt/aqt/utils.py qt/aqt/webview.py qt/aqt/widgetgallery.py qt/aqt/winpaths.py qt/audio/anki_audio/__init__.py qt/audio/hatch_build.py qt/audio/version.py qt/hatch_build.py qt/installer/app/src/anki/__init__.py qt/installer/app/src/anki/__main__.py qt/installer/app/src/anki/app.py qt/installer/briefcase_plugins/src/briefcase_plugins/__init__.py qt/installer/briefcase_plugins/src/briefcase_plugins/platforms/__init__.py qt/installer/briefcase_plugins/src/briefcase_plugins/platforms/linux/__init__.py qt/installer/briefcase_plugins/src/briefcase_plugins/platforms/linux/zip.py qt/mac/anki_mac_helper/__init__.py qt/mac/helper_build.py qt/runanki.py qt/tests/__init__.py qt/tests/launch_anki_for_e2e.py qt/tests/qwebengine_csp_smoke.py qt/tests/test_addons.py qt/tests/test_cfa_deadline_dialog.py qt/tests/test_cfa_ethics_ai.py qt/tests/test_cfa_f0b.py qt/tests/test_cfa_f4_dialog.py qt/tests/test_cfa_f5_style.py qt/tests/test_cfa_menu.py qt/tests/test_cfa_tab_fill.py qt/tests/test_i18n.py qt/tests/test_installer.py qt/tests/test_mediasrv.py qt/tools/build_installer.py qt/tools/build_qrc.py qt/tools/build_ui.py qt/tools/color_svg.py qt/tools/extract_sass_vars.py qt/tools/genhooks_gui.py
+Would reformat: qt/tests/test_cfa_deadline_dialog.py
+1 file would be reformatted, 176 files already formatted
+Failed to run (1): /Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/out/pyenv/bin/ruff format --check qt/aqt/__init__.py qt/aqt/_macos_helper.py qt/aqt/about.py qt/aqt/addcards.py qt/aqt/addons.py qt/aqt/ankihub.py qt/aqt/browser/__init__.py qt/aqt/browser/browser.py qt/aqt/browser/card_info.py qt/aqt/browser/find_and_replace.py qt/aqt/browser/find_duplicates.py qt/aqt/browser/layout.py qt/aqt/browser/previewer.py qt/aqt/browser/sidebar/__init__.py qt/aqt/browser/sidebar/item.py qt/aqt/browser/sidebar/model.py qt/aqt/browser/sidebar/searchbar.py qt/aqt/browser/sidebar/toolbar.py qt/aqt/browser/sidebar/tree.py qt/aqt/browser/table/__init__.py qt/aqt/browser/table/model.py qt/aqt/browser/table/state.py qt/aqt/browser/table/table.py qt/aqt/cfa.py qt/aqt/cfa_ethics_ai.py qt/aqt/cfa_seed.py qt/aqt/cfa_style.py qt/aqt/cfa_tab_fill.py qt/aqt/changenotetype.py qt/aqt/clayout.py qt/aqt/colors.py qt/aqt/customstudy.py qt/aqt/dbcheck.py qt/aqt/debug_console.py qt/aqt/deckbrowser.py qt/aqt/deckchooser.py qt/aqt/deckconf.py qt/aqt/deckdescription.py qt/aqt/deckoptions.py qt/aqt/editcurrent.py qt/aqt/editor.py qt/aqt/emptycards.py qt/aqt/errors.py qt/aqt/exporting.py qt/aqt/fields.py qt/aqt/filtered_deck.py qt/aqt/flags.py qt/aqt/forms/__init__.py qt/aqt/forms/about.py qt/aqt/forms/addcards.py qt/aqt/forms/addfield.py qt/aqt/forms/addmodel.py qt/aqt/forms/addonconf.py qt/aqt/forms/addons.py qt/aqt/forms/browser.py qt/aqt/forms/browserdisp.py qt/aqt/forms/browseropts.py qt/aqt/forms/changemap.py qt/aqt/forms/changemodel.py qt/aqt/forms/clayout_top.py qt/aqt/forms/customstudy.py qt/aqt/forms/dconf.py qt/aqt/forms/debug.py qt/aqt/forms/editcurrent.py qt/aqt/forms/edithtml.py qt/aqt/forms/emptycards.py qt/aqt/forms/exporting.py qt/aqt/forms/fields.py qt/aqt/forms/filtered_deck.py qt/aqt/forms/finddupes.py qt/aqt/forms/findreplace.py qt/aqt/forms/forget.py qt/aqt/forms/getaddons.py qt/aqt/forms/importing.py qt/aqt/forms/main.py qt/aqt/forms/modelopts.py qt/aqt/forms/models.py qt/aqt/forms/preferences.py qt/aqt/forms/preview.py qt/aqt/forms/profiles.py qt/aqt/forms/progress.py qt/aqt/forms/reposition.py qt/aqt/forms/setgroup.py qt/aqt/forms/setlang.py qt/aqt/forms/stats.py qt/aqt/forms/studydeck.py qt/aqt/forms/synclog.py qt/aqt/forms/taglimit.py qt/aqt/forms/template.py qt/aqt/forms/widgets.py qt/aqt/gui_hooks.py qt/aqt/import_export/__init__.py qt/aqt/import_export/exporting.py qt/aqt/import_export/import_dialog.py qt/aqt/import_export/importing.py qt/aqt/importing.py qt/aqt/legacy.py qt/aqt/log.py qt/aqt/main.py qt/aqt/mediacheck.py qt/aqt/mediasrv.py qt/aqt/mediasync.py qt/aqt/modelchooser.py qt/aqt/models.py qt/aqt/mpv.py qt/aqt/notetypechooser.py qt/aqt/operations/__init__.py qt/aqt/operations/card.py qt/aqt/operations/collection.py qt/aqt/operations/deck.py qt/aqt/operations/note.py qt/aqt/operations/notetype.py qt/aqt/operations/scheduling.py qt/aqt/operations/tag.py qt/aqt/overview.py qt/aqt/package.py qt/aqt/preferences.py qt/aqt/profiles.py qt/aqt/progress.py qt/aqt/props.py qt/aqt/qt/__init__.py qt/aqt/qt/qt6.py qt/aqt/reviewer.py qt/aqt/schema_change_tracker.py qt/aqt/sound.py qt/aqt/stats.py qt/aqt/studydeck.py qt/aqt/stylesheets.py qt/aqt/switch.py qt/aqt/sync.py qt/aqt/tagedit.py qt/aqt/taglimit.py qt/aqt/taskman.py qt/aqt/theme.py qt/aqt/toolbar.py qt/aqt/tts.py qt/aqt/undo.py qt/aqt/update.py qt/aqt/url_schemes.py qt/aqt/utils.py qt/aqt/webview.py qt/aqt/widgetgallery.py qt/aqt/winpaths.py qt/audio/anki_audio/__init__.py qt/audio/hatch_build.py qt/audio/version.py qt/hatch_build.py qt/installer/app/src/anki/__init__.py qt/installer/app/src/anki/__main__.py qt/installer/app/src/anki/app.py qt/installer/briefcase_plugins/src/briefcase_plugins/__init__.py qt/installer/briefcase_plugins/src/briefcase_plugins/platforms/__init__.py qt/installer/briefcase_plugins/src/briefcase_plugins/platforms/linux/__init__.py qt/installer/briefcase_plugins/src/briefcase_plugins/platforms/linux/zip.py qt/mac/anki_mac_helper/__init__.py qt/mac/helper_build.py qt/runanki.py qt/tests/__init__.py qt/tests/launch_anki_for_e2e.py qt/tests/qwebengine_csp_smoke.py qt/tests/test_addons.py qt/tests/test_cfa_deadline_dialog.py qt/tests/test_cfa_ethics_ai.py qt/tests/test_cfa_f0b.py qt/tests/test_cfa_f4_dialog.py qt/tests/test_cfa_f5_style.py qt/tests/test_cfa_menu.py qt/tests/test_cfa_tab_fill.py qt/tests/test_i18n.py qt/tests/test_installer.py qt/tests/test_mediasrv.py qt/tools/build_installer.py qt/tools/build_qrc.py qt/tools/build_ui.py qt/tools/color_svg.py qt/tools/extract_sass_vars.py qt/tools/genhooks_gui.py
+[2/16; 15 active; 0.119s] check:format:python:tools
+25 files already formatted
+Found 1 error (1 fixed, 0 remaining).
+[3/16; 14 active; 0.121s] check:ruff
+FAILED: /Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/out/tests/python_ruff.check.3744293702001003432 
+/Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/out/rust/release/runner run --stamp=/Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/out/tests/python_ruff.check.3744293702001003432 /Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/out/pyenv/bin/ruff check qt/aqt ftl pylib/tools tools python 
+I001 [*] Import block is un-sorted or un-formatted
+  --> tools/cfa/serve_cfa_pages.py:58:1
+   |
+56 |   # exists, else Qt raises "QtWebEngineWidgets must be imported ... before a
+57 |   # QCoreApplication instance is created". This mirrors tools/cfa/render_f5_proof.py.
+58 | / import aqt  # noqa: E402
+59 | | from aqt import mediasrv  # noqa: E402
+60 | | from PyQt6.QtWidgets import QApplication  # noqa: E402
+61 | |
+62 | | from anki import cfa  # noqa: E402
+63 | | from anki.cards import CardId  # noqa: E402
+64 | | from anki.collection import Collection  # noqa: E402
+65 | | from anki.decks import DeckId  # noqa: E402
+   | |_____________________________^
+66 |
+67 |   DAY = 86_400
+   |
+help: Organize imports
+
+Found 1 error.
+[*] 1 fixable with the `--fix` option.
+Failed to run (1): /Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/out/pyenv/bin/ruff check qt/aqt ftl pylib/tools tools python
+[4/16; 13 active; 0.444s] check:format:dprint
+FAILED: /Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/out/tests/dprint.check 
+/Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/out/rust/release/runner run --stamp=/Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/out/tests/dprint.check /Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/out/node_modules/.bin/dprint check
+from /Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/cfa/ui/reference/capture_app.mjs:
+27 27| ····for·(const·c·of·candidates)·{
+28 28| ········try·{
+29 29| ············const·mod·=·await·import(c);
+   30|-············if·(mod.chromium)·return·mod.chromium;
+   31|-············if·(mod.default·&&·mod.default.chromium)·return·mod.default.chromium;
+30   |+············if·(mod.chromium)·{·return·mod.chromium;·}
+31   |+············if·(mod.default·&&·mod.default.chromium)·{·return·mod.default.chromium;·}
+32 32| ········}·catch·(e)·{
+33 33| ············errs.push(`${c}:·${e.message·||·e}`);
+34 34| ········}
+...
+78 78| ········const·consoleErrors·=·[];
+79 79| ········const·failed·=·[];
+80 80| ········page.on("console",·(m)·=>·{
+   81|-············if·(m.type()·===·"error")·consoleErrors.push(m.text());
+81   |+············if·(m.type()·===·"error")·{·consoleErrors.push(m.text());·}
+82 82| ········});
+83 83| ········page.on("requestfailed",·(r)·=>·{
+84 84| ············failed.push(`${r.url()}·::·${r.failure()?.errorText·||·"failed"}`);
+85 85| ········});
+86 86| ········page.on("response",·(r)·=>·{
+   87|-············if·(r.status()·>=·400)·failed.push(`${r.url()}·::·HTTP·${r.status()}`);
+87   |+············if·(r.status()·>=·400)·{·failed.push(`${r.url()}·::·HTTP·${r.status()}`);·}
+88 88| ········});
+89 89| 
+90 90| ········let·navError·=·null;
+--
+from /Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/proof/friday/hygiene/NOTES.md:
+ 7  7| `SUBMISSION-CHECKLIST.md`).
+ 8  8| 
+ 9  9| ##·Setup·(respawn·—·worktree·reality)
+10   |+
+11 10| -·`friday/hygiene`·is·checked·out·in·its·own·worktree
+12 11| ··`/Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt`;·the·shared·main·tree
+13 12| ··(`ankiCFA`)·is·on·`friday/ethics`.·Prior-run·edits·lived·in·the·main·tree·and
+...
+21 20| ··is·durable·on·the·remote·regardless·of·local·resets.
+22 21| 
+23 22| ##·AI-OFF·discipline
+24   |+
+25 23| This·worktree·has·**no·`.env`**,·so·every·build/test·here·runs·AI-OFF·by·default
+26 24| (no·key·present·→·deterministic·fallback·path).·The·real·key·is·never
+27 25| printed/logged/committed.·(In·the·main·tree,·use·`mv·.env·.env.bak;·<cmd>;·mv
+...
+30 28| ---
+31 29| 
+32 30| ##·Increment·1·—·Fix·the·6·`just·check`·failures
+33   |+
+34 31| (status:·DONE·—·committed·+·pushed;·PR·below)
+35 32| 
+36 33| Work·verified/built·on·in·the·`friday/hygiene`·**worktree**·at
+...
+38 35| the·shared·main·tree;·carried·over·here·byte-identical,·`just·build`·OK).
+39 36| 
+40 37| Fixes·(all·additive,·in-scope):
+41   |+
+42 38| -·`qt/tests/test_cfa_deadline_dialog.py`·—·the·DeadlineDialog·is·now·a·thin·host
+43 39| ··for·the·shared·`ts/lib/cfa`·SvelteKit·page;·tests·stub·`AnkiWebView`·and·assert
+44 40| ··against·the·REAL·`mediasrv._cfa_deadline_payload`·(deck·scoping,·new-card
+...
+58 54| 
+59 55| BEFORE:·`proof/friday/hygiene/00-just-check-before.txt`·(full·`just·check`,·exit·1,
+60 56| `6·failed,·136·passed`),·`inc1-before-6failures.txt`,·`inc1-c-mypy-before.txt`.
+   57|-AFTER:··`proof/friday/hygiene/inc1-after.txt`·—·mypy·`Success:·no·issues·found·in
+61   |+AFTER:·`proof/friday/hygiene/inc1-after.txt`·—·mypy·`Success:·no·issues·found·in
+62 58| 329·source·files`;·prettier·`All·matched·files·use·Prettier·code·style!`;·probe
+63 59| files·absent;·pytest·`31·passed,·2·skipped`.
+64 60| Tests·run·AI-OFF·(worktree·has·no·`.env`)·+·`just·build`·green.
+   61|-SHA:·`0c18ec672`··PR:·https://github.com/adarshrajesh-ui/ankiCFA/pull/25·(#25)
+65   |+SHA:·`0c18ec672`·PR:·https://github.com/adarshrajesh-ui/ankiCFA/pull/25·(#25)
+66 62| 
+67 63| Note·on·`proof/gnhf2/f0b-deadline-*.png`:·produced·by·the·prior·run·of·the·exact
+68 64| committed·`render_f0b_proof.py`.·Re-running·it·here·regenerated·the·`default`
+...
+71 67| render·fix·itself·is·proven·by·`check:mypy`·going·3·errors·→·0.
+72 68| 
+73 69| ##·Increment·2·—·CFA·deck·content·quality·+·provenance
+74   |+
+75 70| (status:·DONE·—·committed·+·pushed·on·PR·#25)
+76 71| 
+77 72| -·`tools/cfa/build_cfa_deck.py`·—·new·`reading_from_los`·/·`render_source_line`·/
+...
+88 83| ··-·`cfa/deck/items-derivatives-20260703-hygiene-a22.jsonl`·(38·items:·forward
+89 84| ····commitments,·futures/forwards,·swaps,·FRAs,·binomial·+·BSM·option·pricing,
+90 85| ····Greeks/delta-hedging,·put-call·parity)
+   86|-··All·`license:·authored-original`,·exact·6-field·schema,·no·duplicate·fronts.
+91   |+····All·`license:·authored-original`,·exact·6-field·schema,·no·duplicate·fronts.
+92 87| -·Deck:·630·->·**711·authored·items**,·now·covering·**all·ten**·base·topics;
+93 88| ··`topic_weights_for`·renormalizes·to·1.0·over·all·ten.·`validate_deck.py`·green
+94 89| ··(MIN_CARDS=200).
+95 90| -·"20-card"·clarification:·there·is·NO·literal·20·default·in·code·—·the·exam-
+   91|-··priority·queue·returns·a·*capped·weakest-first·fetch*·(desktop·50-200,·mobile
+96   |+··priority·queue·returns·a·_capped·weakest-first·fetch_·(desktop·50-200,·mobile
+97 92| ··`MAX_SESSION_CARDS=100`),·NOT·the·deck·size.·Documented·in·the·builder·docstring
+98 93| ··(and·README/PLATFORM-MATRIX·in·later·increments).·See·HANDOFF·note.
+99 94| -·Tests·(fail·without·the·change):·`test_all_ten_level_ii_topics_present`,
+...
+108 103| -·SHA:·`9e8ad077c`
+109 104| 
+110 105| ##·Increment·3·—·Retire·one-passage·refs·+·PLATFORM-MATRIX
+111    |+
+112 106| (status:·DONE·—·matrix·updated·+·pushed;·one-passage·retirement·BLOCKED·on·W3)
+113 107| 
+114 108| -·One-passage·retirement:·**NOT·actioned·—·blocked·on·W3.**·`origin/main`·still
+...
+129 123| -·SHA:·`9c0615895`
+130 124| 
+131 125| ##·Increment·4·—·README·+·SUBMISSION-CHECKLIST
+132    |+
+133 126| (status:·DONE·—·committed·+·pushed·on·PR·#25)
+134 127| 
+135 128| Both·root·docs·already·existed;·updated·(not·created)·to·match·merged·reality,·no
+136 129| overclaims:
+137    |+
+138 130| -·`README.md`:
+139 131| ··-·Exam·Readiness·bullet·→·**three·scores**·(Memory/Performance/Readiness)·with
+140 132| ····ranges·+·the·full·give-up·rule·(200·reviews·/·50%·coverage·/·30·first
+...
+160 152| ---
+161 153| 
+162 154| ##·Cross-scope·HANDOFFs
+163    |+
+164 155| (none·yet·—·see·HANDOFF.md·if·any)
+--
+from /Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/proof/friday/hygiene/HANDOFF.md:
+ 5  5| NOT·change.·Nothing·here·was·edited·by·me·outside·my·scope.
+ 6  6| 
+ 7  7| ##·1.·One-passage·retirement·—·BLOCKED·on·W3·(ethics),·NOT·actioned
+    8|-Increment·3·asked·me·to·retire·stale·one-passage·refs·*iff*·W3·has·landed·the
+ 8   |+
+ 9   |+Increment·3·asked·me·to·retire·stale·one-passage·refs·_iff_·W3·has·landed·the
+10  9| removal·on·`origin/main`.·It·has·**not**:
+11 10| 
+12 11| -·`origin/main`·still·ships·and·even·enhances·the·one-passage·surface:
+...
+20 19| I·left·every·one-passage·reference·in·docs/tests·intact.·**Action·for·the
+21 20| orchestrator·/·W3:**·once·the·ethics·retirement·merges·to·`origin/main`,·retire
+22 21| the·stale·one-passage·rows/links·in·`docs/cfa/PLATFORM-MATRIX.md`·(row·"Ethics
+   22|-one-passage·deck·+·note-type"),·`README.md`·(the·*Study·Ethics·(One-Passage)*
+23   |+one-passage·deck·+·note-type"),·`README.md`·(the·_Study·Ethics·(One-Passage)_
+24 23| menu·bullet),·and·any·one-passage·lines·in·`docs/cfa/*`.
+25 24| 
+26 25| ##·2.·Mobile·native·surfaces·—·cited·to·the·fork·PR,·pending·merge
+27   |+
+28 26| `docs/cfa/PLATFORM-MATRIX.md`·now·records·the·fork's·native·mobile·**Exam
+29 27| Readiness**·screen·(three·scores).·Honest·scope,·verified·against·the·mobile
+30 28| workstream's·own·NOTES·+·on-device·screencap·(`inc2-readiness-populated.png`):
+...
+41 39| ··mobile·scores·become·🟢·shared-engine·instead·of·an·on-device·fallback.
+42 40| 
+43 41| ##·3.·"20-card"·—·no·literal·default·exists;·documented·the·real·behavior
+44   |+
+45 42| Inc·2·asked·to·document·"20-card·=·the·exam-priority·default·fetch·limit".·There
+46 43| is·**no·literal·20**·anywhere·in·code:·the·exam-priority·queue·returns·a·capped
+   44|-weakest-first·*fetch*·—·desktop·`fetch_limit`·50·(`mediasrv`)·/·200·(`aqt.cfa`),
+47   |+weakest-first·_fetch_·—·desktop·`fetch_limit`·50·(`mediasrv`)·/·200·(`aqt.cfa`),
+48 45| mobile·`MAX_SESSION_CARDS·=·100`·(`CfaExamPriorityActivity`).·The·deck·itself·is
+   46|->200·authored·cards·(711).·I·documented·the·deck-size-vs-fetch-limit·distinction
+   47|-in·`tools/cfa/build_cfa_deck.py`'s·docstring·(and·README,·Inc·4)·rather·than
+   48|-asserting·a·false·"20".
+49 49| 
+50   |+>·200·authored·cards·(711).·I·documented·the·deck-size-vs-fetch-limit·distinction
+51   |+>·in·`tools/cfa/build_cfa_deck.py`'s·docstring·(and·README,·Inc·4)·rather·than
+52   |+>·asserting·a·false·"20".
+53   |+
+54 50| ##·4.·Shared-tree·/·stash·hygiene·(for·whoever·cleans·up)
+55   |+
+56 51| -·The·main·tree·(`ankiCFA`)·carries·the·**sync**·agent's·uncommitted·`justfile`
+57 52| ··change·(adds·`cfa-syncserver`·/·`cfa-sync-dedup-test`·recipes).·NOT·mine;·I
+58 53| ··restored·it·after·briefly·parking·it·to·enter·my·worktree.·Left·intact.
+--
+from /Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/cfa/ui/reference/app/verify-ethics-crossplatform-NOTES.md:
+ 5  5| Restyle·merged·as·PR·#12·(`be9a21449`).·VERIFY-ONLY:·no·template/style·edits.
+ 6  6| 
+ 7  7| ##·Screenshots·(this·dir)
+ 8   |+
+ 9  8| -·`verify-ethics-desktop-front.png`·/·`-desktop-back.png`·—·2000x1520·/·2000x1200·(2x)
+10  9| -·`verify-ethics-android-front.png`·/·`-android-back.png`·—·1080x2400·(real·device)
+11 10| 
+12 11| ##·Capture·method·—·HONEST
+13 12| 
+14 13| ###·Desktop·=·harness·render·(Blink),·NOT·the·live·Qt·window
+15   |+
+16 14| Rendered·the·REAL·`passage_front.html`·/·`passage_back.html`·+·`style.css`·with·**headless
+17 15| Google·Chrome**·via·the·repo's·own·`tools/cfa/render_ethics_restyle.py`·(same·tool·that
+18 16| produced·the·committed·`ethics-restyle-after-*.png`).·Blink·is·the·same·engine·as·the
+...
+22 20| rendered·from·a·seeded·fully-correct·`localStorage`·payload·(the·harness's·normal·method).
+23 21| 
+24 22| ###·Android·=·REAL·emulator,·GENUINE·attempt
+25   |+
+26 23| Emulator·`ankidroid_cfa`·(`emulator-5554`,·Android·14,·1080x2400),·AnkiDroid
+27 24| `com.ichi2.anki.debug`,·System·WebView·**Chrome/113.0.5672.136**.
+28   |+
+29 25| -·The·on-device·deck·still·had·the·PRE-restyle·templates·(on-device·notetype·css=11·070·B,
+30 26| ··none·of·the·restyle/font·markers).·I·rebuilt·the·current·deck·(`just·cfa-mobile-package`,
+31 27| ··byte-identical·templates·to·origin/main)·AND,·to·render·the·current·restyle
+...
+41 37| ··(not·seeded)·attempt.
+42 38| 
+43 39| ##·Fonts·ACTUALLY·LOAD·on·BOTH·platforms·(measured,·not·eyeballed)
+44   |+
+45 40| Via·`document.fonts`·+·DOM·width·probes·at·120px:
+46 41| 
+   42|-|·|·Source·Serif·4·|·IBM·Plex·Sans·|
+   43|-|---|---|---|
+47   |+|······························|·Source·Serif·4······················································|·IBM·Plex·Sans·······································|
+48   |+|·----------------------------·|·-------------------------------------------------------------------·|·---------------------------------------------------·|
+49 44| |·Android·WebView·(Chrome·113)·|·`loaded`,·check=true,·1243px·vs·1235px·generic-serif·→·**distinct**·|·`loaded`·w400+w500,·1162px·vs·1152px·→·**distinct**·|
+   45|-|·Desktop·Blink·(Chrome·150)·|·`loaded`,·check=true,·1243px·vs·1080px·generic-serif·→·**distinct**·|·`loaded`,·1162px·vs·1147px·→·**distinct**·|
+50   |+|·Desktop·Blink·(Chrome·150)···|·`loaded`,·check=true,·1243px·vs·1080px·generic-serif·→·**distinct**·|·`loaded`,·1162px·vs·1147px·→·**distinct**···········|
+51 46| 
+52 47| Source·Serif·4·=·**1243px**·and·IBM·Plex·Sans·=·**1162px**·on·BOTH·→·the·same·bundled
+53 48| data-URI·faces·render·identically·cross-platform.·The·@font-face·data·URIs·work·in
+...
+85 80| "fully·correct"·reveal.
+86 81| 
+87 82| ##·Prioritized·fixes·for·true·cross-platform·parity
+88   |+
+89 83| 1.·**Adopt·Meldrum's·cream·canvas**·(`.card`·bg·~`#f2ede4`,·warm·panel·tint)·so·both
+90 84| ···platforms·match·the·site's·warmth·instead·of·cool·white.·(Biggest·fidelity·lift.)
+91 85| 2.·**CTA·first·impression**·—·give·the·disabled·"Check·answer"·a·subtler·outlined/ghost·look
+--
+from /Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/proof/fixes/p1/NOTES.md:
+250 250| 2.·**Menu·action·+·handler**·—·new·`"Study·Ethics·(One-Passage)"`·action·in·`setup_menu`
+251 251| ···(placed·right·after·"Study·Ethics·Minimal-Pairs"·to·group·the·two·ethics·actions),·wired
+252 252| ···to·a·new·`study_ethics_passages(mw)`·handler.
+    253|-3.·**Entering·review·the·*normal-deck*·way.**·`CFA::Ethics·Passages`·is·a·NORMAL
+253    |+3.·**Entering·review·the·_normal-deck_·way.**·`CFA::Ethics·Passages`·is·a·NORMAL
+254 254| ···(non-filtered)·deck,·so·—·unlike·the·minimal-pairs·sibling·which·uses·`_study_filtered_deck`
+255 255| ···—·the·handler·follows·Anki's·own·overview·"Study"·path:·seed-if-missing·→·`decks.select(did)`
+256 256| ···→·`mw.reset()`·→·`mw.moveToState("review")`.
+...
+302 302| ··**F9·REACHABILITY:·PASS**.
+303 303| -·mypy·on·touched·source·(`qt/aqt/cfa.py`,·`qt/aqt/cfa_seed.py`)·—·**Success:·no·issues·found
+304 304| ··in·2·source·files**.·Official·folder-level·mypy:·16·remaining·errors,·all·pre-existing
+    305|-··baseline·in·files·I·do·not·own·(tools/cfa/*,·cfa/ai/*,·pylib/tests/*,·qt/aqt/cfa_ethics_ai.py);
+305    |+··baseline·in·files·I·do·not·own·(tools/cfa/_,·cfa/ai/_,·pylib/tests/*,·qt/aqt/cfa_ethics_ai.py);
+306 306| ··**none**·in·my·touched·files.
+307 307| -·ruff·check·+·ruff·format·--check·on·touched·files·—·**clean**.
+308 308| 
+...
+364 364| 
+365 365| A·stale/absurd·far-future·exam·date·persisted·in·the·synced·collection·config·(observed:
+366 366| **`2028-08-23`**)·is·shown·and·used·verbatim·by·the·exam-date·picker,·with·no·sanity·check.
+    367|-(The·code·*default*·is·already·the·canonical·near·date·**2026-08-25**·—·confirmed·by·F9's
+367    |+(The·code·_default_·is·already·the·canonical·near·date·**2026-08-25**·—·confirmed·by·F9's
+368 368| `F0b·exam·config·:·{'exam_date':·'2026-08-25'}`·—·so·this·is·runtime·pollution,·not·a·code
+369 369| default·bug.)
+370 370| 
+371 371| ####·Root·cause
+372 372| 
+373 373| `DeadlineDialog._initial_date`·read·`cfg.get("exam_date")·or·_default_exam_date()`·—·i.e.·any
+    374|-persisted·value·was·trusted·blindly;·only·a·*missing*·value·fell·back·to·the·canonical
+374    |+persisted·value·was·trusted·blindly;·only·a·_missing_·value·fell·back·to·the·canonical
+375 375| default.
+376 376| 
+377 377| ####·Fix·(additive,·backward-compatible;·`qt/aqt/cfa.py`·only)
+...
+401 401| ··(persisted·`2099-12-31`·⇒·picker·shows·the·canonical·default),·`test_dialog_keeps_sane_persisted_date`.
+402 402| -·`qt/tests/test_cfa_f0b.py`:·`test_deadline_dialog_renders_without_due_cards`·updated·to·the
+403 403| ··new·honest·empty-state·wording·("No·cards·to·rank·yet");·`test_deadline_dialog_apply_persists_exam_date`
+    404|-··unchanged·(apply·persists·verbatim;·the·guard·is·on·the·*read*·path).
+404    |+··unchanged·(apply·persists·verbatim;·the·guard·is·on·the·_read_·path).
+405 405| 
+406 406| Without·the·change·the·pylib/qt·dialog·tests·ERROR·(the·`deadline_retention_with_new`·/
+407 407| `_sanitized_exam_date`·symbols·don't·exist)·or·FAIL·(all-new·deck·⇒·empty·table;·absurd
+...
+447 447| ##·Item·6·(MEDIUM·#9)·—·F3·"AI·Back"·editor·button·has·no·visible·AI-off·state
+448 448| 
+449 449| **Symptom.**·With·no·`OPENAI_API_KEY`,·the·F3·"AI·Back"·editor·button·was·supposed·to
+    450|-render·*visibly·disabled·with·an·explanatory·tooltip*,·but·it·did·neither:·it·looked/behaved
+450    |+render·_visibly·disabled·with·an·explanatory·tooltip_,·but·it·did·neither:·it·looked/behaved
+451 451| enabled·and·hovering·showed·nothing.
+452 452| 
+453 453| ###·Root·cause·(two·concrete·defects·in·`_button_html()`·in·`qt/aqt/cfa_tab_fill.py`)
+--
+Found 5 not formatted files. Run dprint fmt to fix.
+Failed to run (20): /Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/out/node_modules/.bin/dprint check
+[5/16; 12 active; 0.465s] check:pytest:tools
+============================= test session starts ==============================
+platform darwin -- Python 3.13.13, pytest-8.4.1, pluggy-1.6.0
+rootdir: /Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt
+configfile: pyproject.toml
+plugins: mock-3.15.1, anyio-4.13.0
+collected 4 items
+
+tools/tests/test_mintlify_hooks.py ....                                  [100%]
+
+============================== 4 passed in 0.04s ===============================
+[6/16; 11 active; 0.508s] check:complexipy:qt
+──────────────────────────────── 🐙 complexipy ─────────────────────────────────
+Results saved at 
+/Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/out/complexipy/complexipy-resu
+lts.sarif
+No functions were found with complexity greater than 50.
+────────────────────────── 🎉 Analysis completed! 🎉 ───────────────────────────
+[7/16; 10 active; 2.110s] check:minilints
+    Blocking waiting for file lock on package cache
+     Ignored package `cargo-license v0.7.0` is already installed, use --force to override
+[8/16; 9 active; 5.987s] check:vitest
+(node:87263) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:87367) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+ RUN  v3.2.4 /Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/ts
+
+(node:87609) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:87612) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:87613) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:87615) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:87616) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:87623) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:87611) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:87621) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:87624) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:87620) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:87625) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:87622) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:87642) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ routes/deck-options/steps.test.ts (4 tests) 4ms
+ ✓ lib/tslib/time.test.ts (2 tests) 3ms
+(node:87710) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:87709) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ html-filter/index.test.ts (9 tests) 23ms
+(node:87736) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ reviewer/lib.test.ts (5 tests) 9ms
+(node:87762) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ lib/domlib/surround/unsurround.test.ts (4 tests) 14ms
+ ✓ lib/domlib/surround/surround.test.ts (17 tests) 45ms
+(node:87777) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:87780) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ routes/change-notetype/lib.test.ts (4 tests) 13ms
+(node:87817) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ routes/deck-options/lib.test.ts (5 tests) 15ms
+
+ Test Files  8 passed (8)
+      Tests  50 passed (50)
+   Start at  22:46:57
+   Duration  3.22s (transform 2.30s, setup 0ms, collect 8.83s, tests 127ms, environment 1.95s, prepare 1.46s)
+
+(node:87832) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[9/16; 8 active; 7.562s] check:pytest:aqt
+============================= test session starts ==============================
+platform darwin -- Python 3.13.13, pytest-8.4.1, pluggy-1.6.0
+rootdir: /Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/qt
+configfile: pyproject.toml
+plugins: mock-3.15.1, anyio-4.13.0
+collected 143 items
+
+qt/tests/test_addons.py ...........                                      [  7%]
+qt/tests/test_cfa_deadline_dialog.py ......                              [ 11%]
+qt/tests/test_cfa_ethics_ai.py .......                                   [ 16%]
+qt/tests/test_cfa_f0b.py ...........                                     [ 24%]
+qt/tests/test_cfa_f4_dialog.py ......                                    [ 28%]
+qt/tests/test_cfa_f5_style.py .............                              [ 37%]
+qt/tests/test_cfa_menu.py ....                                           [ 40%]
+qt/tests/test_cfa_tab_fill.py .......................                    [ 56%]
+qt/tests/test_i18n.py ..                                                 [ 58%]
+qt/tests/test_installer.py .........s................s                   [ 76%]
+qt/tests/test_mediasrv.py .................................              [100%]
+
+======================== 141 passed, 2 skipped in 6.34s ========================
+[10/16; 7 active; 13.385s] check:complexipy-diff:qt
+──────────────────────────────── 🐙 complexipy ─────────────────────────────────
+Results saved at 
+/Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/out/complexipy/complexipy-resu
+lts.sarif
+qt/aqt/__init__.py
+    AnkiApp::eventFilter 21  ❌ FAILED 
+
+      Refactor plans:
+        1. Extract complex block into helper function, lines 406-419
+           estimated: 21 -> 10 (-11)
+           steps:
+             - move the selected block into a private helper
+             - pass required values as parameters
+             - return the result/status needed by the caller
+        2. Extract complex block into helper function, lines 430-443
+           estimated: 21 -> 16 (-5)
+           steps:
+             - move the selected block into a private helper
+             - pass required values as parameters
+             - return the result/status needed by the caller
+        3. Flatten nested condition block with guard clauses, lines 417-418
+           estimated: 21 -> 18 (-3)
+           steps:
+             - invert the outer condition
+             - return early when the condition fails
+             - move the main success path one indentation level left
+             - repeat for inner nested conditions where safe
+    setupGL 40  ❌ FAILED 
+
+      Refactor plans:
+        1. Extract complex block into helper function, lines 537-559
+           estimated: 40 -> 31 (-9)
+           steps:
+             - move the selected block into a private helper
+             - pass required values as parameters
+             - return the result/status needed by the caller
+        2. Split conditional dispatcher into handlers, lines 486-499
+           estimated: 40 -> 36 (-4)
+           steps:
+             - create one handler per case
+             - replace the chain with a dispatch table or small delegating match
+             - keep the orchestration function shallow
+        3. Extract complex condition into named predicate, lines 511-511
+           estimated: 40 -> 37 (-3)
+           steps:
+             - move the condition into a well-named helper function
+             - use the helper in the branch condition
+             - keep the caller focused on control flow
+    _run 47  ❌ FAILED 
+
+      Refactor plans:
+        1. Extract complex block into helper function, lines 619-634
+           estimated: 47 -> 40 (-7)
+           steps:
+             - move the selected block into a private helper
+             - pass required values as parameters
+             - return the result/status needed by the caller
+        2. Extract complex block into helper function, lines 715-724
+           estimated: 47 -> 42 (-5)
+           steps:
+             - move the selected block into a private helper
+             - pass required values as parameters
+             - return the result/status needed by the caller
+
+qt/aqt/addcards.py
+    AddCards::on_notetype_change 23  ❌ FAILED 
+
+      Refactor plans:
+        1. Extract complex block into helper function, lines 179-207
+           estimated: 23 -> 4 (-19)
+           steps:
+             - move the selected block into a private helper
+             - pass required values as parameters
+             - return the result/status needed by the caller
+        2. Flatten loop body with continue guards, lines 190-205
+           estimated: 23 -> 19 (-4)
+           steps:
+             - add negative condition checks at the top of the loop
+             - use continue for skipped items
+             - keep the main processing path unindented
+        3. Flatten loop body with continue guards, lines 183-188
+           estimated: 23 -> 21 (-2)
+           steps:
+             - add negative condition checks at the top of the loop
+             - use continue for skipped items
+             - keep the main processing path unindented
+
+qt/aqt/editor.py
+    Editor::_pastePreFilter 28  ❌ FAILED 
+
+      Refactor plans:
+        1. Extract complex block into helper function, lines 1064-1087
+           estimated: 28 -> 17 (-11)
+           steps:
+             - move the selected block into a private helper
+             - pass required values as parameters
+             - return the result/status needed by the caller
+        2. Extract complex block into helper function, lines 1054-1062
+           estimated: 28 -> 18 (-10)
+           steps:
+             - move the selected block into a private helper
+             - pass required values as parameters
+             - return the result/status needed by the caller
+        3. Flatten loop body with continue guards, lines 1064-1087
+           estimated: 28 -> 23 (-5)
+           steps:
+             - add negative condition checks at the top of the loop
+             - use continue for skipped items
+             - keep the main processing path unindented
+    Editor::onBridgeCmd 38  ❌ FAILED 
+
+      Refactor plans:
+        1. Extract complex block into helper function, lines 444-560
+           estimated: 38 -> 16 (-22)
+           steps:
+             - move the selected block into a private helper
+             - pass required values as parameters
+             - return the result/status needed by the caller
+        2. Split conditional dispatcher into handlers, lines 444-560
+           estimated: 38 -> 29 (-9)
+           steps:
+             - create one handler per case
+             - replace the chain with a dispatch table or small delegating match
+             - keep the orchestration function shallow
+        3. Flatten loop body with continue guards, lines 490-494
+           estimated: 38 -> 36 (-2)
+           steps:
+             - add negative condition checks at the top of the loop
+             - use continue for skipped items
+             - keep the main processing path unindented
+
+qt/aqt/importing.py
+    importFile 36  ❌ FAILED 
+
+      Refactor plans:
+        1. Extract complex block into helper function, lines 354-427
+           estimated: 36 -> 16 (-20)
+           steps:
+             - move the selected block into a private helper
+             - pass required values as parameters
+             - return the result/status needed by the caller
+        2. Extract complex block into helper function, lines 341-348
+           estimated: 36 -> 29 (-7)
+           steps:
+             - move the selected block into a private helper
+             - pass required values as parameters
+             - return the result/status needed by the caller
+        3. Flatten loop body with continue guards, lines 341-348
+           estimated: 36 -> 33 (-3)
+           steps:
+             - add negative condition checks at the top of the loop
+             - use continue for skipped items
+             - keep the main processing path unindented
+
+qt/aqt/mpv.py
+    MPVBase::_reader 25  ❌ FAILED 
+
+      Refactor plans:
+        1. Extract complex block into helper function, lines 254-289
+           estimated: 25 -> 4 (-21)
+           steps:
+             - move the selected block into a private helper
+             - pass required values as parameters
+             - return the result/status needed by the caller
+        2. Flatten loop body with continue guards, lines 254-289
+           estimated: 25 -> 16 (-9)
+           steps:
+             - add negative condition checks at the top of the loop
+             - use continue for skipped items
+             - keep the main processing path unindented
+        3. Flatten nested condition block with guard clauses, lines 272-273
+           estimated: 25 -> 21 (-4)
+           steps:
+             - invert the outer condition
+             - return early when the condition fails
+             - move the main success path one indentation level left
+             - repeat for inner nested conditions where safe
+
+qt/aqt/progress.py
+    ProgressManager::finish 24  ❌ FAILED 
+
+      Refactor plans:
+        1. Extract complex block into helper function, lines 239-256
+           estimated: 24 -> 6 (-18)
+           steps:
+             - move the selected block into a private helper
+             - pass required values as parameters
+             - return the result/status needed by the caller
+        2. Flatten nested condition block with guard clauses, lines 241-242
+           estimated: 24 -> 21 (-3)
+           steps:
+             - invert the outer condition
+             - return early when the condition fails
+             - move the main success path one indentation level left
+             - repeat for inner nested conditions where safe
+        3. Flatten nested condition block with guard clauses, lines 243-245
+           estimated: 24 -> 21 (-3)
+           steps:
+             - invert the outer condition
+             - return early when the condition fails
+             - move the main success path one indentation level left
+             - repeat for inner nested conditions where safe
+
+qt/audio/hatch_build.py
+    CustomBuildHook::initialize 21  ❌ FAILED 
+
+      Refactor plans:
+        1. Extract complex block into helper function, lines 31-53
+           estimated: 21 -> 16 (-5)
+           steps:
+             - move the selected block into a private helper
+             - pass required values as parameters
+             - return the result/status needed by the caller
+        2. Extract complex block into helper function, lines 65-72
+           estimated: 21 -> 16 (-5)
+           steps:
+             - move the selected block into a private helper
+             - pass required values as parameters
+             - return the result/status needed by the caller
+        3. Flatten loop body with continue guards, lines 35-40
+           estimated: 21 -> 19 (-2)
+           steps:
+             - add negative condition checks at the top of the loop
+             - use continue for skipped items
+             - keep the main processing path unindented
+
+Failed functions:
+ - qt/aqt/__init__.py: AnkiApp::eventFilter, _run, setupGL
+ - qt/aqt/addcards.py: AddCards::on_notetype_change
+ - qt/aqt/editor.py: Editor::_pastePreFilter, Editor::onBridgeCmd
+ - qt/aqt/importing.py: importFile
+ - qt/aqt/mpv.py: MPVBase::_reader
+ - qt/aqt/progress.py: ProgressManager::finish
+ - qt/audio/hatch_build.py: CustomBuildHook::initialize
+────────────────────────── 🎉 Analysis completed! 🎉 ───────────────────────────
+Complexity diff  (vs main)
+────────────────────────────────────────────────────────────────────────
+  NEW         qt/tests/test_cfa_deadline_dialog.py::_StubWeb::__init__  0  (new)
+  NEW         qt/tests/test_cfa_deadline_dialog.py::_StubWeb::cleanup  0  (new)
+  NEW         
+qt/tests/test_cfa_deadline_dialog.py::_StubWeb::load_sveltekit_page  0  (new)
+  NEW         qt/tests/test_cfa_deadline_dialog.py::_deadline_payload  0  (new)
+  NEW         qt/tests/test_cfa_deadline_dialog.py::_stub_webview      0  (new)
+  REMOVED     
+qt/tests/test_cfa_deadline_dialog.py::test_dialog_empty_state_only_when_truly_em
+pty  0  (removed)
+  NEW         
+qt/tests/test_cfa_deadline_dialog.py::test_dialog_hosts_deadline_page_for_curren
+t_deck  0  (new)
+  REMOVED     
+qt/tests/test_cfa_deadline_dialog.py::test_dialog_keeps_sane_persisted_date  0  
+(removed)
+  REMOVED     
+qt/tests/test_cfa_deadline_dialog.py::test_dialog_ranks_new_cards_on_fresh_all_n
+ew_deck  0  (removed)
+  REMOVED     
+qt/tests/test_cfa_deadline_dialog.py::test_dialog_self_heals_absurd_persisted_da
+te  0  (removed)
+  NEW         
+qt/tests/test_cfa_deadline_dialog.py::test_payload_empty_state_only_when_truly_e
+mpty  0  (new)
+  NEW         
+qt/tests/test_cfa_deadline_dialog.py::test_payload_keeps_sane_persisted_date  0 
+(new)
+  NEW         
+qt/tests/test_cfa_deadline_dialog.py::test_payload_ranks_new_cards_on_fresh_all_
+new_deck  0  (new)
+  NEW         
+qt/tests/test_cfa_deadline_dialog.py::test_payload_self_heals_absurd_persisted_d
+ate  0  (new)
+  NEW         qt/tests/test_installer.py::_briefcase_template_available  0  
+(new)
+────────────────────────────────────────────────────────────────────────
+Net: 11 new, 4 removed
+
+[11/16; 6 active; 22.497s] check:eslint
+(node:87264) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Browserslist: browsers data (caniuse-lite) is 15 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+[12/16; 5 active; 22.828s] check:mypy
+Success: no issues found in 329 source files
+[13/16; 4 active; 23.298s] check:svelte
+(node:87265) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:87366) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:87472) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Loading svelte-check in workspace: /Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/ts
+Getting Svelte diagnostics...
+
+svelte-check found 0 errors and 0 warnings
+[14/16; 3 active; 33.134s] check:clippy
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Checking cfg-if v1.0.3
+   Compiling serde_core v1.0.228
+   Compiling serde v1.0.228
+    Checking memchr v2.7.5
+    Checking itoa v1.0.15
+    Checking pin-project-lite v0.2.16
+    Checking log v0.4.27
+    Checking once_cell v1.21.3
+    Checking futures-core v0.3.31
+    Checking libc v0.2.175
+    Checking bytes v1.11.1
+    Checking bitflags v2.9.3
+    Checking smallvec v1.15.1
+    Checking futures-io v0.3.31
+    Checking equivalent v1.0.2
+    Checking allocator-api2 v0.2.21
+    Checking foldhash v0.1.5
+    Checking zerofrom v0.1.6
+    Checking futures-sink v0.3.31
+   Compiling rustix v1.0.8
+    Checking fnv v1.0.7
+    Checking stable_deref_trait v1.2.0
+    Checking zerocopy v0.8.26
+    Checking slab v0.4.11
+    Checking fastrand v2.3.0
+    Checking futures-channel v0.3.31
+    Checking pin-utils v0.1.0
+    Checking yoke v0.8.0
+    Checking tracing-core v0.1.34
+    Checking futures-task v0.3.31
+    Checking getrandom v0.3.3
+    Checking errno v0.3.13
+    Checking signal-hook-registry v1.4.6
+    Checking mio v1.0.4
+    Checking socket2 v0.6.0
+    Checking zerovec v0.11.4
+    Checking ryu v1.0.20
+    Checking rand_core v0.9.3
+    Checking core-foundation-sys v0.8.7
+    Checking futures-util v0.3.31
+    Checking scopeguard v1.2.0
+    Checking typenum v1.20.0
+    Checking aho-corasick v1.1.3
+    Checking lock_api v0.4.13
+    Checking http v1.3.1
+   Compiling getrandom v0.2.16
+    Checking tracing v0.1.41
+    Checking regex-syntax v0.8.6
+   Compiling rand_core v0.6.4
+    Checking libm v0.2.15
+    Checking crossbeam-utils v0.8.21
+    Checking tokio v1.47.1
+   Compiling rand_chacha v0.3.1
+    Checking either v1.15.0
+    Checking subtle v2.6.1
+   Compiling rand v0.8.5
+    Checking httparse v1.10.1
+    Checking tower-service v0.3.3
+    Checking percent-encoding v2.3.2
+    Checking httpdate v1.0.3
+    Checking try-lock v0.2.5
+    Checking want v0.3.1
+    Checking http-body v1.0.1
+    Checking thiserror v2.0.16
+    Checking litemap v0.8.0
+    Checking writeable v0.6.1
+    Checking tinystr v0.8.1
+    Checking potential_utf v0.1.3
+    Checking zerotrie v0.2.2
+    Checking atomic-waker v1.1.2
+    Checking mime v0.3.17
+    Checking icu_collections v2.0.0
+    Checking form_urlencoded v1.2.2
+    Checking icu_locale_core v2.0.0
+    Checking security-framework-sys v2.14.0
+    Checking base64 v0.22.1
+    Checking ipnet v2.11.0
+    Checking icu_properties_data v2.0.1
+    Checking icu_normalizer_data v2.0.0
+    Checking http-body-util v0.1.3
+    Checking crossbeam-epoch v0.9.18
+    Checking snafu v0.8.8
+    Checking itertools v0.14.0
+    Checking spin v0.9.8
+    Checking crossbeam-deque v0.8.6
+    Checking num-traits v0.2.19
+   Compiling phf_generator v0.11.3
+    Checking core-foundation v0.9.4
+    Checking sync_wrapper v1.0.2
+    Checking siphasher v1.0.1
+    Checking zeroize v1.8.1
+    Checking tower-layer v0.3.3
+    Checking rustls-pki-types v1.12.0
+    Checking icu_provider v2.0.0
+    Checking phf_shared v0.11.3
+    Checking generic-array v0.14.7
+    Checking unicase v2.6.0
+    Checking icu_normalizer v2.0.0
+    Checking icu_properties v2.0.1
+   Compiling ring v0.17.14
+    Checking utf-8 v0.7.6
+    Checking same-file v1.0.6
+    Checking utf8_iter v1.0.4
+    Checking ppv-lite86 v0.2.21
+    Checking security-framework v2.11.1
+   Compiling string_cache_codegen v0.5.4
+    Checking num_cpus v1.17.0
+    Checking rand_chacha v0.9.0
+    Checking parking v2.2.1
+    Checking rand v0.9.4
+    Checking new_debug_unreachable v1.0.6
+    Checking untrusted v0.9.0
+    Checking bytemuck v1.23.2
+    Checking tempfile v3.21.0
+   Compiling anki_io v0.0.0 (/Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/rslib/io)
+    Checking block-buffer v0.10.4
+    Checking crypto-common v0.1.6
+    Checking regex-automata v0.4.10
+    Checking parking_lot_core v0.9.11
+    Checking digest v0.10.7
+    Checking rayon-core v1.13.0
+    Checking camino v1.1.12
+    Checking parking_lot v0.12.4
+    Checking mime_guess v2.0.5
+    Checking walkdir v2.5.0
+    Checking hybrid-array v0.4.11
+    Checking core-foundation v0.10.1
+    Checking rayon v1.11.0
+    Checking native-tls v0.2.14
+    Checking cpufeatures v0.2.17
+    Checking data-encoding v2.9.0
+    Checking precomputed-hash v0.1.1
+    Checking mac v0.1.1
+    Checking idna_adapter v1.2.1
+    Checking http-range-header v0.4.2
+    Checking iri-string v0.7.8
+    Checking idna v1.1.0
+    Checking futf v0.1.5
+    Checking security-framework v3.3.0
+    Checking derive_more v1.0.0
+    Checking futures-lite v2.6.1
+    Checking embassy-futures v0.1.2
+    Checking tendril v0.4.3
+    Checking webpki-roots v1.0.2
+    Checking unic-langid-impl v0.9.6
+    Checking anyhow v1.0.99
+    Checking hashbrown v0.15.5
+    Checking serde_json v1.0.143
+    Checking serde_urlencoded v0.7.1
+    Checking url v2.5.7
+    Checking half v2.6.0
+    Checking string_cache v0.8.9
+    Checking block-buffer v0.12.0
+    Checking crypto-common v0.2.1
+    Checking hex v0.4.3
+    Checking powerfmt v0.2.0
+    Checking const-oid v0.10.2
+    Checking maplit v1.0.2
+    Checking deranged v0.5.2
+    Checking unic-langid-macros v0.9.6
+   Compiling phf_macros v0.11.3
+    Checking cubecl-common v0.5.0
+    Checking serde_bytes v0.11.17
+    Checking indexmap v2.11.0
+    Checking crc32fast v1.5.0
+    Checking sha1 v0.10.6
+    Checking rand_distr v0.5.1
+   Compiling phf_codegen v0.11.3
+    Checking crossbeam-channel v0.5.15
+    Checking cpufeatures v0.3.0
+    Checking time-core v0.1.8
+    Checking rustls-native-certs v0.8.1
+    Checking num-conv v0.2.0
+    Checking adler2 v2.0.1
+    Checking zlib-rs v0.5.1
+    Checking lazy_static v1.5.0
+    Checking colored v3.0.0
+    Checking miniz_oxide v0.8.9
+   Compiling web_atoms v0.1.3
+   Compiling anki_proto_gen v0.0.0 (/Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/rslib/proto_gen)
+    Checking unic-langid v0.9.6
+    Checking portable-atomic v1.11.1
+    Checking strum v0.27.2
+    Checking bstr v1.12.0
+    Checking digest v0.11.2
+    Checking encoding_rs v0.8.35
+    Checking sha2 v0.11.0
+    Checking byteorder v1.5.0
+    Checking utf8parse v0.2.2
+    Checking option-ext v0.2.0
+   Compiling siphasher v0.3.11
+    Checking anstyle-parse v0.2.7
+    Checking dirs-sys v0.5.0
+    Checking rmp v0.8.14
+   Compiling phf_shared v0.10.0
+    Checking thiserror v1.0.69
+   Compiling anki_proto v0.0.0 (/Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/rslib/proto)
+    Checking spin v0.10.0
+    Checking thread-tree v0.3.3
+    Checking tungstenite v0.26.2
+    Checking concurrent-queue v2.5.0
+    Checking csv-core v0.1.12
+    Checking time v0.3.47
+    Checking colorchoice v1.0.4
+    Checking anstyle v1.0.11
+    Checking rustc-hash v2.1.1
+    Checking burn-common v0.17.1
+    Checking rawpointer v0.2.1
+    Checking is_terminal_polyfill v1.70.1
+    Checking anstyle-query v1.1.4
+    Checking matrixmultiply v0.3.10
+    Checking type-map v0.5.1
+    Checking burn-tensor v0.17.1
+    Checking anstream v0.6.20
+    Checking csv v1.3.1
+    Checking event-listener v5.4.1
+    Checking rmp-serde v1.3.0
+    Checking tokio-util v0.7.16
+    Checking tower v0.5.2
+    Checking regex v1.11.2
+    Checking tokio-native-tls v0.3.1
+    Checking libz-rs-sys v0.5.1
+    Checking globset v0.4.16
+    Checking matchers v0.2.0
+    Checking flate2 v1.1.2
+    Checking tokio-tungstenite v0.26.2
+    Checking sanitize-filename v0.6.0
+   Compiling phf_generator v0.10.0
+    Checking dirs v6.0.0
+    Checking axum-core v0.5.2
+    Checking zstd-sys v2.0.15+zstd.1.5.7
+    Checking sharded-slab v0.1.7
+    Checking serde_path_to_error v0.1.17
+    Checking h2 v0.4.12
+    Checking num-integer v0.1.46
+    Checking tower-http v0.6.6
+    Checking num-complex v0.4.6
+    Checking prost v0.13.5
+    Checking fluent-syntax v0.12.0
+    Checking tracing-log v0.2.0
+    Checking multer v3.1.0
+    Checking libloading v0.8.8
+    Checking thread_local v1.1.9
+    Checking unty v0.0.4
+    Checking matchit v0.8.4
+    Checking dtoa v1.0.10
+    Checking nu-ansi-term v0.50.1
+    Checking moddef v0.3.0
+    Checking macerator v0.2.9
+    Checking dtoa-short v0.3.5
+    Checking bincode v2.0.1
+    Checking nvml-wrapper-sys v0.8.0
+    Checking ndarray v0.16.1
+    Checking phf v0.11.3
+    Checking tracing-subscriber v0.3.20
+    Checking zstd-safe v7.2.4
+    Checking burn-dataset v0.17.1
+   Compiling phf_codegen v0.10.0
+    Checking event-listener-strategy v0.5.4
+    Checking ahash v0.8.12
+    Checking intl-memoizer v0.5.3
+    Checking intl_pluralrules v7.0.2
+    Checking fluent-langneg v0.13.0
+    Checking terminal_size v0.4.3
+   Compiling toml_parser v1.0.2
+   Compiling toml_datetime v0.7.0
+   Compiling serde_spanned v1.0.0
+    Checking iana-time-zone v0.1.63
+    Checking burn-ir v0.17.1
+    Checking burn-autodiff v0.17.1
+    Checking markup5ever v0.35.0
+    Checking arrayvec v0.7.6
+   Compiling ucd-trie v0.1.7
+    Checking bytesize v1.3.3
+    Checking self_cell v1.2.0
+    Checking futures-timer v3.0.3
+   Compiling syn v1.0.109
+    Checking clap_lex v0.7.5
+    Checking atomic_float v1.1.0
+    Checking static_assertions v1.1.0
+    Checking unicode-width v0.2.1
+    Checking dunce v1.0.5
+    Checking uuid v1.18.0
+    Checking strsim v0.11.1
+    Checking clap_builder v4.5.46
+    Checking getopts v0.2.24
+    Checking burn-core v0.17.1
+    Checking tracing-appender v0.2.3
+    Checking nvml-wrapper v0.10.0
+    Checking rstest v0.25.0
+    Checking fluent-bundle v0.16.0
+   Compiling toml v0.9.5
+    Checking systemstat v0.2.5
+   Compiling pest v2.8.1
+    Checking html5ever v0.35.0
+    Checking cssparser v0.35.0
+    Checking chrono v0.4.41
+    Checking async-channel v2.5.0
+   Compiling markup5ever v0.11.0
+    Checking zstd v0.13.3
+    Checking sysinfo v0.33.1
+    Checking futures-executor v0.3.31
+   Compiling anki_i18n v0.0.0 (/Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/rslib/i18n)
+    Checking sha2 v0.10.9
+    Checking http v0.2.12
+   Compiling clap_derive v4.5.45
+    Checking simd-adler32 v0.3.7
+    Checking bumpalo v3.19.0
+    Checking env_home v0.1.0
+    Checking which v8.0.0
+    Checking zopfli v0.8.2
+    Checking futures v0.3.31
+   Compiling embed-resource v3.0.5
+    Checking ammonia v4.1.2
+    Checking phf v0.10.1
+   Compiling pest_meta v2.8.1
+    Checking fluent v0.17.0
+    Checking num-format v0.4.4
+   Compiling derive_builder_core v0.20.2
+    Checking ordered-float v2.10.1
+    Checking headers-core v0.3.0
+    Checking burn-ndarray v0.17.1
+    Checking unic-common v0.9.0
+    Checking tinyvec_macros v0.1.1
+    Checking compression-core v0.4.29
+   Compiling system-configuration-sys v0.5.0
+    Checking unic-char-range v0.9.0
+    Checking base64ct v1.8.0
+    Checking unic-char-property v0.9.0
+   Compiling pest_generator v2.8.1
+    Checking password-hash v0.5.0
+    Checking hyper v1.7.0
+    Checking compression-codecs v0.4.30
+    Checking tinyvec v1.10.0
+    Checking unic-ucd-version v0.9.0
+    Checking headers v0.4.1
+    Checking serde-value v0.7.0
+    Checking libsqlite3-sys v0.34.0
+    Checking zip v4.6.0
+    Checking h2 v0.3.27
+   Compiling ninja_gen v0.0.0 (/Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/build/ninja_gen)
+    Checking http-body v0.4.6
+    Checking priority-queue v2.5.0
+    Checking hashlink v0.10.0
+    Checking hyper-util v0.1.16
+    Checking hmac v0.12.1
+    Checking client-ip v0.1.1
+    Checking fsevent-sys v4.1.0
+    Checking socket2 v0.5.10
+    Checking snowflake v1.3.0
+   Compiling pulldown-cmark v0.10.3
+    Checking fallible-streaming-iterator v0.1.9
+    Checking pulldown-cmark-escape v0.11.0
+    Checking bitflags v1.3.2
+    Checking num-modular v0.6.1
+    Checking matches v0.1.10
+    Checking arrayref v0.3.9
+    Checking notify-types v2.0.0
+    Checking constant_time_eq v0.3.1
+    Checking fallible-iterator v0.3.0
+    Checking unicode-segmentation v1.12.0
+    Checking termcolor v1.4.1
+    Checking rusqlite v0.36.0
+    Checking num-order v1.2.0
+    Checking convert_case v0.8.0
+    Checking notify v8.2.0
+    Checking blake3 v1.8.2
+    Checking unic-ucd-category v0.9.0
+    Checking pulldown-cmark v0.13.0
+    Checking id_tree v1.8.0
+    Checking pin-project v1.1.10
+    Checking serde_tuple v1.1.2
+    Checking pbkdf2 v0.12.2
+    Checking num_enum v0.7.4
+    Checking serde-aux v4.7.0
+    Checking hyper-tls v0.6.0
+    Checking axum v0.8.4
+    Checking unicode-normalization v0.1.24
+    Checking async-compression v0.4.30
+    Checking env_filter v0.1.3
+    Checking envy v0.4.2
+    Checking rustls-pemfile v2.2.0
+    Checking nom v8.0.0
+    Checking coarsetime v0.1.36
+    Checking base64 v0.21.7
+    Checking unicode-width v0.1.14
+    Checking permutation v0.4.1
+    Checking difflib v0.4.0
+    Checking percent-encoding-iri v2.2.0 (https://github.com/ankitects/rust-url.git?rev=bb930b8d089f4d30d7d19c12e54e66191de47b88#bb930b8d)
+    Checking jiff v0.2.15
+    Checking htmlescape v0.3.1
+    Checking pulldown-cmark-escape v0.10.1
+   Compiling pulldown-cmark v0.8.0
+    Checking burn-train v0.17.1
+   Compiling derive_builder_macro v0.20.2
+    Checking burn v0.17.1
+    Checking fsrs v5.2.0
+    Checking rustls-pemfile v1.0.4
+    Checking codespan-reporting v0.11.1
+    Checking hyper v0.14.32
+    Checking system-configuration v0.5.1
+    Checking notify-debouncer-mini v0.6.0
+    Checking xml5ever v0.17.0
+    Checking derive_builder v0.20.2
+    Checking ignore v0.4.23
+    Checking elasticlunr-rs v3.0.2
+    Checking toml v0.5.11
+    Checking opener v0.8.2
+    Checking topological-sort v0.2.2
+    Checking sync_wrapper v0.1.2
+    Checking shlex v1.3.0
+    Checking pathdiff v0.2.3
+    Checking codespan v0.11.1
+   Compiling lzma-sys v0.1.20
+    Checking linkify v0.7.0
+    Checking anki_process v0.0.0 (/Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/rslib/process)
+    Checking deadpool-runtime v0.1.4
+    Checking deadpool v0.12.2
+   Compiling rustls v0.23.31
+    Checking prost-types v0.13.5
+    Checking assert-json-diff v2.0.2
+    Checking xattr v1.5.1
+    Checking filetime v0.2.26
+   Compiling async-stream-impl v0.3.6
+   Compiling runner v0.0.0 (/Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/build/runner)
+   Compiling pest_derive v2.8.1
+    Checking tar v0.4.46
+    Checking wiremock v0.6.5
+    Checking prost-reflect v0.14.7
+    Checking handlebars v6.3.2
+    Checking inflections v1.1.1
+    Checking junction v1.2.0
+    Checking minilints v0.0.0 (/Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/tools/minilints)
+    Checking env_logger v0.11.8
+    Checking rustls-webpki v0.103.13
+    Checking clap v4.5.46
+    Checking clap_complete v4.5.57
+    Checking ftl v0.0.0 (/Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/ftl)
+    Checking axum-client-ip v1.1.3
+    Checking axum-extra v0.10.1
+    Checking mdbook v0.4.52
+    Checking async-stream v0.3.6
+    Checking hyper-tls v0.5.0
+    Checking reqwest v0.11.27
+    Checking tokio-rustls v0.26.2
+    Checking hyper-rustls v0.27.7
+    Checking reqwest v0.12.23
+   Compiling html5ever v0.26.0
+   Compiling anki v0.0.0 (/Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/rslib)
+    Checking configure v0.0.0 (/Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/build/configure)
+    Checking xz2 v0.1.7
+    Checking markup5ever_rcdom v0.2.0
+    Checking linkcheck v0.4.1 (https://github.com/ankitects/linkcheck.git?rev=184b2ca50ed39ca43da13f0b830a463861adb9ca#184b2ca5)
+    Checking linkchecker v0.0.0 (/Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/rslib/linkchecker)
+    Checking anki-sync-server v0.0.0 (/Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/rslib/sync)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 32.79s
+[15/16; 2 active; 60.677s] check:pytest:pylib
+============================= test session starts ==============================
+platform darwin -- Python 3.13.13, pytest-8.4.1, pluggy-1.6.0
+rootdir: /Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/pylib
+configfile: pyproject.toml
+plugins: mock-3.15.1, anyio-4.13.0
+collected 190 items
+
+pylib/tests/test_cards.py ....                                           [  2%]
+pylib/tests/test_cfa.py ...............                                  [ 10%]
+pylib/tests/test_cfa_deadline.py .............                           [ 16%]
+pylib/tests/test_cfa_f4.py ...................                           [ 26%]
+pylib/tests/test_cfa_f8_persistence.py ...                               [ 28%]
+pylib/tests/test_cfa_scores.py ..........                                [ 33%]
+pylib/tests/test_cfa_seed.py ...                                         [ 35%]
+pylib/tests/test_cfa_sync.py ......                                      [ 38%]
+pylib/tests/test_collection.py ........                                  [ 42%]
+pylib/tests/test_decks.py ...                                            [ 44%]
+pylib/tests/test_exporting.py .....                                      [ 46%]
+pylib/tests/test_find.py ...                                             [ 48%]
+pylib/tests/test_flags.py .                                              [ 48%]
+pylib/tests/test_hooks.py ...........                                    [ 54%]
+pylib/tests/test_httpclient.py ...                                       [ 56%]
+pylib/tests/test_importing.py ..........                                 [ 61%]
+pylib/tests/test_latex.py .                                              [ 62%]
+pylib/tests/test_media.py ...                                            [ 63%]
+pylib/tests/test_models.py ............                                  [ 70%]
+pylib/tests/test_schedv3.py ..................................           [ 87%]
+pylib/tests/test_stats.py ...                                            [ 89%]
+pylib/tests/test_template.py .                                           [ 90%]
+pylib/tests/test_utils.py ...................                            [100%]
+
+=============================== warnings summary ===============================
+pylib/tests/test_models.py:255
+  /Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/pylib/tests/test_models.py:255: SyntaxWarning: invalid escape sequence '\('
+    q5 = "text with \(x^2\) jax"
+
+pylib/tests/test_models.py:257
+  /Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/pylib/tests/test_models.py:257: SyntaxWarning: invalid escape sequence '\('
+    "{{{{c1::{}}}}} \(2^2\) {{{{c2::{}}}}} \(2^{{{{c3::{}}}}}\) \(x^3\) {{{{c4::{}}}}} {{{{c5::{}}}}}".format(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================== 190 passed, 2 warnings in 60.23s (0:01:00) ==================
+[16/16; 1 active; 80.431s] check:rust_test
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on build directory
+   Compiling serde_core v1.0.228
+   Compiling rustix v1.0.8
+   Compiling regex-automata v0.4.10
+   Compiling ring v0.17.14
+   Compiling core-foundation v0.10.1
+   Compiling http-range-header v0.4.2
+   Compiling phf v0.11.3
+   Compiling anki_proto_gen v0.0.0 (/Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/rslib/proto_gen)
+   Compiling prost v0.13.5
+   Compiling tungstenite v0.26.2
+   Compiling utf8parse v0.2.2
+   Compiling anstyle-query v1.1.4
+   Compiling colorchoice v1.0.4
+   Compiling is_terminal_polyfill v1.70.1
+   Compiling tower-http v0.6.6
+   Compiling anstyle-parse v0.2.7
+   Compiling anstyle v1.0.11
+   Compiling anki_i18n v0.0.0 (/Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/rslib/i18n)
+   Compiling cssparser v0.35.0
+   Compiling security-framework v3.3.0
+   Compiling anstream v0.6.20
+   Compiling sha2 v0.10.9
+   Compiling clap_lex v0.7.5
+   Compiling phf_shared v0.10.0
+   Compiling http v0.2.12
+   Compiling phf v0.10.1
+   Compiling pbkdf2 v0.12.2
+   Compiling tokio-tungstenite v0.26.2
+   Compiling ninja_gen v0.0.0 (/Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/build/ninja_gen)
+   Compiling anki_proto v0.0.0 (/Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/rslib/proto)
+   Compiling socket2 v0.5.10
+   Compiling fsevent-sys v4.1.0
+   Compiling notify-types v2.0.0
+   Compiling num-modular v0.6.1
+   Compiling tempfile v3.21.0
+   Compiling anki_io v0.0.0 (/Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/rslib/io)
+   Compiling native-tls v0.2.14
+   Compiling tokio-native-tls v0.3.1
+   Compiling rustls-webpki v0.103.13
+   Compiling rustls-native-certs v0.8.1
+   Compiling terminal_size v0.4.3
+   Compiling which v8.0.0
+   Compiling clap_builder v4.5.46
+   Compiling http-body v0.4.6
+   Compiling bitflags v1.3.2
+   Compiling termcolor v1.4.1
+   Compiling num-order v1.2.0
+   Compiling notify v8.2.0
+   Compiling derive_builder v0.20.2
+   Compiling system-configuration-sys v0.5.0
+   Compiling unicode-width v0.1.14
+   Compiling pulldown-cmark-escape v0.10.1
+   Compiling jiff v0.2.15
+   Compiling base64 v0.21.7
+   Compiling rustls v0.23.31
+   Compiling notify-debouncer-mini v0.6.0
+   Compiling pulldown-cmark v0.10.3
+   Compiling serde v1.0.228
+   Compiling rustls-pemfile v1.0.4
+   Compiling hashbrown v0.15.5
+   Compiling serde_json v1.0.143
+   Compiling serde_urlencoded v0.7.1
+   Compiling url v2.5.7
+   Compiling half v2.6.0
+   Compiling indexmap v2.11.0
+   Compiling regex v1.11.2
+   Compiling string_cache v0.8.9
+   Compiling cubecl-common v0.5.0
+   Compiling serde_bytes v0.11.17
+   Compiling burn-common v0.17.1
+   Compiling h2 v0.4.12
+   Compiling burn-tensor v0.17.1
+   Compiling globset v0.4.16
+   Compiling sanitize-filename v0.6.0
+   Compiling web_atoms v0.1.3
+   Compiling matchers v0.2.0
+   Compiling csv v1.3.1
+   Compiling rmp-serde v1.3.0
+   Compiling serde_path_to_error v0.1.17
+   Compiling markup5ever v0.35.0
+   Compiling burn-dataset v0.17.1
+   Compiling tracing-subscriber v0.3.20
+   Compiling macerator v0.2.9
+   Compiling bincode v2.0.1
+   Compiling html5ever v0.35.0
+   Compiling clap v4.5.46
+   Compiling zip v4.6.0
+   Compiling priority-queue v2.5.0
+   Compiling burn-autodiff v0.17.1
+   Compiling burn-ir v0.17.1
+   Compiling tokio-rustls v0.26.2
+   Compiling burn-core v0.17.1
+   Compiling tracing-appender v0.2.3
+   Compiling ammonia v4.1.2
+   Compiling hyper v1.7.0
+   Compiling burn-ndarray v0.17.1
+   Compiling hashlink v0.10.0
+   Compiling hyper-util v0.1.16
+   Compiling serde-value v0.7.0
+   Compiling serde-aux v4.7.0
+   Compiling rusqlite v0.36.0
+   Compiling hyper-rustls v0.27.7
+   Compiling hyper-tls v0.6.0
+   Compiling reqwest v0.12.23
+   Compiling axum v0.8.4
+   Compiling h2 v0.3.27
+   Compiling markup5ever v0.11.0
+   Compiling envy v0.4.2
+   Compiling serde_tuple v1.1.2
+   Compiling env_filter v0.1.3
+   Compiling env_logger v0.11.8
+   Compiling html5ever v0.26.0
+   Compiling xml5ever v0.17.0
+   Compiling burn-train v0.17.1
+   Compiling clap_complete v4.5.57
+   Compiling anki v0.0.0 (/Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/rslib)
+   Compiling ignore v0.4.23
+   Compiling elasticlunr-rs v3.0.2
+   Compiling handlebars v6.3.2
+   Compiling burn v0.17.1
+   Compiling fsrs v5.2.0
+   Compiling toml v0.5.11
+   Compiling codespan-reporting v0.11.1
+   Compiling system-configuration v0.5.1
+   Compiling sync_wrapper v0.1.2
+   Compiling topological-sort v0.2.2
+   Compiling pathdiff v0.2.3
+   Compiling opener v0.8.2
+   Compiling codespan v0.11.1
+   Compiling markup5ever_rcdom v0.2.0
+   Compiling hyper v0.14.32
+   Compiling axum-extra v0.10.1
+   Compiling axum-client-ip v1.1.3
+   Compiling mdbook v0.4.52
+   Compiling pulldown-cmark v0.8.0
+   Compiling linkify v0.7.0
+   Compiling prost-types v0.13.5
+   Compiling anki_process v0.0.0 (/Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/rslib/process)
+   Compiling deadpool-runtime v0.1.4
+   Compiling assert-json-diff v2.0.2
+   Compiling deadpool v0.12.2
+   Compiling async-stream v0.3.6
+   Compiling wiremock v0.6.5
+   Compiling lzma-sys v0.1.20
+   Compiling xattr v1.5.1
+   Compiling prost-reflect v0.14.7
+   Compiling filetime v0.2.26
+   Compiling runner v0.0.0 (/Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/build/runner)
+   Compiling tar v0.4.46
+   Compiling xz2 v0.1.7
+   Compiling hyper-tls v0.5.0
+   Compiling reqwest v0.11.27
+   Compiling junction v1.2.0
+   Compiling minilints v0.0.0 (/Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/tools/minilints)
+   Compiling ftl v0.0.0 (/Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/ftl)
+   Compiling linkcheck v0.4.1 (https://github.com/ankitects/linkcheck.git?rev=184b2ca50ed39ca43da13f0b830a463861adb9ca#184b2ca5)
+   Compiling configure v0.0.0 (/Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/build/configure)
+   Compiling linkchecker v0.0.0 (/Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/rslib/linkchecker)
+   Compiling anki-sync-server v0.0.0 (/Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt/rslib/sync)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1m 11s
+────────────
+ Nextest run ID 069e67de-3277-447c-91b4-f8562ae5ed6b with nextest profile: default
+    Starting 556 tests across 17 binaries
+────────────
+     Summary [   5.564s] 556 tests run: 556 passed, 0 skipped
+ninja: build stopped: subcommand failed.
+[0m[1m[31m
+Build failed.
+[0merror: recipe `check` failed on line 35 with exit code 1

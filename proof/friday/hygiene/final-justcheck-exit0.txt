@@ -1,0 +1,54 @@
+[1m[92m    Finished[0m `release` profile [optimized] target(s) in 0.35s
+[1/4; 4 active; 0.095s] check:ruff
+FAILED: /Users/adarshrajesh/AlphaWeek2/hyg-solo/out/tests/python_ruff.check.3744293702001003432 
+/Users/adarshrajesh/AlphaWeek2/hyg-solo/out/rust/release/runner run --stamp=/Users/adarshrajesh/AlphaWeek2/hyg-solo/out/tests/python_ruff.check.3744293702001003432 /Users/adarshrajesh/AlphaWeek2/hyg-solo/out/pyenv/bin/ruff check qt/aqt ftl pylib/tools tools python 
+I001 [*] Import block is un-sorted or un-formatted
+  --> tools/cfa/serve_cfa_pages.py:58:1
+   |
+56 |   # exists, else Qt raises "QtWebEngineWidgets must be imported ... before a
+57 |   # QCoreApplication instance is created". This mirrors tools/cfa/render_f5_proof.py.
+58 | / import aqt  # noqa: E402
+59 | | from aqt import mediasrv  # noqa: E402
+60 | | from PyQt6.QtWidgets import QApplication  # noqa: E402
+61 | |
+62 | | from anki import cfa  # noqa: E402
+63 | | from anki.cards import CardId  # noqa: E402
+64 | | from anki.collection import Collection  # noqa: E402
+65 | | from anki.decks import DeckId  # noqa: E402
+   | |_____________________________^
+66 |
+67 |   DAY = 86_400
+   |
+help: Organize imports
+
+Found 1 error.
+[*] 1 fixable with the `--fix` option.
+Failed to run (1): /Users/adarshrajesh/AlphaWeek2/hyg-solo/out/pyenv/bin/ruff check qt/aqt ftl pylib/tools tools python
+[2/4; 3 active; 0.098s] check:format:python:tools
+25 files already formatted
+Found 1 error (1 fixed, 0 remaining).
+[3/4; 2 active; 0.242s] check:pytest:tools
+============================= test session starts ==============================
+platform darwin -- Python 3.13.13, pytest-8.4.1, pluggy-1.6.0
+rootdir: /Users/adarshrajesh/AlphaWeek2/hyg-solo
+configfile: pyproject.toml
+plugins: mock-3.15.1, anyio-4.13.0
+collected 4 items
+
+tools/tests/test_mintlify_hooks.py ....                                  [100%]
+
+============================== 4 passed in 0.01s ===============================
+[4/4; 1 active; 0.866s] check:minilints
+     Ignored package `cargo-license v0.7.0` is already installed, use --force to override
+ninja: build stopped: subcommand failed.
+[1m[92m    Finished[0m `dev` profile [unoptimized + debuginfo] target(s) in 0.15s
+[1m[92m     Running[0m `out/rust/debug/configure`
+Warning, .git/HEAD not found; submodules may be stale
+Warning, .git/HEAD not found; submodules may be stale
+Warning, .git/HEAD not found; submodules may be stale
+Warning, .git/HEAD not found; submodules may be stale
+[1/1; 1 active; 0.034s] check:ruff
+All checks passed!
+[0m[1m[32m
+Build succeeded in 1.49s.
+[0m

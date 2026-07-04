@@ -62,6 +62,51 @@ def test_topic_weights_renormalize_to_one():
     assert present.issubset(set(weights))
 
 
+def test_all_ten_level_ii_topics_present():
+    # The authored deck must cover every base CFA Level II topic — including
+    # fixed-income and derivatives, which the item glob previously missed.
+    items = build_cfa_deck.load_items(DECK_DIR)
+    present = {build_cfa_deck.los_prefix(i["los_tag"]) for i in items}
+    missing = set(build_cfa_deck.BASE_TOPIC_WEIGHTS) - present
+    assert not missing, f"missing authored topics: {sorted(missing)}"
+    weights = build_cfa_deck.topic_weights_for(items)
+    assert set(weights) == set(build_cfa_deck.BASE_TOPIC_WEIGHTS)
+
+
+def test_render_source_line_names_topic_and_reading():
+    item = {
+        "front": "q",
+        "back": "a",
+        "topic": "Fixed Income",
+        "los_tag": "los::fixed-income::term-structure-forward-rates",
+        "source": "authored",
+        "license": "authored-original",
+    }
+    line = build_cfa_deck.render_source_line(item)
+    assert line.startswith("Source:")
+    assert "CFA Level II" in line
+    assert "Fixed Income" in line
+    # The specific reading is named, derived from the los:: tag (hyphens -> spaces).
+    assert "term structure forward rates" in line
+
+
+def test_back_with_source_is_additive_and_preserves_content():
+    item = {
+        "front": "q",
+        "back": "The estimated slope coefficient.",
+        "topic": "Quantitative Methods",
+        "los_tag": "los::quant::simple-linear-regression",
+        "source": "authored",
+        "license": "authored-original",
+    }
+    back = build_cfa_deck.back_with_source(item)
+    # Authored content is preserved verbatim; the named source is appended AFTER.
+    assert back.startswith("The estimated slope coefficient.")
+    assert build_cfa_deck.render_source_line(item) in back
+    assert back.index("The estimated slope coefficient.") < back.index("Source:")
+    assert "simple linear regression" in back
+
+
 def test_classify_item_type_is_deterministic_and_closed():
     # Every authored item maps to exactly one of the closed type set.
     items = build_cfa_deck.load_items(DECK_DIR)
@@ -149,10 +194,16 @@ def test_build_into_collection():
         # every card's note carries a los:: tag AND a type:: content-type tag
         for cid in cids[:50]:
             note = col.get_card(cid).note()
-            assert any(t.startswith("los::") for t in note.tags)
+            los = next(t for t in note.tags if t.startswith("los::"))
             type_tags = [t for t in note.tags if t.startswith("type::")]
             assert len(type_tags) == 1
             assert type_tags[0].split("::", 1)[1] in build_cfa_deck.ITEM_TYPES
+            # Every built study card carries a visible NAMED SOURCE (D1): the
+            # CFA Level II topic + the specific reading, derived from its los tag.
+            back = note["Back"]
+            assert "Source: CFA Level II" in back
+            reading = build_cfa_deck.reading_from_los(los)
+            assert reading and reading in back
     finally:
         col.close()
         if os.path.exists(tmp):

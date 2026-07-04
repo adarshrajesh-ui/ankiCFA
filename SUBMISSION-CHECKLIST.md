@@ -8,6 +8,14 @@ each validated through the **documented fallback gate** (see _Gate_ below).
 Every AI feature works fully with **AI OFF** through a deterministic fallback;
 no OpenAI key is committed, printed, or required to run the suite.
 
+> **Post-F9 hygiene pass** ([PR #25](https://github.com/adarshrajesh-ui/ankiCFA/pull/25),
+> branch `friday/hygiene`): greened the 6 remaining `just check` failures (deadline
+> tests, honest installer skips, mypy, prettier); grew the deck to **711 items
+> across all ten** Level II topics (added fixed income + derivatives) with a
+> **per-card named source**; and recorded the fork's native mobile **Exam Readiness**
+> screen (three scores) in `docs/cfa/PLATFORM-MATRIX.md`. All additive, AI-off, no
+> overclaims.
+
 ## How to reproduce the whole gate
 
 ```bash
@@ -104,19 +112,30 @@ adb-screencap proof. This is recorded per-iteration in
 - **AI-off is the default and fully functional.** With no `OPENAI_API_KEY`, F0a
   returns `{ok:False}`, F2 semantic grading falls back to the deterministic F1
   grader, F3 tab-fill is disabled with a tooltip, and the eval's LLM ≥0.80
-  assertion is _skipped_ (never faked). The entire test suite passes AI-off.
+  assertion is _skipped_ (never faked). The entire test suite passes AI-off. The
+  master gate is key presence (`cfa.ai.llm_client.ai_enabled()`); the intended
+  layered control adds per-feature `col.conf` toggles (`cfa_ai_enabled` /
+  `cfa_ai_grading_enabled` / `cfa_ai_tabfill_enabled`, AI on only if key present
+  **and** toggle true), with the in-app toggle UI landing on a companion branch.
 - **Scoring is not validated against real exam data.** F4 readiness (SM-2
   recall fallback + Bayesian 95% credible band + pass/fail call vs the ~65% MPS
   proxy) carries a standing _"not validated against real exam data"_ label; the
   eval harness is a seeded synthetic-learner simulation, likewise labelled.
-- **Mobile is shared-engine + synced-content, not a full port.** On Android the
-  fork **Rust engine** (BuildExamQueue / DeadlineRetention) runs on-device and
-  the **decks / note-types / ethics cards / exam config** reach the phone via
-  bundled `.apkg` (content) + AnkiWeb sync (col.conf). **Desktop-only:** the AI
-  tab-fill editor button, LLM ethics grading UI, and the Exam Readiness scoring
-  dialog. Full split: `docs/cfa/PLATFORM-MATRIX.md`.
-- **All 660 authored items are original.** No copyrighted CFA Institute content;
-  the leakage check confirms no held-out eval question overlaps a training front.
+- **Mobile is shared-engine + synced-content + native CFA screens (landing), not a
+  full port.** On Android the fork **Rust engine** (BuildExamQueue /
+  DeadlineRetention) runs on-device and the **decks / note-types / ethics cards /
+  exam config** reach the phone via bundled `.apkg` (content) + AnkiWeb sync
+  (col.conf). The fork's AnkiDroid (branded **ankiCFA**, branch `friday/mobile`,
+  Anki-Android PR #1) now also has a **native Exam Readiness screen** rendering the
+  same three scores (Memory / Performance / Readiness) — via a **deterministic
+  on-device scorer** (the shared `computeCfaScores` RPC is not yet exposed).
+  Still **desktop-only:** the AI tab-fill editor button and the LLM ethics-grading
+  UI. Full, no-overclaim split: `docs/cfa/PLATFORM-MATRIX.md`.
+- **All authored items are original.** The CFA Level II deck is now **711
+  hand-authored items** across **all ten** Level II topics (fixed income and
+  derivatives added in the hygiene pass), each `license: authored-original` and
+  carrying a visible named source; no copyrighted CFA Institute content. The
+  leakage check confirms no held-out eval question overlaps a training front.
 
 ## Merge status
 

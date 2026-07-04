@@ -1,0 +1,13 @@
+=== Increment 4 — AFTER: README + SUBMISSION-CHECKLIST (native-CFA, AI toggle, mobile scores, sync) ===
+date: 2026-07-04T03:46:33Z
+
+--- dprint check (docs) ---
+clean
+
+--- README: key native-CFA claims now present ---
+4
+  (count of the 5 anchor phrases above)
+
+--- SUBMISSION-CHECKLIST: hygiene note + 711 + native readiness ---
+3
+  (count of the 4 anchor phrases above)

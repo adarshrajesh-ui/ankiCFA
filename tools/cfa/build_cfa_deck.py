@@ -12,7 +12,17 @@ Content is hand-authored (there is no AI/generation anywhere in this app). Each
 row in ``cfa/deck/*.jsonl`` is an original, authored item carrying a
 ``license: authored-original`` marker; no copyrighted CFA Institute material is
 used. The item files together are a representative slice of the CFA Level II
-topic areas, not the full curriculum.
+topic areas (all ten of them), not the full curriculum.
+
+Every built card carries a visible NAMED SOURCE footer (its CFA Level II topic +
+the specific reading it drills, derived from the ``los::`` tag) so a study card's
+provenance mirrors the app's AI provenance line -- see :func:`render_source_line`.
+
+Deck size vs. session size: the authored deck is >200 cards. The "Study by Exam
+Priority" queue does not shrink the deck -- it returns a *capped, weakest-first
+fetch* (a ``fetch_limit`` session cap, e.g. desktop 50-200, mobile 100) drawn
+from the full deck. Any small per-session card count is that fetch limit, never
+the deck size.
 
 Usage:
     out/pyenv/bin/python tools/cfa/build_cfa_deck.py --path /tmp/cfa.anki2
@@ -176,6 +186,47 @@ def topic_weights_for(items: list[dict[str, str]]) -> dict[str, float]:
     return {p: round(w / total, 4) for p, w in weights.items()}
 
 
+# --- Named source provenance (Brainlift D1) ----------------------------------
+# Every AI output in this app carries a named source; a hand-authored STUDY card
+# gets the same treatment. The named source is the item's topic + the specific
+# CFA Level II reading it drills, derived deterministically from the ``los::``
+# tag (the join key), so a learner can always see *where a card comes from*.
+SOURCE_PREFIX = "Source:"
+
+
+def reading_from_los(los_tag: str) -> str:
+    """Human-readable reading name from the ``los::<topic>::<reading>`` tag.
+
+    ``los::fixed-income::term-structure-forward-rates`` -> ``term structure
+    forward rates``; a deeper tag joins its trailing segments with `` / ``.
+    """
+    parts = los_tag.split("::")
+    reading = " / ".join(
+        seg.replace("-", " ").strip() for seg in parts[2:] if seg.strip()
+    )
+    return reading
+
+
+def render_source_line(item: dict[str, str]) -> str:
+    """A visible, deterministic named source for a built study card.
+
+    Example: ``Source: CFA Level II > Fixed Income > term structure forward
+    rates``. Appended to the card Back (additive, never replacing authored
+    content) so the study-card provenance mirrors the app's AI provenance line.
+    """
+    reading = reading_from_los(item["los_tag"])
+    tail = f" > {reading}" if reading else ""
+    return f"{SOURCE_PREFIX} CFA Level II > {item['topic']}{tail}"
+
+
+def back_with_source(item: dict[str, str]) -> str:
+    """The card Back with its named-source footer appended (HTML-safe)."""
+    return (
+        f"{item['back']}<br><br>"
+        f'<span class="cfa-source">{render_source_line(item)}</span>'
+    )
+
+
 def add_deck_notes(col, deck_dir: str = DECK_DIR) -> dict:
     """Add the authored CFA Level II notes + exam config to an OPEN collection.
 
@@ -196,7 +247,9 @@ def add_deck_notes(col, deck_dir: str = DECK_DIR) -> dict:
     for item in items:
         note = col.new_note(notetype)
         note["Front"] = item["front"]
-        note["Back"] = item["back"]
+        # Additive named-source footer (Brainlift D1): every study card shows the
+        # CFA Level II topic + reading it drills, derived from its ``los::`` tag.
+        note["Back"] = back_with_source(item)
         note.tags = [item["los_tag"], f"type::{classify_item_type(item)}"]
         col.add_note(note, deck_id)
         added += 1

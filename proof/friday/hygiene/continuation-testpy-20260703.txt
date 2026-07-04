@@ -1,0 +1,17 @@
+# Continuation verification — 2026-07-03 (hygiene worktree, AI-OFF, no .env)
+
+Branch: friday/hygiene @ b7853e467
+Worktree: /Users/adarshrajesh/AlphaWeek2/ankiCFA-hygiene-wt
+
+## just test-py
+tools/tests/test_mintlify_hooks.py ....                                  [100%]
+4 passed in 0.02s
+
+qt/tests: 141 passed, 2 skipped in 2.08s
+(includes test_cfa_deadline_dialog.py ...... — Inc-1 fix)
+
+Build succeeded.
+
+## just cfa-deck-test
+13 passed in 1.44s
+(includes all-ten-topics + named-source assertions — Inc-2)

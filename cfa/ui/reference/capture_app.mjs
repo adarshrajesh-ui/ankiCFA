@@ -27,8 +27,8 @@ async function loadChromium() {
     for (const c of candidates) {
         try {
             const mod = await import(c);
-            if (mod.chromium) return mod.chromium;
-            if (mod.default && mod.default.chromium) return mod.default.chromium;
+            if (mod.chromium) { return mod.chromium; }
+            if (mod.default && mod.default.chromium) { return mod.default.chromium; }
         } catch (e) {
             errs.push(`${c}: ${e.message || e}`);
         }
@@ -78,13 +78,13 @@ async function run() {
         const consoleErrors = [];
         const failed = [];
         page.on("console", (m) => {
-            if (m.type() === "error") consoleErrors.push(m.text());
+            if (m.type() === "error") { consoleErrors.push(m.text()); }
         });
         page.on("requestfailed", (r) => {
             failed.push(`${r.url()} :: ${r.failure()?.errorText || "failed"}`);
         });
         page.on("response", (r) => {
-            if (r.status() >= 400) failed.push(`${r.url()} :: HTTP ${r.status()}`);
+            if (r.status() >= 400) { failed.push(`${r.url()} :: HTTP ${r.status()}`); }
         });
 
         let navError = null;

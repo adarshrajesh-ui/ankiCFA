@@ -1,0 +1,18 @@
+=== Increment 1 — AFTER: the 6 'just check' failures resolved ===
+worktree: ankiCFA-hygiene-wt (friday/hygiene = origin/main @ 6ef32ec8c + hygiene fixes)
+AI-OFF: no .env present in this worktree (deterministic fallback path)
+date: 2026-07-04T03:30:31Z
+
+--- (a) check:mypy  [before: 3 errors in tools/cfa/render_f0b_proof.py] ---
+Success: no issues found in 329 source files
+
+--- (b) check:format:prettier  [before: CfaDeadlinePage.svelte + CfaReadinessPage.svelte flagged] ---
+Checking formatting...
+All matched files use Prettier code style!
+
+--- (c) check:minilints  [before: missing copyright header on .probe*.mjs] ---
+OK: .probe_mm.mjs / .probe2_mm.mjs are deleted (absent from tree)
+
+--- (d) check:pytest:aqt  [before: 6 failed, 136 passed] ---
+...............s................s                                        [100%]
+31 passed, 2 skipped in 0.53s

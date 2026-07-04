@@ -1,0 +1,25 @@
+=== Increment 2 — AFTER: CFA deck content + per-card named source ===
+date: 2026-07-04T03:40:50Z   (AI-OFF: no .env in worktree)
+
+--- deck validator (BEFORE: 630 items across 8 topics) ---
+OK: 711 authored CFA Level II items, all valid.
+
+--- all ten CFA Level II topics present, weights renormalized to 1.0 ---
+  los::altinv          weight=0.08
+  los::corp            weight=0.08
+  los::derivatives     weight=0.08
+  los::econ            weight=0.08
+  los::equity          weight=0.12
+  los::ethics          weight=0.12
+  los::fixed-income    weight=0.12
+  los::fra             weight=0.12
+  los::portmgmt        weight=0.12
+  los::quant           weight=0.08
+  ten present: True | weights sum: 1.0 | items: 711
+
+--- named source now rendered on the card Back (sample) ---
+  The estimated slope coefficient.<br><br><span class="cfa-source">Source: CFA Level II > Fixed Income > term structure forward rates</span>
+
+--- builder tests (tools/cfa/tests), AI-OFF ---
+.............                                                            [100%]
+13 passed in 1.68s

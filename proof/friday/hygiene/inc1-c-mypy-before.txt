@@ -1,0 +1,6 @@
+===== (c) mypy render_f0b_proof.py =====
+tools/cfa/render_f0b_proof.py:86: error: "DeadlineDialog" has no attribute "date_edit"  [attr-defined]
+tools/cfa/render_f0b_proof.py:89: error: "DeadlineDialog" has no attribute "date_edit"  [attr-defined]
+tools/cfa/render_f0b_proof.py:90: error: "DeadlineDialog" has no attribute "_apply_date"  [attr-defined]
+Found 3 errors in 1 file (checked 1 source file)
+c exit=1
