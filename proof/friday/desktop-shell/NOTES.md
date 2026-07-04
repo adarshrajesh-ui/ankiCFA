@@ -39,7 +39,8 @@ Adaptations (Phase 0 not yet landed by orchestrator at start):
   `setWindowTitle("ankiCFA")` + `QPixmap("icons:cfa.png")`; `icons.qrc` includes `cfa.png`.
 - Tests: `just cfa-desktop-shell-test` (4 passed). RED proven by stashing only my
   tracked source edits.
-- SHA: (this commit)
-- PR: (opened after push)
-- Cross-scope handoffs: none. (Noted: `justfile` and `qt/tests/` are shared across
-  concurrent workers; committed only my own hunk/file.)
+- SHA: `22013a473` (on friday/desktop-shell, in the isolated worktree)
+- PR: https://github.com/adarshrajesh-ui/ankiCFA/pull/24
+- Cross-scope handoffs: see `HANDOFF.md` — isolation move + a friday/ethics
+  concurrency incident I cleaned up. `justfile`/`qt/tests/` are shared across
+  concurrent workers; I commit only my own hunk/files.
