@@ -1,0 +1,28 @@
+====================================================================
+A11 — Score-mapping + model-description docs — EVIDENCE
+Captured: 2026-07-04
+====================================================================
+
+Deliverables (one short page each, method + range + give-up rule):
+-rw-r--r--  1 adarshrajesh  staff  3376 Jul  4 17:52 docs/cfa/MODEL-MEMORY.md
+-rw-r--r--  1 adarshrajesh  staff  2819 Jul  4 17:52 docs/cfa/MODEL-PERFORMANCE.md
+-rw-r--r--  1 adarshrajesh  staff  3458 Jul  4 17:52 docs/cfa/MODEL-READINESS.md
+
+-- Constants documented, read straight from pylib/anki/cfa.py --------
+MIN_GRADED_REVIEWS = 200
+MIN_TOPIC_COVERAGE = 0.50
+_CORRECT_EASE = 2
+MIN_FIRST_EXPOSURES = 30
+READINESS_LABEL = "not validated against real exam data"
+_MPS = 0.65
+_READINESS_K = 8.0
+_GUESS_RATE = 1.0 / 3.0
+_READINESS_MARGIN = 0.15
+
+-- Doc-consistency test (docs cannot silently drift from code) -------
+.....                                                                    [100%]
+5 passed in 0.01s
+
+-- Full cfa eval suite still green -----------------------------------
+........................................................                 [100%]
+56 passed in 14.65s

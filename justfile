@@ -172,6 +172,11 @@ cfa-eval-leakage:
 cfa-eval-test:
     {{ py }} -m pytest cfa/eval/tests -q
 
+# A11: the MODEL-*.md score-mapping docs (memory/performance/readiness) must not
+# drift from the constants in pylib/anki/cfa.py (stdlib-only, no build).
+cfa-model-docs-test:
+    {{ py }} -m pytest cfa/eval/tests/test_model_docs.py -q
+
 # A1: AI grader vs simpler baselines (deterministic-span, TF-IDF, LLM). AI-off
 # reports both baselines honestly; with a key the LLM must beat both or it fails.
 cfa-baseline-compare *args:
