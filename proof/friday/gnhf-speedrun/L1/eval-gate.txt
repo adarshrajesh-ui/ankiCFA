@@ -1,0 +1,76 @@
+A2 — Wrong-answer-rate gate + declared cutoffs (ethics-highlight grader)
+========================================================================
+Command : just cfa-ethics-eval   (python cfa/ethics_pairs/eval_ai_grading.py)
+Gate    : accuracy >= 0.80  AND  wrong_answer_rate <= 0.20  (declared up front
+          in eval_ai_grading.py as ACCURACY_CUT / WRONG_ANSWER_RATE_CUT).
+wrong_answer_rate := (# human-INCORRECT attempts the grader false-accepts as
+          "correct") / (# human-incorrect attempts). This is the most
+          dangerous grading error for an exam-prep product, so it gets its
+          own hard ceiling on top of raw accuracy.
+Honesty : AI-off never fails the process (the AI-off contract); it reports the
+          deterministic numbers honestly and SKIPS the LLM assertion. The
+          named gate only fails the process when the LLM actually ran.
+
+Run 1 — AI OFF (deterministic fallback; the honest shipped-without-key number)
+------------------------------------------------------------------------------
+====================================================================
+F2 ethics-highlight grading eval — human-labeled gold-set
+====================================================================
+attempts            : 30
+active grader       : deterministic fallback (AI OFF)
+grade agreement     : 0.733
+overall accuracy    : 0.733
+deterministic base  : 0.733 (frozen preview, for contrast)
+wrong-answer rate   : 0.000 (0/5 human-incorrect answers false-accepted)
+
+confusion (rows=human, cols=grader):
+               correct  somewhat   partial     wrong
+    correct         18         0         7         1
+   somewhat          0         1         0         0
+    partial          0         0         2         0
+      wrong          0         0         0         1
+
+A2 named gate (cutoffs declared up front):
+  accuracy          0.733 < 0.80 -> FAIL
+  wrong-answer rate 0.000 <= 0.20 -> PASS
+  gate (AI-OFF deterministic) -> FAIL
+
+AI OFF: no OPENAI_API_KEY, so the LLM >= 0.80 assertion is SKIPPED. The deterministic fallback graded every attempt; its agreement is reported above and is the honest AI-off number.
+====================================================================
+
+Process exit under AI-off (must be 0 — AI-off still scores): 0
+
+Run 2 — SIMULATED oracle LLM (mocked in-test, returns the human grade; NOT a
+real API call — labeled SIMULATED per the honesty rule). Shows the gate
+actually passing and both legs green when a competent grader runs:
+------------------------------------------------------------------------------
+====================================================================
+F2 ethics-highlight grading eval — human-labeled gold-set
+====================================================================
+attempts            : 30
+active grader       : LLM (semantic)
+grade agreement     : 1.000
+overall accuracy    : 1.000
+deterministic base  : 0.733 (frozen preview, for contrast)
+wrong-answer rate   : 0.000 (0/5 human-incorrect answers false-accepted)
+
+confusion (rows=human, cols=grader):
+               correct  somewhat   partial     wrong
+    correct         26         0         0         0
+   somewhat          0         1         0         0
+    partial          0         0         2         0
+      wrong          0         0         0         1
+
+A2 named gate (cutoffs declared up front):
+  accuracy          1.000 >= 0.80 -> PASS
+  wrong-answer rate 0.000 <= 0.20 -> PASS
+  gate (AI) -> PASS
+
+LLM agreement 1.000 >= threshold 0.80 -> PASS
+====================================================================
+
+Verified by 6 tests in cfa/ethics_pairs/tests/test_ai_grading.py:
+  - wrong_answer_rate reported, 0.0 under AI-off (0/5 false-accepts)
+  - AI-off exits 0 even though its accuracy (0.733) < ACCURACY_CUT
+  - oracle LLM passes the named gate (acc 1.0, war 0.0)
+  - a false-accepting LLM (war 0.8 > 0.20) trips the gate -> main() exit 1

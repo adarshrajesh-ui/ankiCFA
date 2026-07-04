@@ -41,6 +41,16 @@ ATTEMPTS = os.path.join(HERE, "eval_attempts.jsonl")
 PASSAGES = os.path.join(HERE, "passages.jsonl")
 GRADES = ("correct", "somewhat", "partial", "wrong")
 
+# --- A2 named acceptance gate (cutoffs declared up front) --------------------
+# ACCURACY_CUT: the grader must agree with the human correct/incorrect verdict
+#   on at least this fraction of attempts.
+# WRONG_ANSWER_RATE_CUT: of the attempts a human marked INCORRECT, at most this
+#   fraction may be "false-accepted" (grader says correct). This is the most
+#   dangerous grading error for an exam-prep product — telling a student a wrong
+#   answer is right — so it gets its own hard ceiling on top of raw accuracy.
+ACCURACY_CUT = 0.80
+WRONG_ANSWER_RATE_CUT = 0.20
+
 
 def _ai_available() -> bool:
     if os.environ.get("OPENAI_API_KEY"):
@@ -79,6 +89,8 @@ def run_eval(complete_fn=None) -> dict:
     correct_agree = 0
     det_agree = 0
     ai_source = 0
+    human_incorrect = 0
+    false_accepts = 0
     confusion: dict[str, dict[str, int]] = {h: {g: 0 for g in GRADES} for h in GRADES}
 
     for a in attempts:
@@ -97,6 +109,10 @@ def run_eval(complete_fn=None) -> dict:
             grade_agree += 1
         if bool(res["correct"]) == bool(a["human_correct"]):
             correct_agree += 1
+        if not bool(a["human_correct"]):
+            human_incorrect += 1
+            if bool(res["correct"]):
+                false_accepts += 1
         if a.get("deterministic_grade_preview") == h:
             det_agree += 1
         if res["source"] == "ai":
@@ -117,13 +133,25 @@ def run_eval(complete_fn=None) -> dict:
 
     n = len(attempts)
     ran_ai = ai_source > 0
+    # wrong_answer_rate: false-accepts of human-incorrect answers. Undefined
+    # (0.0, reported honestly with the denominator) when no human-incorrect
+    # attempts exist in the gold set.
+    war = round(false_accepts / human_incorrect, 4) if human_incorrect else 0.0
+    accuracy = round(correct_agree / n, 4) if n else 0.0
+    gate_pass = accuracy >= ACCURACY_CUT and war <= WRONG_ANSWER_RATE_CUT
     return {
         "n": n,
         "ran_ai": ran_ai,
         "ai_source_count": ai_source,
         "grade_agreement": round(grade_agree / n, 4) if n else 0.0,
-        "correct_accuracy": round(correct_agree / n, 4) if n else 0.0,
+        "correct_accuracy": accuracy,
         "deterministic_baseline_agreement": round(det_agree / n, 4) if n else 0.0,
+        "human_incorrect": human_incorrect,
+        "false_accepts": false_accepts,
+        "wrong_answer_rate": war,
+        "accuracy_cut": ACCURACY_CUT,
+        "wrong_answer_rate_cut": WRONG_ANSWER_RATE_CUT,
+        "gate_pass": gate_pass,
         "confusion": confusion,
         "per_item": per_item,
     }
@@ -143,6 +171,11 @@ def format_report(report: dict, threshold: float) -> str:
         f"deterministic base  : {report['deterministic_baseline_agreement']:.3f} "
         "(frozen preview, for contrast)"
     )
+    lines.append(
+        f"wrong-answer rate   : {report['wrong_answer_rate']:.3f} "
+        f"({report['false_accepts']}/{report['human_incorrect']} human-incorrect "
+        "answers false-accepted)"
+    )
     lines.append("")
     lines.append("confusion (rows=human, cols=grader):")
     header = "            " + "".join(f"{g:>10}" for g in GRADES)
@@ -150,6 +183,26 @@ def format_report(report: dict, threshold: float) -> str:
     for h in GRADES:
         row = f"  {h:>9} " + "".join(f"{report['confusion'][h][g]:>10}" for g in GRADES)
         lines.append(row)
+    lines.append("")
+    # A2 named acceptance gate: accuracy >= ACCURACY_CUT AND
+    # wrong_answer_rate <= WRONG_ANSWER_RATE_CUT.
+    acc_ok = report["correct_accuracy"] >= report["accuracy_cut"]
+    war_ok = report["wrong_answer_rate"] <= report["wrong_answer_rate_cut"]
+    lines.append("A2 named gate (cutoffs declared up front):")
+    lines.append(
+        f"  accuracy          {report['correct_accuracy']:.3f} "
+        f"{'>=' if acc_ok else '<'} {report['accuracy_cut']:.2f} "
+        f"-> {'PASS' if acc_ok else 'FAIL'}"
+    )
+    lines.append(
+        f"  wrong-answer rate {report['wrong_answer_rate']:.3f} "
+        f"{'<=' if war_ok else '>'} {report['wrong_answer_rate_cut']:.2f} "
+        f"-> {'PASS' if war_ok else 'FAIL'}"
+    )
+    lines.append(
+        f"  gate ({'AI' if report['ran_ai'] else 'AI-OFF deterministic'}) -> "
+        f"{'PASS' if report['gate_pass'] else 'FAIL'}"
+    )
     lines.append("")
     if report["ran_ai"]:
         ok = report["grade_agreement"] >= threshold
@@ -180,8 +233,13 @@ def main(argv=None) -> int:
     else:
         print(format_report(report, args.threshold))
 
-    # Only fail the process when the LLM actually ran and missed the bar.
-    if report["ran_ai"] and report["grade_agreement"] < args.threshold:
+    # Only fail the process when the LLM actually ran and missed a bar — either
+    # the grade-agreement threshold or the A2 named gate (accuracy +
+    # wrong-answer rate). AI-off reports the deterministic numbers honestly and
+    # never fails the process (the documented AI-off contract).
+    if report["ran_ai"] and (
+        report["grade_agreement"] < args.threshold or not report["gate_pass"]
+    ):
         return 1
     return 0
 

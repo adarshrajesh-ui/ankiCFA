@@ -409,3 +409,108 @@ def test_fallback_coaching_nudges_to_ai():
     assert r["source"] == "fallback"
     assert "AI grading" in r["coaching"]  # explicitly points to the AI upgrade
     assert "study_tip" in r
+
+
+# --- A2 wrong-answer-rate gate ----------------------------------------------
+
+
+def test_wrong_answer_rate_reported_and_zero_under_ai_off():
+    # The deterministic fallback never false-accepts a human-incorrect answer,
+    # so the safety metric is 0.0 over the 5 human-incorrect gold attempts.
+    report = E.run_eval(complete_fn=_off_client)
+    assert report["human_incorrect"] == 5
+    assert report["false_accepts"] == 0
+    assert report["wrong_answer_rate"] == 0.0
+    # cutoffs are surfaced in the report so evidence carries them
+    assert report["accuracy_cut"] == E.ACCURACY_CUT
+    assert report["wrong_answer_rate_cut"] == E.WRONG_ANSWER_RATE_CUT
+
+
+def test_ai_off_never_fails_process_even_below_accuracy_cut():
+    # AI-off accuracy (0.733) is below ACCURACY_CUT, but the AI-off contract
+    # means the process must still succeed and score honestly.
+    assert E.ACCURACY_CUT > 0.733  # precondition: the cut is above the fallback
+    os.environ.pop("OPENAI_API_KEY", None)
+    assert E.main([]) == 0
+
+
+def _incorrect_item_ids():
+    attempts = {r["item_id"]: r for r in E._load(E.ATTEMPTS)}
+    return [a["item_id"] for a in attempts.values() if not a["human_correct"]]
+
+
+def _oracle_by_passage(grade_for):
+    """Build an oracle that returns grade_for(attempt) for the matched item."""
+    passages = {r["item_id"]: r for r in E._load(E.PASSAGES)}
+    attempts = {r["item_id"]: r for r in E._load(E.ATTEMPTS)}
+
+    def oracle(**kwargs):
+        user = kwargs["user"]
+        chosen = "wrong"
+        for a in attempts.values():
+            if passages[a["item_id"]]["passage"] in user:
+                chosen = grade_for(a)
+                break
+        return {
+            "ok": True,
+            "model": "gpt-4o-mini",
+            "usage": {"total_tokens": 10},
+            "error": None,
+            "purpose": kwargs.get("purpose", ""),
+            "text": json.dumps(
+                {"highlight_grade": chosen, "explanation": "oracle", "spans": []}
+            ),
+        }
+
+    return oracle
+
+
+def test_oracle_llm_passes_named_gate():
+    # An oracle returning the human grade -> perfect accuracy, zero false
+    # accepts -> both gate legs PASS and main() exits 0.
+    report = E.run_eval(complete_fn=_oracle_by_passage(lambda a: a["human_grade"]))
+    assert report["ran_ai"] is True
+    assert report["wrong_answer_rate"] == 0.0
+    assert report["correct_accuracy"] >= E.ACCURACY_CUT
+    assert report["gate_pass"] is True
+
+
+def test_false_accepting_llm_trips_wrong_answer_gate():
+    # A grader that calls every human-incorrect answer "correct" drives the
+    # wrong-answer rate to 1.0 -> the safety leg FAILs and main() exits 1,
+    # even though overall accuracy could look high.
+    def grade_for(a):
+        # keep correct items correct, but wrongly upgrade incorrect ones
+        return "correct"
+
+    oracle = _oracle_by_passage(grade_for)
+    report = E.run_eval(complete_fn=oracle)
+    assert report["ran_ai"] is True
+    # 4 of the 5 human-incorrect attempts are eligible false-accepts; the 5th
+    # has a wrong verdict the grader always rejects (verdict gate), so it can
+    # never be false-accepted. Either way the safety rate blows past the cut.
+    assert report["human_incorrect"] == 5
+    assert report["false_accepts"] == 4
+    assert report["wrong_answer_rate"] == 0.8
+    assert report["wrong_answer_rate"] > report["wrong_answer_rate_cut"]
+    assert report["gate_pass"] is False
+
+    # verify main() surfaces the failure as a non-zero exit
+    import contextlib
+    import io
+
+    def _patched_run(*_a, **_k):
+        return report
+
+    orig = E.run_eval
+    E.run_eval = _patched_run
+    try:
+        os.environ["OPENAI_API_KEY"] = "sk-test"
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            rc = E.main([])
+    finally:
+        E.run_eval = orig
+        os.environ.pop("OPENAI_API_KEY", None)
+    assert rc == 1
+    assert "wrong-answer rate" in buf.getvalue()
