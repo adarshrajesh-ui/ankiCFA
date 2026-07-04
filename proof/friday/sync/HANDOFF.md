@@ -47,10 +47,30 @@ Exact files (mobile repo `/Users/adarshrajesh/wed/AnkiDroid`):
 
 ---
 
-## → orchestrator (scores) — `compute_cfa_scores` needs per-(card,day) dedup
-(placeholder — filled in during increment 3.)
+## → orchestrator (scores) — apply per-(card,day) dedup in memory_score / compute_cfa_scores
+
+`memory_score()` in `pylib/anki/cfa.py` (~571) counts **raw** revlog rows per card
+(`count(*)`). After sync, the same card reviewed on two devices the same day
+correctly yields **two** revlog rows (see `test_offline_same_card_dual_review_*`)
+but the give-up rule's `graded_reviews` total must use **per-(card, day) dedup**.
+
+**Fix:** use `cfa_sync.deduped_graded_review_count(col)` (or equivalent) instead of
+`summ(review_counts.values())` when computing `MemoryScore.graded_reviews` and the
+give-up check in `_giveup_reason`.
+
+Flagship regression test: `pylib/tests/test_cfa_sync_dedup.py::
+test_offline_same_card_dual_review_revlog_distinct_not_inflated`.
 
 ---
 
-## → W3 / bridge owner (AnkiDroid) — ethics attempt-detail → `card.custom_data` on mobile
-(placeholder — filled in during increment 5.)
+## → W3 / ethics — full attempt-detail payload exceeds Anki custom_data limits
+
+Anki enforces **top-level keys ≤ 8 bytes** and **serialized custom_data ≤ 100 bytes**.
+The full W3 payload (spans, verdicts, selectionIndices) cannot fit.
+
+**Sync workstream ships:** `cfa_sync.compact_ethics_payload()` + namespace
+`cfaEthic` (8 chars) with fields `{id, ok, hl, src, std}`. Desktop hook:
+`qt/aqt/cfa_ethics_sync.py` (registered from `qt/aqt/cfa.py`).
+
+**AnkiDroid bridge still needed** to read `localStorage["cfaEthics:pending"]` and
+write the same compact shape before sync (out of sync scope).

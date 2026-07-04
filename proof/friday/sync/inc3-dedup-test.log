@@ -1,0 +1,14 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.13, pytest-8.4.1, pluggy-1.6.0 -- /Users/adarshrajesh/AlphaWeek2/ankiCFA/out/pyenv/bin/python
+cachedir: .pytest_cache
+rootdir: /Users/adarshrajesh/AlphaWeek2/ankiCFA-sync/pylib
+configfile: pyproject.toml
+plugins: mock-3.15.1, anyio-4.13.0
+collecting ... collected 4 items
+
+pylib/tests/test_cfa_sync_dedup.py::test_offline_same_card_dual_review_revlog_distinct_not_inflated PASSED [ 25%]
+pylib/tests/test_cfa_sync_dedup.py::test_dedup_would_fail_if_naive_count_used_for_giveup PASSED [ 50%]
+pylib/tests/test_cfa_sync_dedup.py::test_different_days_both_count PASSED [ 75%]
+pylib/tests/test_cfa_sync_dedup.py::test_ethics_custom_data_roundtrips_through_sync_server PASSED [100%]
+
+============================== 4 passed in 16.78s ==============================

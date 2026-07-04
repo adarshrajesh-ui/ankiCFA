@@ -239,3 +239,95 @@ def last_review_ms(col: Collection, card_id: int) -> int | None:
     """Timestamp (ms) of the most recent review of ``card_id``, or None."""
     val = col.db.scalar("select max(id) from revlog where cid = ?", card_id)
     return int(val) if val is not None else None
+
+
+# --------------------------------------------------------------------------
+# Scoring validation: per-(card, day) dedup (orchestrator contract)
+# --------------------------------------------------------------------------
+
+
+def _collection_day(col: Collection, reviewed_at_ms: int) -> int:
+    """Anki collection-relative day number for a revlog id (ms epoch)."""
+    return int((reviewed_at_ms / 1000 - col.crt) // 86400)
+
+
+def raw_graded_review_count(col: Collection, *, deck_filter: str = "1") -> int:
+    """Count every graded revlog row (``ease > 0``) — *would* double-count."""
+    val = col.db.scalar(
+        f"""
+        select count(*)
+        from revlog r join cards c on r.cid = c.id
+        where {deck_filter} and r.ease > 0
+        """
+    )
+    return int(val or 0)
+
+
+def deduped_graded_review_count(col: Collection, *, deck_filter: str = "1") -> int:
+    """Count graded reviews with per-(card, collection-day) dedup.
+
+    The orchestrator's ``compute_cfa_scores`` give-up rule should use this shape
+    so a same-card-same-day review made on two devices (which correctly persists
+    as two distinct revlog rows after sync) does not inflate graded-review totals.
+    """
+    rows = col.db.all(
+        f"""
+        select r.cid, r.id
+        from revlog r join cards c on r.cid = c.id
+        where {deck_filter} and r.ease > 0
+        """
+    )
+    seen: set[tuple[int, int]] = set()
+    for cid, rid in rows:
+        seen.add((int(cid), _collection_day(col, int(rid))))
+    return len(seen)
+
+
+def merge_custom_data(col: Collection, card_id: int, namespace: str, payload: dict) -> None:
+    """Merge ``payload`` into ``card.custom_data[namespace]`` and save (syncs)."""
+    import json
+
+    card = col.get_card(card_id)
+    root: dict = {}
+    if card.custom_data:
+        with contextlib.suppress(json.JSONDecodeError, TypeError):
+            parsed = json.loads(card.custom_data)
+            if isinstance(parsed, dict):
+                root = parsed
+    root[namespace] = payload
+    serialized = json.dumps(root, separators=(",", ":"))
+    if len(serialized.encode("utf-8")) > 100:
+        raise ValueError(
+            f"custom_data exceeds Anki's 100-byte limit ({len(serialized.encode('utf-8'))} bytes)"
+        )
+    card.custom_data = serialized
+    col.update_card(card)
+
+
+def compact_ethics_payload(payload: dict) -> dict:
+    """Shrink W3 attempt detail to fit Anki's 100-byte ``custom_data`` cap."""
+    pid = str(payload.get("pairId") or payload.get("itemId") or "")[:12]
+    return {
+        "id": pid,
+        "ok": bool(payload.get("correct")),
+        "hl": str(payload.get("highlight", ""))[:8],
+        "src": "ai" if payload.get("source") == "ai" else "fb",
+        "std": str(payload.get("standard", ""))[:24],
+    }
+
+
+def read_custom_data_namespace(
+    col: Collection, card_id: int, namespace: str
+) -> dict | None:
+    """Return ``card.custom_data[namespace]`` if present."""
+    import json
+
+    card = col.get_card(card_id)
+    if not card.custom_data:
+        return None
+    with contextlib.suppress(json.JSONDecodeError, TypeError):
+        parsed = json.loads(card.custom_data)
+        if isinstance(parsed, dict) and namespace in parsed:
+            val = parsed[namespace]
+            return val if isinstance(val, dict) else None
+    return None
