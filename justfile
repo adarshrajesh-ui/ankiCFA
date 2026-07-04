@@ -171,6 +171,11 @@ cfa-eval-test:
 cfa-baseline-compare *args:
     {{ py }} cfa/eval/baseline_compare.py {{ args }}
 
+# A3: memory-model calibration — Brier + log loss + 10-bin reliability chart on
+# held-out reviews (SIMULATED cohort unless --revlog gives real reviews).
+cfa-calibration *args:
+    {{ py }} cfa/eval/calibration.py {{ args }}
+
 # Feature 8: content-type-aware weighting — equal-weakness cards of different item types get different exam-queue multipliers
 cfa-types-test:
     {{ ninja }} pylib

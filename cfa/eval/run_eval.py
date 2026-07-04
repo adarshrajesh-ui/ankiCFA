@@ -122,8 +122,15 @@ def _ece(scores: list[float], labels: list[int], bins: int = 10) -> float:
     return ece
 
 
-def run(seed: int = 0, learners: int = DEFAULT_LEARNERS,
-        heldout_path: str = HELDOUT) -> dict:
+def simulate(seed: int = 0, learners: int = DEFAULT_LEARNERS,
+             heldout_path: str = HELDOUT) -> dict:
+    """Run the seeded data-generating process once.
+
+    Returns the raw ``(pred_p, outcome)`` pairs plus per-variant mean
+    predictions, so downstream tools (e.g. ``calibration.py``) can compute
+    their own metrics from exactly the same simulated held-out reviews rather
+    than re-deriving the DGP. Deterministic given ``seed``.
+    """
     rng = random.Random(seed)
     heldout = load_heldout(heldout_path)
 
@@ -154,6 +161,22 @@ def run(seed: int = 0, learners: int = DEFAULT_LEARNERS,
                 preds_here.append(pred_p)
             per_variant_mean[cid][variant] = sum(preds_here) / len(preds_here)
 
+    return {
+        "scores": scores,
+        "labels": labels,
+        "per_variant_mean": per_variant_mean,
+        "concepts": len(heldout),
+        "learners": learners,
+    }
+
+
+def run(seed: int = 0, learners: int = DEFAULT_LEARNERS,
+        heldout_path: str = HELDOUT) -> dict:
+    sim = simulate(seed=seed, learners=learners, heldout_path=heldout_path)
+    scores = sim["scores"]
+    labels = sim["labels"]
+    per_variant_mean = sim["per_variant_mean"]
+
     accuracy = sum(
         1 for s, y in zip(scores, labels) if (s >= 0.5) == bool(y)
     ) / len(scores)
@@ -170,8 +193,8 @@ def run(seed: int = 0, learners: int = DEFAULT_LEARNERS,
     return {
         "seed": seed,
         "learners": learners,
-        "concepts": len(heldout),
-        "questions": 2 * len(heldout),
+        "concepts": sim["concepts"],
+        "questions": 2 * sim["concepts"],
         "predictions": len(scores),
         "accuracy": accuracy,
         "auc": auc,
