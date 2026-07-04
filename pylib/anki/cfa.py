@@ -525,14 +525,18 @@ def _giveup_reason(
     return None
 
 
-def memory_score(
+def _py_memory_score(
     col: anki.collection.Collection,
     *,
     deck_id: Optional[DeckId | int] = None,
     now_ts: Optional[int] = None,
 ) -> MemoryScore:
-    """Compute the honest, give-up-aware memory score for a deck (or the whole
-    collection when ``deck_id`` is None).
+    """Pure-Python reference implementation of the memory score.
+
+    This is the canonical algorithm. The public :func:`memory_score` delegates
+    to the shared Rust ``ComputeCfaScores`` engine (so desktop and mobile read
+    identical numbers) and only falls back to this when the backend predates the
+    RPC. Kept, too, as the parity reference verified in the test-suite.
 
     Retrievability is computed in bulk by the same FSRS SQL helper the Rust
     engine uses, so it is consistent and fast on large decks.
@@ -665,13 +669,15 @@ class PerformanceScore:
         return asdict(self)
 
 
-def performance_score(
+def _py_performance_score(
     col: anki.collection.Collection,
     *,
     deck_id: Optional[DeckId | int] = None,
     now_ts: Optional[int] = None,
 ) -> PerformanceScore:
-    """Estimate P(correct on a new question) from first-exposure accuracy.
+    """Pure-Python reference for the performance score (see :func:`_py_memory_score`).
+
+    Estimate P(correct on a new question) from first-exposure accuracy.
 
     For every card in scope we take its earliest graded review (``ease > 0``)
     and count it correct when ``ease >= 2`` (anything but *Again*). The rate is
@@ -776,21 +782,22 @@ class ReadinessScore:
         return asdict(self)
 
 
-def readiness_score(
+def _py_readiness_score(
     col: anki.collection.Collection,
     *,
     deck_id: Optional[DeckId | int] = None,
     now_ts: Optional[int] = None,
 ) -> ReadinessScore:
-    """Combine memory + performance + coverage into a wide, uncalibrated P(pass).
+    """Pure-Python reference for the readiness score (see :func:`_py_memory_score`).
 
+    Combine memory + performance + coverage into a wide, uncalibrated P(pass).
     Abstains (give-up rule) whenever either input score abstains — a readiness
     number is only as trustworthy as the two scores beneath it."""
     now_ts = now_ts if now_ts is not None else int(time.time())
     computed_at = datetime.fromtimestamp(now_ts).isoformat(timespec="seconds")
 
-    mem = memory_score(col, deck_id=deck_id, now_ts=now_ts)
-    perf = performance_score(col, deck_id=deck_id, now_ts=now_ts)
+    mem = _py_memory_score(col, deck_id=deck_id, now_ts=now_ts)
+    perf = _py_performance_score(col, deck_id=deck_id, now_ts=now_ts)
 
     if mem.abstain or perf.abstain:
         why = []
@@ -960,13 +967,15 @@ class BayesianReadiness:
         return asdict(self)
 
 
-def bayesian_readiness(
+def _py_bayesian_readiness(
     col: anki.collection.Collection,
     *,
     deck_id: Optional[DeckId | int] = None,
     now_ts: Optional[int] = None,
 ) -> BayesianReadiness:
-    """Exam readiness as a Bayesian band + an explicit pass/fail call.
+    """Pure-Python reference for the Bayesian readiness (see :func:`_py_memory_score`).
+
+    Exam readiness as a Bayesian band + an explicit pass/fail call.
 
     Unlike :func:`readiness_score`, this NEVER abstains: with little evidence the
     95% credible band on estimated exam accuracy is very wide (the topics sit at
@@ -1125,3 +1134,195 @@ def bayesian_readiness(
         computed_at=computed_at,
         topics=topics,
     )
+
+
+# =============================================================================
+# Thin wrappers over the shared Rust engine (ComputeCfaScores RPC)
+# =============================================================================
+#
+# The four public score functions delegate to the read-only Rust
+# ``ComputeCfaScores`` RPC — the SAME engine the AnkiDroid client calls — so the
+# numbers are computed in exactly one place and desktop == mobile by
+# construction. The Rust port is a faithful mirror of the ``_py_*`` references
+# above (verified field-by-field to 1e-9 in the test-suite) and additionally
+# de-duplicates graded reviews to at most one per (card, day), so an offline
+# dual-device round-trip cannot double-count. If the loaded backend predates the
+# RPC (an older ``_rsbridge``), the wrappers transparently fall back to the
+# pure-Python reference, so scores never disappear.
+
+
+def _pb_opt(msg: Any, name: str) -> Optional[float]:
+    """Read a proto3 ``optional`` field, returning None when it is unset."""
+    return getattr(msg, name) if msg.HasField(name) else None
+
+
+def _memory_from_pb(pb: Any) -> MemoryScore:
+    return MemoryScore(
+        abstain=pb.abstain,
+        reason=pb.reason,
+        point=_pb_opt(pb, "point"),
+        range_low=_pb_opt(pb, "range_low"),
+        range_high=_pb_opt(pb, "range_high"),
+        coverage_pct=pb.coverage_pct,
+        topics_total=pb.topics_total,
+        topics_covered=pb.topics_covered,
+        graded_reviews=pb.graded_reviews,
+        last_review_at=_pb_opt(pb, "last_review_at"),
+        computed_at=pb.computed_at,
+        topics=[
+            TopicScore(
+                topic=t.topic,
+                weight=t.weight,
+                reviewed_cards=t.reviewed_cards,
+                graded_reviews=t.graded_reviews,
+                avg_r=_pb_opt(t, "avg_r"),
+                r_low=_pb_opt(t, "r_low"),
+                r_high=_pb_opt(t, "r_high"),
+                covered=t.covered,
+            )
+            for t in pb.topics
+        ],
+    )
+
+
+def _performance_from_pb(pb: Any) -> PerformanceScore:
+    return PerformanceScore(
+        abstain=pb.abstain,
+        reason=pb.reason,
+        point=_pb_opt(pb, "point"),
+        range_low=_pb_opt(pb, "range_low"),
+        range_high=_pb_opt(pb, "range_high"),
+        first_exposures=pb.first_exposures,
+        correct=pb.correct,
+        computed_at=pb.computed_at,
+    )
+
+
+def _readiness_from_pb(pb: Any) -> ReadinessScore:
+    return ReadinessScore(
+        abstain=pb.abstain,
+        reason=pb.reason,
+        point=_pb_opt(pb, "point"),
+        range_low=_pb_opt(pb, "range_low"),
+        range_high=_pb_opt(pb, "range_high"),
+        label=pb.label,
+        memory_point=_pb_opt(pb, "memory_point"),
+        performance_point=_pb_opt(pb, "performance_point"),
+        coverage_pct=pb.coverage_pct,
+        computed_at=pb.computed_at,
+    )
+
+
+def _bayesian_from_pb(pb: Any) -> BayesianReadiness:
+    return BayesianReadiness(
+        accuracy=pb.accuracy,
+        ci_low=pb.ci_low,
+        ci_high=pb.ci_high,
+        call=pb.call,
+        call_prob=pb.call_prob,
+        p_pass=pb.p_pass,
+        mps=pb.mps,
+        recall=_pb_opt(pb, "recall"),
+        label=pb.label,
+        first_exposures=pb.first_exposures,
+        topics_total=pb.topics_total,
+        topics_covered=pb.topics_covered,
+        computed_at=pb.computed_at,
+        topics=[
+            TopicPosterior(
+                topic=t.topic,
+                weight=t.weight,
+                successes=t.successes,
+                failures=t.failures,
+                mean=t.mean,
+                ci_low=t.ci_low,
+                ci_high=t.ci_high,
+                recall=_pb_opt(t, "recall"),
+                covered=t.covered,
+            )
+            for t in pb.topics
+        ],
+    )
+
+
+def _compute_scores_via_rpc(
+    col: anki.collection.Collection,
+    deck_id: Optional[DeckId | int],
+    now_ts: Optional[int],
+) -> Any:
+    """Call the shared Rust engine once, returning the full proto response.
+
+    Raises ``AttributeError`` when the loaded backend has no ``compute_cfa_scores``
+    method (an older ``_rsbridge``), which the callers use to fall back."""
+    return col._backend.compute_cfa_scores(
+        deck_id=int(deck_id) if deck_id is not None else 0,
+        whole_collection=deck_id is None,
+        now=int(now_ts) if now_ts is not None else 0,
+    )
+
+
+def memory_score(
+    col: anki.collection.Collection,
+    *,
+    deck_id: Optional[DeckId | int] = None,
+    now_ts: Optional[int] = None,
+) -> MemoryScore:
+    """Honest, give-up-aware memory score for a deck (or the whole collection).
+
+    Delegates to the shared Rust ``ComputeCfaScores`` engine; see
+    :func:`_py_memory_score` for the algorithm."""
+    try:
+        return _memory_from_pb(_compute_scores_via_rpc(col, deck_id, now_ts).memory)
+    except AttributeError:
+        return _py_memory_score(col, deck_id=deck_id, now_ts=now_ts)
+
+
+def performance_score(
+    col: anki.collection.Collection,
+    *,
+    deck_id: Optional[DeckId | int] = None,
+    now_ts: Optional[int] = None,
+) -> PerformanceScore:
+    """P(correct on a new question) from first-exposure accuracy (Wilson 95%).
+
+    Delegates to the shared Rust engine; see :func:`_py_performance_score`."""
+    try:
+        return _performance_from_pb(
+            _compute_scores_via_rpc(col, deck_id, now_ts).performance
+        )
+    except AttributeError:
+        return _py_performance_score(col, deck_id=deck_id, now_ts=now_ts)
+
+
+def readiness_score(
+    col: anki.collection.Collection,
+    *,
+    deck_id: Optional[DeckId | int] = None,
+    now_ts: Optional[int] = None,
+) -> ReadinessScore:
+    """Wide, uncalibrated P(pass) fusing memory + performance + coverage.
+
+    Delegates to the shared Rust engine; see :func:`_py_readiness_score`."""
+    try:
+        return _readiness_from_pb(
+            _compute_scores_via_rpc(col, deck_id, now_ts).readiness
+        )
+    except AttributeError:
+        return _py_readiness_score(col, deck_id=deck_id, now_ts=now_ts)
+
+
+def bayesian_readiness(
+    col: anki.collection.Collection,
+    *,
+    deck_id: Optional[DeckId | int] = None,
+    now_ts: Optional[int] = None,
+) -> BayesianReadiness:
+    """Bayesian readiness band + explicit pass/fail call (never abstains).
+
+    Delegates to the shared Rust engine; see :func:`_py_bayesian_readiness`."""
+    try:
+        return _bayesian_from_pb(
+            _compute_scores_via_rpc(col, deck_id, now_ts).bayesian
+        )
+    except AttributeError:
+        return _py_bayesian_readiness(col, deck_id=deck_id, now_ts=now_ts)

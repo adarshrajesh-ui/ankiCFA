@@ -150,6 +150,105 @@ def ai_enabled() -> bool:
     return _get_api_key() is not None
 
 
+# --- in-app AI toggle (persisted in col.conf -> syncs natively) -------------
+#
+# The key-presence check above is necessary but not sufficient: a user with a
+# key configured must still be able to turn AI OFF in the app, per-feature, and
+# have that choice sync to the phone. That switch lives in the collection
+# config (three keys, all default OFF so the app is deterministic out of the
+# box), and the effective gate for any AI feature is:
+#
+#     ai_feature_enabled(feature) == key_present AND master AND feature
+#
+# These string constants are the single source of truth for the key names; the
+# desktop toggle UI, the Kotlin client, and docs/cfa/AI-PROVENANCE.md all refer
+# to them. `col` is duck-typed (only `.get_config(key, default)` is used) so
+# this module stays free of any `anki` import and testable without a backend.
+
+CONF_AI_MASTER = "cfa_ai_enabled"
+CONF_AI_GRADING = "cfa_ai_grading_enabled"
+CONF_AI_TABFILL = "cfa_ai_tabfill_enabled"
+
+# Feature name -> its per-feature col.conf key.
+AI_FEATURE_KEYS: dict[str, str] = {
+    "grading": CONF_AI_GRADING,
+    "tabfill": CONF_AI_TABFILL,
+}
+
+
+def key_present() -> bool:
+    """True when an OpenAI key is configured (alias of :func:`ai_enabled`)."""
+    return _get_api_key() is not None
+
+
+def _read_conf(feature_key: str, col: object, conf: Optional[dict]) -> dict:
+    """Resolve the master + per-feature toggle values from ``conf`` or ``col``.
+
+    Missing keys default to False, so AI is OFF unless explicitly enabled."""
+    if conf is not None:
+        return conf
+    if col is not None:
+        get = col.get_config  # type: ignore[attr-defined]
+        return {
+            CONF_AI_MASTER: get(CONF_AI_MASTER, False),
+            feature_key: get(feature_key, False),
+        }
+    return {}
+
+
+def ai_feature_enabled(
+    feature: str, *, col: object = None, conf: Optional[dict] = None
+) -> bool:
+    """Return True iff AI is enabled for ``feature``.
+
+    The gate is ``key_present() AND master-switch AND per-feature-switch`` —
+    all three must hold. Pass either a live ``col`` (its ``get_config`` is
+    read) or a plain ``conf`` mapping (e.g. ``col.all_config()``); with neither,
+    the switches default OFF. Unknown feature names raise ``ValueError`` so a
+    typo can never silently read as "enabled".
+    """
+    if feature not in AI_FEATURE_KEYS:
+        raise ValueError(
+            f"unknown AI feature {feature!r}; expected one of "
+            f"{sorted(AI_FEATURE_KEYS)}"
+        )
+    if not key_present():
+        return False
+    feature_key = AI_FEATURE_KEYS[feature]
+    resolved = _read_conf(feature_key, col, conf)
+    if not bool(resolved.get(CONF_AI_MASTER, False)):
+        return False
+    return bool(resolved.get(feature_key, False))
+
+
+def ai_toggle_state(*, col: object = None, conf: Optional[dict] = None) -> dict:
+    """Snapshot of every toggle, for an in-app settings panel / status line.
+
+    Returns ``{"key_present", "master", "grading", "tabfill", "grading_on",
+    "tabfill_on"}`` where the ``*_on`` values are the fully-resolved effective
+    gates (what :func:`ai_feature_enabled` returns)."""
+    if conf is None and col is not None:
+        get = col.get_config  # type: ignore[attr-defined]
+        conf = {
+            CONF_AI_MASTER: get(CONF_AI_MASTER, False),
+            CONF_AI_GRADING: get(CONF_AI_GRADING, False),
+            CONF_AI_TABFILL: get(CONF_AI_TABFILL, False),
+        }
+    conf = conf or {}
+    kp = key_present()
+    master = bool(conf.get(CONF_AI_MASTER, False))
+    grading = bool(conf.get(CONF_AI_GRADING, False))
+    tabfill = bool(conf.get(CONF_AI_TABFILL, False))
+    return {
+        "key_present": kp,
+        "master": master,
+        "grading": grading,
+        "tabfill": tabfill,
+        "grading_on": kp and master and grading,
+        "tabfill_on": kp and master and tabfill,
+    }
+
+
 def _int_env(name: str, default: int) -> int:
     try:
         return int(os.environ[name])
@@ -304,6 +403,13 @@ def _classify_error(exc: Exception) -> str:
 __all__ = [
     "complete",
     "ai_enabled",
+    "key_present",
+    "ai_feature_enabled",
+    "ai_toggle_state",
+    "CONF_AI_MASTER",
+    "CONF_AI_GRADING",
+    "CONF_AI_TABFILL",
+    "AI_FEATURE_KEYS",
     "usage_so_far",
     "reset_usage",
     "CompletionResult",

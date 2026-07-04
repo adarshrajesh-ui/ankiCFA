@@ -276,6 +276,16 @@ impl crate::services::SchedulerService for Collection {
         self.deadline_retention(input)
     }
 
+    // CFA fork. Thin delegate to the read-only honest-score engine in
+    // scheduler/cfa_scores.rs (a faithful port of pylib/anki/cfa.py). Required
+    // wiring for the generated SchedulerService trait; all logic lives there.
+    fn compute_cfa_scores(
+        &mut self,
+        input: scheduler::ComputeCfaScoresRequest,
+    ) -> Result<scheduler::ComputeCfaScoresResponse> {
+        self.compute_cfa_scores(input)
+    }
+
     fn custom_study(
         &mut self,
         input: scheduler::CustomStudyRequest,

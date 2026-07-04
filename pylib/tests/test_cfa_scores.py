@@ -108,15 +108,22 @@ def _seed_topic(
         "update cards set data=?, ivl=? where id=?", [(data, 20, c) for c in cids]
     )
 
-    base = (col.db.scalar("select coalesce(max(id), 0) from revlog") or 0) + 1
+    # Space each card's reviews on DISTINCT days (one review per card per day —
+    # the realistic review-card case) so the shared engine's (card, day)
+    # de-duplication is a no-op here and the raw and de-duplicated counts agree.
+    # ``base_ms`` starts ``reviews_each`` days before ``now``; ``j`` selects the
+    # day (j=0 the oldest, i.e. the first exposure); ``uid`` is a small,
+    # globally-unique within-day offset that never crosses a day boundary.
+    day_ms = DAY * 1000
+    base_ms = now * 1000 - reviews_each * day_ms
+    uid = col.db.scalar("select count(*) from revlog") or 0
     rows = []
-    n = 0
     for idx, c in enumerate(cids):
         for j in range(reviews_each):
             ease = first_ease[idx] if j == 0 else 3
             # id, cid, usn, ease, ivl, lastIvl, factor, time, type(review)
-            rows.append((base + n, c, -1, ease, 10, 5, 2500, 1000, 1))
-            n += 1
+            rows.append((base_ms + j * day_ms + uid, c, -1, ease, 10, 5, 2500, 1000, 1))
+            uid += 1
     col.db.executemany(
         "insert into revlog (id,cid,usn,ease,ivl,lastIvl,factor,time,type)"
         " values (?,?,?,?,?,?,?,?,?)",

@@ -49,14 +49,19 @@ def _seed_studied(
     data = json.dumps({"s": 60.0, "d": 5.0, "lrt": now - 86400})
     col.db.executemany("update cards set data=? where id=?", [(data, c) for c in cids])
 
-    base = (col.db.scalar("select coalesce(max(id), 0) from revlog") or 0) + 1
+    # Space each card's reviews on DISTINCT days (one review per card per day)
+    # so the shared engine's (card, day) de-duplication is a no-op here and the
+    # raw and de-duplicated graded-review counts agree. ``uid`` is a small,
+    # globally-unique within-day offset that never crosses a day boundary.
+    day_ms = 86_400 * 1000
+    base_ms = now * 1000 - reviews_each * day_ms
+    uid = col.db.scalar("select count(*) from revlog") or 0
     rows = []
-    n = 0
     for c in cids:
-        for _ in range(reviews_each):
+        for j in range(reviews_each):
             # id, cid, usn, ease(>0=graded), ivl, lastIvl, factor, time, type(review)
-            rows.append((base + n, c, -1, 3, 10, 5, 2500, 1000, 1))
-            n += 1
+            rows.append((base_ms + j * day_ms + uid, c, -1, 3, 10, 5, 2500, 1000, 1))
+            uid += 1
     col.db.executemany(
         "insert into revlog (id,cid,usn,ease,ivl,lastIvl,factor,time,type)"
         " values (?,?,?,?,?,?,?,?,?)",
