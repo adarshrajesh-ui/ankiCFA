@@ -38,6 +38,10 @@ service FrontendService {
   rpc GetCfaDeadlineView(GetCfaDeadlineViewRequest) returns (generic.Json);
   // CFA fork: persist the configured exam date (preserving topic weights).
   rpc SetCfaExamDate(SetCfaExamDateRequest) returns (generic.Empty);
+  // CFA fork: JSON payload for the SvelteKit CFA Home dashboard (three-score
+  // snapshot + exam countdown + AI state). No request args — resolves the CFA
+  // deck server-side.
+  rpc GetCfaHomeView(generic.Empty) returns (generic.Json);
 }
 
 service BackendFrontendService {}

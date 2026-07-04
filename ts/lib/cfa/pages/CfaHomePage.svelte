@@ -1,0 +1,265 @@
+<!--
+Copyright: Ankitects Pty Ltd and contributors
+License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
+
+CfaHomePage — the native CFA landing dashboard the app opens into (in place of
+the stock Anki deck list). Built from the shared CFA design system ($lib/cfa):
+
+  * a quiet brand lockup + the EXAM COUNTDOWN hero (warn tone inside 14 days),
+    with the current honest pass/fail one-liner as the lead,
+  * three VALUE-FIRST honest-score StatCards (Memory / Performance / Readiness),
+    identical formatting to the Exam Readiness page (shared ./readiness helpers),
+  * a STUDY grid of primary CTAs (Ethics minimal-pairs, Exam Priority, the CFA
+    deck, Exam Readiness, Peak-on-Exam-Day) — each a bridgeCommand routed to the
+    existing CFA entry points,
+  * an AI-state chip (opens AI settings) and a Decks escape hatch.
+
+Calm by design: weights <= 600, flat cards, 4px/pill radii, 8px rhythm, and the
+pass/fail/warn semantic triad preserved.
+-->
+<script lang="ts">
+    import { bridgeCommand } from "@tslib/bridgecommand";
+
+    import { Caption, Eyebrow, Hero, PageHeading, StatCard } from "$lib/cfa";
+    import type { CfaHomePayload, CfaTone, ScoreBand } from "$lib/cfa";
+
+    import { bandSub, bandTone, bandValue, captionText, readinessName } from "./readiness";
+    import { examCountdown, HOME_CTAS, heroLead } from "./home";
+
+    /** The full CFA Home payload (three scores + exam countdown + AI state). */
+    export let data: CfaHomePayload;
+
+    interface ScoreCard {
+        name: string;
+        meaning: string;
+        band: ScoreBand;
+    }
+
+    $: countdown = examCountdown(data);
+    $: scoreCards = [
+        { name: data.memory.name, meaning: data.memory.meaning, band: data.memory },
+        {
+            name: data.performance.name,
+            meaning: data.performance.meaning,
+            band: data.performance,
+        },
+        {
+            name: readinessName(data.readiness),
+            meaning: data.readiness.meaning,
+            band: data.readiness,
+        },
+    ] satisfies ScoreCard[];
+
+    function go(cmd: string): void {
+        bridgeCommand(cmd);
+    }
+</script>
+
+<div class="cfa-app cfa-home">
+    <div class="cfa-home__inner">
+        <PageHeading eyebrow="ankiCFA · Level II" title="Exam Home" eyebrowTone="green" />
+
+        <Hero
+            tone={countdown.tone as CfaTone}
+            headline={countdown.headline}
+            sub={countdown.sub}
+        >
+            {heroLead(data)}
+        </Hero>
+
+        <section class="cfa-home__block">
+            <Eyebrow tone="muted">Your honest scores</Eyebrow>
+            <div class="cfa-home__stats">
+                {#each scoreCards as card (card.name)}
+                    <StatCard
+                        value={bandValue(card.band)}
+                        tone={bandTone(card.band)}
+                        sub={bandSub(card.band)}
+                        nowrap={!card.band.abstain}
+                    >
+                        <span class="cfa-home__stat-name">{card.name}</span>
+                        <span class="cfa-home__stat-meaning">{card.meaning}</span>
+                    </StatCard>
+                {/each}
+            </div>
+            <Caption>{captionText(data.caption)}</Caption>
+        </section>
+
+        <section class="cfa-home__block">
+            <Eyebrow tone="muted">Study</Eyebrow>
+            <div class="cfa-home__ctas">
+                {#each HOME_CTAS as cta (cta.cmd)}
+                    <button
+                        type="button"
+                        class="cfa-home__cta"
+                        class:is-primary={cta.primary}
+                        on:click={() => go(cta.cmd)}
+                    >
+                        <span class="cfa-home__cta-label">{cta.label}</span>
+                        <span class="cfa-home__cta-sub">{cta.sub}</span>
+                    </button>
+                {/each}
+            </div>
+        </section>
+
+        <div class="cfa-home__foot">
+            <button
+                type="button"
+                class="cfa-home__chip"
+                class:is-on={data.aiEnabled}
+                on:click={() => go("cfa:ai")}
+            >
+                AI {data.aiEnabled ? "On" : "Off"} · settings
+            </button>
+            <button type="button" class="cfa-home__decks" on:click={() => go("cfa:decks")}>
+                Browse decks →
+            </button>
+        </div>
+
+        <Caption tone="muted">{data.footerText}</Caption>
+    </div>
+</div>
+
+<style lang="scss">
+    @use "../tokens" as cfa;
+
+    .cfa-home {
+        box-sizing: border-box;
+        width: 100%;
+        padding: cfa.space(7) cfa.space(6);
+        background: cfa.$cfa-page;
+        color: cfa.$cfa-ink;
+        font-family: cfa.$cfa-font-body;
+        font-size: cfa.$cfa-fs-body;
+        font-weight: cfa.$cfa-weight-regular;
+        line-height: cfa.$cfa-lh-body;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+
+        :global(*),
+        :global(*::before),
+        :global(*::after) {
+            box-sizing: border-box;
+        }
+
+        &__inner {
+            display: flex;
+            flex-direction: column;
+            gap: cfa.space(6);
+            max-width: 820px;
+            margin: 0 auto;
+        }
+
+        &__block {
+            display: flex;
+            flex-direction: column;
+            gap: cfa.space(3);
+        }
+
+        &__stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: cfa.space(5);
+        }
+
+        &__stat-name {
+            display: block;
+            font-weight: cfa.$cfa-weight-semibold;
+            color: cfa.$cfa-muted;
+        }
+
+        &__stat-meaning {
+            display: block;
+            margin-top: cfa.space(1);
+            font-size: cfa.$cfa-fs-meta;
+            line-height: cfa.$cfa-lh-snug;
+            color: cfa.$cfa-faint;
+        }
+
+        // CTA grid — flat cards, calm hover, warm accent on the primary drill.
+        &__ctas {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: cfa.space(4);
+        }
+
+        &__cta {
+            display: flex;
+            flex-direction: column;
+            gap: cfa.space(1);
+            padding: cfa.space(4) cfa.space(5);
+            text-align: left;
+            cursor: pointer;
+            background: cfa.$cfa-bg;
+            border: 1px solid cfa.$cfa-line;
+            border-radius: cfa.$cfa-radius-block;
+            color: cfa.$cfa-ink;
+            transition:
+                border-color 0.12s ease,
+                background 0.12s ease,
+                transform 0.12s ease;
+
+            &:hover {
+                border-color: cfa.$cfa-accent;
+                transform: translateY(-1px);
+            }
+
+            &:focus-visible {
+                outline: 2px solid cfa.$cfa-accent;
+                outline-offset: 2px;
+            }
+
+            &.is-primary {
+                background: cfa.$cfa-accent-soft;
+                border-color: cfa.$cfa-accent;
+            }
+        }
+
+        &__cta-label {
+            font-weight: cfa.$cfa-weight-semibold;
+            font-size: cfa.$cfa-fs-body;
+        }
+
+        &__cta-sub {
+            font-size: cfa.$cfa-fs-meta;
+            line-height: cfa.$cfa-lh-snug;
+            color: cfa.$cfa-muted;
+        }
+
+        &__foot {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: cfa.space(3);
+        }
+
+        &__chip,
+        &__decks {
+            cursor: pointer;
+            padding: cfa.space(2) cfa.space(4);
+            font-family: inherit;
+            font-size: cfa.$cfa-fs-meta;
+            font-weight: cfa.$cfa-weight-semibold;
+            border-radius: cfa.$cfa-radius-pill;
+            border: 1px solid cfa.$cfa-line;
+            background: cfa.$cfa-bg;
+            color: cfa.$cfa-muted;
+
+            &:hover {
+                border-color: cfa.$cfa-accent;
+                color: cfa.$cfa-ink;
+            }
+
+            &:focus-visible {
+                outline: 2px solid cfa.$cfa-accent;
+                outline-offset: 2px;
+            }
+        }
+
+        &__chip.is-on {
+            color: cfa.$cfa-pass;
+            border-color: cfa.$cfa-pass;
+        }
+    }
+</style>

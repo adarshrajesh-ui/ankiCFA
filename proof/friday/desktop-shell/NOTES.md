@@ -44,3 +44,41 @@ Adaptations (Phase 0 not yet landed by orchestrator at start):
 - Cross-scope handoffs: see `HANDOFF.md` — isolation move + a friday/ethics
   concurrency incident I cleaned up. `justfile`/`qt/tests/` are shared across
   concurrent workers; I commit only my own hunk/files.
+
+---
+
+## Increment 2 — CFA Home is the native landing screen
+
+The app now opens into a native CFA dashboard instead of the stock Anki deck
+list. Deck list stays reachable (toolbar "Decks", the Home "Browse decks" CTA,
+`d` shortcut).
+
+- Files (my scope only):
+  - `proto/anki/frontend.proto` — `rpc GetCfaHomeView(generic.Empty) returns (generic.Json)`.
+  - `qt/aqt/mediasrv.py` — `_cfa_home_payload` (reuses `_cfa_exam_readiness_payload`
+    for score parity + adds examDate/daysToExam/aiEnabled) + `get_cfa_home_view`
+    handler; registered in `post_handler_list`; `cfa-home` added to
+    `is_sveltekit_page`; `/_anki/getCfaHomeView` whitelisted (main webview, like
+    congratsInfo).
+  - `qt/aqt/webview.py` — `AnkiWebViewKind.CFA_HOME` + api-access.
+  - `qt/aqt/main.py` — `cfaHome` state, `setupCfaHome`, `_cfaHomeState` (defensive),
+    and the landing change: profile load `moveToState("cfaHome")`.
+  - `qt/aqt/cfa_home.py` (new) — `CfaHome` controller: loads the SvelteKit page in
+    the main webview + routes CTA bridgeCommands to the existing
+    `cfa.study_*/show_*` entry points (+ `open_ai_settings` placeholder for INC5).
+  - `ts/lib/cfa/types.ts` + `index.ts` — `CfaHomePayload`.
+  - `ts/lib/cfa/pages/CfaHomePage.svelte` + `home.ts` — the dashboard (design-system
+    Hero/StatCard/PageHeading; 3 honest scores; exam countdown; CTA grid; AI chip).
+  - `ts/routes/cfa-home/+page.ts` + `+page.svelte` — the route (getCfaHomeView -> page).
+  - `qt/tests/test_cfa_home.py` (6 tests).
+- Data path: consumes the Python `anki.cfa.*` scores (RPC-wrapper-ready). CTAs use
+  `bridgeCommand` (proven by the congrats page) — no cross-thread Qt from mediasrv.
+- Evidence:
+  - before (feature absent at base 6ef32ec8c): `item2-home-before.txt`
+  - after (REAL render via the live mediasrv + seeded deck): `item2-home-after.png`
+    — 151 days to exam, "likely pass (p=0.97)", Memory 82–100% / Performance
+    67–84% / Readiness 53–100%, 8/8 topics, 536 graded reviews, 5 CTAs, AI Off.
+- Build: `./ninja pylib qt` green (proto regen -> `getCfaHomeView` in @generated/backend
+  + cfa-home route bundled). `svelte-check`: 0 errors / 0 warnings (1286 files).
+- Tests: `just cfa-desktop-shell-test` -> 10 passed (branding 4 + home 6).
+- SHA: (this commit)  ·  PR: #24

@@ -1,0 +1,11 @@
+=== BEFORE (branch base 6ef32ec8c): CFA Home did not exist ===
+--- aqt/cfa_home.py at base ---
+fatal: path 'qt/aqt/cfa_home.py' exists on disk, but not in '6ef32ec8c'
+  (file absent at base)
+--- mediasrv _cfa_home_payload at base ---
+  matches: 0
+--- main.py cfaHome landing at base ---
+  matches: 0
+--- ts/routes/cfa-home at base ---
+fatal: path 'ts/routes/cfa-home/+page.svelte' exists on disk, but not in '6ef32ec8c'
+  (route absent at base)

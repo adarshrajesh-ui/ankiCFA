@@ -426,6 +426,7 @@ def is_sveltekit_page(path: str) -> bool:
         "image-occlusion",
         "cfa-readiness",
         "cfa-deadline",
+        "cfa-home",
     ]
 
 
@@ -895,6 +896,43 @@ def set_cfa_exam_date() -> bytes:
     return b""
 
 
+# CFA fork: the canonical Level II study deck the Home dashboard reports on.
+_CFA_HOME_DECK_NAME = "CFA Level II"
+
+
+def _cfa_home_deck_id(col: Collection) -> int:
+    """Resolve the deck the Home snapshot scores: the CFA Level II deck if it
+    exists, otherwise the currently selected deck (always valid)."""
+    did = col.decks.id_for_name(_CFA_HOME_DECK_NAME)
+    if did is None:
+        did = col.decks.get_current_id()
+    return int(did)
+
+
+def _cfa_home_payload(col: Collection) -> dict[str, Any]:
+    """The CFA Home dashboard payload: the SAME three honest scores + Bayesian
+    hero the Exam Readiness page shows (parity by reuse), plus the exam
+    countdown and the master AI-toggle state for the dashboard chrome."""
+    from anki import cfa
+
+    deck_id = _cfa_home_deck_id(col)
+    payload = _cfa_exam_readiness_payload(col, deck_id)
+
+    cfg = cfa.get_exam_config(col) or {}
+    payload["examDate"] = cfg.get("exam_date")
+    payload["daysToExam"] = cfa.days_to_exam(col)
+    # AI is ON only if the master toggle is present AND true (contract default:
+    # OFF). The Home surface only reports the master state; per-feature toggles
+    # live in AI settings.
+    payload["aiEnabled"] = bool(col.get_config("cfa_ai_enabled", False))
+    return payload
+
+
+def get_cfa_home_view() -> bytes:
+    payload = _cfa_home_payload(aqt.mw.col)
+    return generic_pb2.Json(json=json.dumps(payload).encode()).SerializeToString()
+
+
 post_handler_list = [
     congrats_info,
     get_deck_configs_for_update,
@@ -914,6 +952,7 @@ post_handler_list = [
     get_cfa_exam_readiness,
     get_cfa_deadline_view,
     set_cfa_exam_date,
+    get_cfa_home_view,
 ]
 
 
@@ -1026,6 +1065,10 @@ def _check_dynamic_request_permissions():
         "/_anki/setSchedulingStates",
         "/_anki/i18nResources",
         "/_anki/congratsInfo",
+        # CFA fork: the Home dashboard renders in the main webview (kind MAIN,
+        # no API token), so its read-only score payload is whitelisted here —
+        # exactly like congratsInfo.
+        "/_anki/getCfaHomeView",
     ):
         pass
     else:
