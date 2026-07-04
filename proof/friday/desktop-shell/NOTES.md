@@ -107,3 +107,28 @@ Top bar and CFA menu read as a CFA product.
 - Build: `./ninja pylib qt` green. Tests: `just cfa-desktop-shell-test` → 19 passed
   (branding 4 + home 6 + menu 5 + toolbar 4).
 - SHA: (this commit)  ·  PR: #24
+
+---
+
+## Increment 4 — CFA design system re-skins the stock chrome
+
+The remaining stock surfaces (top toolbar + deck list) now carry the CFA palette
++ type, so no screen reads as plain Anki.
+
+- Files (my scope only):
+  - `qt/aqt/cfa_chrome.py` (new) — builds CFA CSS from the parity-locked
+    `cfa_style.TOKENS` and installs it via public gui_hooks:
+    `webview_will_set_content` re-skins the `TopToolbar` (navy links, orange
+    hover) and the `DeckBrowser` (CFA page tint + type + an "ankiCFA · Level II /
+    Your decks" banner); `deck_browser_will_render_content` adds a quiet CFA
+    caption. Idempotent `register()`.
+  - `qt/aqt/cfa.py` — call `cfa_chrome.register()` from `setup_menu` (guarded).
+  - `qt/tests/test_cfa_chrome.py` (5 tests).
+- Approach: additive — no stock render code rewritten, no scss rebuild. Palette
+  is byte-parity with the SvelteKit `_tokens.scss` (same source: `cfa_style.TOKENS`).
+- Scope check: no `friday/*` worker touches `deckbrowser.py`/`cfa_style.py`.
+- Evidence: `item4-chrome-before.txt` (chrome absent at base) + honest before/after
+  CSS-composited render `item4-chrome-before-after.png` (real compiled
+  toolbar.css/deckbrowser.css + the exact injected CFA CSS).
+- Build: `./ninja pylib qt` green. Tests: `just cfa-desktop-shell-test` → 24 passed.
+- SHA: (this commit)  ·  PR: #24

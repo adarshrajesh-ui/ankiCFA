@@ -76,6 +76,15 @@ def setup_menu(mw: AnkiQt) -> None:
     mw._cfa_menu = menu  # type: ignore[attr-defined]
     mw.form.menubar.addMenu(menu)
 
+    # Re-skin the remaining stock web surfaces (top toolbar + deck list) with the
+    # CFA design system so no screen reads as plain Anki. Safe/additive.
+    try:
+        from aqt.cfa_chrome import register as _register_chrome
+
+        _register_chrome()
+    except Exception:
+        pass
+
     # F2: register the semantic ethics-highlight grading bridge (pycmd). Safe
     # to call unconditionally — it falls back to the deterministic grade when
     # AI is off, and it never raises during registration.
