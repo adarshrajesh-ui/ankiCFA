@@ -74,13 +74,21 @@ def _seed(
     )
     n_ok = round(n_cards * frac_ok)
     first_ease = [3] * n_ok + [1] * (n_cards - n_ok)
-    base = (col.db.scalar("select coalesce(max(id),0) from revlog") or 0) + 1
-    rows, k = [], 0
+    # Spread each card's reviews across DISTINCT collection-days: the scoring
+    # engine dedups graded reviews per-(card, day) (so a card reviewed twice in
+    # one day — e.g. offline on two devices — is not double-counted). Fake
+    # same-day revlog ids would collapse every review of a card into one day, so
+    # "reviews_each" study sessions must land on separate days to count. j == 0
+    # is the OLDEST review (a card's first exposure); the per-card +idx offset
+    # keeps revlog ids globally unique without crossing a day boundary.
+    now_ms = int(time.time() * 1000)
+    anchor_ms = now_ms - reviews_each * DAY * 1000
+    rows = []
     for idx, c in enumerate(cids):
         for j in range(reviews_each):
             ease = first_ease[idx] if j == 0 else 3
-            rows.append((base + k, c, -1, ease, 10, 5, 2500, 1000, 1))
-            k += 1
+            rid = anchor_ms + j * DAY * 1000 + idx
+            rows.append((rid, c, -1, ease, 10, 5, 2500, 1000, 1))
     col.db.executemany(
         "insert into revlog (id,cid,usn,ease,ivl,lastIvl,factor,time,type)"
         " values (?,?,?,?,?,?,?,?,?)",
