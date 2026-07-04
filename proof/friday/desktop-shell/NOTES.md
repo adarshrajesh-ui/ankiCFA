@@ -159,3 +159,27 @@ A visible desktop control for the AI-toggle contract, reachable from the CFA Hom
   `item5-ai-settings-on.png` (master + grading on).
 - Build: `./ninja pylib qt` green. Tests: `just cfa-desktop-shell-test` → 29 passed.
 - SHA: (this commit)  ·  PR: #24
+
+---
+
+## Done — native-CFA desktop shell (all 5 increments)
+
+`friday/desktop-shell` (off origin/main @ 6ef32ec8c) → PR #24. Commits:
+`22013a473` branding · `38ee181ff` CFA Home landing · `357068e3f` toolbar/menu ·
+`dd19c8b21` chrome re-skin · `52db091d8` AI settings.
+
+Acceptance:
+- Launch lands on a CFA Home dashboard (3 honest scores + Bayesian call + exam
+  countdown + study CTAs), NOT the Anki deck list. Deck list still reachable.
+- Title/app-id/icon are CFA-branded ("ankiCFA - {profile}", cfa.png).
+- Toolbar = Home / Study / Ethics / Readiness + Sync; CFA menu adds Home + AI
+  Settings, single ethics entry (Minimal-Pairs).
+- Every remaining screen (toolbar + deck list) wears the CFA design system.
+- A visible in-app AI toggle (master + per-feature, gated) writes the col.conf
+  contract (D3b).
+- `./ninja pylib qt` green · `svelte-check` 0 errors/0 warnings ·
+  `just cfa-desktop-shell-test` → 29 passed.
+- Walkthrough: `item-walkthrough.png` (real renders of all four steps).
+
+Isolation: worked in a locked git worktree; every commit staged only
+desktop-shell-scoped files (see HANDOFF.md for the one-time friday/ethics cleanup).
