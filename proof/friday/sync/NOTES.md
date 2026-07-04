@@ -55,4 +55,40 @@ Scope files: `tools/cfa/sync_server.py`, `tools/cfa/adb_helpers.sh`,
 `tools/cfa/configure_phone_sync.sh`, `tools/cfa/desktop_sync.py`,
 justfile recipes `cfa-syncserver` / `cfa-sync-dedup-test`.
 
-Commit: <inc1-sha>   PR: <pr-link>
+Commit: c886dcfbb   PR: https://github.com/adarshrajesh-ui/ankiCFA/pull/26
+
+---
+
+## Increment 2 — D4/D7 round-trip (phone↔desktop), revlog counts match ✅
+
+**Machine-checked (the designated assertion):**
+`pylib/tests/test_cfa_sync.py::test_roundtrip_ethics_and_cfa_card_revlog_counts_match`
+reviews BOTH an ethics card and a CFA-deck card, round-trips phone→desktop and
+reverse over the real server, and asserts the exact revlog ids match on both
+sides (no lost / duplicated review). `proof/friday/sync/inc2-roundtrip-test.log`
+(7 passed, incl. existing forward/reverse/conflict).
+
+**Human proof (emulator):**
+- `roundtrip-take1-phone-reviews.mp4` — reviewing a CFA card + the ethics
+  (one-passage) card (verdict "Unethical" selected) on the phone.
+- `roundtrip.mp4` — review + a successful sync (snackbar "Collection synced").
+- Step shots: `inc2-step1-deckpicker.png`, `inc2-step2-cfa-answer.png`,
+  `inc2-step3-ethics-verdict.png`, `inc2-clean-01-front.png`,
+  `inc2-phone-fullsync-dialog.png` (real "Select collection to keep" full-sync UI).
+
+**Phone→desktop with REAL data (verified against the SQLite files):**
+- Desktop full-downloaded the phone's uploaded collection incl. the reviews made
+  on camera (`inc2-desktop-after-phone-reviews.txt`; ids 1783136442121,
+  1783136453524).
+- A controlled DELTA: reviewed one CFA card on the phone (Good), synced, desktop
+  pulled it — revlog **261 → 262**, NEW id **1783137078212**
+  (`inc2-desktop-after-delta.txt`, `inc2-sync-state-comparison.txt`).
+
+**Reverse** proven by the pytest (real server + Rust engine). A device-observable
+reverse is impeded by a CFA AnkiDroid app bug (the Exam-Priority/bootstrap
+customizations reset/diverge the on-device collection) — filed in
+`proof/friday/sync/HANDOFF.md` (→ W-mobile).
+
+Tooling added: `tools/cfa/phone_sync.sh` (reliable cold-launch + uiautomator-
+located Sync tap + logcat outcome), extended `tools/cfa/desktop_sync.py`
+(review/dump). Commit: <inc2-sha>
