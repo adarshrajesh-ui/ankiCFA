@@ -1,4 +1,28 @@
-# ankiCFA — Acceptance D1–D7 (status @ Phase-0 spine)
+# ankiCFA — Acceptance D1–D7 (status)
+
+## Integration progress (Phase-2, driven here)
+
+- **✅ Phase-0 spine merged to `main`** (`6ef32ec8c..891720111`, fast-forward) —
+  step 1 of the merge order (Phase0 first). The shared `ComputeCfaScores` engine
+  is now on the trunk, so the worker tabs rebase onto it and the mobile
+  fork-engine build (`cfa_build_fork_engine.sh`) picks up the RPC.
+- **✅ mypy clean** on the changed spine Python (`pylib/anki/cfa.py`,
+  `cfa/ai/llm_client.py`, `tools/cfa/syncserver.py`).
+- **✅ eval ran AI-off** (F7 readiness harness, `cfa/eval/run_eval.py`):
+  accuracy@0.5 = 0.686, AUC = 0.763, ECE = 0.078, paraphrase-gap ≤ 0.117 (seed 0,
+  12000 predictions). Note: D2's "eval-before-serve **gate** at 0.80" is the
+  **AI-grading** eval gate (a grading-worker deliverable, not this simulation
+  harness) — verified once that gate lands.
+- **⏳ Remaining DONE criteria are gated on the worker tabs**, which are LIVE and
+  still pushing (own worktrees: `desktop-shell`, `sync`, `ethics`, `hygiene`; an
+  emulator `emulator-5554` is running an in-progress mobile app). Merging their
+  moving, incomplete branches or driving their emulator now would collide with
+  active work and misrepresent completion. The final integration + D4/D5/D6/D7
+  device recordings run against their **finished** branches + a rebuilt AAR.
+
+---
+
+## Detailed matrix
 
 This maps each acceptance item to concrete evidence. Phase-0 (the shared spine,
 `friday/phase0`) is **done and pushed**; items that depend on the worker tabs
