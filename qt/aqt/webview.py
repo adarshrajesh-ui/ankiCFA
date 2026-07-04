@@ -61,6 +61,7 @@ class AnkiWebViewKind(Enum):
     IMPORT_ANKI_PACKAGE = "anki package import"
     CFA_READINESS = "cfa readiness"
     CFA_DEADLINE = "cfa deadline"
+    CFA_HOME = "cfa home"
 
 
 class AuthInterceptor(QWebEngineUrlRequestInterceptor):
@@ -146,6 +147,7 @@ class AnkiWebPage(QWebEnginePage):
             AnkiWebViewKind.IMPORT_LOG,
             AnkiWebViewKind.CFA_READINESS,
             AnkiWebViewKind.CFA_DEADLINE,
+            AnkiWebViewKind.CFA_HOME,
         )
 
         global _profile_with_api_access, _profile_without_api_access

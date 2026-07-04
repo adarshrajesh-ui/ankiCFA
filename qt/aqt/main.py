@@ -83,7 +83,13 @@ from aqt.webview import AnkiWebView, AnkiWebViewKind
 install_pylib_legacy()
 
 MainWindowState = Literal[
-    "startup", "deckBrowser", "overview", "review", "resetRequired", "profileManager"
+    "startup",
+    "cfaHome",
+    "deckBrowser",
+    "overview",
+    "review",
+    "resetRequired",
+    "profileManager",
 ]
 
 
@@ -239,6 +245,7 @@ class AnkiQt(QMainWindow):
         self.updateTitleBar()
         self.setup_focus()
         # screens
+        self.setupCfaHome()
         self.setupDeckBrowser()
         self.setupOverview()
         self.setupReviewer()
@@ -506,7 +513,7 @@ class AnkiQt(QMainWindow):
         restoreGeom(self, "mainWindow")
         restoreState(self, "mainWindow")
         # titlebar
-        self.setWindowTitle(f"{self.pm.name} - Anki")
+        self.setWindowTitle(self.window_title())
         # show and raise window for osx
         self.show()
         self.activateWindow()
@@ -666,7 +673,10 @@ class AnkiQt(QMainWindow):
 
             aqt.cfa_seed.maybe_seed(self)
             self.apply_collection_options()
-            self.moveToState("deckBrowser")
+            # CFA fork: land on the native CFA Home dashboard, not the stock
+            # Anki deck list (the deck list stays reachable via the toolbar
+            # "Decks" link, the CFA Home "Decks" CTA, and the `d` shortcut).
+            self.moveToState("cfaHome")
         except Exception:
             # dump error to stderr so it gets picked up by errors.py
             traceback.print_exc()
@@ -772,6 +782,15 @@ class AnkiQt(QMainWindow):
         if state != "resetRequired":
             self.bottomWeb.adjustHeightToFit()
         gui_hooks.state_did_change(state, oldState)
+
+    def _cfaHomeState(self, oldState: MainWindowState) -> None:
+        # CFA fork: the native landing dashboard (defensive — this runs inside
+        # loadCollection's broad try/except, so a failure must not blank-screen).
+        try:
+            self.cfaHome.show()
+        except Exception:
+            traceback.print_exc()
+            self.moveToState("deckBrowser")
 
     def _deckBrowserState(self, oldState: MainWindowState) -> None:
         self.deckBrowser.show()
@@ -951,6 +970,9 @@ title="{}" {}>{}</button>""".format(
         # main window
         self.form = aqt.forms.main.Ui_MainWindow()
         self.form.setupUi(self)
+        # CFA fork: brand the window icon (authoritative, resolved via the
+        # "icons:" search path so it holds even before the .ui is recompiled).
+        self.setWindowIcon(QIcon("icons:cfa.png"))
         # toolbar
         tweb = self.toolbarWeb = TopWebView(self)
         self.toolbar = Toolbar(self, tweb)
@@ -1060,6 +1082,11 @@ title="{}" {}>{}</button>""".format(
 
     def inMainThread(self) -> bool:
         return self._mainThread == QThread.currentThread()
+
+    def setupCfaHome(self) -> None:
+        from aqt.cfa_home import CfaHome
+
+        self.cfaHome = CfaHome(self)
 
     def setupDeckBrowser(self) -> None:
         from aqt.deckbrowser import DeckBrowser
@@ -1474,8 +1501,15 @@ title="{}" {}>{}</button>""".format(
 
         aqt.cfa.setup_menu(self)
 
+    def window_title(self) -> str:
+        # CFA fork: brand the window as "ankiCFA - {profile}", falling back to
+        # the bare brand when no profile is loaded yet.
+        pm = getattr(self, "pm", None)
+        name = getattr(pm, "name", None) if pm is not None else None
+        return f"ankiCFA - {name}" if name else "ankiCFA"
+
     def updateTitleBar(self) -> None:
-        self.setWindowTitle("Anki")
+        self.setWindowTitle(self.window_title())
 
     # View
     ##########################################################################

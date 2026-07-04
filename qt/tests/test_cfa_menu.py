@@ -37,29 +37,38 @@ def _make_menu() -> "tuple[QWidget, object]":
     return mw, mw._cfa_menu  # type: ignore[attr-defined]
 
 
-def test_cfa_menu_has_five_actions() -> None:
+def test_cfa_menu_has_six_actions() -> None:
     _mw, menu = _make_menu()
     actions = menu.actions()
-    assert len(actions) == 5
+    assert len(actions) == 6
 
 
 def test_cfa_menu_action_labels() -> None:
     _mw, menu = _make_menu()
     labels = [a.text() for a in menu.actions()]
     assert labels == [
+        "CFA Home",
         "Exam Readiness…",
         "Study Ethics Minimal-Pairs",
-        "Study Ethics (One-Passage)",
         "Study by Exam Priority",
         "Peak-on-Exam-Day (Deadline)…",
+        "AI Settings…",
     ]
 
 
-def test_cfa_menu_has_one_passage_action() -> None:
-    # The F1 one-passage flagship must have a dedicated, reachable menu entry.
+def test_cfa_menu_single_ethics_entry_is_minimal_pairs() -> None:
+    # The menu is consistent with the CFA Home CTAs: one ethics entry, the
+    # Minimal-Pairs flagship. The one-passage drill is retired from the menu.
     _mw, menu = _make_menu()
     labels = [a.text() for a in menu.actions()]
-    assert "Study Ethics (One-Passage)" in labels
+    assert "Study Ethics Minimal-Pairs" in labels
+    assert "Study Ethics (One-Passage)" not in labels
+
+
+def test_cfa_menu_has_home_entry() -> None:
+    _mw, menu = _make_menu()
+    labels = [a.text() for a in menu.actions()]
+    assert "CFA Home" in labels
 
 
 def test_cfa_menu_handlers_exist() -> None:

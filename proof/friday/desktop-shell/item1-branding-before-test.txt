@@ -1,0 +1,20 @@
+E       assert 'setApplicationName("ankiCFA")' in '# Copyright: Ankitects Pty Ltd and contributors\n# License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses...pp.exec()\n    else:\n        return app\n\n    if PROFILE_CODE:\n        write_profile_results()\n\n    return None\n'
+
+qt/tests/test_cfa_branding.py:39: AssertionError
+_____________________ test_window_icon_asset_and_reference _____________________
+
+    def test_window_icon_asset_and_reference() -> None:
+        icon = _REPO / "qt" / "aqt" / "data" / "qt" / "icons" / "cfa.png"
+        assert icon.is_file() and icon.stat().st_size > 0
+    
+        ui = (_REPO / "qt" / "aqt" / "forms" / "main.ui").read_text(encoding="utf-8")
+>       assert ":/icons/cfa.png" in ui
+E       assert ':/icons/cfa.png' in '<?xml version="1.0" encoding="UTF-8"?>\n<ui version="4.0">\n <class>MainWindow</class>\n <widget class="QMainWindow" ...ty>\n  </action>\n </widget>\n <resources>\n  <include location="icons.qrc"/>\n </resources>\n <connections/>\n</ui>\n'
+
+qt/tests/test_cfa_branding.py:49: AssertionError
+=========================== short test summary info ============================
+FAILED qt/tests/test_cfa_branding.py::test_window_title_includes_profile - At...
+FAILED qt/tests/test_cfa_branding.py::test_window_title_without_profile - Att...
+FAILED qt/tests/test_cfa_branding.py::test_application_identity_is_cfa - asse...
+FAILED qt/tests/test_cfa_branding.py::test_window_icon_asset_and_reference - ...
+4 failed in 0.82s

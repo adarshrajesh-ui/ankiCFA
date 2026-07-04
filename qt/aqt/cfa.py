@@ -50,8 +50,15 @@ EXAM_PRIORITY_DECK_NAME = "CFA::Exam Priority"
 
 
 def setup_menu(mw: AnkiQt) -> None:
-    """Add a top-level CFA menu to the main window with four study actions."""
+    """Add a top-level CFA menu, consistent with the CFA Home dashboard CTAs.
+
+    Single ethics entry (Minimal-Pairs, the flagship); the one-passage drill is
+    retired from the menu. ``study_ethics_passages`` remains callable for
+    compatibility, it is simply no longer surfaced here."""
     menu = QMenu("&CFA", mw)
+
+    home = menu.addAction("CFA Home")
+    qconnect(home.triggered, lambda: mw.moveToState("cfaHome"))
 
     readiness = menu.addAction("Exam Readiness…")
     qconnect(readiness.triggered, lambda: show_exam_readiness(mw))
@@ -59,18 +66,27 @@ def setup_menu(mw: AnkiQt) -> None:
     ethics = menu.addAction("Study Ethics Minimal-Pairs")
     qconnect(ethics.triggered, lambda: study_ethics_pairs(mw))
 
-    passages = menu.addAction("Study Ethics (One-Passage)")
-    qconnect(passages.triggered, lambda: study_ethics_passages(mw))
-
     priority = menu.addAction("Study by Exam Priority")
     qconnect(priority.triggered, lambda: study_by_exam_priority(mw))
 
     deadline = menu.addAction("Peak-on-Exam-Day (Deadline)…")
     qconnect(deadline.triggered, lambda: show_deadline(mw))
 
+    ai_settings = menu.addAction("AI Settings…")
+    qconnect(ai_settings.triggered, lambda: _open_ai_settings(mw))
+
     # Keep a reference so the menu (and its slots) survive garbage collection.
     mw._cfa_menu = menu  # type: ignore[attr-defined]
     mw.form.menubar.addMenu(menu)
+
+    # Re-skin the remaining stock web surfaces (top toolbar + deck list) with the
+    # CFA design system so no screen reads as plain Anki. Safe/additive.
+    try:
+        from aqt.cfa_chrome import register as _register_chrome
+
+        _register_chrome()
+    except Exception:
+        pass
 
     # F2: register the semantic ethics-highlight grading bridge (pycmd). Safe
     # to call unconditionally — it falls back to the deterministic grade when
@@ -99,6 +115,13 @@ def setup_menu(mw: AnkiQt) -> None:
         _register_tab_fill()
     except Exception:
         pass
+
+
+def _open_ai_settings(mw: AnkiQt) -> None:
+    # Lazy import keeps aqt.cfa import-light and avoids a Qt import cycle.
+    from aqt.cfa_ai_settings import open_ai_settings
+
+    open_ai_settings(mw)
 
 
 def show_exam_readiness(mw: AnkiQt) -> None:

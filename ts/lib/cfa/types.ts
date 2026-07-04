@@ -94,6 +94,21 @@ export interface ExamReadinessPayload {
     footerText: string;
 }
 
+/**
+ * Full payload for the CFA Home dashboard — the native landing screen. It
+ * carries the SAME three honest scores + Bayesian hero as Exam Readiness (built
+ * by reusing that payload for score parity), plus the exam countdown and the
+ * master AI-toggle state for the dashboard chrome.
+ */
+export interface CfaHomePayload extends ExamReadinessPayload {
+    /** ISO date string of the configured exam, or null if not set yet. */
+    examDate: string | null;
+    /** Whole days until the exam (0 == today), or null if no exam date set. */
+    daysToExam: number | null;
+    /** Master AI toggle (col.conf `cfa_ai_enabled`); default OFF. */
+    aiEnabled: boolean;
+}
+
 /** One ranked row of the Deadline planner table. */
 export interface DeadlineRow {
     cardId: number;

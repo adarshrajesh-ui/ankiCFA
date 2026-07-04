@@ -23,11 +23,11 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string notr="true">Anki</string>
+   <string notr="true">ankiCFA</string>
   </property>
   <property name="windowIcon">
    <iconset resource="icons.qrc">
-    <normaloff>:/icons/anki.png</normaloff>:/icons/anki.png</iconset>
+    <normaloff>:/icons/cfa.png</normaloff>:/icons/cfa.png</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
    <property name="sizePolicy">

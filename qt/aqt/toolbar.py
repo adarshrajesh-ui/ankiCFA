@@ -343,34 +343,38 @@ class Toolbar:
         )
 
     def _centerLinks(self) -> str:
+        # CFA fork: the top bar reads as a CFA product — Home / Study / Ethics /
+        # Readiness — with Sync kept last (its id="sync"/id="sync-spinner" are
+        # load-bearing). The Anki-centric actions (Add, Browse, Stats) remain
+        # available from the menu bar.
         links = [
             self.create_link(
-                "decks",
-                tr.actions_decks(),
-                self._deckLinkHandler,
-                tip=tr.actions_shortcut_key(val="D"),
-                id="decks",
+                "cfa_home",
+                "Home",
+                self._cfaHomeLinkHandler,
+                tip="CFA Home dashboard",
+                id="cfa_home",
             ),
             self.create_link(
-                "add",
-                tr.actions_add(),
-                self._addLinkHandler,
-                tip=tr.actions_shortcut_key(val="A"),
-                id="add",
+                "cfa_study",
+                "Study",
+                self._cfaStudyLinkHandler,
+                tip="Study by exam priority (weakest first)",
+                id="cfa_study",
             ),
             self.create_link(
-                "browse",
-                tr.qt_misc_browse(),
-                self._browseLinkHandler,
-                tip=tr.actions_shortcut_key(val="B"),
-                id="browse",
+                "cfa_ethics",
+                "Ethics",
+                self._cfaEthicsLinkHandler,
+                tip="Study Ethics — Minimal Pairs",
+                id="cfa_ethics",
             ),
             self.create_link(
-                "stats",
-                tr.qt_misc_stats(),
-                self._statsLinkHandler,
-                tip=tr.actions_shortcut_key(val="T"),
-                id="stats",
+                "cfa_readiness",
+                "Readiness",
+                self._cfaReadinessLinkHandler,
+                tip="Exam Readiness report",
+                id="cfa_readiness",
             ),
         ]
 
@@ -432,6 +436,25 @@ class Toolbar:
 
     def _deckLinkHandler(self) -> None:
         self.mw.moveToState("deckBrowser")
+
+    # CFA fork: top-bar CTA handlers (delegate to the existing CFA entry points).
+    def _cfaHomeLinkHandler(self) -> None:
+        self.mw.moveToState("cfaHome")
+
+    def _cfaStudyLinkHandler(self) -> None:
+        import aqt.cfa
+
+        aqt.cfa.study_by_exam_priority(self.mw)
+
+    def _cfaEthicsLinkHandler(self) -> None:
+        import aqt.cfa
+
+        aqt.cfa.study_ethics_pairs(self.mw)
+
+    def _cfaReadinessLinkHandler(self) -> None:
+        import aqt.cfa
+
+        aqt.cfa.show_exam_readiness(self.mw)
 
     def _studyLinkHandler(self) -> None:
         # if overview already shown, switch to review

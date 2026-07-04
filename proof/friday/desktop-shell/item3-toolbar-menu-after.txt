@@ -1,0 +1,8 @@
+=== AFTER (inc3): reframed toolbar + menu ===
+--- CFA menu labels (functional, from test) ---
+  CFA Home | Exam Readiness… | Study Ethics Minimal-Pairs | Study by Exam Priority | Peak-on-Exam-Day (Deadline)…
+--- toolbar center-links HTML (generated) ---
+   <a class=hitem tabindex="-1" aria-label="Home"  id="cfa_home" href=# onclick="return pycmd('cfa_home')">Home</a>
+   <a class=hitem tabindex="-1" aria-label="Study"  id="cfa_study" href=# onclick="return pycmd('cfa_study')">Study</a>
+   <a class=hitem tabindex="-1" aria-label="Ethics"  id="cfa_ethics" href=# onclick="return pycmd('cfa_ethics')">Ethics</a>
+   <a class=hitem tabindex="-1" aria-label="Readiness"  id="cfa_readiness" href=# onclick="return pycmd('cfa_readiness')">Readiness</a>
