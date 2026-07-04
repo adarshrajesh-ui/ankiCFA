@@ -162,7 +162,7 @@ overclaims:
 - dprint check clean on README + SUBMISSION-CHECKLIST + PLATFORM-MATRIX.
 - No new code test: docs-only increment; the numeric/topic claims are backed by
   Inc-2's tests (all-ten-topics, validator 711) and the PLATFORM-MATRIX evidence.
-- SHA: (filled after commit)
+- SHA: `315922aef` (docs) + `08aea7842` (lint fixup / final-check evidence)
 
 ---
 
