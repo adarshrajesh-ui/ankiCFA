@@ -1,0 +1,38 @@
+# Speedrun PROGRESS (single GNHF run) — update after each item
+
+Master plan: `proof/friday/SPEEDRUN-PLAN.md`. Mobile:
+`/Users/adarshrajesh/wed/AnkiDroid/SPEEDRUN-MOBILE-PLAN.md`.
+Legend: TODO / WIP / DONE (evidence path) / BLOCKED (root cause).
+
+## Phase A — features
+| Item | Status | Evidence |
+|------|--------|----------|
+| A1 AI-beats-baseline | TODO | |
+| A2 wrong-answer-rate gate | TODO | |
+| A3 memory calibration (Brier/logloss/chart) | TODO | |
+| A4 performance-model accuracy | TODO | |
+| A5 paraphrase gap | TODO | |
+| A6 card-gen gold set | TODO | |
+| A7 coverage map + topics 8→10 | TODO | |
+| A8 ablation (3 builds) | TODO | |
+| A9 50k benchmark | TODO | |
+| A10 crash/offline robustness | TODO | |
+| A11 score-mapping + model docs | TODO | |
+| A12 unify Rust note | TODO | |
+| A13 desktop installer (screenshots) | TODO | |
+| A14 results report + Brainlift | TODO | |
+| M1 mobile scores via RPC | TODO | |
+| M2 desktop→phone reverse sync | TODO | |
+| M3 same-card conflict merge | TODO | |
+| M4 offline-then-sync + AI-off | TODO | |
+| M5 packaged phone build | TODO | |
+
+## Phase B — UI/UX passes (≥3, escalating; both apps)
+| Pass | Desktop | Mobile | Log |
+|------|---------|--------|-----|
+| 1 (critical) | TODO | TODO | |
+| 2 (harsher) | TODO | TODO | |
+| 3 (ruthless) | TODO | TODO | |
+
+Named must-fix: desktop Readiness renders with data; Connect/Logout redesigned;
+native-CFA feel everywhere; AnkiDroid CFA UI full refactor.
