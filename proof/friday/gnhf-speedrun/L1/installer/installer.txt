@@ -1,0 +1,59 @@
+A13 — Packaged desktop installer + clean-machine install proof
+==============================================================
+Date: 2026-07-04 (captured on macOS 15.6.1, arm64)
+
+## Packaged artifact (REAL, built via just installer / tools/build-installer)
+path:    out/installer/dist/anki-26.05-mac-apple.dmg
+size:    225742941 bytes (~226 MB)
+sha256:  8845dfcfa480ef49f9f856db9a39587b6b0b78393054066b2251bdaba196d343
+format:  Format Description: UDIF read-only compressed (bzip2)
+version: 26.5 (CFBundleShortVersionString), banner 'Starting ankiCFA 26.05...'
+
+## Clean-machine install (drag Anki.app out of the DMG to a fresh location,
+## fresh ANKI_BASE profile with NO prior Anki data) — proves self-containment
+installed to: /tmp/cfa-clean-install/Applications/Anki.app (fresh, isolated from dev tree)
+profile:      /tmp/cfa-clean-install/profile (brand-new, empty)
+bundle size:  655M  self-contained: Python.framework=yes, PyQt6=yes
+launch log (clean profile, past first-run):
+  Starting ankiCFA 26.05...
+  aqt.mediasrv: Serving on http://127.0.0.1:<port>
+  Starting main loop...
+
+## Verifier (tools/cfa/verify_installer.py) on the installed bundle:
+CFA packaged-installer verification
+===================================
+bundle:            /tmp/cfa-clean-install/Applications/Anki.app
+version:           26.5
+self-contained py: yes
+self-contained qt: yes
+CFA modules found: 8/8
+  [ok ] anki/cfa
+  [ok ] anki/cfa_sync
+  [ok ] anki/cfa_deadline
+  [ok ] aqt/cfa
+  [ok ] aqt/cfa_home
+  [ok ] aqt/cfa_chrome
+  [ok ] aqt/cfa_sync_connect
+  [ok ] aqt/cfa_seed
+
+RESULT: PASS
+
+## Ordered clean-machine install screenshot sequence (NO VIDEO):
+  01-dmg-drag-install.png        — mounted DMG: 'Anki' + 'Applications' drag-to-install layout
+  02-clean-first-run-language.png — first launch on a fresh profile: Anki Language picker
+  03-clean-cfa-exam-home.png     — after language chosen: native CFA 'Exam Home' renders
+                                    (Home/Study/Ethics/Readiness/Sync/Connect/Log out chrome;
+                                     honest empty-state 'Not enough data' scores on a fresh install)
+
+## Tests (just cfa-installer-test):
+..........                                                               [100%]
+10 passed in 0.02s
+
+## Honesty notes
+ - The .dmg is a REAL Briefcase package built on this machine; not simulated.
+ - 'Clean machine' is faithfully approximated: the app runs from an isolated dir
+   with a brand-new profile, using ONLY the runtime it bundles (own Python + Qt),
+   with no dependency on the dev checkout. The empty-state scores confirm no data leaked in.
+ - macOS-only artifact this pass. Windows/Linux packages need those toolchains/
+   submodules and are not built here (see PROGRESS note); the cross-platform
+   build_installer.py path exists and is unchanged.

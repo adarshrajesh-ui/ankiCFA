@@ -256,6 +256,14 @@ cfa-bench-test:
     {{ ninja }} pylib
     PYTHONPATH="out/pylib:cfa/ethics_pairs" ANKI_TEST_MODE=1 {{ py }} -m pytest tools/cfa/tests/test_bench.py -q
 
+# A13: verify a packaged Anki.app is a self-contained CFA-fork installer bundle.
+cfa-installer-verify app:
+    {{ py }} tools/cfa/verify_installer.py {{ app }}
+
+# A13: installer-verifier test suite (synthetic bundle fixtures + real bundle if present).
+cfa-installer-test:
+    {{ py }} -m pytest tools/cfa/tests/test_installer.py -q
+
 # Feature 8: content-type-aware weighting — equal-weakness cards of different item types get different exam-queue multipliers
 cfa-types-test:
     {{ ninja }} pylib
