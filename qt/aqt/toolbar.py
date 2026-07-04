@@ -380,6 +380,19 @@ class Toolbar:
 
         links.append(self._create_sync_link())
 
+        # CFA fork: an always-visible Log out entry right after Sync, so logging
+        # out / switching the synced login never requires hunting through
+        # Preferences > Syncing.
+        links.append(
+            self.create_link(
+                "cfa_logout",
+                "Log out",
+                self._cfaLogoutLinkHandler,
+                tip="Log out of the sync account",
+                id="cfa_logout",
+            )
+        )
+
         gui_hooks.top_toolbar_did_init_links(links, self)
 
         return "\n".join(links)
@@ -455,6 +468,11 @@ class Toolbar:
         import aqt.cfa
 
         aqt.cfa.show_exam_readiness(self.mw)
+
+    def _cfaLogoutLinkHandler(self) -> None:
+        import aqt.cfa
+
+        aqt.cfa.logout_of_sync(self.mw)
 
     def _studyLinkHandler(self) -> None:
         # if overview already shown, switch to review

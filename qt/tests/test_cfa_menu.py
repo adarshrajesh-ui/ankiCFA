@@ -63,7 +63,17 @@ def test_cfa_menu_has_logout_entry_and_handler() -> None:
     _mw, menu = _make_menu()
     labels = [a.text() for a in menu.actions()]
     assert "Log out of Sync…" in labels
-    assert callable(cfa_mod._logout_of_sync)
+    assert callable(cfa_mod.logout_of_sync)
+
+
+def test_toolbar_exposes_logout_link() -> None:
+    # The always-visible top bar carries a "Log out" entry right after Sync,
+    # wired to the shared public logout handler.
+    from aqt import cfa as cfa_mod
+    from aqt.toolbar import Toolbar
+
+    assert callable(getattr(Toolbar, "_cfaLogoutLinkHandler", None))
+    assert callable(cfa_mod.logout_of_sync)
 
 
 def test_cfa_menu_single_ethics_entry_is_minimal_pairs() -> None:
@@ -103,6 +113,8 @@ def test_logout_clears_auth_when_confirmed(monkeypatch) -> None:
     cleared: list = []
 
     class PM:
+        profile = {"syncUser": "cfa@example.com"}
+
         def sync_auth(self):
             return object()  # logged in
 
@@ -114,7 +126,7 @@ def test_logout_clears_auth_when_confirmed(monkeypatch) -> None:
             pass
 
     mw = SimpleNamespace(pm=PM(), col=SimpleNamespace(media=Media()))
-    cfa_mod._logout_of_sync(mw)  # type: ignore[arg-type]
+    cfa_mod.logout_of_sync(mw)  # type: ignore[arg-type]
     assert cleared == [True]
 
 
@@ -132,6 +144,8 @@ def test_logout_noop_when_not_logged_in(monkeypatch) -> None:
     cleared: list = []
 
     class PM:
+        profile: dict = {}
+
         def sync_auth(self):
             return None  # not logged in
 
@@ -139,5 +153,5 @@ def test_logout_noop_when_not_logged_in(monkeypatch) -> None:
             cleared.append(True)
 
     mw = SimpleNamespace(pm=PM(), col=None)
-    cfa_mod._logout_of_sync(mw)  # type: ignore[arg-type]
+    cfa_mod.logout_of_sync(mw)  # type: ignore[arg-type]
     assert cleared == [] and info == [True]

@@ -76,7 +76,7 @@ def setup_menu(mw: AnkiQt) -> None:
     qconnect(ai_settings.triggered, lambda: _open_ai_settings(mw))
 
     logout = menu.addAction("Log out of Sync…")
-    qconnect(logout.triggered, lambda: _logout_of_sync(mw))
+    qconnect(logout.triggered, lambda: logout_of_sync(mw))
 
     # Keep a reference so the menu (and its slots) survive garbage collection.
     mw._cfa_menu = menu  # type: ignore[attr-defined]
@@ -120,11 +120,13 @@ def setup_menu(mw: AnkiQt) -> None:
         pass
 
 
-def _logout_of_sync(mw: AnkiQt) -> None:
-    """Log out of the sync account (AnkiWeb or self-hosted) from the CFA menu.
+def logout_of_sync(mw: AnkiQt) -> None:
+    """Log out of the sync account (AnkiWeb or self-hosted).
 
-    A discoverable one-click logout: the stock button lives in
+    A discoverable one-click logout, reachable from BOTH the CFA menu and the
+    always-visible top-bar "Account" link. The stock button lives in
     Preferences > Syncing and only shows once logged in, which is easy to miss.
+    Names the account being signed out so it's clear WHICH login is affected.
     Clears the stored sync credentials (keeps the custom server URL) so the next
     sync prompts for login again. The media cache is re-flagged so a fresh login
     re-checks media, mirroring the stock logout.
@@ -133,14 +135,17 @@ def _logout_of_sync(mw: AnkiQt) -> None:
 
     if mw.pm.sync_auth() is None:
         showInfo(
-            "You're not logged in to a sync account.",
+            "You're not logged in to a sync account.\n\n"
+            "Click Sync on the top bar (or press Y) to log in.",
             parent=mw,
-            title="ankiCFA — Sync",
+            title="ankiCFA — Sync account",
         )
         return
+    account = mw.pm.profile.get("syncUser") or "your sync account"
     if not askUser(
-        "Log out of the sync account? You'll need to log in again to sync "
-        "(your custom sync-server URL is kept).",
+        f"Log out of {account}?\n\n"
+        "You'll need to log in again to sync (your custom sync-server URL is "
+        "kept).",
         parent=mw,
         title="Log out of Sync",
     ):
@@ -151,7 +156,10 @@ def _logout_of_sync(mw: AnkiQt) -> None:
             mw.col.media.force_resync()
     except Exception:
         pass
-    tooltip("Logged out of sync. Open Sync to log in again.", parent=mw)
+    tooltip(
+        "Logged out of sync. Click Sync on the top bar to log in again.",
+        parent=mw,
+    )
 
 
 def _open_ai_settings(mw: AnkiQt) -> None:
