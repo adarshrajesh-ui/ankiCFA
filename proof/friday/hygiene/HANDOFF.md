@@ -63,19 +63,24 @@ mobile `MAX_SESSION_CARDS = 100` (`CfaExamPriorityActivity`). The deck itself is
   worktree mid-run (reflog), wiping uncommitted copies once. Mitigated by
   committing + pushing each increment promptly.
 
-## 5. `serve_cfa_pages.py` ruff I001 — the ONLY remaining `just check` blocker
+## 5. `serve_cfa_pages.py` ruff I001 — pre-existing committed debt (self-heals in `just check`)
 
-A full `just check` in a clean `friday/hygiene` worktree (Rust: **556 tests
-pass**) now fails on exactly ONE target — a cross-scope one I must not touch:
+A full `just check` on this branch **exits 0 (green)** — verified twice
+(`proof/friday/hygiene/final-justcheck-exit0.txt`, and
+`inc5-dprint-complete-check.txt` with the reorder pre-applied; Rust: **556 tests
+pass**). The reason: `check:ruff` first trips on
+`tools/cfa/serve_cfa_pages.py:58` **I001** (import block un-sorted), but
+`check:format:python`'s built-in isort autofixer (`ruff check --select I --fix`)
+heals it in the same run and the runner's retry pass then reports
+`check:ruff → All checks passed!`. This is **identical to `origin/main`**, where
+`serve_cfa_pages.py` is also committed isort-dirty (PR #21).
 
-- `check:ruff` — `tools/cfa/serve_cfa_pages.py:58` **I001** (import block
-  un-sorted). Committed in `origin/main` (PR #21) and continually re-reordered by
-  the serve/desktop-shell + sync workstreams (their uncommitted reorder is the
-  fix). `serve_cfa_pages.py` is serve code — on the "Do NOT edit" list — so it is
-  **handed off, not committed here**. `ruff check --fix` produces the one-line
-  reorder; once it lands on `origin/main`, a rebase makes `just check` fully green.
-  Diagnostic proof that everything else is green with that reorder applied:
-  `proof/friday/hygiene/inc5-dprint-complete-check.txt` (`CHECK_EXIT=0`).
+Residual debt (handed off, NOT fixed here): the _committed_ `serve_cfa_pages.py`
+stays isort-dirty, so every `just check` leaves a spurious uncommitted reorder of
+that file in the working tree. `serve_cfa_pages.py` is serve code — on the
+"Do NOT edit" list — so the one-line reorder (`ruff check --fix`) is left to the
+serve/desktop-shell workstream (their uncommitted reorder is exactly this).
+Committing it there clears the residual, so `just check` stops touching the tree.
 
 RESOLVED (previously handed off): the three pre-existing `check:format:dprint`
 failures — `cfa/ui/reference/capture_app.mjs` (PR #22),

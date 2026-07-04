@@ -176,15 +176,18 @@ the ONE thing left for a green `just check`: the three pre-existing
 `cfa/ui/reference/app/verify-ethics-crossplatform-NOTES.md`,
 `proof/fixes/p1/NOTES.md`) were still dirty. These are dprint-only, in the (e)
 `just fix-fmt` mandate, and not on the "Do NOT edit" list — so they were formatted
-(`out/node_modules/.bin/dprint fmt`, no `.py`/serve touched). Full `just check`
-with the (handed-off) serve isort reorder applied is now green end-to-end
-(`inc5-dprint-complete-check.txt`, `CHECK_EXIT=0`).
+(`out/node_modules/.bin/dprint fmt`, no `.py`/serve touched). A full `just check`
+on the branch now **EXITS 0 (green)** — verified in `final-justcheck-exit0.txt`
+(and `inc5-dprint-complete-check.txt`): the serve `I001` self-heals via
+`check:format:python`'s isort autofixer + the runner's retry pass (same as
+`origin/main`), so nothing hygiene-owned blocks the check.
 
 ## Cross-scope HANDOFFs
 
-- `tools/cfa/serve_cfa_pages.py` ruff `I001` import sort — serve/desktop-shell code
-  (Do-NOT-edit); the ONLY remaining `just check` blocker. Owned by that workstream
-  (their reorder is uncommitted in the shared tree). See HANDOFF.md #5.
+- `tools/cfa/serve_cfa_pages.py` ruff `I001` — pre-existing `origin/main` debt
+  (PR #21), serve/desktop-shell code (Do-NOT-edit). `just check` self-heals it
+  (exits 0) but leaves a spurious uncommitted reorder each run; committing the
+  reorder in that workstream clears the residual. See HANDOFF.md #5.
 - One-passage retirement — blocked on W3 (HANDOFF.md #1); left intact.
 - Mobile native surfaces cited to the fork PR; `computeCfaScores` RPC ask to the
   engine owner (HANDOFF.md #2).
