@@ -200,3 +200,28 @@ def test_payload_topic_count_is_canonical_and_consistent() -> None:
         assert payload["caption"]["topicsTotal"] == 8
     finally:
         col.close()
+
+
+def test_payload_topic_rows_show_human_names_not_raw_slugs() -> None:
+    # Polish fix — the per-topic table must present readable CFA topic-area
+    # NAMES (e.g. "Financial Reporting & Analysis"), never the raw
+    # ``los::<slug>`` join-key tags that leaked through before. The payload maps
+    # each topic slug to its canonical display name (behaviour otherwise
+    # identical: same rows, order and numbers).
+    _app()
+    col = _empty_col()
+    deck = _seed(
+        col, "los::ethics", n_cards=5, reviews_each=3, frac_ok=0.8, configure=False
+    )
+    try:
+        payload = _cfa_exam_readiness_payload(col, int(deck))
+        names = [t["topic"] for t in payload["topics"]]
+        # No raw ``los::`` slug leaks into the displayed topic column.
+        assert not any(n.startswith("los::") for n in names), names
+        # The canonical CFA topic-area names are what the table shows.
+        assert "Ethics & Professional Standards" in names
+        assert "Financial Reporting & Analysis" in names
+        assert "Portfolio Management" in names
+        assert "Alternative Investments" in names
+    finally:
+        col.close()

@@ -20,6 +20,12 @@ variant separated by whitespace only (like the real stats band).
     export let tone: CfaTone = "neutral";
     /** `card` = flat hairline card; `bare` = whitespace-only stack. */
     export let variant: "card" | "bare" = "card";
+    /**
+     * Keep the value on a single line (e.g. a short serif range like
+     * "82%–100%" must never wrap). Leave off for long values such as the
+     * abstain notice, which should wrap normally.
+     */
+    export let nowrap = false;
 </script>
 
 <div
@@ -29,6 +35,7 @@ variant separated by whitespace only (like the real stats band).
 >
     <div
         class="cfa-stat__value"
+        class:is-nowrap={nowrap}
         class:tone-pass={tone === "pass"}
         class:tone-fail={tone === "fail"}
         class:tone-warn={tone === "warn"}
@@ -63,6 +70,12 @@ variant separated by whitespace only (like the real stats band).
             font-weight: cfa.$cfa-weight-regular;
             line-height: cfa.$cfa-lh-tight;
             font-variant-numeric: tabular-nums;
+
+            // Short serif ranges must stay on one line (never break "82%–100%"
+            // across two rows); long values (the abstain notice) still wrap.
+            &.is-nowrap {
+                white-space: nowrap;
+            }
 
             &.tone-neutral {
                 color: cfa.$cfa-ink;

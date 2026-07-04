@@ -169,8 +169,16 @@
   border: none; border-radius: 100px; padding: 12px 24px; min-height: 44px;
   background: var(--cfa-primary); color: #fff;
 }
-#cfa-check:hover, #cfa-record-btn:hover { background: var(--cfa-primary-hover); }
-#cfa-check:disabled { background: var(--cfa-faint); cursor: not-allowed; }
+#cfa-check:not(:disabled):hover, #cfa-record-btn:not(:disabled):hover { background: var(--cfa-primary-hover); }
+/* Pre-verdict the Check CTA is a soft ghost/outline — clearly disabled but not a
+   dead grey slab: transparent fill, a hairline ring, and quiet muted text. */
+#cfa-check:disabled {
+  background: transparent;
+  color: var(--cfa-faint);
+  box-shadow: inset 0 0 0 1px var(--cfa-line);
+  cursor: not-allowed;
+}
+.nightMode #cfa-check:disabled { box-shadow: inset 0 0 0 1px #3a3b44; }
 .cfa-hint { color: var(--cfa-faint); font-size: .8rem; margin: 8px 0 0; }
 
 /* reveal panel — a quiet hairline card (hidden until the attempt is checked) */

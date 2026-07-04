@@ -51,8 +51,8 @@ const SHOTS = [
         name: "readiness",
         url: `http://127.0.0.1:${PORT}/cfa-readiness/${DECK_ID}`,
         file: "verify-readiness-desktop.png",
-        width: 640, // ExamReadinessDialog.resize(640, 560)
-        height: 560,
+        width: 800, // ExamReadinessDialog.resize(800, 600)
+        height: 600,
     },
     {
         name: "deadline",

@@ -794,7 +794,9 @@ def _cfa_exam_readiness_payload(col: Collection, deck_id: int) -> dict[str, Any]
         },
         "topics": [
             {
-                "topic": t.topic,
+                # Display the readable CFA topic-area NAME, not the raw
+                # ``los::<slug>`` join-key tag (behaviour otherwise identical).
+                "topic": cfa.topic_display_name(t.topic),
                 "weight": t.weight,
                 "reviewedCards": t.reviewed_cards,
                 "gradedReviews": t.graded_reviews,
