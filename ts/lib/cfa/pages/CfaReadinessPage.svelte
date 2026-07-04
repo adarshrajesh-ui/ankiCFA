@@ -116,6 +116,7 @@ the pass/fail/warn semantic triad preserved throughout.
                         value={bandValue(card.band)}
                         tone={bandTone(card.band)}
                         sub={bandSub(card.band)}
+                        nowrap={!card.band.abstain}
                     >
                         <span class="cfa-readiness__stat-name">{card.name}</span>
                         <span class="cfa-readiness__stat-meaning">{card.meaning}</span>

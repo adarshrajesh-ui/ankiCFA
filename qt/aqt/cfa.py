@@ -415,7 +415,9 @@ class ExamReadinessDialog(QDialog):
         super().__init__(mw)
         assert mw.col is not None
         self.setWindowTitle("CFA — Exam Readiness")
-        self.resize(640, 560)
+        # Wide enough that the three value-first StatCards render their serif
+        # ranges (e.g. "82%–100%") on a single line at real desktop width.
+        self.resize(800, 600)
         self.web: AnkiWebView | None = AnkiWebView(kind=AnkiWebViewKind.CFA_READINESS)
         self.web.load_sveltekit_page(f"cfa-readiness/{int(deck_id)}")
         layout = QVBoxLayout()
