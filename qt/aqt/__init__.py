@@ -571,7 +571,7 @@ def write_profile_results() -> None:
 
 
 def run() -> None:
-    print(f"Starting Anki {_version}...")
+    print(f"Starting ankiCFA {_version}...")
     try:
         _run()
     except Exception:
@@ -677,8 +677,9 @@ def _run(argv: list[str] | None = None, exec: bool = True) -> AnkiApp | None:
         os.environ["QT_QPA_PLATFORM"] = "windows:altgr"
 
     # create the app
-    QCoreApplication.setApplicationName("Anki")
-    QGuiApplication.setDesktopFileName("anki")
+    # CFA fork: brand the Qt application/desktop identity as ankiCFA.
+    QCoreApplication.setApplicationName("ankiCFA")
+    QGuiApplication.setDesktopFileName("ankicfa")
     app = AnkiApp(argv)
     if app.secondInstance():
         # we've signaled the primary instance, so we should close
@@ -744,6 +745,11 @@ def _run(argv: list[str] | None = None, exec: bool = True) -> AnkiApp | None:
     from aqt.utils import aqt_data_folder
 
     QDir.addSearchPath("icons", os.path.join(aqt_data_folder(), "qt", "icons"))
+
+    # CFA fork: brand the application/window icon. Resolved via the "icons:"
+    # search path registered above, so this works regardless of the compiled
+    # Qt resource (:/icons/cfa.png).
+    app.setWindowIcon(QIcon("icons:cfa.png"))
 
     if pmLoadResult.firstTime:
         pm.setDefaultLang(lang[0])

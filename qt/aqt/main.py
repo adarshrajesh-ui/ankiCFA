@@ -506,7 +506,7 @@ class AnkiQt(QMainWindow):
         restoreGeom(self, "mainWindow")
         restoreState(self, "mainWindow")
         # titlebar
-        self.setWindowTitle(f"{self.pm.name} - Anki")
+        self.setWindowTitle(self.window_title())
         # show and raise window for osx
         self.show()
         self.activateWindow()
@@ -951,6 +951,9 @@ title="{}" {}>{}</button>""".format(
         # main window
         self.form = aqt.forms.main.Ui_MainWindow()
         self.form.setupUi(self)
+        # CFA fork: brand the window icon (authoritative, resolved via the
+        # "icons:" search path so it holds even before the .ui is recompiled).
+        self.setWindowIcon(QIcon("icons:cfa.png"))
         # toolbar
         tweb = self.toolbarWeb = TopWebView(self)
         self.toolbar = Toolbar(self, tweb)
@@ -1474,8 +1477,15 @@ title="{}" {}>{}</button>""".format(
 
         aqt.cfa.setup_menu(self)
 
+    def window_title(self) -> str:
+        # CFA fork: brand the window as "ankiCFA - {profile}", falling back to
+        # the bare brand when no profile is loaded yet.
+        pm = getattr(self, "pm", None)
+        name = getattr(pm, "name", None) if pm is not None else None
+        return f"ankiCFA - {name}" if name else "ankiCFA"
+
     def updateTitleBar(self) -> None:
-        self.setWindowTitle("Anki")
+        self.setWindowTitle(self.window_title())
 
     # View
     ##########################################################################

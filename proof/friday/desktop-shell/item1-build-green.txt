@@ -1,0 +1,10 @@
+=== just build (./ninja pylib qt) — up to date ===
+ninja: no work to do.  => Build succeeded
+
+=== generated form out/qt/_aqt/forms/main_qt6.py now branded ===
+24:        MainWindow.setWindowTitle("ankiCFA")
+26:        icon.addPixmap(QtGui.QPixmap("icons:cfa.png"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
+27:        MainWindow.setWindowIcon(icon)
+
+=== icons.qrc includes cfa.png ===
+56:        <file alias="icons/cfa.png">icons/cfa.png</file>

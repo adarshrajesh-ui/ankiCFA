@@ -1,0 +1,9 @@
+=== BEFORE: branding strings (stock Anki) ===
+574:    print(f"Starting Anki {_version}...")
+680:    QCoreApplication.setApplicationName("Anki")
+681:    QGuiApplication.setDesktopFileName("anki")
+509:        self.setWindowTitle(f"{self.pm.name} - Anki")
+1478:        self.setWindowTitle("Anki")
+25:  <property name="windowTitle">
+28:  <property name="windowIcon">
+30:    <normaloff>:/icons/anki.png</normaloff>:/icons/anki.png</iconset>
