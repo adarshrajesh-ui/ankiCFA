@@ -208,6 +208,20 @@ cfa-coverage-map *args:
 cfa-outline-test:
     {{ py }} -m pytest cfa/outline/tests -q
 
+# A8: study-feature ablation — the exam-priority points-at-stake queue across
+# THREE builds (ON / OFF=weakness-only / PLAIN=deck order) on the same cohort,
+# exam and study-time budget; reports exam-weighted accuracy per arm with a
+# bootstrap 95% CI and the ON-OFF / ON-PLAIN effect sizes. SIMULATED by default
+# (honest label); --uniform-weights runs the null control (collapses ON->OFF);
+# --observations FILE scores real per-learner arm outcomes and gates on them.
+cfa-ablation *args:
+    {{ py }} tools/cfa/ablation_harness.py {{ args }}
+
+# A8: ablation-harness test suite (deterministic DGP, equal budget, real effect,
+# uniform-weights null, give-up abstain, observations gate).
+cfa-ablation-test:
+    {{ py }} -m pytest tools/cfa/tests/test_ablation_harness.py -q
+
 # Feature 8: content-type-aware weighting — equal-weakness cards of different item types get different exam-queue multipliers
 cfa-types-test:
     {{ ninja }} pylib

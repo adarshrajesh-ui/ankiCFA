@@ -1,0 +1,85 @@
+A8 — STUDY-FEATURE ABLATION (exam-priority points-at-stake queue)
+Captured: gnhf iter 10. Command: just cfa-ablation (python3 tools/cfa/ablation_harness.py)
+Metric convention: exam-weighted accuracy in [0,1], higher is better.
+
+########## BASE RUN (SIMULATED cohort, default 35% study budget) ##########
+A8 study-feature ablation — exam-priority queue [SIMULATED]
+====================================================================
+FEATURE   : exam-priority points-at-stake study queue (BuildExamQueue)
+HYPOTHESIS: at equal study time, allocating by exam-weight x weakness
+            beats weakness-only and plain deck order on exam-weighted
+            accuracy.
+METRIC    : exam-weighted accuracy in [0,1] (higher better), 95% CI over learners
+--------------------------------------------------------------------
+cohort    : 200 learners x 10 topics
+study time: 42/120 cards (35% of deck) — SAME budget for all 3 arms
+exam      : 60 held-out questions (6/topic), identical across arms
+--------------------------------------------------------------------
+Per-arm exam-weighted accuracy (mean [95% CI]):
+  ON    (points-at-stake queue)       : 0.6435 [0.6353, 0.6523]
+  OFF   (weakness-only, no weight)    : 0.6157 [0.6062, 0.6261]
+  PLAIN (unmodified Anki, deck order) : 0.5626 [0.5532, 0.5719]
+--------------------------------------------------------------------
+Effect sizes (paired, bootstrap 95% CI):
+  ON - OFF              : +0.0279 [+0.0220, +0.0337]  -> REAL effect (CI clears 0)
+  ON - PLAIN            : +0.0809 [+0.0736, +0.0883]  -> REAL effect (CI clears 0)
+--------------------------------------------------------------------
+NOTE: SIMULATED cohort — validates the mechanism + the metric, not
+      a real-world effect size. Re-run with --uniform-weights to
+      confirm the ON-OFF effect is driven by exam-weighting, and
+      --observations FILE to score real per-learner arm outcomes.
+
+########## HONEST NULL CONTROL (--uniform-weights) ##########
+# Equal topic weights => ON's key (weight x weakness) collapses onto OFF's
+# key (weakness). The ON-OFF effect MUST vanish; ON-PLAIN survives.
+A8 study-feature ablation — exam-priority queue [SIMULATED]
+====================================================================
+FEATURE   : exam-priority points-at-stake study queue (BuildExamQueue)
+HYPOTHESIS: at equal study time, allocating by exam-weight x weakness
+            beats weakness-only and plain deck order on exam-weighted
+            accuracy.
+METRIC    : exam-weighted accuracy in [0,1] (higher better), 95% CI over learners
+--------------------------------------------------------------------
+cohort    : 200 learners x 10 topics
+study time: 42/120 cards (35% of deck) — SAME budget for all 3 arms
+exam      : 60 held-out questions (6/topic), identical across arms
+control   : UNIFORM WEIGHTS (null) — ON key collapses onto OFF key
+--------------------------------------------------------------------
+Per-arm exam-weighted accuracy (mean [95% CI]):
+  ON    (points-at-stake queue)       : 0.6150 [0.6054, 0.6250]
+  OFF   (weakness-only, no weight)    : 0.6150 [0.6054, 0.6250]
+  PLAIN (unmodified Anki, deck order) : 0.5693 [0.5605, 0.5786]
+--------------------------------------------------------------------
+Effect sizes (paired, bootstrap 95% CI):
+  ON - OFF              : +0.0000 [+0.0000, +0.0000]  -> NULL (CI includes 0)
+  ON - PLAIN            : +0.0457 [+0.0392, +0.0526]  -> REAL effect (CI clears 0)
+--------------------------------------------------------------------
+NOTE: SIMULATED cohort — validates the mechanism + the metric, not
+      a real-world effect size. Re-run with --uniform-weights to
+      confirm the ON-OFF effect is driven by exam-weighting, and
+      --observations FILE to score real per-learner arm outcomes.
+
+########## ROBUSTNESS: ON - PLAIN effect across seeds 0-5 ##########
+  seed 0: ON-PLAIN=+0.0809 CI[+0.0736,+0.0883]  ON-OFF=+0.0279 CI[+0.0220,+0.0337]
+  seed 1: ON-PLAIN=+0.0671 CI[+0.0592,+0.0748]  ON-OFF=+0.0118 CI[+0.0064,+0.0174]
+  seed 2: ON-PLAIN=+0.0781 CI[+0.0706,+0.0865]  ON-OFF=+0.0186 CI[+0.0129,+0.0244]
+  seed 3: ON-PLAIN=+0.0834 CI[+0.0760,+0.0909]  ON-OFF=+0.0160 CI[+0.0102,+0.0218]
+  seed 4: ON-PLAIN=+0.0874 CI[+0.0785,+0.0960]  ON-OFF=+0.0141 CI[+0.0087,+0.0201]
+  seed 5: ON-PLAIN=+0.0845 CI[+0.0768,+0.0923]  ON-OFF=+0.0309 CI[+0.0246,+0.0374]
+
+########## GIVE-UP RULE (too few learners -> ABSTAIN, exits 0) ##########
+A8 study-feature ablation — exam-priority queue [SIMULATED]
+====================================================================
+FEATURE   : exam-priority points-at-stake study queue (BuildExamQueue)
+HYPOTHESIS: at equal study time, allocating by exam-weight x weakness
+            beats weakness-only and plain deck order on exam-weighted
+            accuracy.
+METRIC    : exam-weighted accuracy in [0,1] (higher better), 95% CI over learners
+--------------------------------------------------------------------
+RESULT    : ABSTAIN — insufficient data to estimate an effect.
+  learners=20 (need >= 30); budget_cards=42 (need >= 1)
+exit=0
+
+########## TESTS (just cfa-ablation-test) ##########
+............                                                             [100%]
+12 passed in 2.86s
