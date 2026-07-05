@@ -217,9 +217,17 @@ The batched-AI wording, when AI is on, warms these same templated strings.
 
         <div class="cfa-map__stage">
             <div class="cfa-map__mapbox">
+                <!-- role="group", NOT "img": every node below is a focusable
+                role="button" (tabindex=0). role="img" would flatten the SVG to a
+                single presentational image and PRUNE the accessibility subtree,
+                leaving those focusable node buttons unreachable by screen
+                readers (focusable-but-not-in-a11y-tree — WCAG 4.1.2 / 1.3.1).
+                "group" gives the map its accessible name AND exposes the
+                interactive nodes. (The approved spec/mobile use "img" because
+                their nodes are NOT focusable; only the desktop made them so.) -->
                 <svg
                     viewBox="0 0 {VIEW_W} {VIEW_H}"
-                    role="img"
+                    role="group"
                     aria-label="Interactive CFA concept mastery map"
                 >
                     <defs>

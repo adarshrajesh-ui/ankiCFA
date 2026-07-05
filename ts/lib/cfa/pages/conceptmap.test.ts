@@ -259,3 +259,27 @@ test("D-P4-3: hover tooltip renders name + % at the node (spec parity)", () => {
     // …and the tooltip group is aria-hidden (the node aria-label already speaks).
     expect(src).toMatch(/class="cfa-tip"[\s\S]*?aria-hidden="true"/);
 });
+
+// --- Phase B regression guard (D-P4-4) ----------------------------------
+// The map SVG must expose its focusable node buttons to screen readers. The
+// desktop made every node a focusable role="button" (tabindex=0), so the SVG
+// container must NOT be role="img" (which flattens the SVG to one image and
+// prunes the a11y subtree, orphaning those focusable buttons — WCAG 4.1.2 /
+// 1.3.1). It must be role="group" so the map keeps its accessible name AND the
+// interactive nodes stay reachable. Lock it in the source.
+test("D-P4-4: map SVG is a named group, not an a11y-pruning role=img", () => {
+    const fs = require("node:fs") as typeof import("node:fs");
+    const path = require("node:path") as typeof import("node:path");
+    const src = fs.readFileSync(
+        path.join(__dirname, "CfaConceptMapPage.svelte"),
+        "utf8",
+    );
+    // The <svg ...> attributes (up to the first '>') carry role="group",
+    // never role="img", while keeping the accessible name.
+    const svgOpen = src.slice(src.indexOf("<svg"), src.indexOf(">", src.indexOf("<svg")) + 1);
+    expect(svgOpen).toContain('role="group"');
+    expect(svgOpen).not.toContain('role="img"');
+    expect(svgOpen).toContain('aria-label="Interactive CFA concept mastery map"');
+    // The nodes are still focusable buttons (the reason role=img is wrong here).
+    expect(src).toMatch(/role="button"\s*\n\s*tabindex="0"/);
+});

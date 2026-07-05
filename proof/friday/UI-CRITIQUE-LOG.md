@@ -708,3 +708,26 @@ REAL engine SVG for two nodes: an unlabelled subsection reads **"Credit / 63%
 mastered"** and an abstaining subsection honestly reads **"Real Estate / no data
 yet"**, both positioned above the disc without clipping — byte-for-byte the
 navy-chip / turquoise-% treatment the mobile asset and the approved spec show.
+
+### D-P4-4 — Concept-Map SVG orphans its focusable nodes from screen readers (accessibility / ARIA-conflict audit)
+
+Pass 4 escalates on the Concept Map from what a sighted user sees (D-P4-1 gauge,
+D-P4-3 tooltip) to what a **screen-reader** user can reach. The map was audited
+with the a11y tree as the artifact, since the fix changes no pixels.
+
+| ID | Severity | Where | Finding | Fix |
+|----|----------|-------|---------|-----|
+| D-P4-4 | MAJOR (accessibility / ARIA conflict) | `CfaConceptMapPage.svelte` — the map `<svg>` container | The desktop made every one of the 31 nodes a **focusable** `role="button"` `tabindex="0"` (a keyboard-a11y enhancement over the spec) — but the SVG container kept the spec's `role="img"`. `role="img"` tells assistive tech to present the SVG as a **single flat image and prune its accessibility subtree**, so those focusable node buttons become **reachable by Tab yet invisible to screen readers** — the classic focusable-but-not-in-the-a11y-tree conflict. A keyboard+SR user Tabs onto "Ethics" and hears nothing; the map's whole interactive value (name + % per node) is silent. The spec/mobile use `role="img"` safely because THEIR nodes are not focusable; only the desktop introduced the conflict. **WCAG 2.1 SC 4.1.2 (Name, Role, Value, A) & SC 1.3.1 (Info & Relationships, A).** | **FIXED (iter 11)** — the container is now `role="group"` (accessible name unchanged: "Interactive CFA concept mastery map"). `group` gives the visualization a name **and** exposes the interactive node buttons, so every focusable node's `aria-label` ("Ethics: 63% mastered", "Real Estate: No data yet") is announced. Pure semantics — no pixel, engine, score, or fill change. |
+
+**Verification:** `ts/lib/cfa/pages/conceptmap.test.ts` **24 → 25 tests, green**
+(new `D-P4-4` source guard: the `<svg>` open tag carries `role="group"`, never
+`role="img"`, keeps its `aria-label`, and the nodes remain focusable
+`role="button"` `tabindex="0"`). `just cfa-conceptmap-test` green; `svelte-check`
+0 errors on the component. **Accessibility-tree evidence** (the honest artifact —
+the fix changes no pixels): `proof/concept-map/a11y-role-fix.{html,png,-tree.txt}`
+render the EXACT structure (a focusable `role="button"` node inside the map SVG)
+under both roles and dump the browser a11y tree — BEFORE (`role="img"`) the tree
+has only `image "Interactive CFA concept mastery map"` and the node button is
+**absent/pruned**; AFTER (`role="group"`) the tree exposes
+`button "Ethics: 63% mastered"`, proving the focusable node is now reachable by
+assistive tech.
