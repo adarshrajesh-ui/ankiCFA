@@ -1,0 +1,39 @@
+====================================================================
+A14 — Consolidated results report + Brainlift — EVIDENCE
+Captured: 2026-07-04
+====================================================================
+
+Deliverables:
+-rw-r--r--  1 adarshrajesh  staff  11588 Jul  4 19:00 proof/friday/RESULTS-REPORT.md
+  (Brainlift.md updated with a 'Product Validation' DOK section)
+Brainlift.md lines:      285
+
+-- RESULTS-REPORT.md headline scorecard (A1..A13) --------------------
+## 1. Headline scorecard
+
+| # | Deliverable | Kind | Headline result | Bar | Verdict | Evidence |
+|---|-------------|------|-----------------|-----|---------|----------|
+| A1 | AI beats a simpler baseline | MEASURED (AI-off) | TF-IDF 0.933 > deterministic-span 0.733; **LLM SKIPPED (AI off)** | LLM > max(baselines) | **UNPROVEN — AI off** (honest null) | `L1/baseline-compare.txt` |
+| A2 | Wrong-answer-rate gate | MEASURED (AI-off) | war **0.000** (0/5 false-accepts); accuracy 0.733 | acc≥0.80 AND war≤0.20 | war leg PASS, acc leg **FAIL** (AI off) | `L1/eval-gate.txt` |
+| A3 | Memory calibration | SIMULATED | Brier **0.2024**, log loss 0.5909, ECE 0.0784 | < base-rate Brier (0.247) | **PASS** (metric/math validated) | `L1/calibration.txt` + `.png` |
+| A4 | Performance-model accuracy | SIMULATED | held-out acc **0.7217** (AUC 0.7161) vs baseline 0.6863 | acc≥0.70 AND beats baseline | **PASS** (seed 0); see §4 caveat | `L1/performance-eval.txt` |
+| A5 | Paraphrase memory-vs-performance gap | SIMULATED | gap **0.2583** (95% CI [0.2408, 0.2767]) | CI clears 0 AND gap≥0.02 | **PASS** (distinguishable) | `L1/paraphrase-gap.txt` |
+| A6 | Card-gen gold-set checker | SIMULATED | 86% useful / 6% bad / 8% wrong | useful≥80% AND wrong≤10% | **PASS**; bad batch BLOCKED | `L1/cardgen-check.txt` |
+| A7 | Coverage map + topics 8→10 | MEASURED (real deck) | **10/10 topics covered**, 711 cards; Rust==Python==outline | all 10 covered, 3-way parity | **PASS** | `L1/coverage-map.txt` + `.png` |
+| A8 | Study-feature ablation (3 builds) | SIMULATED | ON 0.6435 > OFF 0.6157 > PLAIN 0.5626 | ON−PLAIN CI clears 0 | **PASS**; honest null holds (§4) | `L1/ablation.txt` |
+| A9 | 50k-card benchmark | MEASURED (real backend) | next-card p50 **0.036 ms**; dashboard **220 ms** | < 1s interaction budget | **PASS**; dashboard = bottleneck (§4) | `L1/bench.txt` |
+| A10 | Crash + offline robustness | MEASURED (real backend) | **20/20 SIGKILLs → CLEAN**; revlog 280→4358 | 0 corruption; AI-off still scores | **PASS** | `L1/crash-robustness.txt` |
+| A11 | Score-mapping + model docs | DOCS + test | 3 MODEL-*.md; 5-test doc-drift guard | docs match code constants | **PASS** | `L1/model-docs.txt` |
+| A12 | Unified Rust-change note | DOCS + test | all 3 RPCs; **24 Rust tests** | note matches build | **PASS** | `L1/rust-engine-note.txt` |
+| A13 | Desktop installer (screenshots) | MEASURED (real DMG) | 226 MB macOS DMG; 3-shot clean-machine install | self-contained + boots CFA Home | **PASS** (macOS); win/linux not built | `L1/installer/` |
+
+---
+
+-- Drift-guard test (report numbers must match evidence; stdlib) -----
+out/pyenv/bin/python -m pytest cfa/eval/tests/test_results_report.py -q
+.....                                                                    [100%]
+5 passed in 0.01s
+
+-- Full cfa eval suite still green -----------------------------------
+...................................................................      [100%]
+67 passed in 9.60s

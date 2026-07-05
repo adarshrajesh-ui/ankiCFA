@@ -229,3 +229,57 @@ DOK 1
 The multi-vendor official ecosystem shows that CFA prep is validated but fragmented.
 Kann, Huang et al., 2024 reviewed medical market concentration.
 https://link.springer.com/article/10.1007/s40670-024-02116-7
+
+Product Validation — Does the Built App Support the Thesis?
+DOK 3 — Insights
+The three spiky POVs above are now backed by a built, tested product rather than
+argument alone. Every number below is reproducible from the repo and is either
+MEASURED (real built backend / real deck) or SIMULATED (synthetic cohort that
+validates the model math and metric code, not a real-world effect size). The
+full consolidated write-up, including the results that did NOT clear their bar,
+lives in proof/friday/RESULTS-REPORT.md. Nothing here required an AI key; the app
+scores with AI switched off.
+
+DOK 2 — POV 1 (ethics as recall, not recognition)
+The near-miss minimal-pair ethics feature ships with a deterministic grader that
+works AI-off. Grade agreement with a human 4-way label (30 attempts, MEASURED):
+deterministic-span 0.733, a simpler TF-IDF keyword baseline 0.933. Honest gap:
+with no OpenAI key the LLM leg is SKIPPED, so "AI beats the baseline" is UNPROVEN
+this run — and the simpler TF-IDF baseline actually out-scores the shipped
+deterministic grader. A named wrong-answer-rate gate (false-accepts of
+human-incorrect answers, cutoff ≤0.20) reads 0.000 AI-off; the harness is proven
+to BLOCK a losing AI (a mocked below-baseline grader trips the gate → non-zero
+exit), which is the honest way to state an unproven positive.
+
+DOK 2 — POV 2 (date-aware scheduling) and POV 3 (content-type weighting)
+Both POVs are realised as read-only Rust RPCs (DeadlineRetention back-plans
+intervals toward the exam date; BuildExamQueue weights by exam-weight × weakness
+with a per-content-type multiplier) with Rust==Python parity and 24 passing Rust
+tests. A pre-registered 3-build ablation (ON / OFF / plain unmodified Anki) on the
+same cohort, same held-out exam, and equal study-time budget (SIMULATED) reports
+exam-weighted accuracy ON 0.6435 > OFF 0.6157 > PLAIN 0.5626; the ON−PLAIN effect
+(+0.0809, 95% CI [+0.0736, +0.0883]) clears zero on every seed. The honest null
+control (uniform topic weights) collapses ON−OFF to exactly 0.0, proving the edge
+is weight-driven rather than a modeling artifact — a null reported, not hidden.
+
+DOK 3 — The core product claim: Memory ≠ Performance ≠ Readiness
+The app answers three separate questions, each with a range and a give-up rule.
+The paraphrase test (SIMULATED, 200 learners, 30 concepts × 2 wordings) measures a
+memory-vs-performance gap of 0.2583 (95% CI [0.2408, 0.2767], clears zero) between
+recall on the drilled card and accuracy on the reworded exam question; a zero-boost
+control collapses that gap to −0.0317, so the gap is real signal, not a wording
+artifact. Memory calibration (SIMULATED, 12k reviews) reports Brier 0.2024 / log
+loss 0.5909 / ECE 0.0784 with a reliability chart; the performance model predicts
+held-out exam-question correctness at 0.7217 accuracy vs a 0.6863 majority
+baseline. Readiness carries the standing caveat "not validated against real exam
+data" and abstains rather than bluff when either input is thin.
+
+DOK 2 — Honesty, robustness, and the give-up rule as design constraints
+The give-up rule is enforced code, not decoration: every score abstains below its
+data threshold (memory <200 graded reviews, performance <30 first exposures,
+paraphrase <30 learners). The engine is crash-safe — 20 mid-review SIGKILLs left
+zero corruption (MEASURED, revlog grew 280→4358, every reopen CLEAN) — and fast:
+next-card and answerCard ack are sub-millisecond at p50/p95 on a 50k-card deck,
+with the whole-collection dashboard recompute (~220 ms, no cache) the honest
+remaining bottleneck. This turns the thesis's implicit promise — a trustworthy
+readiness read for a single high-stakes date — into a testable contract.

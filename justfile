@@ -182,6 +182,12 @@ cfa-model-docs-test:
 cfa-rust-note-test:
     {{ py }} -m pytest cfa/eval/tests/test_rust_engine_note.py -q
 
+# A14: the consolidated proof/friday/RESULTS-REPORT.md must not drift from the
+# raw evidence files (every cited file exists, every headline number matches its
+# source, honesty scaffolding present) (stdlib-only, no build).
+cfa-results-test:
+    {{ py }} -m pytest cfa/eval/tests/test_results_report.py -q
+
 # A1: AI grader vs simpler baselines (deterministic-span, TF-IDF, LLM). AI-off
 # reports both baselines honestly; with a key the LLM must beat both or it fails.
 cfa-baseline-compare *args:
