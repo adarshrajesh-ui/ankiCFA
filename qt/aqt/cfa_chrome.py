@@ -51,6 +51,18 @@ def _toolbar_css() -> str:
     color: {t["accent"]} !important;
     background: {t["accent_soft"]};
   }}
+  /* Active-tab "you are here" marker. Stock Anki's toolbar has no active-tab
+     concept, so the CFA nav (Home / Concept Map / Readiness) read as an
+     undifferentiated row of links — a product nav should always show which
+     section you're in. The current tab is a filled accent pill (white text on
+     the warm accent), a clear selected-segment treatment that reads instantly
+     and stays put on hover. Applied via `is-active` + `aria-current="page"`
+     from Toolbar._update_active_cfa_tab. */
+  .hitem.is-active,
+  .hitem.is-active:hover {{
+    color: {t["bg"]} !important;
+    background: {t["accent"]};
+  }}
   /* The single context-aware sync-account control (Connect / Log out) reads as
      a distinct bordered chip, set apart from the plain nav links so account
      management is discoverable without crowding the bar with extra links. */

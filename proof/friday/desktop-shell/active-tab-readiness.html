@@ -1,0 +1,51 @@
+<!doctype html><html><head><meta charset="utf-8">
+<style id="cfa-chrome-toolbar">
+  .header {
+    background: #ffffff !important;
+    border-bottom: 1px solid #E7E9EC;
+    font-family: "IBM Plex Sans", -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  .hitem {
+    color: #4D5C6D !important;
+    font-weight: 600;
+    letter-spacing: .01em;
+    border-radius: 100px;
+  }
+  .hitem:hover {
+    color: #DA5C01 !important;
+    background: #FCEBDA;
+  }
+  /* Active-tab "you are here" marker. Stock Anki's toolbar has no active-tab
+     concept, so the CFA nav (Home / Concept Map / Readiness) read as an
+     undifferentiated row of links — a product nav should always show which
+     section you're in. The current tab is a filled accent pill (white text on
+     the warm accent), a clear selected-segment treatment that reads instantly
+     and stays put on hover. Applied via `is-active` + `aria-current="page"`
+     from Toolbar._update_active_cfa_tab. */
+  .hitem.is-active,
+  .hitem.is-active:hover {
+    color: #ffffff !important;
+    background: #DA5C01;
+  }
+  /* The single context-aware sync-account control (Connect / Log out) reads as
+     a distinct bordered chip, set apart from the plain nav links so account
+     management is discoverable without crowding the bar with extra links. */
+  #cfa_account {
+    border: 1px solid #E7E9EC;
+    color: #122B46 !important;
+    margin-left: 6px;
+  }
+  #cfa_account:hover {
+    border-color: #DA5C01;
+    color: #DA5C01 !important;
+    background: #FCEBDA;
+  }
+</style>
+<style>body{margin:0} .header{padding:8px 14px;display:flex;gap:2px;align-items:center}</style>
+</head><body><div class="header"><div class="toolbar" style="display:flex;gap:2px"><a class="hitem" id="cfa_home" href="#">Home</a>
+<a class="hitem" id="cfa_study" href="#">Study</a>
+<a class="hitem" id="cfa_ethics" href="#">Ethics</a>
+<a class="hitem" id="cfa_concept_map" href="#">Concept Map</a>
+<a class="hitem is-active" id="cfa_readiness" aria-current="page" href="#">Readiness</a>
+<a class="hitem" id="sync" href="#">Sync</a>
+<a class="hitem" id="cfa_account" href="#">Connect</a></div></div></body></html>

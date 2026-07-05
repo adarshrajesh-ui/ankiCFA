@@ -664,3 +664,26 @@ is gone, the fill is gated behind `#if active.pct !== null`, and the
 node and a true-0% node render as identical flat empty bars; AFTER the
 abstaining node shows the neutral hatch while the true-0% node stays a flat
 empty bar, making the two states unmistakably distinct.
+
+### D-P4-2 — CFA top-bar nav gives no "you are here" indication (product-nav / orientation audit)
+
+Pass 4 continues on the native shell. The desktop top bar was rebuilt as a CFA
+product nav (Home / Study / Ethics / Concept Map / Readiness) — but it was
+audited as a user who has just clicked "Readiness" and is trying to confirm
+where they are.
+
+| ID | Severity | Where | Finding | Fix |
+|----|----------|-------|---------|-----|
+| D-P4-2 | MAJOR (orientation / product-feel) | `qt/aqt/toolbar.py` `_centerLinks` + `qt/aqt/cfa_chrome.py` `_toolbar_css` — the CFA nav tabs | Every CFA tab rendered as an identical muted `.hitem` link with **no active-state marker**. Landing on the native Home / Concept Map / Readiness screens (built in iters 1/6), the top bar looked byte-identical regardless of which section you were in — the objective's explicit "reads as stock Anki, not a purpose-built product" clunk. Stock Anki's toolbar has no active-tab concept, so the CFA fork inherited a row of undifferentiated links; a UWorld-grade product nav must always show the current section. **Nielsen #1 (visibility of system status); no orientation cue.** | **FIXED (iter 9)** — the current section is now a filled **accent pill** (white text on the warm accent, a clear selected-segment treatment) via a new `.hitem.is-active` chrome style. `Toolbar._update_active_cfa_tab` maps the main-window state → its tab id (`cfaHome`/`cfaConceptMap`/`cfaReadiness`) and sets `is-active` + `aria-current="page"` on that tab, clearing it on every other tab. It runs from `redraw()` **and** a `gui_hooks.state_did_change` subscription, so leaving a CFA screen for the deck list or a study session never leaves a stale pill lit. Pure presentation — no scores, routing, or navigation logic change. Study/Ethics launch into the shared overview/review flow (no dedicated state) so they carry no persistent pill, documented as a known limit. |
+
+**Verification:** `qt/tests/test_cfa_active_tab.py` (**7 tests, green**, added to
+`just cfa-desktop-shell-test` → **51 tests green**): the state→tab map, the
+active-highlight JS for a CFA state, the null-clear for a non-CFA state, the
+`state_did_change` transition (into and out of a CFA state), `redraw()`
+refreshing the tab, and source guards that the chrome styles a distinct
+`.hitem.is-active` accent pill and the toolbar registers the state hook.
+**Rendered evidence:** `proof/friday/desktop-shell/active-tab-readiness.{html,png}`
+renders the REAL `cfa_chrome._toolbar_css()` over the actual nav ids with
+Readiness marked exactly as `_eval_active_cfa_tab` would — the screenshot shows
+"Readiness" as a filled orange pill while Home / Study / Ethics / Concept Map
+stay muted navy links.

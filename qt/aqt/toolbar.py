@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import enum
+import json
 import re
 from collections.abc import Callable
 from typing import Any, cast
@@ -275,6 +276,11 @@ class Toolbar:
             "study": self._studyLinkHandler,
         }
         self.web.requiresCol = False
+        # CFA fork: keep the active nav-tab highlight in sync with EVERY
+        # main-window state change — not just the states that redraw the
+        # toolbar — so leaving a CFA screen for the deck list or a study session
+        # never leaves a stale "you are here" pill lit.
+        gui_hooks.state_did_change.append(self._on_state_did_change)
 
     def draw(
         self,
@@ -301,7 +307,50 @@ class Toolbar:
     def redraw(self) -> None:
         self.set_sync_active(self.mw.media_syncer.is_syncing())
         self.update_sync_status()
+        self._update_active_cfa_tab()
         gui_hooks.top_toolbar_did_redraw(self)
+
+    # CFA fork: which main-window states own a persistent top-bar nav tab, and
+    # the id of the tab that should read as "active" while in that state. (Study
+    # and Ethics launch into the shared overview/review flow rather than a
+    # dedicated state, so they have no persistent active tab.)
+    _CFA_STATE_TABS = {
+        "cfaHome": "cfa_home",
+        "cfaConceptMap": "cfa_concept_map",
+        "cfaReadiness": "cfa_readiness",
+    }
+
+    def _update_active_cfa_tab(self) -> None:
+        """Highlight the CFA nav tab matching the current main-window state.
+
+        A purpose-built product nav shows WHERE you are; stock Anki's toolbar has
+        no active-tab concept, so Home / Concept Map / Readiness read as an
+        undifferentiated row of links. This marks the tab for the current state
+        with `is-active` + `aria-current="page"` (and clears it everywhere else,
+        so navigating to the deck list or a study session leaves no stale
+        highlight). Pure presentation — no scores or navigation change.
+        """
+        self._eval_active_cfa_tab(
+            self._CFA_STATE_TABS.get(getattr(self.mw, "state", ""))
+        )
+
+    def _on_state_did_change(self, new_state: str, old_state: str) -> None:
+        self._eval_active_cfa_tab(self._CFA_STATE_TABS.get(new_state))
+
+    def _eval_active_cfa_tab(self, active: str | None) -> None:
+        self.web.eval(
+            "(function(){"
+            "var ids=%s,active=%s;"
+            "ids.forEach(function(id){"
+            "var el=document.getElementById(id);"
+            "if(!el)return;"
+            "if(id===active){el.classList.add('is-active');"
+            "el.setAttribute('aria-current','page');}"
+            "else{el.classList.remove('is-active');"
+            "el.removeAttribute('aria-current');}"
+            "});})();"
+            % (json.dumps(list(self._CFA_STATE_TABS.values())), json.dumps(active))
+        )
 
     # Available links
     ######################################################################
