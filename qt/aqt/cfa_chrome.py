@@ -17,6 +17,10 @@ plain Anki:
   chips, a navy "Show Answer" primary pill, a quiet caution border on "Again",
   and a filled-navy recommended (default) answer — so the most-used study
   surface no longer shows stock-Anki native buttons.
+* the note editor (``Editor`` webview — Add Cards / Edit / the Browse pane):
+  CFA page tint + quiet CFA field labels + a warm-accent focus ring, so the
+  surface that hosts the flagship "Tab to complete the back" AI feature reads
+  as a CFA screen rather than stock Anki.
 
 Palette/type come from :data:`aqt.cfa_style.TOKENS` (parity-locked to the web
 ``_tokens.scss``), so the chrome matches the SvelteKit pages exactly. Everything
@@ -270,6 +274,49 @@ def _reviewer_bottom_css() -> str:
 </style>"""
 
 
+def _editor_css() -> str:
+    t = _t()
+    # The note editor (Add Cards / Edit Current / the Browse editor pane) is the
+    # surface that hosts the flagship "Tab to complete the back" AI feature — yet
+    # it shipped as pure stock Anki: field cards on a bare `--canvas`, plain sans
+    # field labels, and a stock-blue focus ring. Retone it to the CFA design
+    # system so the editor reads as a purpose-built CFA screen:
+    #   * the editor sits on the calm CFA page tint (white field cards on top),
+    #   * field labels become quiet CFA section labels (navy-muted, tracked caps),
+    #   * field cards get a hairline CFA border,
+    #   * a focused field glows the warm CFA accent instead of stock blue.
+    # Presentation-only, and it leaves the rich-text content, toolbar icons and
+    # the tab-fill affordance (which already uses the accent) untouched.
+    return f"""
+<style id="cfa-chrome-editor">
+  html, body {{
+    background: {t["primary_soft"]} !important;
+    font-family: {t["font"]};
+    color: {t["ink"]};
+  }}
+  /* Field labels read as quiet CFA section labels, not plain sans text. */
+  .label-name {{
+    font-family: {t["font"]};
+    color: {t["muted"]} !important;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    font-size: {t["fs_meta"]}px;
+  }}
+  /* Field cards keep a white face (editing legibility) with a hairline CFA
+     border instead of the stock grey. */
+  .editor-field {{
+    border-color: {t["line"]} !important;
+  }}
+  /* A focused field glows the warm CFA accent (was the stock-blue
+     `--border-focus` ring), matching the accent used by every other CFA
+     control and the tab-fill affordance. */
+  .editor-field:focus-within {{
+    outline-color: {t["accent"]} !important;
+  }}
+</style>"""
+
+
 def _deckbrowser_banner() -> str:
     return (
         '<div class="cfa-deck-banner">'
@@ -305,6 +352,8 @@ def on_webview_will_set_content(web_content: Any, context: object | None) -> Non
         web_content.body = _overview_eyebrow() + web_content.body
     elif name == "ReviewerBottomBar":
         web_content.head += _reviewer_bottom_css()
+    elif name == "Editor":
+        web_content.head += _editor_css()
 
 
 def on_deck_browser_will_render_content(deck_browser: Any, content: Any) -> None:

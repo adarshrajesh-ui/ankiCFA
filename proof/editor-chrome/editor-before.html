@@ -1,0 +1,31 @@
+<!doctype html><html><head><meta charset=utf-8><title>Editor — stock Anki (before)</title><style>
+  :root {
+    --canvas: #ffffff;
+    --canvas-elevated: #f7f8f9;
+    --fg: #2a2a2a;
+    --border: #d7d7d7;
+    --border-focus: #4899e8;   /* stock blue focus ring */
+    --border-radius: 5px;
+  }
+  html, body { background: var(--canvas-elevated); font-family: -apple-system, "Segoe UI", Roboto, sans-serif; color: var(--fg); margin: 0; }
+
+  .field-container { background: var(--canvas); border-radius: var(--border-radius); overflow:hidden; }
+  .label-container { padding: 0 3px 4px; }
+  .label-name { font-size: 13px; }
+  .editor-field { border: 1px solid var(--border); border-radius: var(--border-radius); margin:1px; padding:12px 14px; box-shadow:0 1px 2px rgba(0,0,0,.06); background:var(--canvas); }
+  .editor-field.focus { outline: 2px solid var(--border-focus); outline-offset:-1px; }
+  .content { font-size:15px; line-height:1.5; }
+  .hint { color:#8a8f96; }
+</style></head><body>
+  <div class="fields" style="padding:22px 26px; max-width:560px;">
+    <div class="field-container">
+      <div class="label-container"><span class="label-name">Front</span></div>
+      <div class="editor-field"><div class="content">What is the CAPM expected return formula?</div></div>
+    </div>
+    <div style="height:16px"></div>
+    <div class="field-container">
+      <div class="label-container"><span class="label-name">Back</span></div>
+      <div class="editor-field focus"><div class="content hint">&#10022; Press <b>Tab</b> to generate this with AI</div></div>
+    </div>
+  </div>
+</body></html>

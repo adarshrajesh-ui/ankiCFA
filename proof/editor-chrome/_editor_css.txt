@@ -1,0 +1,28 @@
+
+<style id="cfa-chrome-editor">
+  html, body {
+    background: #F3F6F8 !important;
+    font-family: "IBM Plex Sans", -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: #122B46;
+  }
+  /* Field labels read as quiet CFA section labels, not plain sans text. */
+  .label-name {
+    font-family: "IBM Plex Sans", -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: #4D5C6D !important;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    font-size: 12px;
+  }
+  /* Field cards keep a white face (editing legibility) with a hairline CFA
+     border instead of the stock grey. */
+  .editor-field {
+    border-color: #E7E9EC !important;
+  }
+  /* A focused field glows the warm CFA accent (was the stock-blue
+     `--border-focus` ring), matching the accent used by every other CFA
+     control and the tab-fill affordance. */
+  .editor-field:focus-within {
+    outline-color: #DA5C01 !important;
+  }
+</style>

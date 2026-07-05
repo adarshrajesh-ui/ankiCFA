@@ -935,3 +935,37 @@ to carry the `CFA Knowledge` note type (mobile parity). **After evidence**
 chrome-devtools-axi over the note type's REAL compiled CSS from a real built
 card): a warm accent eyebrow, a serif-navy prompt, a calm rule, a navy answer,
 and a muted source line — one cohesive CFA card face.
+
+---
+
+## Pass 4 — D-P4-13: the note editor (host of the flagship tab-fill AI feature) was stock Anki
+
+**Surface:** the desktop **note editor** webview — Add Cards, Edit Current, and
+the Browse editor pane (all render via `Editor.setupWeb` → `stdHtml(context=self)`,
+so the context class name is `Editor`).
+
+**How it was found:** auditing `cfa_chrome.on_webview_will_set_content`, the CFA
+chrome re-skins `TopToolbar` / `DeckBrowser` / `Overview` / `ReviewerBottomBar`
+but had **no `Editor` branch** — so the editor rendered as pure stock Anki. This
+is the surface that hosts the flagship **"Tab to complete the back" AI feature**
+(`cfa_tab_fill.py`): a reviewer opening Add Cards to try the headline feature met
+a plain-Anki screen (bare `--canvas`, lowercase sans field labels, a stock-blue
+focus ring), directly contradicting "no visibly un-themed stock-Anki screens
+remain" on a feature-critical surface.
+
+| # | Severity | Element | Issue | Fix |
+|---|----------|---------|-------|-----|
+| D-P4-13 | MAJOR (design-system consistency / product feel — flagship-AI-feature surface) | The note editor webview (`Editor` context) | The editor shipped 100% stock Anki: field cards on a bare `--canvas`, plain-sans lowercase field labels ("Front"/"Back"), a stock-**blue** `--border-focus` ring, and grey field borders — zero CFA identity on the screen that hosts the tab-to-fill AI feature. | **FIXED (iter 36)** — added an `Editor` branch + `_editor_css()` to `cfa_chrome`: the editor sits on the calm CFA **page tint** (`--primary-soft #F3F6F8`, white field cards on top for editing legibility); field labels become quiet **CFA section labels** (navy-muted `#4D5C6D`, 700-weight, tracked uppercase, `fs_meta`); field cards get a **hairline CFA border** (`--line`); and a focused field glows the **warm CFA accent** (`#DA5C01`) instead of the stock-blue ring — matching the accent the tab-fill affordance already uses. Additive via the existing `webview_will_set_content` gui_hook; the editor DOM/body, rich-text content, toolbar icons and tab-fill wiring are all untouched. |
+
+**Verification:** `just cfa-chrome-test` / `just cfa-desktop-shell-test` — 2 new
+tests (`test_editor_gets_cfa_skin`, `test_editor_retones_labels_and_focus_to_cfa`,
+13 in `test_cfa_chrome.py`): the `Editor` context gets the `cfa-chrome-editor`
+skin with the body left intact, and the CSS retones `.label-name` to tracked
+CFA caps, `.editor-field` to the hairline `--line` border and the
+`:focus-within` ring to the CFA accent, on the `--primary-soft` page tint.
+**Before/after evidence** (`proof/editor-chrome/editor-{before,after}.{html,png}`,
+`tools/cfa/render_editor_chrome.py` — the shipped `_editor_css()` overlaid on a
+faithful editor-DOM reconstruction over the real stock editor CSS variables):
+BEFORE plain lowercase sans labels, a stock-blue focus ring and black text on a
+grey canvas; AFTER tracked navy-muted labels, navy text, hairline CFA borders and
+a warm-accent focus ring on the CFA page tint — one cohesive CFA editor.

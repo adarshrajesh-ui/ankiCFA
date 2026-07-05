@@ -34,6 +34,10 @@ class ReviewerBottomBar:
     pass
 
 
+class Editor:
+    pass
+
+
 def test_toolbar_gets_cfa_skin() -> None:
     wc = SimpleNamespace(head="", body="<div class='header'></div>")
     cfa_chrome.on_webview_will_set_content(wc, TopToolbar())
@@ -126,6 +130,32 @@ def test_reviewer_bottom_primary_and_caution_cues() -> None:
     # rating tiers other than Again stay neutral — no traffic-light data-ease 2/3.
     assert 'data-ease="2"' not in css
     assert 'data-ease="3"' not in css
+
+
+def test_editor_gets_cfa_skin() -> None:
+    # The note editor (Add Cards / Edit / Browse pane) — home of the flagship
+    # tab-fill AI feature — shipped as pure stock Anki; the CFA skin must retone
+    # it without touching the editor body/DOM.
+    wc = SimpleNamespace(head="", body="<div class='fields'></div>")
+    cfa_chrome.on_webview_will_set_content(wc, Editor())
+    assert "cfa-chrome-editor" in wc.head
+    # body left intact — the editor DOM is Anki's; only the skin is injected.
+    assert wc.body == "<div class='fields'></div>"
+
+
+def test_editor_retones_labels_and_focus_to_cfa() -> None:
+    # Field labels become quiet CFA section labels and a focused field glows the
+    # CFA accent instead of the stock-blue --border-focus ring.
+    css = cfa_chrome._editor_css()
+    accent = cfa_style.TOKENS["accent"]
+    line = cfa_style.TOKENS["line"]
+    assert ".label-name" in css
+    assert "text-transform: uppercase;" in css
+    assert ".editor-field:focus-within" in css
+    assert f"outline-color: {accent} !important;" in css
+    assert f"border-color: {line} !important;" in css
+    # page tint, not a bare canvas
+    assert cfa_style.TOKENS["primary_soft"] in css
 
 
 def test_other_contexts_untouched() -> None:
