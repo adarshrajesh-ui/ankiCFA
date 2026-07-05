@@ -12,7 +12,9 @@ desktop dialog shows (qt/aqt/cfa.py):
     hairline/thin-spine card (never a saturated ring), with the accuracy + 95%
     CI lead and the standing "not validated" caveat (or the abstain state),
   * three VALUE-FIRST honest-score StatCards (big serif range on top, muted
-    label below, midpoint sub) — abstain stays warn,
+    label below, midpoint sub) — while abstaining they stay QUIET (muted-grey
+    "Awaiting reviews", the give-up reason in the sub); the "not enough data"
+    verdict is stated ONCE in the hero rather than shouted across the cards,
   * the per-topic recall DataTable (uppercase muted headers, right-aligned
     numerics, warn recall when low/uncovered, "no data" for null ranges),
   * the coverage caption and the explanatory footer in quiet muted text.

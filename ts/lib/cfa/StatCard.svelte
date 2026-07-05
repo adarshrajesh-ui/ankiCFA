@@ -39,6 +39,7 @@ variant separated by whitespace only (like the real stats band).
         class:tone-pass={tone === "pass"}
         class:tone-fail={tone === "fail"}
         class:tone-warn={tone === "warn"}
+        class:tone-muted={tone === "muted"}
         class:tone-neutral={tone === "neutral"}
     >
         <slot name="value">{value}</slot>
@@ -88,6 +89,14 @@ variant separated by whitespace only (like the real stats band).
             }
             &.tone-warn {
                 color: cfa.$cfa-warn;
+            }
+            // Quiet "awaiting data" absence — calm faint grey AND down-sized
+            // (subtitle, not the 40px display) so the empty state never
+            // out-shouts the real numbers, the countdown, or the CTAs. Reserve
+            // warn-orange for genuine warnings, never for missing data.
+            &.tone-muted {
+                color: cfa.$cfa-faint;
+                font-size: cfa.$cfa-fs-subtitle;
             }
         }
 

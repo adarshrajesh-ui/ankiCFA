@@ -64,10 +64,13 @@ export interface Countdown {
 /** The exam countdown banner text/tone from the Home payload. */
 export function examCountdown(p: CfaHomePayload): Countdown {
     if (p.daysToExam === null || p.examDate === null) {
+        // A missing exam date is a calm prompt, not a warning: keep it neutral
+        // navy so the loud warn-orange is reserved for a genuinely near deadline
+        // and the warm primary CTA remains the single accent that leads the eye.
         return {
             headline: "Set your exam date",
             sub: "Schedule it from Exam Readiness or Peak on Exam Day.",
-            tone: "warn",
+            tone: "neutral",
             unset: true,
         };
     }

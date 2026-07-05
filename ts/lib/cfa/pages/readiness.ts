@@ -27,14 +27,23 @@ export function rangeText(low: number | null, high: number | null): string {
     return `${pct(low)}–${pct(high)}`;
 }
 
-/** The big serif value for an honest-score StatCard (range, or abstain). */
+/**
+ * The big serif value for an honest-score StatCard: the range when scored, or a
+ * SHORT, calm placeholder while abstaining. The full "not enough data" verdict
+ * is stated once in the hero — the cards stay quiet ("Awaiting reviews") with the
+ * give-up reason in the sub-line, so the empty state never shouts three times.
+ */
 export function bandValue(band: ScoreBand): string {
-    return band.abstain ? "Not enough data" : rangeText(band.rangeLow, band.rangeHigh);
+    return band.abstain ? "Awaiting reviews" : rangeText(band.rangeLow, band.rangeHigh);
 }
 
-/** StatCard value tone — warn keeps the abstain state semantic. */
+/**
+ * StatCard value tone. Abstain is `muted` (quiet faint grey) — an honest ABSENCE
+ * of data, deliberately NOT `warn`-orange, so it does not read as a warning nor
+ * collide with the warm primary-CTA hue (color-semantic separation).
+ */
 export function bandTone(band: ScoreBand): CfaTone {
-    return band.abstain ? "warn" : "neutral";
+    return band.abstain ? "muted" : "neutral";
 }
 
 /** The faint sub-line under a StatCard: the give-up reason, or the midpoint. */

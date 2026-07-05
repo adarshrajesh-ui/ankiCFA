@@ -132,8 +132,12 @@ export interface DeadlinePayload {
 // Component-level helper types.
 // -----------------------------------------------------------------------------
 
-/** Semantic tone shared across components (never washes out the pass/fail triad). */
-export type CfaTone = "neutral" | "pass" | "fail" | "warn";
+/**
+ * Semantic tone shared across components (never washes out the pass/fail triad).
+ * `muted` is the QUIET neutral used for honest "no data yet" states — it must
+ * read as calm absence, never as a warning (reserve `warn` for real cautions).
+ */
+export type CfaTone = "neutral" | "pass" | "fail" | "warn" | "muted";
 
 /** A column definition for the shared `DataTable`. */
 export interface CfaColumn {

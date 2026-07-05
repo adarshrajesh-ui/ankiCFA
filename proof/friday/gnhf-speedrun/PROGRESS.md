@@ -49,12 +49,20 @@ mobile screen/state) and `proof/friday/UI-CRITIQUE-LOG.md` created.
   pass: D2-3 (caption "as of —" placeholder), D2-4 (deterministic topic sort);
   drive-by un-nested a pre-existing `no-nested-ternary` eslint failure in
   `home.ts` so `check:eslint`/svelte/tsc are green.
+- **ALL 5 Pass-1 desktop MAJORs FIXED (iter 26)** — D1-1/D1-2/D1-3/D2-1/D2-2:
+  the abstain state no longer shouts in warn-orange. Added a `muted` `CfaTone`;
+  `bandValue`→ quiet "Awaiting reviews" + `bandTone`→ `muted` (down-sized 22px
+  faint grey, reason in sub); the "Not enough data" verdict is said **once** in
+  the Readiness hero; the unset-exam Home countdown is now neutral navy so the
+  peach primary CTA is the single warm accent. Re-captured `desktop-ui/pass-1/`
+  (before/after vs `pass-1-before/`); `test-e2e` **6/6 green**,
+  `check:eslint`/svelte/tsc green.
 - **Honesty:** GPT-4o vision CRITIC is UNAVAILABLE (no `OPENAI_API_KEY`/`.env`);
   critique is a labelled structured senior-designer heuristic pass, not a
   fabricated model transcript.
-- **Still TODO this pass:** desktop MAJORs D1-1/D1-2/D1-3/D2-1/D2-2; Qt-chrome
-  surfaces (D5–D8, D10–D12); populated (non-abstain) render; then Passes 2–3;
-  and ALL mobile passes.
+- **Still TODO this pass:** desktop MINORs (D1-4/5/6, D2-5); Qt-chrome surfaces
+  (D5–D8, D10–D12); populated (non-abstain) render; then Passes 2–3; and ALL
+  mobile passes. (Desktop Pass-1 MAJORs all resolved.)
 
 Named must-fix: desktop Readiness renders with data (**functional gate DONE**);
 Connect/Logout redesigned; native-CFA feel everywhere; AnkiDroid CFA UI full
