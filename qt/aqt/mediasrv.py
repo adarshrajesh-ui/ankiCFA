@@ -757,11 +757,23 @@ def _cfa_score_band(name: str, meaning: str, score: Any) -> dict[str, Any]:
 def _cfa_exam_readiness_payload(col: Collection, deck_id: int) -> dict[str, Any]:
     from anki import cfa
 
-    bayes = cfa.bayesian_readiness(col, deck_id=deck_id)
-    score = cfa.memory_score(col, deck_id=deck_id)
-    perf = cfa.performance_score(col, deck_id=deck_id)
-    ready = cfa.readiness_score(col, deck_id=deck_id)
-    deck_name = col.decks.name(DeckId(deck_id))
+    # ``deck_id == 0`` means score the WHOLE collection (every deck) rather than a
+    # single deck subtree. The CFA Home / Concept Map / native Readiness screens
+    # pass 0 so the special "CFA::Ethics Pairs" deck — which is a SIBLING of the
+    # "CFA Level II" deck, not a child — and any other studied CFA content all
+    # impact the three scores, the Bayesian verdict and the concept-map fills.
+    # This matches the AnkiDroid client, which already calls
+    # ``computeCfaScores(wholeCollection=true)``: the desktop was the only surface
+    # still scoping the headline scores to the "CFA Level II" subtree, so the same
+    # reviews produced different scores on desktop vs phone and ethics-pair reviews
+    # never reached the desktop readiness report or concept map. A real (non-zero)
+    # deck id still scopes to that deck + children (per-deck readiness).
+    scope = deck_id or None
+    bayes = cfa.bayesian_readiness(col, deck_id=scope)
+    score = cfa.memory_score(col, deck_id=scope)
+    perf = cfa.performance_score(col, deck_id=scope)
+    ready = cfa.readiness_score(col, deck_id=scope)
+    deck_name = _cfa_scope_name(col, deck_id)
 
     # Hero: the Bayesian pass/fail call, but ABSTAIN when either Memory or
     # Performance gives up — identical gate to the desktop dialog
@@ -915,13 +927,15 @@ def set_cfa_exam_date() -> bytes:
 _CFA_HOME_DECK_NAME = "CFA Level II"
 
 
-def _cfa_home_deck_id(col: Collection) -> int:
-    """Resolve the deck the Home snapshot scores: the CFA Level II deck if it
-    exists, otherwise the currently selected deck (always valid)."""
+def _cfa_scope_name(col: Collection, deck_id: int) -> str:
+    """Heading for the readiness / home scope. A real deck id -> that deck's
+    name; ``0`` (whole-collection scoring) -> the "CFA Level II" deck name if it
+    exists, else the literal, so the overall exam-readiness view is labelled with
+    the exam rather than whichever single deck happens to be selected."""
+    if deck_id:
+        return col.decks.name(DeckId(deck_id))
     did = col.decks.id_for_name(_CFA_HOME_DECK_NAME)
-    if did is None:
-        did = col.decks.get_current_id()
-    return int(did)
+    return col.decks.name(DeckId(did)) if did is not None else _CFA_HOME_DECK_NAME
 
 
 def _cfa_home_payload(col: Collection) -> dict[str, Any]:
@@ -930,8 +944,9 @@ def _cfa_home_payload(col: Collection) -> dict[str, Any]:
     countdown and the master AI-toggle state for the dashboard chrome."""
     from anki import cfa
 
-    deck_id = _cfa_home_deck_id(col)
-    payload = _cfa_exam_readiness_payload(col, deck_id)
+    # Whole-collection scoring (deck_id=0) so ethics-pair reviews and every other
+    # CFA deck impact the Home scores + concept map, matching the phone.
+    payload = _cfa_exam_readiness_payload(col, 0)
 
     cfg = cfa.get_exam_config(col) or {}
     payload["examDate"] = cfg.get("exam_date")

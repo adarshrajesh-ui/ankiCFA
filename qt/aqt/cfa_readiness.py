@@ -5,7 +5,9 @@
 
 Renders the SvelteKit ``cfa-readiness/{deck_id}`` page (the Bayesian pass/fail
 hero, the three give-up-gated honest-score bands, the per-topic recall table)
-into the MAIN webview, scoped to the current deck. It is built from the SAME
+into the MAIN webview, scored over the WHOLE collection (deck_id=0) so it matches
+the CFA Home dashboard and the phone and includes every CFA deck. It is built
+from the SAME
 ``anki.cfa`` data the old modal ``ExamReadinessDialog`` embedded, so the report
 is byte-for-byte the same — only its container changed.
 
@@ -41,8 +43,11 @@ class CfaReadiness:
         self.web.set_bridge_command(self._link_handler, self)
         # redraw the (CFA-branded) top bar, matching CfaHome/CfaConceptMap
         self.mw.toolbar.redraw()
-        deck_id = self.mw.col.decks.get_current_id()
-        self.web.load_sveltekit_page(f"cfa-readiness/{int(deck_id)}")
+        # deck_id 0 => score the WHOLE collection, so this overall readiness
+        # report matches the CFA Home dashboard and the phone (which already
+        # score whole-collection) and includes the CFA::Ethics Pairs deck. It no
+        # longer silently reflects whichever single deck happened to be selected.
+        self.web.load_sveltekit_page("cfa-readiness/0")
         self.web.setFocus()
 
     # Bridge (pycmd / bridgeCommand) handlers

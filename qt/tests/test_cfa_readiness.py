@@ -53,7 +53,11 @@ def test_toolbar_readiness_tab_moves_to_native_state() -> None:
     assert 'moveToState("cfaReadiness")' in body
 
 
-def test_controller_loads_the_readiness_page_for_current_deck() -> None:
+def test_controller_loads_the_whole_collection_readiness_page() -> None:
+    # The overall readiness report is scored over the WHOLE collection (deck_id
+    # 0), matching the CFA Home dashboard and the phone (both whole-collection),
+    # so ethics-pair reviews and every CFA deck reach it. It must NOT scope to
+    # whichever single deck happens to be current (which excluded ethics pairs).
     loaded: list[str] = []
     web = SimpleNamespace(
         set_bridge_command=lambda *a: None,
@@ -67,7 +71,7 @@ def test_controller_loads_the_readiness_page_for_current_deck() -> None:
     )
     ctrl = cfa_readiness.CfaReadiness(mw)  # type: ignore[arg-type]
     ctrl.show()
-    assert loaded == ["cfa-readiness/42"]
+    assert loaded == ["cfa-readiness/0"]
 
 
 def test_link_handler_delegates_to_cfa_entry_points(monkeypatch) -> None:

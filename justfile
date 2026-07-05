@@ -108,7 +108,7 @@ cfa-menu-test:
 # Friday desktop-shell: native-CFA desktop shell tests (branding, home landing, toolbar, AI toggle)
 cfa-desktop-shell-test:
     {{ ninja }} pylib qt
-    QT_QPA_PLATFORM=offscreen PYTHONPATH="out/pylib:pylib:qt:out/qt" {{ py }} -m pytest qt/tests/test_cfa_branding.py qt/tests/test_cfa_home.py qt/tests/test_cfa_menu.py qt/tests/test_cfa_toolbar.py qt/tests/test_cfa_chrome.py qt/tests/test_cfa_ai_settings.py qt/tests/test_cfa_readiness.py qt/tests/test_cfa_active_tab.py -q
+    QT_QPA_PLATFORM=offscreen PYTHONPATH="out/pylib:pylib:qt:out/qt" {{ py }} -m pytest qt/tests/test_cfa_branding.py qt/tests/test_cfa_home.py qt/tests/test_cfa_menu.py qt/tests/test_cfa_toolbar.py qt/tests/test_cfa_chrome.py qt/tests/test_cfa_ai_settings.py qt/tests/test_cfa_readiness.py qt/tests/test_cfa_ethics_scoring_scope.py qt/tests/test_cfa_active_tab.py -q
 
 # F0b: visible desktop fixes — on-demand ethics preload, no dead-ends, exam-date picker, new cards in the priority queue
 cfa-f0b-test:
