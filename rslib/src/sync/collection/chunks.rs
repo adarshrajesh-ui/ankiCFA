@@ -14,8 +14,8 @@ use crate::notes::Note;
 use crate::prelude::*;
 use crate::revlog::RevlogEntry;
 use crate::serde::deserialize_int_from_number;
-use crate::storage::card::data::card_data_string;
 use crate::storage::card::data::CardData;
+use crate::storage::card::data::card_data_string;
 use crate::sync::collection::normal::ClientSyncState;
 use crate::sync::collection::normal::NormalSyncer;
 use crate::sync::collection::protocol::EmptyInput;
@@ -181,7 +181,11 @@ impl Collection {
 
     fn add_or_update_card_if_newer(&self, entry: CardEntry, pending_usn: Usn) -> Result<()> {
         let proceed = if let Some(existing_card) = self.storage.get_card(entry.id)? {
-            !existing_card.usn.is_pending_sync(pending_usn) || existing_card.mtime < entry.mtime
+            // If the same card was reviewed offline on both sides within the
+            // same second, both card rows can have identical mtimes. Accept the
+            // incoming row on ties so normal sync converges instead of each side
+            // keeping its own scheduler state. Revlog rows are merged separately.
+            !existing_card.usn.is_pending_sync(pending_usn) || existing_card.mtime <= entry.mtime
         } else {
             true
         };

@@ -7,22 +7,25 @@ use std::future::Future;
 use std::sync::LazyLock;
 
 use axum::http::StatusCode;
+use fsrs::FSRS5_DEFAULT_DECAY;
 use reqwest::Client;
 use reqwest::Url;
 use serde_json::json;
-use tempfile::tempdir;
 use tempfile::TempDir;
+use tempfile::tempdir;
 use tokio::sync::Mutex;
 use tokio::sync::MutexGuard;
 use tracing::Instrument;
 use tracing::Span;
-use wiremock::matchers::method;
-use wiremock::matchers::path;
 use wiremock::Mock;
 use wiremock::MockServer;
 use wiremock::ResponseTemplate;
+use wiremock::matchers::method;
+use wiremock::matchers::path;
 
 use crate::card::CardQueue;
+use crate::card::CardType;
+use crate::card::FsrsMemoryState;
 use crate::collection::CollectionBuilder;
 use crate::deckconfig::DeckConfig;
 use crate::decks::DeckKind;
@@ -32,6 +35,7 @@ use crate::log::set_global_logger;
 use crate::notetype::all_stock_notetypes;
 use crate::prelude::*;
 use crate::revlog::RevlogEntry;
+use crate::revlog::RevlogReviewKind;
 use crate::search::SortMode;
 use crate::sync::collection::graves::ApplyGravesRequest;
 use crate::sync::collection::meta::MetaRequest;
@@ -41,15 +45,16 @@ use crate::sync::collection::normal::SyncOutput;
 use crate::sync::collection::protocol::EmptyInput;
 use crate::sync::collection::protocol::SyncProtocol;
 use crate::sync::collection::start::StartRequest;
-use crate::sync::collection::upload::UploadResponse;
 use crate::sync::collection::upload::CORRUPT_MESSAGE;
+use crate::sync::collection::upload::UploadResponse;
 use crate::sync::http_client::HttpSyncClient;
-use crate::sync::http_server::default_ip_header;
 use crate::sync::http_server::SimpleServer;
 use crate::sync::http_server::SyncServerConfig;
+use crate::sync::http_server::default_ip_header;
 use crate::sync::login::HostKeyRequest;
 use crate::sync::login::SyncAuth;
 use crate::sync::request::IntoSyncRequest;
+use anki_proto::scheduler as scheduler_pb;
 
 struct TestAuth {
     username: String,
@@ -281,6 +286,69 @@ async fn sync_roundtrip() -> Result<()> {
         let ctx = SyncTestContext::new(client);
         upload_download(&ctx).await?;
         regular_sync(&ctx).await?;
+        Ok(())
+    })
+    .await
+}
+
+#[tokio::test]
+async fn cfa_phone_desktop_offline_reviews_roundtrip() -> Result<()> {
+    with_active_server(|client| async move {
+        let ctx = SyncTestContext::new(client);
+        let mut desktop = ctx.col1();
+        let cid = add_cfa_ethics_review_card(&mut desktop)?;
+
+        let out = ctx.normal_sync(&mut desktop).await;
+        assert!(matches!(
+            out.required,
+            SyncActionRequired::FullSyncRequired { .. }
+        ));
+        ctx.full_upload(desktop).await;
+
+        let mut phone = ctx.col2();
+        let out = ctx.normal_sync(&mut phone).await;
+        assert_eq!(
+            out.required,
+            SyncActionRequired::FullSyncRequired {
+                upload_ok: false,
+                download_ok: true,
+            }
+        );
+        ctx.full_download(phone).await;
+
+        let mut desktop = ctx.col1();
+        let mut phone = ctx.col2();
+        assert!(
+            phone.storage.get_card(cid)?.is_some(),
+            "phone received ethics card"
+        );
+
+        let base_ms = TimestampMillis::now().0 - 60_000;
+        let tied_mtime = TimestampSecs::now().0;
+        record_offline_review(&mut desktop, cid, base_ms, 11, 3)?;
+        record_offline_review(&mut phone, cid, base_ms + 1, 21, 1)?;
+        force_card_mtime(&mut desktop, cid, tied_mtime)?;
+        force_card_mtime(&mut phone, cid, tied_mtime)?;
+
+        // Documented same-card offline merge behavior:
+        // * revlog rows are append-only and both device reviews survive exactly once;
+        // * the scheduler/card row uses newer mtime, with exact mtime ties resolved
+        //   toward the side already accepted by the server, so all clients converge.
+        let out = ctx.normal_sync(&mut desktop).await;
+        assert_eq!(out.required, SyncActionRequired::NoChanges);
+        let out = ctx.normal_sync(&mut phone).await;
+        assert_eq!(out.required, SyncActionRequired::NoChanges);
+        assert_card_interval(&mut phone, cid, 11)?;
+        assert_revlog_ids(&phone, cid, &[base_ms, base_ms + 1])?;
+
+        let out = ctx.normal_sync(&mut desktop).await;
+        assert_eq!(out.required, SyncActionRequired::NoChanges);
+        assert_card_interval(&mut desktop, cid, 11)?;
+        assert_revlog_ids(&desktop, cid, &[base_ms, base_ms + 1])?;
+
+        assert_synced_cfa_scores_include_ethics_review(&mut desktop)?;
+        assert_synced_cfa_scores_include_ethics_review(&mut phone)?;
+
         Ok(())
     })
     .await
@@ -540,6 +608,131 @@ fn col1_setup(col: &mut Collection) {
     let mut note = nt.new_note();
     note.set_field(0, "1").unwrap();
     col.add_note(&mut note, DeckId(1)).unwrap();
+}
+
+fn add_cfa_ethics_review_card(col: &mut Collection) -> Result<CardId> {
+    let mut deck = col.get_or_create_normal_deck("CFA::Ethics")?;
+    col.add_or_update_deck(&mut deck)?;
+
+    let nt = col.get_notetype_by_name("Basic")?.unwrap();
+    let mut note = nt.new_note();
+    note.set_field(0, "ethics prompt")?;
+    note.set_field(1, "ethics answer")?;
+    note.tags.push("los::ethics::sync".into());
+    col.add_note(&mut note, deck.id)?;
+
+    let cid = col.search_cards(note.id, SortMode::NoOrder)?[0];
+    col.get_and_update_card(cid, |card| {
+        card.queue = CardQueue::Review;
+        card.ctype = CardType::Review;
+        card.due = 0;
+        card.interval = 30;
+        card.ease_factor = 2500;
+        card.decay = Some(FSRS5_DEFAULT_DECAY);
+        card.last_review_time = Some(TimestampSecs::now().adding_secs(-86_400));
+        card.memory_state = Some(FsrsMemoryState {
+            stability: 100.0,
+            difficulty: 5.0,
+        });
+        Ok(())
+    })?;
+    Ok(cid)
+}
+
+fn record_offline_review(
+    col: &mut Collection,
+    cid: CardId,
+    review_id_ms: i64,
+    interval: u32,
+    ease: u8,
+) -> Result<()> {
+    let usn = col.usn()?;
+    let original = col.storage.get_card(cid)?.or_not_found(cid)?;
+    let mut card = original.clone();
+    card.queue = CardQueue::Review;
+    card.ctype = CardType::Review;
+    card.reps += 1;
+    card.interval = interval;
+    card.due = col.timing_today()?.days_elapsed as i32 + interval as i32;
+    card.ease_factor = 2500;
+    card.decay = Some(FSRS5_DEFAULT_DECAY);
+    card.last_review_time = Some(RevlogId(review_id_ms).as_secs());
+    card.memory_state = Some(FsrsMemoryState {
+        stability: interval as f32 + 50.0,
+        difficulty: 5.0,
+    });
+    col.update_card_inner(&mut card, original, usn)?;
+    col.storage.add_revlog_entry(
+        &RevlogEntry {
+            id: RevlogId(review_id_ms),
+            cid,
+            usn,
+            button_chosen: ease,
+            interval: interval as i32,
+            last_interval: 30,
+            ease_factor: u32::from(card.ease_factor),
+            taken_millis: 1000,
+            review_kind: RevlogReviewKind::Review,
+        },
+        false,
+    )?;
+    Ok(())
+}
+
+fn force_card_mtime(col: &mut Collection, cid: CardId, mtime: i64) -> Result<()> {
+    col.storage
+        .db
+        .execute("update cards set mod = ? where id = ?", (mtime, cid.0))?;
+    Ok(())
+}
+
+fn assert_card_interval(col: &mut Collection, cid: CardId, interval: u32) -> Result<()> {
+    let card = col.storage.get_card(cid)?.or_not_found(cid)?;
+    assert_eq!(card.interval, interval);
+    Ok(())
+}
+
+fn assert_revlog_ids(col: &Collection, cid: CardId, expected: &[i64]) -> Result<()> {
+    let mut ids: Vec<i64> = col
+        .storage
+        .get_revlog_entries_for_card(cid)?
+        .into_iter()
+        .map(|entry| entry.id.0)
+        .collect();
+    ids.sort();
+    assert_eq!(ids, expected);
+    Ok(())
+}
+
+fn assert_synced_cfa_scores_include_ethics_review(col: &mut Collection) -> Result<()> {
+    let scores = col.compute_cfa_scores(scheduler_pb::ComputeCfaScoresRequest {
+        deck_id: 0,
+        whole_collection: true,
+        now: 0,
+    })?;
+    let memory = scores.memory.unwrap();
+    let ethics_memory = memory
+        .topics
+        .iter()
+        .find(|topic| topic.topic == "los::ethics")
+        .unwrap();
+    assert_eq!(
+        ethics_memory.graded_reviews, 1,
+        "same-card same-day offline reviews count once for CFA memory"
+    );
+
+    let bayesian = scores.bayesian.unwrap();
+    let ethics_bayesian = bayesian
+        .topics
+        .iter()
+        .find(|topic| topic.topic == "los::ethics")
+        .unwrap();
+    assert!(
+        ethics_bayesian.covered,
+        "ethics feeds concept-map topic data"
+    );
+    assert_eq!(bayesian.first_exposures, 1);
+    Ok(())
 }
 
 async fn upload_download(ctx: &SyncTestContext) -> Result<()> {
