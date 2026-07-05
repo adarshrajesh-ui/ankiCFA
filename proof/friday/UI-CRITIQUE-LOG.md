@@ -217,5 +217,38 @@ app now reads as a cohesive navy CFA product end-to-end, not "AnkiDroid with two
 bolt-on CFA screens." Remaining mobile items are MINORs (M2-2 drawer icon, M4-2
 config density) + the escalating Pass-2/Pass-3 critiques.
 
-## Pass 2 (harsher) — TODO (both apps)
+## Pass 2 — DESKTOP (harsher): Qt-chrome native surfaces
+
+Pass 1 covered the CFA *web* pages (Home, Readiness). Pass 2 turns the harsher
+lens on the **native Qt chrome** — the top toolbar and its account controls —
+starting with the objective's **named must-fix: "the clunky Connect and Logout
+controls."**
+
+Captures (faithful standalone render of the real top-bar markup + the real
+`cfa_chrome._toolbar_css()` + base `toolbar.css`, screenshotted with
+`chrome-devtools-axi`; the Qt webview renders this exact HTML/CSS):
+- `desktop-ui/pass-2-before/connect-logout.png` (+ `.html`) — the old bar.
+- `desktop-ui/pass-2/connect-logout.png` (+ `.html`) — the redesigned bar,
+  logged-out **and** logged-in states.
+
+### D7 — Connect / Log out controls (the named clunky controls)
+| # | Severity | Element | Issue | Fix |
+|---|----------|---------|-------|-----|
+| D7-1 | MAJOR | top-bar sync cluster | **Three** always-visible sync links sat in a row — `Sync` **+** `Connect` **+** `Log out` — regardless of state. `Connect` showed even when already connected; `Log out` showed even when logged out. Two of the three were dead/no-op in any given state — clunky and confusing (which one applies now?). | **FIXED (iter 31)** — replaced the always-visible Connect+Log out pair with **one context-aware account control** (`Toolbar._create_account_link` → pure `cfa_sync_connect.account_link_spec`): logged-out → `Connect`, logged-in → `Log out` (tooltip names the account). Keys off `pm.sync_auth()`; `connect_cfa_sync`/`logout_of_sync` now `toolbar.draw()` so the control flips immediately. Before/after in `pass-2/`. |
+| D7-2 | MINOR | affordance | The sync-account link was visually identical to the Home/Study/Ethics/Readiness *navigation* links — no signal it manages an account, not a page. | **FIXED (iter 31)** — the single account control renders as a distinct **bordered chip** (`#cfa_account` in `cfa_chrome._toolbar_css`), set apart from the plain nav links, warm-accent border/hover; discoverable without crowding the bar. |
+
+**Verification:** `qt/tests/test_cfa_toolbar.py` extended with 6 tests (spec
+logged-out=Connect / logged-in=Log out naming the account / safe without a name;
+`_create_account_link` flips handler+label with login state; `_centerLinks`
+builds exactly one `_create_account_link()` and the old `"cfa_connect"` /
+`"cfa_logout"` create_link pair is gone). `test_cfa_toolbar` + `test_cfa_menu` +
+`test_cfa_chrome` **25/25 green**; ruff check + format clean. The CFA *menu*
+keeps both explicit entries (a menu enumerates all actions; each self-guards).
+
+### Still-TODO (desktop Pass 2/3)
+- Remaining Qt-chrome surfaces: D3 Deadline dialog, D4 Ethics reviewer, D6 AI
+  Settings dialog, D8 deck browser, D11 window chrome — capture + critique.
+- Populated (real ranges / Bayesian pass-fail call) render of D1/D2.
+
+## Pass 2 (harsher) — MOBILE: TODO
 ## Pass 3 (ruthless, pixel-level) — TODO (both apps)

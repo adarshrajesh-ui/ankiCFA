@@ -30,6 +30,37 @@ CFA_SYNC_USER = os.environ.get("CFA_SYNC_USER", "cfa")
 CFA_SYNC_PASS = os.environ.get("CFA_SYNC_PASS", "cfa-friday")
 
 
+def account_link_spec(logged_in: bool, account: str | None = None) -> dict[str, str]:
+    """The single context-aware sync-account control for the top bar.
+
+    The old top bar showed Sync **and** an always-visible "Connect" **and** an
+    always-visible "Log out" — three sync links in a row, with Connect present
+    even when already connected and Log out present even when logged out. That
+    was the "clunky Connect/Logout" the redesign targets. Now exactly ONE
+    account control renders next to Sync, reflecting the actual login state:
+
+    * logged out → ``Connect`` (invites you to link this desktop), and
+    * logged in  → ``Log out`` (names the account in its tooltip).
+
+    Returned as a plain dict so it is unit-testable without Qt; the toolbar
+    turns it into a single ``create_link`` and wires the matching handler.
+    """
+    if logged_in:
+        who = account or "your sync account"
+        return {
+            "cmd": "cfa_logout",
+            "label": "Log out",
+            "tip": f"Signed in as {who} — click to log out of sync",
+            "id": "cfa_account",
+        }
+    return {
+        "cmd": "cfa_connect",
+        "label": "Connect",
+        "tip": "Connect this desktop to the CFA sync server and sync",
+        "id": "cfa_account",
+    }
+
+
 def connect_cfa_sync(mw: AnkiQt) -> None:
     """Point desktop at the local CFA server, log in, and sync — in one click."""
     from aqt.utils import showWarning, tooltip
@@ -60,6 +91,13 @@ def connect_cfa_sync(mw: AnkiQt) -> None:
 
     mw.pm.set_sync_key(auth.hkey)
     mw.pm.set_sync_username(CFA_SYNC_USER)
+
+    # Flip the top-bar account control from "Connect" to "Log out" right away
+    # (the single context-aware control keys off pm.sync_auth()).
+    try:
+        mw.toolbar.draw()
+    except Exception:
+        pass
 
     # 3. Run the normal GUI sync — it shows the progress UI and, on the very
     #    first sync of a device, the Download-from / Upload-to direction choice.

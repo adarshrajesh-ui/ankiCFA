@@ -37,19 +37,32 @@ def _toolbar_css() -> str:
     return f"""
 <style id="cfa-chrome-toolbar">
   .header {{
-    background: {t['bg']} !important;
-    border-bottom: 1px solid {t['line']};
-    font-family: {t['font']};
+    background: {t["bg"]} !important;
+    border-bottom: 1px solid {t["line"]};
+    font-family: {t["font"]};
   }}
   .hitem {{
-    color: {t['muted']} !important;
+    color: {t["muted"]} !important;
     font-weight: 600;
     letter-spacing: .01em;
     border-radius: 100px;
   }}
   .hitem:hover {{
-    color: {t['accent']} !important;
-    background: {t['accent_soft']};
+    color: {t["accent"]} !important;
+    background: {t["accent_soft"]};
+  }}
+  /* The single context-aware sync-account control (Connect / Log out) reads as
+     a distinct bordered chip, set apart from the plain nav links so account
+     management is discoverable without crowding the bar with extra links. */
+  #cfa_account {{
+    border: 1px solid {t["line"]};
+    color: {t["ink"]} !important;
+    margin-left: 6px;
+  }}
+  #cfa_account:hover {{
+    border-color: {t["accent"]};
+    color: {t["accent"]} !important;
+    background: {t["accent_soft"]};
   }}
 </style>"""
 
@@ -61,13 +74,13 @@ def _deckbrowser_css() -> str:
     return f"""
 <style id="cfa-chrome-deckbrowser">
   html, body {{
-    background: {t['primary_soft']} !important;
-    color: {t['ink']};
-    font-family: {t['font']};
+    background: {t["primary_soft"]} !important;
+    color: {t["ink"]};
+    font-family: {t["font"]};
   }}
-  a {{ color: {t['ink']}; }}
-  a:hover {{ color: {t['accent']}; }}
-  table tr {{ border-color: {t['line']}; }}
+  a {{ color: {t["ink"]}; }}
+  a:hover {{ color: {t["accent"]}; }}
+  table tr {{ border-color: {t["line"]}; }}
   .gears {{ opacity: .55; }}
   .gears:hover {{ opacity: 1; }}
   .cfa-deck-banner {{
@@ -75,28 +88,28 @@ def _deckbrowser_css() -> str:
     margin: 22px auto 8px;
     padding: 0 8px;
     text-align: left;
-    font-family: {t['font']};
+    font-family: {t["font"]};
   }}
   .cfa-deck-banner .eyebrow {{
-    font-size: {t['fs_eyebrow']}px;
+    font-size: {t["fs_eyebrow"]}px;
     font-weight: 700;
     letter-spacing: .12em;
     text-transform: uppercase;
-    color: {t['accent']};
+    color: {t["accent"]};
   }}
   .cfa-deck-banner .title {{
-    font-family: {t['font_heading']};
-    font-size: {t['fs_title']}px;
+    font-family: {t["font_heading"]};
+    font-size: {t["fs_title"]}px;
     font-weight: 600;
-    color: {t['ink']};
+    color: {t["ink"]};
     margin-top: 2px;
   }}
   .cfa-deck-caption {{
     max-width: 820px;
     margin: 10px auto 0;
     padding: 0 8px;
-    font-size: {t['fs_meta']}px;
-    color: {t['faint']};
+    font-size: {t["fs_meta"]}px;
+    color: {t["faint"]};
     text-align: left;
   }}
 </style>"""
@@ -138,5 +151,7 @@ def register() -> None:
     if _registered:
         return
     gui_hooks.webview_will_set_content.append(on_webview_will_set_content)
-    gui_hooks.deck_browser_will_render_content.append(on_deck_browser_will_render_content)
+    gui_hooks.deck_browser_will_render_content.append(
+        on_deck_browser_will_render_content
+    )
     _registered = True

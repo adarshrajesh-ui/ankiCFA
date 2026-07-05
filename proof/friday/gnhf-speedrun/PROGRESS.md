@@ -31,7 +31,7 @@ Legend: TODO / WIP / DONE (evidence path) / BLOCKED (root cause).
 | Pass | Desktop | Mobile | Log |
 |------|---------|--------|-----|
 | 1 (critical) | DONE (CFA web 5 MAJOR + 4 MINOR fixed; Qt chrome → Pass 2) | DONE (all 7 MAJORs fixed) | `UI-CRITIQUE-LOG.md` Pass 1 |
-| 2 (harsher) | TODO | TODO | |
+| 2 (harsher) | WIP (Qt chrome: D7 Connect/Logout — named must-fix — FIXED) | TODO | `UI-CRITIQUE-LOG.md` Pass 2 |
 | 3 (ruthless) | TODO | TODO | |
 
 Phase B kicked off (iter 25). `proof/friday/UI-INVENTORY.md` (every desktop +
@@ -113,6 +113,20 @@ mobile screen/state) and `proof/friday/UI-CRITIQUE-LOG.md` created.
 - **TODO next:** desktop Pass-1 MINORs + Qt-chrome surfaces; then the escalating
   Pass 2 (harsher) and Pass 3 (ruthless) critiques for BOTH apps.
 
+**Pass 2 desktop — started (iter 31): named must-fix "clunky Connect/Logout".**
+- **D7 Connect/Logout FIXED** — the top bar showed **three** always-visible sync
+  links (`Sync` + `Connect` + `Log out`) regardless of state (Connect present
+  when already connected, Log out present when logged out — two dead in any
+  state). Replaced with **one context-aware account control**
+  (`Toolbar._create_account_link` → pure `cfa_sync_connect.account_link_spec`):
+  logged-out → `Connect`, logged-in → `Log out` (tooltip names the account),
+  keyed off `pm.sync_auth()`; `connect_cfa_sync`/`logout_of_sync` now
+  `toolbar.draw()` so it flips instantly. Rendered as a distinct bordered chip
+  (`#cfa_account`) set apart from the nav links (D7-2). +6 tests in
+  `test_cfa_toolbar.py` (25/25 green with menu+chrome), ruff clean. Before/after
+  `desktop-ui/pass-2-before/` + `desktop-ui/pass-2/` (logged-out + logged-in).
+
 Named must-fix: desktop Readiness renders with data (**functional gate DONE**);
-Connect/Logout redesigned; native-CFA feel everywhere; AnkiDroid CFA UI full
-refactor.
+**Connect/Logout redesigned (DONE, iter 31)**; native-CFA feel everywhere
+(desktop shell chrome WIP; mobile shell DONE); AnkiDroid CFA UI full refactor
+(Pass 1 DONE).

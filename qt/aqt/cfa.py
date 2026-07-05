@@ -159,6 +159,11 @@ def logout_of_sync(mw: AnkiQt) -> None:
             mw.col.media.force_resync()
     except Exception:
         pass
+    # Flip the top-bar account control back from "Log out" to "Connect".
+    try:
+        mw.toolbar.draw()
+    except Exception:
+        pass
     tooltip(
         "Logged out of sync. Click Sync on the top bar to log in again.",
         parent=mw,

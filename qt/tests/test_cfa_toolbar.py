@@ -70,3 +70,72 @@ def test_cfa_link_handlers_exist() -> None:
         "_cfaReadinessLinkHandler",
     ):
         assert callable(getattr(Toolbar, name))
+
+
+# --- clunky Connect/Logout redesign: one context-aware account control -------
+
+
+def test_account_link_spec_logged_out_is_connect() -> None:
+    from aqt.cfa_sync_connect import account_link_spec
+
+    spec = account_link_spec(False)
+    assert spec["cmd"] == "cfa_connect"
+    assert spec["label"] == "Connect"
+    assert spec["id"] == "cfa_account"
+
+
+def test_account_link_spec_logged_in_is_logout_naming_account() -> None:
+    from aqt.cfa_sync_connect import account_link_spec
+
+    spec = account_link_spec(True, "cfa")
+    assert spec["cmd"] == "cfa_logout"
+    assert spec["label"] == "Log out"
+    assert spec["id"] == "cfa_account"
+    # the tip names the signed-in account so it's clear WHICH login logs out
+    assert "cfa" in spec["tip"]
+
+
+def test_account_link_spec_logged_in_without_name_is_safe() -> None:
+    from aqt.cfa_sync_connect import account_link_spec
+
+    spec = account_link_spec(True, None)
+    assert spec["cmd"] == "cfa_logout"
+    assert "your sync account" in spec["tip"]
+
+
+def _toolbar_with_auth(logged_in: bool, user: str | None) -> Toolbar:
+    tb = _toolbar()
+    hkey = "HKEY" if logged_in else None
+    tb.mw.pm = SimpleNamespace(  # type: ignore[attr-defined]
+        sync_auth=lambda: object() if hkey else None,
+        profile={"syncUser": user},
+    )
+    return tb
+
+
+def test_create_account_link_flips_with_login_state() -> None:
+    # logged out -> the single control is Connect, wired to the connect handler
+    out = _toolbar_with_auth(False, None)
+    html = out._create_account_link()
+    assert "pycmd('cfa_connect')" in html
+    assert 'id="cfa_account"' in html
+    assert ">Connect</a>" in html
+    assert out.link_handlers["cfa_connect"] == out._cfaConnectLinkHandler
+
+    # logged in -> the SAME control is Log out, wired to the logout handler
+    inn = _toolbar_with_auth(True, "cfa")
+    html2 = inn._create_account_link()
+    assert "pycmd('cfa_logout')" in html2
+    assert 'id="cfa_account"' in html2
+    assert ">Log out</a>" in html2
+    assert inn.link_handlers["cfa_logout"] == inn._cfaLogoutLinkHandler
+
+
+def test_center_links_builds_single_account_control() -> None:
+    # The old clunky pair of always-visible create_link("cfa_connect") +
+    # create_link("cfa_logout") is gone; exactly one _create_account_link() is
+    # appended after Sync.
+    body = _center_links_src()
+    assert "_create_account_link()" in body
+    assert '"cfa_connect"' not in body
+    assert '"cfa_logout"' not in body

@@ -380,30 +380,13 @@ class Toolbar:
 
         links.append(self._create_sync_link())
 
-        # CFA fork: one-click "Connect" wires this desktop to the local CFA sync
-        # server and logs in — no trip through Preferences > Syncing.
-        links.append(
-            self.create_link(
-                "cfa_connect",
-                "Connect",
-                self._cfaConnectLinkHandler,
-                tip="Connect this desktop to the CFA sync server and sync",
-                id="cfa_connect",
-            )
-        )
-
-        # CFA fork: an always-visible Log out entry right after Sync, so logging
-        # out / switching the synced login never requires hunting through
-        # Preferences > Syncing.
-        links.append(
-            self.create_link(
-                "cfa_logout",
-                "Log out",
-                self._cfaLogoutLinkHandler,
-                tip="Log out of the sync account",
-                id="cfa_logout",
-            )
-        )
+        # CFA fork: a single context-aware sync-account control right after Sync
+        # — "Connect" when logged out, "Log out" when logged in. This replaces
+        # the old always-visible Connect + Log out pair (three sync links in a
+        # row, each shown regardless of state) with one control that reflects
+        # the real login state, so account management never requires a trip
+        # through Preferences > Syncing.
+        links.append(self._create_account_link())
 
         gui_hooks.top_toolbar_did_init_links(links, self)
 
@@ -480,6 +463,29 @@ class Toolbar:
         import aqt.cfa
 
         aqt.cfa.show_exam_readiness(self.mw)
+
+    def _create_account_link(self) -> str:
+        # One context-aware sync-account control (Connect / Log out) built from
+        # the pure spec in cfa_sync_connect, keyed off the real login state.
+        from aqt.cfa_sync_connect import account_link_spec
+
+        logged_in = False
+        account: str | None = None
+        try:
+            logged_in = self.mw.pm.sync_auth() is not None
+            if self.mw.pm.profile is not None:
+                account = self.mw.pm.profile.get("syncUser")
+        except Exception:
+            pass
+        spec = account_link_spec(logged_in, account)
+        handler = (
+            self._cfaLogoutLinkHandler
+            if spec["cmd"] == "cfa_logout"
+            else self._cfaConnectLinkHandler
+        )
+        return self.create_link(
+            spec["cmd"], spec["label"], handler, tip=spec["tip"], id=spec["id"]
+        )
 
     def _cfaConnectLinkHandler(self) -> None:
         from aqt.cfa_sync_connect import connect_cfa_sync

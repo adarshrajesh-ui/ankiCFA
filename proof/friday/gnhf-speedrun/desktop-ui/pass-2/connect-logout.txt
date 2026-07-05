@@ -1,0 +1,18 @@
+D7 — clunky Connect/Logout redesign (desktop Pass 2, Qt chrome)
+Generated 2026-07-05T02:54:50Z — iteration 31
+
+BEFORE: top bar showed Sync + Connect + Log out (three always-visible sync
+links, two dead in any state). AFTER: one context-aware account control
+(Connect when logged out, Log out when logged in), keyed off pm.sync_auth(),
+rendered as a distinct bordered chip (#cfa_account).
+
+Screenshots:
+  before/connect-logout.png  (+ .html) — Sync + Connect + Log out in a row
+  ../pass-2/connect-logout.png (+ .html) — one chip: Connect (out) / Log out (in)
+
+=== targeted tests ===
+.........................                                                [100%]
+25 passed in 0.37s
+
+=== ruff ===
+All checks passed!
