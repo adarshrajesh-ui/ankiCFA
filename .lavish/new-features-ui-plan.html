@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ankiCFA — New-Features UI Plan: The Mastery Engine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+  :root{
+    --ink:#122B46; --navy:#122B46; --navy-hover:#0E2238;
+    --muted:#4D5C6D; --faint:#939597;
+    --line:#E7E9EC; --surface:#F3F6F8; --bg:#ffffff;
+    --accent:#DA5C01; --accent-hover:#B34B01; --accent-soft:#FCEBDA;
+    --accent-ink:#A84500; --accent-on-navy:#F0894A;
+    --pass:#15803D; --pass-soft:#f0fdf4; --fail:#B91C1C; --fail-soft:#fef2f2; --warn:#B45309;
+    --sans:'IBM Plex Sans',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    --serif:'Source Serif 4',Georgia,'Times New Roman',serif;
+    --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:var(--sans); color:var(--ink); background:var(--surface);
+    font-size:15px; line-height:1.55; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1120px; margin:0 auto; padding:0 20px 120px;}
+  h1,h2,h3,.serif{font-family:var(--serif);}
+  h2{font-size:26px; font-weight:600; letter-spacing:-.01em; margin:0 0 6px;}
+  h3{font-size:19px; font-weight:600; margin:0 0 6px;}
+  p{margin:0 0 12px;}
+  a{color:var(--accent-ink);}
+  .eyebrow{font-size:11px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--accent-ink);}
+  .meta{font-size:12px; color:var(--faint);}
+  code,.mono{font-family:var(--mono); font-size:.86em;}
+  .pill{display:inline-block; padding:2px 9px; border-radius:100px; font-size:11px; font-weight:600; letter-spacing:.02em; white-space:nowrap;}
+  .pill.navy{background:var(--navy); color:#fff;}
+  .pill.soft{background:var(--surface); color:var(--muted); border:1px solid var(--line);}
+  .pill.accent{background:var(--accent-soft); color:var(--accent-ink);}
+  .pill.pass{background:var(--pass-soft); color:var(--pass);}
+  .pill.fail{background:var(--fail-soft); color:var(--fail);}
+  .pill.warn{background:#fff7ed; color:var(--warn);}
+
+  /* App-bar hero (also demonstrates the fixed desktop app bar) */
+  .appbar{
+    position:sticky; top:0; z-index:50; background:var(--navy); color:#fff;
+    border-bottom:3px solid var(--accent);
+  }
+  .appbar-in{max-width:1120px; margin:0 auto; padding:10px 20px; display:flex; align-items:center; gap:16px; flex-wrap:wrap;}
+  .brand{font-family:var(--serif); font-size:18px; font-weight:700; letter-spacing:.01em; color:#fff; min-width:0;}
+  .brand small{display:block; font-family:var(--sans); font-weight:600; font-size:10px; letter-spacing:.16em; color:var(--accent-on-navy); text-transform:uppercase;}
+  .navtabs{display:flex; gap:4px; margin-left:auto; flex-wrap:wrap;}
+  .navtabs a{color:#cdd7e3; text-decoration:none; font-size:13px; font-weight:600; padding:6px 11px; border-radius:100px;}
+  .navtabs a:hover{color:#fff; background:rgba(255,255,255,.10);}
+  .navtabs a.hot{color:var(--navy); background:var(--accent-on-navy);}
+
+  header.hero{padding:40px 0 10px;}
+  header.hero .lede{font-size:17px; color:var(--muted); max-width:760px;}
+  .wedge{
+    margin:18px 0 4px; padding:18px 20px; border-left:4px solid var(--accent);
+    background:#fff; border-radius:0 12px 12px 0; box-shadow:0 1px 0 var(--line);
+  }
+  .wedge b{color:var(--accent-ink);}
+
+  section{margin-top:40px;}
+  .sec-head{display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin-bottom:14px;}
+  .sec-head .n{font-family:var(--serif); font-size:14px; font-weight:700; color:#fff; background:var(--navy); width:30px; height:30px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; flex:0 0 auto;}
+
+  .card{background:#fff; border:1px solid var(--line); border-radius:14px; padding:18px 18px;}
+  .card.soft{background:var(--surface);}
+  .grid{display:grid; gap:16px;}
+  .g2{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .g3{grid-template-columns:repeat(3,minmax(0,1fr));}
+  .g2>*,.g3>*{min-width:0;}
+  @media(max-width:820px){.g2,.g3{grid-template-columns:minmax(0,1fr);}}
+
+  ul.tight{margin:8px 0 0; padding-left:18px;}
+  ul.tight li{margin:4px 0;}
+  .kicker{font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--faint); margin-bottom:6px;}
+
+  /* Rules chips */
+  .rules{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px;}
+  .rule{background:#fff; border:1px solid var(--line); border-radius:12px; padding:14px;}
+  .rule h4{font-family:var(--sans); font-size:14px; margin:0 0 4px; color:var(--ink);}
+  .rule p{font-size:13px; color:var(--muted); margin:0;}
+  .rule .tag{font-size:10px;}
+
+  /* Concept map */
+  .mapwrap{display:grid; grid-template-columns:minmax(0,1.55fr) minmax(0,1fr); gap:16px;}
+  @media(max-width:900px){.mapwrap{grid-template-columns:minmax(0,1fr);}}
+  .mapcanvas{background:linear-gradient(180deg,#0E2238,#122B46); border-radius:14px; padding:6px; overflow:hidden;}
+  .mapcanvas svg{width:100%; height:auto; display:block;}
+  .legend{display:flex; gap:14px; flex-wrap:wrap; margin-top:8px; padding:0 8px 6px;}
+  .legend span{font-size:11px; color:#c7d2df; display:inline-flex; align-items:center; gap:6px;}
+  .dot{width:12px; height:12px; border-radius:50%; display:inline-block;}
+  .detail{background:#fff; border:1px solid var(--line); border-radius:14px; padding:16px; min-width:0;}
+  .detail .why{font-size:13px;}
+  .detail dt{font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--faint); margin-top:10px; font-weight:700;}
+  .detail dd{margin:2px 0 0; font-size:13px; color:var(--ink);}
+  .drill{margin-top:12px; background:var(--accent-soft); color:var(--accent-ink); border-radius:10px; padding:10px 12px; font-size:13px; font-weight:600;}
+
+  /* Ethics loop mock */
+  .ethics{border:1px solid var(--line); border-radius:16px; overflow:hidden; background:#fff;}
+  .ethics-top{background:var(--surface); border-bottom:1px solid var(--line); padding:12px 16px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
+  .clustertag{background:var(--navy); color:#fff; font-size:11px; font-weight:600; padding:3px 10px; border-radius:100px;}
+  .vign{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0;}
+  @media(max-width:720px){.vign{grid-template-columns:minmax(0,1fr);}}
+  .vign .case{padding:16px; font-size:13.5px; color:var(--ink);}
+  .vign .case:first-child{border-right:1px solid var(--line);}
+  @media(max-width:720px){.vign .case:first-child{border-right:0; border-bottom:1px solid var(--line);}}
+  .case h4{font-family:var(--sans); font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin:0 0 8px;}
+  .hl{background:var(--accent-soft); border-bottom:2px solid var(--accent); padding:0 2px; border-radius:3px;}
+  .judge{display:flex; gap:8px; padding:12px 16px; border-top:1px solid var(--line); flex-wrap:wrap;}
+  .jbtn{border:1px solid var(--navy); color:var(--navy); background:#fff; border-radius:100px; padding:6px 16px; font-weight:600; font-size:13px; font-family:var(--sans);}
+  .jbtn.sel{background:var(--navy); color:#fff;}
+  .feedback{padding:12px 16px; border-top:1px solid var(--line); background:var(--pass-soft);}
+  .feedback .row{display:flex; gap:10px; align-items:flex-start; font-size:13px; margin:4px 0;}
+  .feedback .ai{background:#fff; border:1px dashed var(--accent); border-radius:10px; padding:8px 10px; margin-top:8px; font-size:12.5px; color:var(--muted);}
+
+  /* Before/After */
+  .ba{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:0; border:1px solid var(--line); border-radius:14px; overflow:hidden;}
+  @media(max-width:720px){.ba{grid-template-columns:minmax(0,1fr);}}
+  .ba .col{padding:16px; min-width:0;}
+  .ba .before{background:var(--fail-soft); border-right:1px solid var(--line);}
+  @media(max-width:720px){.ba .before{border-right:0; border-bottom:1px solid var(--line);}}
+  .ba .after{background:var(--pass-soft);}
+  .ba h4{font-family:var(--sans); font-size:12px; letter-spacing:.08em; text-transform:uppercase; margin:0 0 8px;}
+  .ba .before h4{color:var(--fail);} .ba .after h4{color:var(--pass);}
+  .ba code{background:#fff; border:1px solid var(--line); border-radius:6px; padding:1px 5px;}
+
+  /* phone frames */
+  .phones{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:16px; align-items:start;}
+  .phone{text-align:center; min-width:0;}
+  .phone img{width:100%; max-width:230px; border-radius:18px; border:1px solid var(--line); box-shadow:0 8px 24px rgba(18,43,70,.12);}
+  .phone .cap{font-size:12px; color:var(--muted); margin-top:8px;}
+  .mock-phone{max-width:230px; margin:0 auto; background:#fff; border-radius:22px; border:1px solid var(--line); box-shadow:0 8px 24px rgba(18,43,70,.14); overflow:hidden;}
+  .mp-status{background:var(--navy); color:#fff; font-size:10px; padding:6px 12px; display:flex; justify-content:space-between;}
+  .mp-hero{background:linear-gradient(180deg,#122B46,#0E2238); color:#fff; padding:14px 14px 16px; text-align:left;}
+  .mp-hero .eb{color:var(--accent-on-navy); font-size:9px; letter-spacing:.14em; font-weight:700;}
+  .mp-hero .big{font-family:var(--serif); font-size:20px; font-weight:700;}
+  .mp-hero .sub{font-size:11px; color:#c7d2df;}
+  .mp-body{padding:12px; text-align:left; display:flex; flex-direction:column; gap:8px;}
+  .mp-tile{border:1px solid var(--line); border-radius:12px; padding:10px; font-size:12px;}
+  .mp-tile b{font-size:12px;}
+  .mp-tile .mini{font-size:10px; color:var(--faint);}
+  .mp-cta{background:var(--accent); color:#fff; border-radius:10px; text-align:center; padding:9px; font-weight:600; font-size:12px;}
+  .mp-nav{display:flex; border-top:1px solid var(--line);}
+  .mp-nav div{flex:1; text-align:center; padding:8px 2px; font-size:9px; color:var(--faint);}
+  .mp-nav div.on{color:var(--accent-ink); font-weight:700;}
+  .mp-nav .ic{display:block; font-size:14px; color:inherit;}
+
+  /* steps / phases */
+  .phase{display:grid; grid-template-columns:44px minmax(0,1fr); gap:14px; margin:0 0 14px;}
+  .phase .badge{width:44px; height:44px; border-radius:12px; background:var(--navy); color:#fff; font-family:var(--serif); font-weight:700; display:flex; align-items:center; justify-content:center; font-size:15px;}
+  .phase.p0 .badge{background:var(--accent);}
+  .phase .body{background:#fff; border:1px solid var(--line); border-radius:12px; padding:12px 14px; min-width:0;}
+  .phase .body h4{font-family:var(--sans); margin:0 0 2px; font-size:15px;}
+  .phase .body .who{font-size:11px; color:var(--faint);}
+
+  table.tbl{width:100%; border-collapse:collapse; font-size:13px; background:#fff; border:1px solid var(--line); border-radius:12px; overflow:hidden;}
+  table.tbl th,table.tbl td{padding:9px 12px; text-align:left; border-bottom:1px solid var(--line); vertical-align:top;}
+  table.tbl th{background:var(--surface); font-size:11px; letter-spacing:.04em; text-transform:uppercase; color:var(--muted);}
+  table.tbl tr:last-child td{border-bottom:0;}
+  .tblwrap{overflow-x:auto;}
+
+  /* decisions */
+  .decision{background:#fff; border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:14px;}
+  .decision h3{margin-bottom:2px;}
+  .decision .q{font-size:13px; color:var(--muted); margin-bottom:10px;}
+  .opts{display:flex; flex-direction:column; gap:8px;}
+  .opts label{display:flex; gap:10px; align-items:flex-start; border:1px solid var(--line); border-radius:10px; padding:10px 12px; cursor:pointer; font-size:13.5px;}
+  .opts label:hover{border-color:var(--accent);}
+  .opts input{margin-top:3px;}
+  .opts .rec{color:var(--accent-ink); font-weight:700; font-size:11px;}
+  .qbtn{margin-top:12px; background:var(--navy); color:#fff; border:0; border-radius:100px; padding:9px 20px; font-weight:600; font-family:var(--sans); font-size:13px; cursor:pointer;}
+  .qbtn:hover{background:var(--navy-hover);}
+
+  .callout{background:#fff; border:1px solid var(--line); border-left:4px solid var(--navy); border-radius:0 12px 12px 0; padding:14px 16px;}
+  .callout.warn{border-left-color:var(--warn);}
+  .callout.truth{border-left-color:var(--accent);}
+  .src{font-size:11px; color:var(--faint);}
+  .footer-note{margin-top:40px; padding-top:18px; border-top:1px solid var(--line); font-size:12px; color:var(--faint);}
+  .mermaid{background:#fff; border:1px solid var(--line); border-radius:14px; padding:14px; overflow-x:auto;}
+</style>
+</head>
+<body>
+
+<div class="appbar">
+  <div class="appbar-in">
+    <div class="brand">ankiCFA <small>CFA Level II · Exam Prep</small></div>
+    <nav class="navtabs">
+      <a href="#vision">Vision</a>
+      <a href="#ethics">Ethics Loop</a>
+      <a href="#map">Concept Map</a>
+      <a href="#api">API</a>
+      <a href="#fixes">Fixes</a>
+      <a href="#phone">Phone</a>
+      <a href="#plan">Plan</a>
+      <a href="#decisions" class="hot">Decisions</a>
+    </nav>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <header class="hero" id="vision">
+    <div class="eyebrow">New-features UI plan · verified against the codebase</div>
+    <h1 style="font-size:34px; line-height:1.1; margin:6px 0 12px;">The Mastery Engine</h1>
+    <p class="lede">A plan to turn ankiCFA from “Anki with a CFA tab” into a purpose-built CFA prep app whose center of gravity is a <b>concept graph that decides what you study next</b> — plus the ethics near-miss loop, a real on-device AI flow, and the specific desktop/phone bugs fixed. Every current-state claim below is checked against the actual source.</p>
+    <div class="wedge">
+      <div class="eyebrow" style="color:var(--accent-ink)">The wedge</div>
+      <p style="margin:6px 0 0; font-size:16px;">The graph is a <b>mastery engine that drives study</b>, not a decorative progress bar. A node brightens only when a concept is <b>reliable under exam-like conditions</b> — never from clicks or streaks.</p>
+    </div>
+    <p class="meta" style="margin-top:14px;">Design source: the subject project’s own CFA design system — <span class="mono">docs/cfa/DESIGN-SYSTEM.md</span>, <span class="mono">cfa_style.TOKENS</span>, AnkiDroid <span class="mono">cfa.xml</span> (navy #122B46 · warm accent #DA5C01 · IBM Plex Sans / Source Serif 4).</p>
+  </header>
+
+  <!-- CURRENT STATE -->
+  <section id="truth">
+    <div class="sec-head"><span class="n">0</span><h2>Where it actually is today</h2></div>
+    <p style="max-width:820px; color:var(--muted)">Truth-seeking first. The desktop CFA <em>pages</em> are genuinely CFA-native, but the phone is still ~95% stock Anki, and both AI features fail at the point of use. Three concrete, reproduced defects:</p>
+    <div class="grid g3" style="margin-top:6px;">
+      <div class="card">
+        <span class="pill fail">Phone · AI</span>
+        <h3 style="margin-top:8px;">AI Fill errors on tap</h3>
+        <p style="font-size:13px; color:var(--muted)">The “AI Fill” item exists in the ⋮ menu, but tapping it shows <span class="mono">“AI unavailable — client_error… Card left unchanged.”</span></p>
+        <p class="src">Verified: <span class="mono">NoteEditorFragment.fillWithAi()</span> → <span class="mono">CfaAiClient.fill()</span>; string <span class="mono">cfa_ai_fill_unavailable</span>. Root cause: no reachable AI proxy.</p>
+      </div>
+      <div class="card">
+        <span class="pill fail">Phone · UX</span>
+        <h3 style="margin-top:8px;">Still “default Anki + a title”</h3>
+        <p style="font-size:13px; color:var(--muted)">Deck list, drawer (Decks / Card browser / Statistics / Settings / Help / Support AnkiDroid), ⋮ (add deck, backup, import/export). No CFA core. Ethics AI feedback absent.</p>
+        <p class="src">Verified: nav drawer + one Exam Readiness activity added; everything else is upstream AnkiDroid.</p>
+      </div>
+      <div class="card">
+        <span class="pill fail">Desktop · Nav</span>
+        <h3 style="margin-top:8px;">Readiness won’t open from the app bar</h3>
+        <p style="font-size:13px; color:var(--muted)">Only the macOS menu bar → CFA → Exam Readiness works. The in-app top bar does nothing.</p>
+        <p class="src">Verified: <span class="mono">cfa_chrome.py</span> only re-skins toolbar CSS — it injects <b>no</b> clickable Readiness control, though the deck footnote claims “Readiness on the top bar”.</p>
+      </div>
+    </div>
+
+    <div class="phones" style="margin-top:18px;">
+      <div class="phone"><img src="./phone-current-deck.png" alt="current phone deck list" /><div class="cap">Now: stock deck list, only “ankiCFA” differs</div></div>
+      <div class="phone"><img src="./phone-current-drawer.png" alt="current phone drawer" /><div class="cap">Now: stock AnkiDroid drawer</div></div>
+      <div class="phone"><img src="./phone-navy-deck.png" alt="rebuilt navy shell" /><div class="cap">After rebuild: navy shell only — still Anki structure</div></div>
+    </div>
+    <div class="callout truth" style="margin-top:16px;">
+      <b>Directive taken literally:</b> build the phone as if designing the optimal CFA prep app from scratch — do not preserve the Anki shell for its own sake. Delete/replace as much as needed; reuse only the parts that serve CFA prep (the Rust scheduler + collection/sync engine).
+    </div>
+  </section>
+
+  <!-- DESIGN RULES -->
+  <section id="rules">
+    <div class="sec-head"><span class="n">1</span><h2>The design rules we’re holding</h2></div>
+    <div class="rules">
+      <div class="rule"><span class="pill accent tag">challenge</span><h4>Optimal challenge (~70–85%)</h4><p>Drills target the band where success is likely but not certain — the map biases toward concepts sitting outside that band.</p></div>
+      <div class="rule"><span class="pill accent tag">autonomy</span><h4>Bounded autonomy</h4><p>The app recommends the next drill, but the learner can always pick a node/edge themselves. Guidance, not rails.</p></div>
+      <div class="rule"><span class="pill accent tag">curiosity</span><h4>Curiosity gap before rule</h4><p>Ethics shows the near-miss and asks for a judgment <em>before</em> revealing the governing Standard.</p></div>
+      <div class="rule"><span class="pill accent tag">competence</span><h4>Competence feedback, not coins</h4><p>Feedback is “this got more reliable under exam conditions”, never streaks, badges, or points.</p></div>
+      <div class="rule"><span class="pill accent tag">diagnostic</span><h4>Failure as diagnostic</h4><p>A wrong answer is signal: it dims the node, names the mistake pattern, and can spawn a comparison drill.</p></div>
+    </div>
+  </section>
+
+  <!-- ETHICS LOOP -->
+  <section id="ethics">
+    <div class="sec-head"><span class="n">2</span><h2>Core loop — Ethics near-miss vignettes</h2><span class="pill soft">exists on desktop · bring to phone + AI</span></div>
+    <p style="max-width:820px; color:var(--muted)">Two almost-identical cases. Pick which is unethical, highlight the controlling phrase, get immediate feedback on <b>both</b> the label and the highlight — then AI adds semantic coaching on <em>why</em> your highlight was near-miss.</p>
+    <div class="ethics" style="margin-top:8px;">
+      <div class="ethics-top">
+        <span class="clustertag">II(A) · Material Nonpublic Information</span>
+        <span class="meta">Curiosity gap: judge first, Standard revealed after.</span>
+      </div>
+      <div class="vign">
+        <div class="case">
+          <h4>Case A</h4>
+          <p>An analyst overhears two strangers in an airport discussing an unannounced merger, independently corroborates the detail through public filings, and then trades.</p>
+        </div>
+        <div class="case">
+          <h4>Case B</h4>
+          <p>An analyst is told the same merger detail by <span class="hl">a friend on the target’s deal team, under an expectation of confidence,</span> and then trades ahead of the announcement.</p>
+        </div>
+      </div>
+      <div class="judge">
+        <span class="meta" style="align-self:center; margin-right:6px;">Which is unethical?</span>
+        <span class="jbtn">Case A</span>
+        <span class="jbtn sel">Case B ✓</span>
+      </div>
+      <div class="feedback">
+        <div class="row"><span class="pill pass">Label ✓</span><span>Correct — B breaches II(A): the info is material, nonpublic, and received in breach of a duty.</span></div>
+        <div class="row"><span class="pill warn">Highlight ≈</span><span>Close. You caught the source, but the <em>controlling</em> phrase is the breach-of-duty (“under an expectation of confidence”), not merely “deal team”.</span></div>
+        <div class="ai"><b>AI coaching (semantic, via proxy):</b> Your recurring pattern is flagging <em>who</em> leaked over <em>whether a duty was breached</em>. In A, mosaic-theory corroboration makes trading permissible; in B the duty is the hinge. Next: 2 more mosaic-vs-breach pairs.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONCEPT MAP -->
+  <section id="map">
+    <div class="sec-head"><span class="n">3</span><h2>The Concept Map — the centerpiece</h2><span class="pill accent">net-new</span></div>
+    <p style="max-width:860px; color:var(--muted)">Each CFA concept is a node: <b>dull when weak, bright when mastered</b>. Edges are the boundaries students confuse; a weak edge can spawn a comparison drill. Tap a node or edge → a friendly, <b>user-specific</b> paragraph (why it’s dim, your mistake pattern, what would brighten it, the next drill) — never generic summary text.</p>
+
+    <div class="callout truth" style="margin:0 0 14px;"><b>Locked for v1:</b> render <b>all concept nodes at once</b> with a <b>server-precomputed, stable layout</b> (identical every open). Density is managed by topic-color clustering + zoom/pan so the full graph stays readable — including on the phone.</div>
+
+    <div class="mapwrap">
+      <div>
+        <div class="mapcanvas">
+          <svg viewBox="0 0 800 470" role="img" aria-label="CFA concept mastery graph with nodes of varying brightness">
+            <defs>
+              <radialGradient id="bright" cx="50%" cy="45%" r="60%">
+                <stop offset="0%" stop-color="#FFD8B0"/><stop offset="45%" stop-color="#F0894A"/><stop offset="100%" stop-color="#DA5C01"/>
+              </radialGradient>
+              <radialGradient id="mid" cx="50%" cy="45%" r="60%">
+                <stop offset="0%" stop-color="#7FA8D6"/><stop offset="100%" stop-color="#33557f"/>
+              </radialGradient>
+              <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
+                <feGaussianBlur stdDeviation="9" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+            </defs>
+            <!-- edges -->
+            <g stroke-linecap="round">
+              <line x1="400" y1="95" x2="620" y2="185" stroke="#3a5madd" style="stroke:#37527a" stroke-width="2" opacity=".5"/>
+              <line x1="400" y1="95" x2="185" y2="185" stroke="#37527a" stroke-width="2" opacity=".45"/>
+              <line x1="185" y1="185" x2="305" y2="330" stroke="#5b7ba6" stroke-width="4" opacity=".8"/>
+              <line x1="120" y1="330" x2="185" y2="185" stroke="#37527a" stroke-width="2" opacity=".4"/>
+              <line x1="305" y1="330" x2="660" y2="330" stroke="#37527a" stroke-width="2.5" opacity=".45"/>
+              <!-- confused boundaries (weak edges) -->
+              <line x1="620" y1="185" x2="505" y2="305" stroke="#DA5C01" stroke-width="3" stroke-dasharray="7 7" opacity=".95"/>
+              <line x1="660" y1="330" x2="565" y2="415" stroke="#DA5C01" stroke-width="3" stroke-dasharray="7 7" opacity=".9"/>
+            </g>
+            <!-- nodes: [bright] Ethics, Equity ; [mid] Quant, Portfolio, Corp ; [dim] FRA, FixedIncome, Econ ; [vdim] Derivatives -->
+            <g font-family="IBM Plex Sans, sans-serif" text-anchor="middle">
+              <!-- Ethics (bright) -->
+              <circle cx="400" cy="95" r="30" fill="url(#bright)" filter="url(#glow)"/>
+              <text x="400" y="52" fill="#EAF1F8" font-size="13" font-weight="600">Ethics &amp; Standards</text>
+              <text x="400" y="99" fill="#3a1c00" font-size="11" font-weight="700">92</text>
+              <!-- Equity (bright-mid) -->
+              <circle cx="620" cy="185" r="26" fill="url(#bright)" filter="url(#glow)" opacity=".92"/>
+              <text x="620" y="147" fill="#EAF1F8" font-size="12" font-weight="600">Equity Valuation</text>
+              <text x="620" y="189" fill="#3a1c00" font-size="11" font-weight="700">80</text>
+              <!-- Quant (mid) -->
+              <circle cx="185" cy="185" r="24" fill="url(#mid)"/>
+              <text x="185" y="147" fill="#c7d2df" font-size="12" font-weight="600">Quant Methods</text>
+              <text x="185" y="189" fill="#EAF1F8" font-size="11" font-weight="700">64</text>
+              <!-- Portfolio (mid) -->
+              <circle cx="305" cy="330" r="23" fill="url(#mid)" opacity=".9"/>
+              <text x="305" y="372" fill="#c7d2df" font-size="12" font-weight="600">Portfolio Mgmt</text>
+              <text x="305" y="334" fill="#EAF1F8" font-size="11" font-weight="700">61</text>
+              <!-- FRA (dim) -->
+              <circle cx="505" cy="305" r="22" fill="#1c3a5c" stroke="#2c517d" stroke-width="1"/>
+              <text x="505" y="266" fill="#8fa3ba" font-size="12" font-weight="600">Financial Reporting</text>
+              <text x="505" y="309" fill="#9fb4cb" font-size="11" font-weight="700">38</text>
+              <!-- Fixed Income (dim) -->
+              <circle cx="660" cy="330" r="22" fill="#1c3a5c" stroke="#2c517d" stroke-width="1"/>
+              <text x="660" y="372" fill="#8fa3ba" font-size="12" font-weight="600">Fixed Income</text>
+              <text x="660" y="334" fill="#9fb4cb" font-size="11" font-weight="700">41</text>
+              <!-- Economics (dim) -->
+              <circle cx="120" cy="330" r="20" fill="#1c3a5c" stroke="#2c517d" stroke-width="1"/>
+              <text x="120" y="368" fill="#8fa3ba" font-size="12" font-weight="600">Economics</text>
+              <text x="120" y="334" fill="#9fb4cb" font-size="11" font-weight="700">44</text>
+              <!-- Derivatives (very dim, selected) -->
+              <circle cx="565" cy="415" r="21" fill="#16304d" stroke="#DA5C01" stroke-width="2.5"/>
+              <text x="565" y="452" fill="#F0894A" font-size="12" font-weight="700">Derivatives ◂ selected</text>
+              <text x="565" y="419" fill="#c98a5f" font-size="11" font-weight="700">23</text>
+            </g>
+          </svg>
+          <div class="legend">
+            <span><i class="dot" style="background:#DA5C01"></i> mastered (reliable)</span>
+            <span><i class="dot" style="background:#33557f"></i> developing</span>
+            <span><i class="dot" style="background:#1c3a5c; border:1px solid #2c517d"></i> weak</span>
+            <span><i class="dot" style="background:#122B46; border:2px dashed #DA5C01"></i> confused boundary (weak edge)</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail">
+        <div class="eyebrow">Tap result · Derivatives</div>
+        <p class="why" style="margin-top:6px;">This node is <b>dim (23)</b> because your recall is fine but it <b>collapses under exam-style vignettes</b> — you rarely apply put-call parity when the question is worded around a hedge, not a formula.</p>
+        <dl>
+          <dt>Your mistake pattern</dt>
+          <dd>Confuses the <b>Derivatives ↔ Fixed Income</b> boundary (the dashed edge): discounts cash flows correctly but mis-signs the forward.</dd>
+          <dt>What would brighten it</dt>
+          <dd>Not more flashcards — <b>near-miss discrimination</b> on 6 hedge-vs-speculate vignettes + a timed retention check in 3 days.</dd>
+        </dl>
+        <div class="drill">▶ Next drill: “Forward vs. Fixed-Income” comparison set (spawned from the weak edge)</div>
+        <p class="src" style="margin-top:10px;">~80% of this text is template-filled from performance data; only the italic “why” and the pattern sentence are LLM-polished.</p>
+      </div>
+    </div>
+
+    <div class="grid g2" style="margin-top:16px;">
+      <div class="card soft">
+        <div class="kicker">Brightness must mean something</div>
+        <p style="font-size:13.5px; margin:0 0 8px;">Brightness aggregates five exam-validity signals — <b>not clicks or streaks</b>:</p>
+        <div class="tblwrap"><table class="tbl">
+          <tr><th>Signal</th><th>Reads</th></tr>
+          <tr><td>Recall</td><td>Retrieval on the drilled card (memory)</td></tr>
+          <tr><td>Vignette application</td><td>Correct on reworded exam-style items (performance)</td></tr>
+          <tr><td>Near-miss discrimination</td><td>Distinguishes confusable pairs (edges)</td></tr>
+          <tr><td>Retention</td><td>Still correct after a delay, not just fresh</td></tr>
+          <tr><td>Speed</td><td>Answered within exam time budget</td></tr>
+        </table></div>
+      </div>
+      <div class="card soft">
+        <div class="kicker">Reuse, don’t reinvent</div>
+        <p style="font-size:13.5px;">The three existing honest scores already come from one shared Rust engine (<span class="mono">ComputeCfaScores</span>). The map is a <b>new read-model over the same signals</b>, and it must honor the existing <b>give-up / abstain rule</b>: a node stays grey (“not enough evidence”) rather than showing a falsely bright value.</p>
+        <p class="src">Verified: desktop == mobile == Python parity on the scores; the map adds no new scoring truth, only a spatial view + next-action.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- API -->
+  <section id="api">
+    <div class="sec-head"><span class="n">4</span><h2>API — instant map, explanations that refine</h2></div>
+    <p style="max-width:860px; color:var(--muted)">One batched call on page load carries <span class="mono">visibleNodes</span> + <span class="mono">visibleEdges</span> + performance data. Templates cover ~80% so the map renders instantly; the LLM only polishes language and the specific miss explanations, streamed in the background.</p>
+    <div class="mermaid">
+flowchart TD
+  A["Concept Map opens"] --> B["ONE batched POST /cfa/concept-map<br/>{ visibleNodes, visibleEdges, performance }"]
+  B --> C{"Server"}
+  C -->|"~80% templated"| D["Template renderer<br/>deterministic · instant"]
+  C -->|"language polish + specific misses"| E["LLM · GPT-4o<br/>via reachable proxy"]
+  D --> F["Map renders INSTANTLY<br/>brightness + edges + skeleton text"]
+  E -. "streams" .-> G["Explanations refine<br/>in background"]
+  F --> H["Tap node / edge →<br/>user-specific paragraph"]
+  G -. "upgrades in place" .-> H
+    </div>
+    <div class="grid g3" style="margin-top:6px;">
+      <div class="card"><div class="kicker">Instant</div><p style="font-size:13px; margin:0;">First paint uses only templates + local data — zero network wait for the graph itself.</p></div>
+      <div class="card"><div class="kicker">Cheap + safe</div><p style="font-size:13px; margin:0;">LLM is scoped to language + miss-explanation, keeping cost bounded and every claim traceable to a named source.</p></div>
+      <div class="card"><div class="kicker">AI-off still works</div><p style="font-size:13px; margin:0;">With AI off, the templated 80% is the whole experience — the map and next-drill still function.</p></div>
+    </div>
+  </section>
+
+  <!-- FIXES -->
+  <section id="fixes">
+    <div class="sec-head"><span class="n">5</span><h2>The three defects → fixes</h2></div>
+
+    <h3 style="margin-top:6px;">A. Phone AI (both features): make the proxy reachable</h3>
+    <div class="ba">
+      <div class="col before"><h4>Before</h4>
+        <p>Tap AI Fill → <code>AI unavailable — client_error…</code>. Ethics has no AI feedback. The phone points at <code>10.0.2.2:27702</code> but nothing is listening.</p>
+        <p class="src">Cause: proxy is a separate desktop process that’s usually not running; failure text is cryptic.</p>
+      </div>
+      <div class="col after"><h4>After</h4>
+        <p>AI Fill drafts the empty side via a <b>reachable</b> proxy; ethics highlights get semantic AI coaching. Clear states: <b>drafting → done (with source)</b>, or an honest, actionable “AI off — turn on in Settings”.</p>
+        <ul class="tight" style="font-size:13px;"><li>Bundle the proxy into the sync server the phone already logs into (one endpoint, one token).</li><li>Fix the error copy + add an in-app AI toggle/status.</li></ul>
+      </div>
+    </div>
+
+    <h3 style="margin-top:18px;">B. Desktop Readiness: real app-bar control</h3>
+    <div class="ba">
+      <div class="col before"><h4>Before</h4>
+        <p>Top bar is only CSS-reskinned; <b>no</b> Readiness control is injected. Deck footnote says “Readiness on the top bar,” but only the macOS menu bar → CFA → Exam Readiness fires <code>show_exam_readiness()</code>.</p>
+        <p class="src">Verified in <span class="mono">cfa_chrome.py</span> (_toolbar_css only) + <span class="mono">cfa_home.py</span> (<code>cfa:readiness</code> bridge).</p>
+      </div>
+      <div class="col after"><h4>After</h4>
+        <p>First-class app-bar tabs — <b>Home · Study · Ethics · Readiness</b> — each wired to the handler that already exists (<code>show_exam_readiness()</code>). The footnote becomes true.</p>
+        <p class="src">Low-risk: handler + Home-page route already work; we only add the missing clickable entry point.</p>
+      </div>
+    </div>
+
+    <h3 style="margin-top:18px;">C. Phone shell: a CFA app, not Anki</h3>
+    <div class="ba">
+      <div class="col before"><h4>Before</h4>
+        <p>DeckPicker + stock drawer (Decks / Card browser / Statistics / Settings / Help / Support AnkiDroid). CFA is one bolt-on activity.</p>
+      </div>
+      <div class="col after"><h4>After</h4>
+        <p>Purpose-built CFA home with a <b>bottom nav: Today · Study · Map · Readiness</b>. Anki’s deck/card-browser plumbing is hidden behind “Manage,” not the front door.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PHONE -->
+  <section id="phone">
+    <div class="sec-head"><span class="n">6</span><h2>Phone rewrite — the optimal CFA app</h2></div>
+    <div class="grid g2" style="align-items:start;">
+      <div>
+        <div class="kicker">Proposed phone home</div>
+        <div class="mock-phone">
+          <div class="mp-status"><span>4:06</span><span>▮▮▮ ▾</span></div>
+          <div class="mp-hero">
+            <div class="eb">ANKICFA · CFA LEVEL II</div>
+            <div class="big">Today</div>
+            <div class="sub">38 days to exam · Readiness 41–58</div>
+          </div>
+          <div class="mp-body">
+            <div class="mp-cta">▶ Start today’s session (18 min)</div>
+            <div class="mp-tile"><b>Weakest link</b><div class="mini">Derivatives ↔ Fixed Income — confused boundary</div></div>
+            <div class="mp-tile"><b>Ethics near-miss</b> <span class="pill accent" style="font-size:9px;">AI</span><div class="mini">2 mosaic-vs-breach pairs</div></div>
+            <div class="mp-tile"><b>Concept map</b><div class="mini">3 nodes brightened this week</div></div>
+          </div>
+          <div class="mp-nav">
+            <div class="on"><span class="ic">◉</span>Today</div>
+            <div><span class="ic">▤</span>Study</div>
+            <div><span class="ic">✦</span>Map</div>
+            <div><span class="ic">▲</span>Readiness</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="kicker">What changes</div>
+        <ul class="tight">
+          <li><b>Replace</b> DeckPicker as the launch surface with a CFA “Today” home (session CTA, weakest link, next drills).</li>
+          <li><b>Bottom nav</b> (Today · Study · Map · Readiness) instead of a hamburger full of Anki tools.</li>
+          <li><b>Concept Map</b> as a first-class tab — the same mastery engine as desktop.</li>
+          <li><b>Ethics loop</b> on-device with AI semantic feedback (via the reachable proxy).</li>
+          <li><b>AI Fill</b> in a CFA add-card flow with clear drafting/done/off states.</li>
+          <li><b>Keep</b> the Rust scheduler, collection, and two-way sync — that’s the shared engine worth reusing.</li>
+        </ul>
+        <div class="callout warn" style="margin-top:12px;">
+          <b>Honest scope flag:</b> replacing the launch surface + navigation is a large lift in AnkiDroid (Kotlin/Fragments). The plan phases it so the app is shippable at each step, and Anki’s tools stay reachable under “Manage” to avoid regressions.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PLAN -->
+  <section id="plan">
+    <div class="sec-head"><span class="n">7</span><h2>Phased plan &amp; workstreams</h2></div>
+    <div class="phase p0">
+      <div class="badge">P0</div>
+      <div class="body"><h4>Unblock &amp; make AI real (days)</h4><div class="who">Desktop + Mobile + Backend</div>
+        <ul class="tight" style="font-size:13.5px;"><li>Bundle AI proxy into the sync server; fix phone error copy + AI toggle.</li><li>Add desktop app-bar Readiness/Study/Ethics tabs → existing handlers.</li><li>Prove AI Fill + ethics AI end-to-end on device.</li></ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="badge">P1</div>
+      <div class="body"><h4>Phone CFA shell</h4><div class="who">Mobile (Kotlin)</div>
+        <ul class="tight" style="font-size:13.5px;"><li>New “Today” launch surface + bottom nav; Anki tools moved under “Manage”.</li><li>Port Ethics near-miss loop + AI coaching to phone.</li></ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="badge">P2</div>
+      <div class="body"><h4>Concept Map — the mastery engine</h4><div class="who">Backend + Web + Mobile</div>
+        <ul class="tight" style="font-size:13.5px;"><li>Define brightness read-model over the 5 signals (respect abstain rule).</li><li>Batched <span class="mono">/cfa/concept-map</span> endpoint (templates + streamed LLM).</li><li>Render map on desktop (Svelte) and phone; tap → user-specific paragraph; weak edges spawn drills.</li></ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="badge">P3</div>
+      <div class="body"><h4>Depth &amp; polish</h4><div class="who">All</div>
+        <ul class="tight" style="font-size:13.5px;"><li>Curiosity-gap sequencing, optimal-challenge selection, retention/speed signals feeding brightness.</li><li>Cost caps + provenance surfacing; UI/UX critique pass to production grade.</li></ul>
+      </div>
+    </div>
+
+    <h3 style="margin-top:14px;">Risks &amp; open questions</h3>
+    <div class="grid g2">
+      <div class="callout"><b>Risk — AI reachability off-LAN.</b> A device off the desktop’s network can’t reach a self-hosted proxy. Mitigation depends on the hosting decision below.</div>
+      <div class="callout"><b>Risk — phone rewrite regressions.</b> Replacing DeckPicker touches deep AnkiDroid flows (sync entry, intents). Phase + keep “Manage” fallback.</div>
+      <div class="callout"><b>Open — brightness validity.</b> How much retention/speed weight before a node may go bright? Needs a small calibration pass.</div>
+      <div class="callout truth"><b>Resolved — map scale.</b> v1 shows <b>all concept nodes at once</b> on a server-precomputed layout, clustered by topic color with zoom/pan. The one remaining modeling question is brightness-weight calibration (below).</div>
+    </div>
+  </section>
+
+  <!-- DECISIONS -->
+  <section id="decisions">
+    <div class="sec-head"><span class="n">8</span><h2>Decisions — locked ✓</h2><span class="pill pass">4 / 4 answered</span></div>
+    <p style="color:var(--muted); max-width:820px;">You made the calls below; they’re now folded into the plan above. To revisit one, annotate its card and send it back.</p>
+    <div class="grid g2">
+      <div class="card"><span class="pill pass">Locked</span><h3 style="margin-top:8px;">1 · Phone AI hosting</h3><p style="font-size:13.5px; margin:0;"><b>Bundle the proxy into the sync server</b> the phone already logs into — one endpoint/token, AI “just works” after login. <span class="src">(feeds P0)</span></p></div>
+      <div class="card"><span class="pill pass">Locked</span><h3 style="margin-top:8px;">2 · Phone rewrite scope</h3><p style="font-size:13.5px; margin:0;"><b>Full replace</b> — new “Today” launch home + bottom nav; Anki tools move under “Manage”. <span class="src">(feeds P1)</span></p></div>
+      <div class="card"><span class="pill pass">Locked</span><h3 style="margin-top:8px;">3 · Concept-map layout</h3><p style="font-size:13.5px; margin:0;"><b>Server-precomputed, stable</b> positions — instant and identical every open. <span class="src">(feeds P2)</span></p></div>
+      <div class="card"><span class="pill pass">Locked</span><h3 style="margin-top:8px;">4 · Map granularity (v1)</h3><p style="font-size:13.5px; margin:0;"><b>All concept nodes at once</b> — clustered by topic color with zoom/pan to manage density. <span class="src">(feeds P2)</span></p></div>
+    </div>
+    <div class="callout" style="margin-top:14px;">Prefer to free-type more? Annotate any element or select text on this page and send it — I’ll fold it into the plan.</div>
+  </section>
+
+  <div class="footer-note">
+    ankiCFA new-features UI plan · rendered in the subject project’s CFA design system (navy #122B46 · accent #DA5C01 · IBM&nbsp;Plex&nbsp;Sans / Source&nbsp;Serif&nbsp;4). Current-state claims verified against <span class="mono">cfa_chrome.py</span>, <span class="mono">cfa_home.py</span>, <span class="mono">NoteEditorFragment.kt</span>, <span class="mono">CfaAiClient.kt</span>, <span class="mono">cfa.xml</span>, <span class="mono">DESIGN-SYSTEM.md</span>.
+  </div>
+
+</div>
+
+<script>
+  (function(){
+    var mm = (document.documentElement.getAttribute('data-theme')||'').length;
+    try{
+      mermaid.initialize({
+        startOnLoad:true, securityLevel:'loose',
+        theme:'base',
+        themeVariables:{
+          fontFamily:'IBM Plex Sans, sans-serif',
+          primaryColor:'#F3F6F8', primaryTextColor:'#122B46', primaryBorderColor:'#122B46',
+          lineColor:'#4D5C6D', tertiaryColor:'#FCEBDA', secondaryColor:'#fff',
+          clusterBkg:'#fff'
+        }
+      });
+    }catch(e){}
+  })();
+</script>
+</body>
+</html>
