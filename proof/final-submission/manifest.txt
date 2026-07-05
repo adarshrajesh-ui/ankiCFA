@@ -1,0 +1,24 @@
+ankiCFA Lane 4 final proof bundle
+
+Authoritative report:
+- REPORT.md
+
+Generated packet:
+- proof-packet.html
+- proof-packet.pdf
+
+Screenshots:
+- screenshots/desktop/
+- screenshots/android/
+- screenshots/install-launch/
+
+Logs:
+- logs/desktop/
+- logs/android/
+
+Raw/supporting notes:
+- raw/
+
+Expected package artifacts to reference after build:
+- Desktop DMG: out/installer/dist/anki-26.05-mac-apple.dmg
+- Android APK: /Users/adarshrajesh/wed/AnkiDroid/AnkiDroid/build/outputs/apk/full/release/AnkiDroid-full-arm64-v8a-release.apk

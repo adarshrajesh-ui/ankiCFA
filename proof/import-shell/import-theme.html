@@ -1,0 +1,49 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+  body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;margin:0;background:#eef0f3;padding:24px;color:#1a1a1a}
+  h2{font:600 13px/1 sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#68707d;margin:0 0 12px}
+  .wrap{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .panel{border-radius:8px;padding:0 0 20px;min-height:360px;overflow:hidden}
+  /* BEFORE: stock Anki blue tokens */
+  .before{--button-primary-bg:#3b82f6;--border-focus:#3b82f6;--fg-link:#1d4ed8;--selected-bg:rgba(147,197,253,.5);background:#ffffff}
+  /* AFTER: CFA tokens (matches ImportPage .cfa-import.is-light overrides) */
+  .after{--button-primary-bg:#122b46;--border-focus:#da5c01;--fg-link:#da5c01;--selected-bg:#fcebda;background:#fafbfd}
+  .eyebrow{font:600 12px/1 sans-serif;letter-spacing:.09em;text-transform:uppercase;color:#da5c01;margin:20px 0 0 20px}
+  /* sticky header: filename + primary Import button */
+  .sticky{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-bottom:1px solid #e3e7ec;margin-top:14px}
+  .filename{font-size:14px;color:#3a4553;font-weight:600}
+  .imp{background:var(--button-primary-bg);color:#fff;border:none;border-radius:5px;padding:8px 18px;font-size:14px;font-weight:600;cursor:pointer}
+  .body{padding:0 20px}
+  .sec-title{font:600 17px/1.3 Georgia,serif;color:#122b46;border-bottom:1px solid #e3e7ec;padding-bottom:6px;margin:18px 0 12px}
+  .switch-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;font-size:13px;color:#3a4553}
+  .switch{width:34px;height:18px;border-radius:9px;background:var(--button-primary-bg);position:relative}
+  .switch::after{content:"";position:absolute;right:2px;top:2px;width:14px;height:14px;border-radius:50%;background:#fff}
+  .selrow{background:var(--selected-bg);border-radius:6px;padding:9px 12px;font-size:13px;border:1px solid var(--border-focus);margin-top:10px}
+  a{color:var(--fg-link);font-size:13px;text-decoration:none}
+  .h2wrap{padding:0 20px}
+</style></head><body>
+<div class="wrap">
+  <div class="panel before">
+    <div class="h2wrap"><h2 style="margin-top:20px">Before — stock Anki</h2></div>
+    <div class="sticky"><span class="filename">cfa-level-ii.apkg</span><button class="imp">Import</button></div>
+    <div class="body">
+      <div class="sec-title" style="color:#1a1a1a;font-family:sans-serif">Import options</div>
+      <div class="switch-row"><span>Also import scheduling information</span><span class="switch"></span></div>
+      <div class="switch-row"><span>Import any deck presets</span><span class="switch"></span></div>
+      <div class="selrow">Update notes: <b>If newer</b></div>
+      <a href="#">Learn more about importing</a>
+    </div>
+  </div>
+  <div class="panel after">
+    <div class="eyebrow">ankiCFA · Level II · Import</div>
+    <div class="h2wrap"><h2 style="margin-top:8px">After — CFA design system</h2></div>
+    <div class="sticky"><span class="filename">cfa-level-ii.apkg</span><button class="imp">Import</button></div>
+    <div class="body">
+      <div class="sec-title">Import options</div>
+      <div class="switch-row"><span>Also import scheduling information</span><span class="switch"></span></div>
+      <div class="switch-row"><span>Import any deck presets</span><span class="switch"></span></div>
+      <div class="selrow">Update notes: <b>If newer</b></div>
+      <a href="#">Learn more about importing</a>
+    </div>
+  </div>
+</div>
+</body></html>
