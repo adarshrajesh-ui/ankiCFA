@@ -31,7 +31,7 @@ Legend: TODO / WIP / DONE (evidence path) / BLOCKED (root cause).
 | Pass | Desktop | Mobile | Log |
 |------|---------|--------|-----|
 | 1 (critical) | DONE (CFA web 5 MAJOR + 4 MINOR fixed; Qt chrome → Pass 2) | DONE (all 7 MAJORs fixed) | `UI-CRITIQUE-LOG.md` Pass 1 |
-| 2 (harsher) | WIP (Qt chrome: D7 Connect/Logout — named must-fix — FIXED) | TODO | `UI-CRITIQUE-LOG.md` Pass 2 |
+| 2 (harsher) | WIP (Qt chrome: D7 Connect/Logout — named must-fix — FIXED; D9 populated render; D3 Deadline) | WIP (M6-1 DeckPicker stock-blue leak FIXED) | `UI-CRITIQUE-LOG.md` Pass 2 |
 | 3 (ruthless) | TODO | TODO | |
 
 Phase B kicked off (iter 25). `proof/friday/UI-INVENTORY.md` (every desktop +
@@ -157,6 +157,20 @@ mobile screen/state) and `proof/friday/UI-CRITIQUE-LOG.md` created.
   (2 e2e, asserts zero warn rows + "New" + hint on the fresh deck). Before/after
   `desktop-ui/pass-2-before/03,04` + `pass-2/03,04`. Green: `check:vitest` 62/62,
   eslint/svelte/tsc, `ruff` on `mediasrv.py`.
+
+**Pass 2 mobile — started (iter 34): DeckPicker stock-blue leak (M6-1).**
+- After the Pass-1 shell refactor branded the shell navy, the harsher Pass-2
+  lens found TWO residual stock-AnkiDroid blue tokens leaking on the primary
+  landing screen (DeckPicker): filtered/dynamic **deck names** (`dynDeckColor`
+  `#2222bb`) and the **"new" card counts** (`newCountColor`
+  `material_indigo_700`). **FIXED (M6-1, MAJOR)** — both retoned to
+  `@color/cfa_navy` in `theme_light.xml`; the deck list now reads as one cohesive
+  navy CFA list (learn=red/review=green count semantics kept, orange FAB the
+  single accent). Device-observable before/after on `emulator-5554`
+  (`AnkiDroid: proof/gnhf-speedrun/mobile-ui/pass-2-before/01` →
+  `pass-2/01` + `02` + `deckpicker-brand.txt`). Green:
+  `installFullDebug`, `lintVitalFullRelease`, `ktlintCheck`. Committed on
+  `gnhf/speedrun-mobile` (orchestrator does not touch the mobile repo).
 
 Named must-fix: desktop Readiness renders with data (**functional gate DONE** +
 **populated real-range render DONE, iter 32**); **Connect/Logout redesigned

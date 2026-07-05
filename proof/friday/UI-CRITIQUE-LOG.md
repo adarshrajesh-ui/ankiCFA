@@ -287,5 +287,36 @@ rows + the calm "New" cells + the hint. Full `check:vitest` 62/62,
 - Remaining Qt-chrome surfaces: D4 Ethics reviewer, D6 AI Settings dialog,
   D8 deck browser, D11 window chrome — capture + critique.
 
-## Pass 2 (harsher) — MOBILE: TODO
+## Pass 2 — MOBILE (harsher): stock-blue leaks through the navy shell
+
+Pass 1 branded the shell navy (toolbar, status bar, nav drawer, Reviewer, FAB)
+and resolved all 7 Pass-1 MAJORs. The harsher Pass-2 lens re-captured the primary
+screens on `emulator-5554` (real running debug build) and looked specifically for
+*residual* stock-AnkiDroid colour leaking through the new navy shell.
+
+Captures (before = current post-shell-refactor state; after = this pass), branch
+`gnhf/speedrun-mobile` at `AnkiDroid: proof/gnhf-speedrun/mobile-ui/`:
+- `pass-2-before/01-deckpicker.png`, `03-exam-readiness-top.png`,
+  `04-exam-readiness-bottom.png`
+- `pass-2/01-deckpicker.png`, `02-nav-drawer.png`, `deckpicker-brand.txt`
+
+### M6 — DeckPicker (residual stock-blue on the primary landing screen)
+| # | Severity | Element | Issue | Fix |
+|---|----------|---------|-------|-----|
+| M6-1 | MAJOR | filtered deck names + "new" counts | After the shell went navy, TWO stock-AnkiDroid blue tokens still leaked on the first screen the user opens every session: the **filtered/dynamic deck NAMES** ("Study — Ethics Minimal-Pairs", "CFA Exam Priority") rendered in stock blue (`dynDeckColor` = `#2222bb`), and the **"new" card COUNT numbers** (20 / 29 / 99 / 1) rendered in indigo-blue (`newCountColor` = `@color/material_indigo_700`). Together the DeckPicker read blue-accented despite the navy shell — the exact "non-native-CFA feel" the objective flags. | **FIXED (iter 34)** — in `theme_light.xml` (shipped default day theme) both tokens now point at `@color/cfa_navy`. The CFA study decks are curated study modes, not an Anki implementation detail to surface in loud blue, so their names read in brand navy → one cohesive branded deck list. The "new" count keeps the three-way distinction (new = navy, learn = red, review = green); the semantic learn/review colours (the learned Anki affordance) are unchanged, matching the M5-2 decision. Orange FAB stays the single warm accent. Before `pass-2-before/01` → after `pass-2/01` + `02`. |
+
+**Verification:** `./gradlew :AnkiDroid:installFullDebug` (BUILD SUCCESSFUL) →
+device-observable after capture; `:AnkiDroid:lintVitalFullRelease` + `ktlintCheck`
+**BUILD SUCCESSFUL**. Theme-resource-only change (no Kotlin) so the `*Cfa*` unit
+tests are unaffected. `material_indigo_700` is a library (`anki-common`) colour
+with other definitions, so dropping the app reference does not trip
+`UnusedResources`.
+
+### Still-TODO (mobile Pass 2/3)
+- Harsher sweep of the remaining screens (Reviewer, Exam Config) for residual
+  stock colour; MINORs carried from Pass 1 (M2-2 generic drawer icon for Exam
+  Readiness, M4-2 sparse Exam-Config density, M3-5 per-topic "no data" hint line
+  + 8→10 topic parity when the AAR is rebuilt); Readiness give-up microcopy
+  repeats the memory/performance reasons across the three cards (Pass-3 polish).
+
 ## Pass 3 (ruthless, pixel-level) — TODO (both apps)
