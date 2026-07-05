@@ -61,6 +61,14 @@ def test_conflict_rule_rejects_cross_card():
 
 
 def _review(col, cid: int, ease: int) -> None:
+    # Settle first so this review's collection `mod` lands in a strictly later
+    # millisecond than the preceding sync. Anki's incremental sync keys "does
+    # the server have anything new?" off the collection modification time; in a
+    # fast test the setup sync, a review, and the next sync can all share one ms
+    # tick, so the receiving device's cached server-mod anchor collides with the
+    # server's new mod and it reports NO_CHANGES forever (extra sync rounds do
+    # NOT help — verified). Spacing the review's mod out is the actual fix.
+    time.sleep(0.05)
     card = col.get_card(cid)
     card.start_timer()
     col.sched.answerCard(card, ease)
