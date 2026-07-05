@@ -32,7 +32,7 @@ Legend: TODO / WIP / DONE (evidence path) / BLOCKED (root cause).
 |------|---------|--------|-----|
 | 1 (critical) | DONE (CFA web 5 MAJOR + 4 MINOR fixed; Qt chrome → Pass 2) | DONE (all 7 MAJORs fixed) | `UI-CRITIQUE-LOG.md` Pass 1 |
 | 2 (harsher) | DONE (D7 Connect/Logout — named must-fix — FIXED; D9 populated render; D3 Deadline; D4 Ethics reviewer gold-phrase ladder FIXED; D6 AI Settings dialog redesigned FIXED; D8 deck-browser stock-blue leak FIXED; D11 CFA menu grouped into labelled sections FIXED — every D1–D11 surface captured+critiqued) | DONE (M6-1 DeckPicker stock-blue leak FIXED; M7-1 Readiness abstain triple-repeat FIXED; M4-2 Exam-Config context line + live countdown FIXED; M8-1 Reviewer "Show answer" CTA stock-blue→navy FIXED — every mobile surface captured+critiqued) | `UI-CRITIQUE-LOG.md` Pass 2 |
-| 3 (ruthless) | WIP (D-P3-1 WCAG AA contrast audit — faint→faint-ink, 16-test guard, FIXED) | TODO | `UI-CRITIQUE-LOG.md` Pass 3 |
+| 3 (ruthless) | WIP (D-P3-1 WCAG AA contrast audit — faint→faint-ink, 16-test guard, FIXED) | WIP (M-P3-1 WCAG AA contrast audit — accent-as-text fails AA → accent-ink/on-navy, 10-test guard, FIXED) | `UI-CRITIQUE-LOG.md` Pass 3 |
 
 Phase B kicked off (iter 25). `proof/friday/UI-INVENTORY.md` (every desktop +
 mobile screen/state) and `proof/friday/UI-CRITIQUE-LOG.md` created.
@@ -325,6 +325,30 @@ mobile screen/state) and `proof/friday/UI-CRITIQUE-LOG.md` created.
   green; both populated e2e specs 2/2. Before/after +
   `03-contrast-audit-proof.png` under `desktop-ui/pass-3{,-before}/` +
   `contrast-audit.txt`.
+
+**Pass 3 mobile — started (iter 44): scientific WCAG AA contrast audit.**
+- **M-P3-1 (MAJOR, accessibility) FIXED** — the ruthless mobile pass opened with
+  the same *measured* WCAG 2.1 audit applied to the CFA Android tokens (ratios
+  computed from the compiled `R.color` values). Finding: the warm brand accent
+  `cfa_accent` (#DA5C01) was colouring small readable TEXT — the Readiness &
+  Config eyebrows (11sp), the exam countdown (13sp) on white and the nav-drawer
+  tagline (12sp) on navy — yet only reaches **3.81:1 on white / 3.78:1 on navy**,
+  below AA's 4.5:1 (the desktop design system already dodges this by using an
+  AA-safe green eyebrow, `Eyebrow.svelte` #007e56, not the orange accent).
+  Parity-safe fix (accent VALUE unchanged → still correct for the FAB tint /
+  outlined-button ripple / progress indicator): two AA-safe accent-**text**
+  tokens in `res/values/cfa.xml` — **`cfa_accent_ink` #A84500** for light
+  backgrounds (white 5.97 / surface 5.50) and **`cfa_accent_on_navy` #F0894A**
+  for the navy drawer (5.74); darkening reduces navy contrast, so navy needs a
+  brighter tint (hence two tokens). Repointed the 4 TextViews. New
+  `CfaContrastTest.kt` (**10 tests, green**) computes contrast from the compiled
+  resources, asserts AA on every background, documents why the raw accent fails,
+  and a regression guard that parses the layouts and fails if `cfa_accent`
+  returns as a text colour. Device-observable before/after (stash-isolated) +
+  `04-contrast-audit-proof.png` under `AnkiDroid: proof/gnhf-speedrun/mobile-ui/pass-3{,-before}/`
+  + `contrast-audit.txt`. Green: CFA unit tests, `lintVitalFullRelease`,
+  `ktlintCheck`, `installFullDebug`. Committed on `gnhf/speedrun-mobile`
+  (`ff9a2632b5`).
 
 Named must-fix: desktop Readiness renders with data (**functional gate DONE** +
 **populated real-range render DONE, iter 32**); **Connect/Logout redesigned

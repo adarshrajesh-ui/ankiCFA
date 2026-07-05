@@ -504,4 +504,30 @@ check:eslint` all green; the two populated e2e specs still 2/2. **Honesty:** the
 GPT-4o vision critic is still unavailable (no `OPENAI_API_KEY`); the ratios are
 *computed*, which is stronger than a vision opinion for this class of defect.
 
-## Pass 3 — MOBILE (ruthless, pixel-level) — TODO
+## Pass 3 — MOBILE (ruthless, pixel-level): accessibility / contrast
+
+Same ruthless lens as the desktop Pass-3 audit, applied to the CFA Android
+tokens: a *measured* WCAG 2.1 audit (ratios computed from the compiled
+resource values, not by eye). It found the mobile sibling of the desktop
+finding — a warm-accent-as-small-text accessibility defect the earlier passes
+missed.
+
+### M-P3-1 — Warm brand accent fails WCAG AA as small text (the audit finding)
+
+| ID | Severity | Where | Critique | Fix |
+|----|----------|-------|----------|-----|
+| M-P3-1 | MAJOR (accessibility) | Readiness eyebrow (11sp), Config eyebrow (11sp), Config exam countdown (13sp), nav-drawer tagline (12sp) | The warm brand accent `cfa_accent` (#DA5C01) was colouring small readable **text** in four TextViews, yet only reaches **3.81:1 on white** and **3.78:1 on the navy drawer** — below WCAG AA's 4.5:1 normal-text bar (it does not even clear the 3:1 large-text floor comfortably). The desktop design system already avoids this exact trap (`Eyebrow.svelte` uses the AA-safe `$cfa-mm-green` #007e56, not the orange accent); mobile had copied the accent onto text directly and never caught it. | **FIXED (iter 44)** — parity-safe (iter-26/43 pattern: add a new token, never change the accent's value — it stays correct for the FAB tint / outlined-button ripple / progress indicator, none of which are small text). Two AA-safe accent-**text** tokens added to `res/values/cfa.xml`: **`cfa_accent_ink` #A84500** for LIGHT backgrounds (white 5.97:1 / cfa_surface 5.50:1) and **`cfa_accent_on_navy` #F0894A** for the navy drawer (5.74:1). Note: darkening (like accent_ink) *reduces* contrast on navy, so the navy drawer needs a *brighter* warm tint — hence two tokens. Repointed the 4 TextViews. |
+
+**Verification:** `AnkiDroid/src/test/java/com/ichi2/anki/cfa/CfaContrastTest.kt`
+(**10 tests, green**) — computes WCAG contrast from the real compiled `R.color`
+values, asserts AA for every CFA text token on its background, **documents why
+the raw accent fails** (pins the finding so the accent can't be "fixed" by
+quietly brightening the FAB), asserts the two new tokens clear AA, asserts the
+fix stayed warm-orange (R>B by ≥60, not a grey collapse), and a **regression
+guard** that parses the three layout XMLs and fails if `cfa_accent` ever returns
+as a TextView `textColor`. Green: CFA unit tests, `lintVitalFullRelease`,
+`ktlintCheck`, `installFullDebug`. Device-observable before/after on
+`emulator-5554` (stash-isolated) + a FAIL→PASS swatch proof under
+`AnkiDroid: proof/gnhf-speedrun/mobile-ui/pass-3{,-before}/` + `contrast-audit.txt`.
+**Honesty:** GPT-4o vision critic still unavailable (no `OPENAI_API_KEY`); the
+ratios are *computed*, which is stronger than a vision opinion for this defect.
