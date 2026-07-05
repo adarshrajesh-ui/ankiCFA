@@ -1,6 +1,10 @@
 // Copyright: Ankitects Pty Ltd and contributors
 // License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
 
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+
 import { expect, test } from "vitest";
 
 import type { TopicRow } from "../types";
@@ -19,6 +23,8 @@ import {
     topicRadius,
 } from "./conceptmap";
 
+const here = dirname(fileURLToPath(import.meta.url));
+
 function topic(over: Partial<TopicRow>): TopicRow {
     return {
         topic: "Equity Investments",
@@ -29,6 +35,10 @@ function topic(over: Partial<TopicRow>): TopicRow {
         covered: true,
         ...over,
     };
+}
+
+function componentSource(): string {
+    return readFileSync(join(here, "CfaConceptMapPage.svelte"), "utf8");
 }
 
 // The 10 official Level II areas (weights are single points inside the bands).
@@ -221,12 +231,7 @@ test("drillFor: centre suggests the dimmest heavy sections; topics get a drill",
 // score and breaks the give-up rule. Lock the fix in the Svelte source so a
 // revert to `width: {active.pct ?? 0}%` is caught.
 test("D-P4-1: panel gauge distinguishes abstain from a genuine 0%", () => {
-    const fs = require("node:fs") as typeof import("node:fs");
-    const path = require("node:path") as typeof import("node:path");
-    const src = fs.readFileSync(
-        path.join(__dirname, "CfaConceptMapPage.svelte"),
-        "utf8",
-    );
+    const src = componentSource();
     // The abstain-conflating fallback must be gone…
     expect(src).not.toContain("active.pct ?? 0}%");
     // …the fill is only drawn when there IS a measured pct…
@@ -243,12 +248,7 @@ test("D-P4-1: panel gauge distinguishes abstain from a genuine 0%", () => {
 // honouring the give-up rule ("no data yet"). Lock it in the source so the
 // tooltip can't silently regress back to panel-only.
 test("D-P4-3: hover tooltip renders name + % at the node (spec parity)", () => {
-    const fs = require("node:fs") as typeof import("node:fs");
-    const path = require("node:path") as typeof import("node:path");
-    const src = fs.readFileSync(
-        path.join(__dirname, "CfaConceptMapPage.svelte"),
-        "utf8",
-    );
+    const src = componentSource();
     // The tooltip is driven by hover/focus (hotId), never by a pinned select…
     expect(src).toMatch(/tipNode = hotId !== null/);
     // …it emits both the name and a "% mastered"/"no data yet" line…
@@ -268,12 +268,7 @@ test("D-P4-3: hover tooltip renders name + % at the node (spec parity)", () => {
 // 1.3.1). It must be role="group" so the map keeps its accessible name AND the
 // interactive nodes stay reachable. Lock it in the source.
 test("D-P4-4: map SVG is a named group, not an a11y-pruning role=img", () => {
-    const fs = require("node:fs") as typeof import("node:fs");
-    const path = require("node:path") as typeof import("node:path");
-    const src = fs.readFileSync(
-        path.join(__dirname, "CfaConceptMapPage.svelte"),
-        "utf8",
-    );
+    const src = componentSource();
     // The <svg ...> attributes (up to the first '>') carry role="group",
     // never role="img", while keeping the accessible name.
     const svgOpen = src.slice(src.indexOf("<svg"), src.indexOf(">", src.indexOf("<svg")) + 1);
@@ -291,12 +286,7 @@ test("D-P4-4: map SVG is a named group, not an a11y-pruning role=img", () => {
 // the Escape-to-unpin key handling (both on-node and window-level), and the
 // discoverability hint so the exits can't silently regress.
 test("D-P4-5: a pinned node can always be unpinned (toggle + Escape)", () => {
-    const fs = require("node:fs") as typeof import("node:fs");
-    const path = require("node:path") as typeof import("node:path");
-    const src = fs.readFileSync(
-        path.join(__dirname, "CfaConceptMapPage.svelte"),
-        "utf8",
-    );
+    const src = componentSource();
     // Clicking the same pinned node toggles the selection off (not a one-way set).
     expect(src).toMatch(/selId = selId === n\.id \? null : n\.id/);
     // Escape clears the pin from anywhere via a window keydown listener…
@@ -306,4 +296,35 @@ test("D-P4-5: a pinned node can always be unpinned (toggle + Escape)", () => {
     expect(src).toMatch(/e\.key === "Escape" && selId !== null/);
     // The exit is discoverable in the lede copy.
     expect(src).toContain("to unpin");
+});
+
+test("frozen liquid-glass surface keeps the key production selectors", () => {
+    const src = componentSource();
+
+    expect(src).toContain("Exact build target · liquid glass · same on phone &amp; desktop");
+    expect(src).toContain('class="cfa-map__appbar"');
+    expect(src).toContain('class="cfa-map__hero"');
+    expect(src).toContain('class="cfa-map__stage"');
+    expect(src).toContain('class="cfa-map__mapbox"');
+    expect(src).toContain('class="cfa-map__panel"');
+    expect(src).toContain('class="cfa-map__section-card"');
+    expect(src).toContain("pearl");
+    expect(src).toContain("liquid glass");
+});
+
+test("batched explanation bridge fires once on mount and never per node tap", () => {
+    const src = componentSource();
+
+    expect(src).toMatch(/onMount\(\(\) => \{[\s\S]*?bridgeCommand<string>\(\s*"cfaExplainMap:"/);
+    expect(src.match(/cfaExplainMap:/g)).toHaveLength(1);
+    expect(src).toMatch(/on:click=\{\(\) => onSelect\(n\)\}/);
+    expect(src).not.toMatch(/on:click=\{\(\) => bridgeCommand<string>\(\s*"cfaExplainMap:/);
+});
+
+test("AI-off fallback copy and priority drill routing remain available", () => {
+    const src = componentSource();
+
+    expect(src).toContain("AI is off — these explanations are the deterministic templated fallback");
+    expect(src).toContain('on:click={() => go("cfa:priority")}');
+    expect(src).toContain("{drillFor(active)}");
 });

@@ -47,7 +47,7 @@ class CfaConceptMap:
         # The map is self-contained (hover/click are handled client-side), but a
         # node's "next drill" chip can delegate to the existing CFA study entry
         # points so the map adds no new study/scoring logic of its own.
-        import aqt.cfa as cfa
+        from aqt import cfa
 
         mw = self.mw
         if url == "cfa:priority":

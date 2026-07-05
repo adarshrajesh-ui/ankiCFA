@@ -1,0 +1,10 @@
+freeze generated: 2026-07-05 15:42:34
+feature: Concept Map - Mastery Engine Liquid Glass
+approved source: /Users/adarshrajesh/AlphaWeek2/ankiCFA/.lavish/concept-map-spec.html
+folder: /Users/adarshrajesh/AlphaWeek2/ankiCFA/.lavish/perfect features/Concept Map - Mastery Engine Liquid Glass
+source: /Users/adarshrajesh/AlphaWeek2/ankiCFA/.lavish/perfect features/Concept Map - Mastery Engine Liquid Glass/source.html
+feature spec: /Users/adarshrajesh/AlphaWeek2/ankiCFA/.lavish/perfect features/Concept Map - Mastery Engine Liquid Glass/FEATURE.md
+packet html: /Users/adarshrajesh/AlphaWeek2/ankiCFA/.lavish/perfect features/Concept Map - Mastery Engine Liquid Glass/packet.html
+pdf: /Users/adarshrajesh/AlphaWeek2/ankiCFA/.lavish/perfect features/Concept Map - Mastery Engine Liquid Glass/feature.pdf
+desktop screenshot: /Users/adarshrajesh/AlphaWeek2/ankiCFA/.lavish/perfect features/Concept Map - Mastery Engine Liquid Glass/desktop.png
+mobile screenshot: /Users/adarshrajesh/AlphaWeek2/ankiCFA/.lavish/perfect features/Concept Map - Mastery Engine Liquid Glass/mobile.png

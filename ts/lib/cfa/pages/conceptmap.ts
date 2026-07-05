@@ -340,7 +340,12 @@ export function templatedExplanation(node: ConceptNode): string {
             + "is earned, never faked.";
     }
 
-    const recall = pct >= 70 ? "solid" : pct >= 45 ? "decent" : "shaky";
+    let recall = "shaky";
+    if (pct >= 70) {
+        recall = "solid";
+    } else if (pct >= 45) {
+        recall = "decent";
+    }
 
     if (kind === "cfa") {
         return `This is your overall CFA readiness — about ${pct}%. It's the `
