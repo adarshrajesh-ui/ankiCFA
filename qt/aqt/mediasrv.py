@@ -857,6 +857,17 @@ def _cfa_deadline_payload(col: Collection, deck_id: int) -> dict[str, Any]:
     )
     recalls = list(result.predicted_recall)
 
+    # Never-studied (NEW) cards carry no FSRS memory state, so their predicted
+    # exam-day recall is 0.0 BY CONSTRUCTION (see deadline_retention_with_new) —
+    # not a genuine "you will forget everything" figure. Flag them so the page
+    # renders a calm "New" instead of an alarming warn-orange "0.0%", and never
+    # warn-colours a row that only reads 0.0 because it has no data yet.
+    from anki import cfa_deadline
+
+    deck_name = col.decks.name(DeckId(int(deck_id)))
+    escaped = cfa_deadline._escape_deck_name(deck_name)
+    new_set = {int(cid) for cid in col.find_cards(f'deck:"{escaped}" is:new')}
+
     return {
         "examDate": exam_date,
         "topicWeights": dict(topic_weights),
@@ -868,7 +879,11 @@ def _cfa_deadline_payload(col: Collection, deck_id: int) -> dict[str, Any]:
                 "cardId": result.card_ids[i],
                 "predictedRecall": recalls[i],
                 "suggestedIntervalDays": result.suggested_interval_days[i],
-                "warnLowRecall": recalls[i] < _CFA_DEADLINE_WARN_RECALL,
+                "isNew": result.card_ids[i] in new_set,
+                "warnLowRecall": (
+                    result.card_ids[i] not in new_set
+                    and recalls[i] < _CFA_DEADLINE_WARN_RECALL
+                ),
             }
             for i in range(len(result))
         ],

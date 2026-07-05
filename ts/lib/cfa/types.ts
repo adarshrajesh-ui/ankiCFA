@@ -115,6 +115,13 @@ export interface DeadlineRow {
     predictedRecall: number;
     suggestedIntervalDays: number;
     warnLowRecall: boolean;
+    /**
+     * True for a never-studied (NEW) card. Such a card has no FSRS memory state,
+     * so its predicted exam-day recall is 0.0 by construction — not a genuine
+     * "you will forget everything" figure. The page renders these calmly as
+     * "New" (not an alarming warn-orange "0.0%").
+     */
+    isNew: boolean;
 }
 
 /** Full payload for the Deadline planner page. */

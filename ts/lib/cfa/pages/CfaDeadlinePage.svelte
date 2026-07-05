@@ -29,6 +29,7 @@ SetCfaExamDate RPC.
         type DeadlinePayload,
         type DeadlineRow,
     } from "$lib/cfa";
+    import { intervalCell, newCardHint, recallCell } from "./deadline";
 
     /** The full Deadline payload (exam date, ranked rows, provenance). */
     export let data: DeadlinePayload;
@@ -55,10 +56,7 @@ SetCfaExamDate RPC.
     $: isEmpty = data.headerMode === "empty";
     $: cardWord = data.cardCount === 1 ? "card" : "cards";
     $: summary = `Exam date ${data.examDate} · ${data.cardCount} ${cardWord} · source: ${data.dataSource}`;
-
-    function formatRecall(recall: number): string {
-        return `${(recall * 100).toFixed(1)}%`;
-    }
+    $: tableHint = newCardHint(data.rows);
 
     function handleSetExamDate(): void {
         onSetExamDate(examDate);
@@ -99,6 +97,9 @@ SetCfaExamDate RPC.
                 predicted exam-day recall is ranked weakest-first here.
             </Caption>
         {:else}
+            {#if tableHint}
+                <Caption>{tableHint}</Caption>
+            {/if}
             <DataTable
                 {columns}
                 rows={data.rows as unknown as CfaRow[]}
@@ -113,11 +114,14 @@ SetCfaExamDate RPC.
                         <span
                             class="cfa-deadline__recall"
                             class:is-warn={deadlineRow.warnLowRecall}
+                            class:is-new={deadlineRow.isNew}
                         >
-                            {formatRecall(deadlineRow.predictedRecall)}
+                            {recallCell(deadlineRow)}
                         </span>
                     {:else}
-                        {deadlineRow.suggestedIntervalDays}
+                        <span class:cfa-deadline__muted={deadlineRow.isNew}>
+                            {intervalCell(deadlineRow)}
+                        </span>
                     {/if}
                 </svelte:fragment>
             </DataTable>
@@ -215,6 +219,18 @@ SetCfaExamDate RPC.
         &.is-warn {
             color: cfa.$cfa-warn; // at-risk (recall < 0.85), semantic preserved
         }
+
+        // A never-studied card has no memory state yet — render a calm muted
+        // "New", NEVER an alarming warn-orange "0.0%".
+        &.is-new {
+            color: cfa.$cfa-muted;
+            font-variant-numeric: normal;
+        }
+    }
+
+    // The capped-interval "–" placeholder for a new card recedes.
+    .cfa-deadline__muted {
+        color: cfa.$cfa-muted;
     }
 
     .cfa-deadline__foot {

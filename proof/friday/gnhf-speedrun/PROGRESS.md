@@ -142,6 +142,22 @@ mobile screen/state) and `proof/friday/UI-CRITIQUE-LOG.md` created.
   `just cfa-capture-populated`; the Pass-1 abstain gate `cfa_readiness_render`
   stays green unseeded (3/3). Evidence `desktop-ui/pass-2/populated-render.txt`.
 
+**Pass 2 desktop — DEADLINE planner captured + fixed (iter 33).**
+- **D3 Deadline planner** (`/cfa-deadline/{deckId}` → `CfaDeadlinePage.svelte`) —
+  a shipped desktop surface that had **never been captured/critiqued** in any
+  pass. Captured both states (real backend) and fixed **D3-1 (MAJOR)**: a fresh
+  all-new deck rendered **50 identical warn-orange `0.0%` rows** (a wall of
+  alarming orange + misleading, since a never-studied card has no memory model so
+  its 0.0 is a placeholder-by-construction, not a real recall). The payload now
+  flags `isNew` (deck `is:new` set) and never warn-colours a data-less row; the
+  page renders new cards as a **calm muted "New"** + en-dash interval + a one-line
+  explanatory hint, while genuinely at-risk **studied** cards keep the
+  `recall < 0.85` warn semantic. New `ts/lib/cfa/pages/deadline.ts` +
+  `deadline.test.ts` (7 vitest) + `ts/tests/e2e/cfa_deadline_render.test.ts`
+  (2 e2e, asserts zero warn rows + "New" + hint on the fresh deck). Before/after
+  `desktop-ui/pass-2-before/03,04` + `pass-2/03,04`. Green: `check:vitest` 62/62,
+  eslint/svelte/tsc, `ruff` on `mediasrv.py`.
+
 Named must-fix: desktop Readiness renders with data (**functional gate DONE** +
 **populated real-range render DONE, iter 32**); **Connect/Logout redesigned
 (DONE, iter 31)**; native-CFA feel everywhere (desktop shell chrome WIP; mobile

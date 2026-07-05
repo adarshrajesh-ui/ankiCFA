@@ -259,9 +259,33 @@ state (this pass). The premium Pass-1 fixes (calm hero, symmetric CTA grid,
 score ranges stay honestly labelled ("not validated against real exam data",
 wide uncalibrated band) and are computed with **no AI**.
 
+### D3 — Deadline planner ("Peak on exam day")
+Captures (real backend, `ts/tests/e2e/cfa_deadline_render.test.ts`, both states):
+- `desktop-ui/pass-2-before/03-cfa-deadline-ranked.png` + `04-cfa-deadline-empty.png`
+- `desktop-ui/pass-2/03-cfa-deadline-ranked.png` + `04-cfa-deadline-empty.png`
+
+This shipped desktop surface (`/cfa-deadline/{deckId}` → `CfaDeadlinePage.svelte`)
+had **never been captured or critiqued** in any Phase-B pass — a real inventory
+gap (D3 in `UI-INVENTORY.md`). Captured this pass and critiqued:
+
+| # | Severity | Element | Issue | Fix |
+|---|----------|---------|-------|-----|
+| D3-1 | MAJOR | ranked table (recall + interval columns) | On a fresh / all-new deck the "weakest-first ranking" rendered **50 identical rows of warn-orange `0.0%` + `0`** — a wall of alarming orange that (a) is a hierarchy-inversion / colour-semantic shout (the *absence* of a memory model is the loudest thing on screen — the same defect fixed on Home/Readiness D1-2/D2-2/D1-3), and (b) is **misleading**: a never-studied card has no FSRS memory state, so `0.0%` is a placeholder-by-construction (`deadline_retention_with_new` assigns new cards recall 0.0), **not** a real "you will forget everything" figure. | **FIXED (iter 33)** — the payload (`mediasrv._cfa_deadline_payload`) now flags never-studied cards (`isNew`, via the deck's `is:new` set) and never warn-colours a row that only reads 0.0 because it has no data yet. `CfaDeadlinePage` renders a new card's recall as a **calm muted "New"** (not warn-orange `0.0%`) and its interval as a muted en-dash, with a one-line hint above the table ("Every card here is new — a predicted exam-day recall appears for each once you've studied it…"). Genuinely at-risk **studied** cards keep the warn-orange `recall < 0.85` semantic. Verified `pass-2/03`: zero `.is-warn` rows on the fresh deck, calm "New" column + hint. |
+| D3-2 | MINOR | empty state (non-CFA deck) | The "No due cards to rank yet." warn Notice + helper caption is honest and calm — no defect. Kept as-is; documented for completeness (`pass-2/04`). | No change needed. |
+
+**Verification:** `ts/lib/cfa/pages/deadline.ts` pure helpers (`recallCell`,
+`intervalCell`, `newCardCount`, `allNew`, `newCardHint`) + `deadline.test.ts`
+(7 vitest tests, green — asserts a new card renders "New" never "0.0%", the
+all-new hint, mixed-deck count/plural, studied-only → no hint).
+`ts/tests/e2e/cfa_deadline_render.test.ts` (2 e2e, green vs the REAL backend)
+captures both states and asserts the fresh-deck table has **zero** warn-orange
+rows + the calm "New" cells + the hint. Full `check:vitest` 62/62,
+`check:eslint`/svelte/typescript green; `ruff check`/`format` clean on
+`mediasrv.py`.
+
 ### Still-TODO (desktop Pass 2/3)
-- Remaining Qt-chrome surfaces: D3 Deadline dialog, D4 Ethics reviewer, D6 AI
-  Settings dialog, D8 deck browser, D11 window chrome — capture + critique.
+- Remaining Qt-chrome surfaces: D4 Ethics reviewer, D6 AI Settings dialog,
+  D8 deck browser, D11 window chrome — capture + critique.
 
 ## Pass 2 (harsher) — MOBILE: TODO
 ## Pass 3 (ruthless, pixel-level) — TODO (both apps)
