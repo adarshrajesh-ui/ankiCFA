@@ -42,9 +42,9 @@ def _command_actions(menu) -> list:
     return [a for a in menu.actions() if not a.isSeparator()]
 
 
-def test_cfa_menu_has_eight_actions() -> None:
+def test_cfa_menu_has_seven_actions() -> None:
     _mw, menu = _make_menu()
-    assert len(_command_actions(menu)) == 8
+    assert len(_command_actions(menu)) == 7
 
 
 def test_cfa_menu_action_labels() -> None:
@@ -57,13 +57,12 @@ def test_cfa_menu_action_labels() -> None:
         "Study by Exam Priority",
         "Peak-on-Exam-Day (Deadline)…",
         "AI Settings…",
-        "Connect to CFA Sync server",
-        "Log out of Sync…",
+        "Connect && Sync CFA Account…",
     ]
 
 
 def test_cfa_menu_is_grouped_into_labelled_sections() -> None:
-    # D11 (Phase B Pass 2): the eight commands are grouped under three labelled
+    # D11 (Phase B Pass 2): the commands are grouped under three labelled
     # native section separators, not a flat undifferentiated list.
     _mw, menu = _make_menu()
     sections = [a.text() for a in menu.actions() if a.isSeparator() and a.text()]
@@ -90,12 +89,13 @@ def test_cfa_menu_sections_order_commands_correctly() -> None:
     assert all(section for section, _ in order)
 
 
-def test_cfa_menu_has_logout_entry_and_handler() -> None:
+def test_cfa_menu_has_connect_sync_entry() -> None:
     from aqt import cfa as cfa_mod
 
     _mw, menu = _make_menu()
     labels = [a.text() for a in menu.actions()]
-    assert "Log out of Sync…" in labels
+    assert "Connect && Sync CFA Account…" in labels
+    assert "Log out of Sync…" not in labels
     assert callable(cfa_mod.logout_of_sync)
 
 
@@ -110,7 +110,7 @@ def test_toolbar_exposes_logout_link() -> None:
 
 
 def test_toolbar_and_menu_expose_connect_sync() -> None:
-    # One-click "Connect" (top bar) + "Connect to CFA Sync server" (menu) both
+    # One-click "Connect & Sync" (top bar/menu) routes to the shared connector.
     # route to the shared one-click connector.
     from aqt.cfa_sync_connect import connect_cfa_sync
     from aqt.toolbar import Toolbar
@@ -120,7 +120,7 @@ def test_toolbar_and_menu_expose_connect_sync() -> None:
 
     _mw, menu = _make_menu()
     labels = [a.text() for a in menu.actions()]
-    assert "Connect to CFA Sync server" in labels
+    assert "Connect && Sync CFA Account…" in labels
 
 
 def test_connect_cfa_sync_configures_and_syncs(monkeypatch) -> None:

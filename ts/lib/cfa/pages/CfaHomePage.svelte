@@ -12,6 +12,7 @@ the stock Anki deck list). Built from the shared CFA design system ($lib/cfa):
   * a STUDY grid of primary CTAs (Ethics minimal-pairs, Exam Priority, the CFA
     deck, Exam Readiness, Peak-on-Exam-Day) — each a bridgeCommand routed to the
     existing CFA entry points,
+  * a sync/account status card with one clear Connect & Sync action,
   * an AI-state chip (opens AI settings) and a Decks escape hatch.
 
 Calm by design: weights <= 600, flat cards, 4px/pill radii, 8px rhythm, and the
@@ -83,6 +84,21 @@ pass/fail/warn semantic triad preserved.
                 {/each}
             </div>
             <Caption>{captionText(data.caption)}</Caption>
+        </section>
+
+        <section class="cfa-home__sync" aria-label="CFA sync status">
+            <div>
+                <Eyebrow tone={data.sync.connected ? "green" : "muted"}>Settings & sync</Eyebrow>
+                <div class="cfa-home__sync-title">{data.sync.status}</div>
+                <div class="cfa-home__sync-meta">
+                    <span>{data.sync.account}</span>
+                    <span>{data.sync.lastSynced}</span>
+                    <span>{data.sync.detail}</span>
+                </div>
+            </div>
+            <button type="button" class="cfa-home__sync-action" on:click={() => go("cfa:sync")}>
+                {data.sync.actionLabel}
+            </button>
         </section>
 
         <section class="cfa-home__block">
@@ -163,6 +179,70 @@ pass/fail/warn semantic triad preserved.
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: cfa.space(5);
+        }
+
+        &__sync {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: cfa.space(5);
+            padding: cfa.space(5);
+            background: cfa.$cfa-bg;
+            border: 1px solid cfa.$cfa-line;
+            border-left: 4px solid cfa.$cfa-primary;
+            border-radius: cfa.$cfa-radius-block;
+
+            @media (max-width: 560px) {
+                align-items: stretch;
+                flex-direction: column;
+            }
+        }
+
+        &__sync-title {
+            margin-top: cfa.space(1);
+            font-family: cfa.$cfa-font-heading;
+            font-size: cfa.$cfa-fs-subtitle;
+            font-weight: cfa.$cfa-weight-semibold;
+            line-height: cfa.$cfa-lh-heading;
+            color: cfa.$cfa-ink;
+        }
+
+        &__sync-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: cfa.space(2);
+            margin-top: cfa.space(2);
+            color: cfa.$cfa-muted;
+            font-size: cfa.$cfa-fs-meta;
+            line-height: cfa.$cfa-lh-snug;
+
+            > span:not(:last-child)::after {
+                content: "·";
+                margin-left: cfa.space(2);
+                color: cfa.$cfa-faint-ink;
+            }
+        }
+
+        &__sync-action {
+            flex: 0 0 auto;
+            cursor: pointer;
+            padding: cfa.space(3) cfa.space(5);
+            font-family: inherit;
+            font-size: cfa.$cfa-fs-small;
+            font-weight: cfa.$cfa-weight-semibold;
+            color: cfa.$cfa-bg;
+            background: cfa.$cfa-primary;
+            border: 1px solid cfa.$cfa-primary;
+            border-radius: cfa.$cfa-radius-pill;
+
+            &:hover {
+                background: cfa.$cfa-primary-hover;
+            }
+
+            &:focus-visible {
+                outline: 2px solid cfa.$cfa-accent;
+                outline-offset: 2px;
+            }
         }
 
         &__stat-name {

@@ -80,18 +80,18 @@ def test_account_link_spec_logged_out_is_connect() -> None:
 
     spec = account_link_spec(False)
     assert spec["cmd"] == "cfa_connect"
-    assert spec["label"] == "Connect"
+    assert spec["label"] == "Connect & Sync"
     assert spec["id"] == "cfa_account"
 
 
-def test_account_link_spec_logged_in_is_logout_naming_account() -> None:
+def test_account_link_spec_logged_in_is_connected_and_syncs() -> None:
     from aqt.cfa_sync_connect import account_link_spec
 
     spec = account_link_spec(True, "cfa")
-    assert spec["cmd"] == "cfa_logout"
-    assert spec["label"] == "Log out"
+    assert spec["cmd"] == "cfa_connect"
+    assert spec["label"] == "Connected"
     assert spec["id"] == "cfa_account"
-    # the tip names the signed-in account so it's clear WHICH login logs out
+    # the tip names the signed-in account so it's clear WHICH account syncs
     assert "cfa" in spec["tip"]
 
 
@@ -99,7 +99,7 @@ def test_account_link_spec_logged_in_without_name_is_safe() -> None:
     from aqt.cfa_sync_connect import account_link_spec
 
     spec = account_link_spec(True, None)
-    assert spec["cmd"] == "cfa_logout"
+    assert spec["cmd"] == "cfa_connect"
     assert "your sync account" in spec["tip"]
 
 
@@ -119,16 +119,16 @@ def test_create_account_link_flips_with_login_state() -> None:
     html = out._create_account_link()
     assert "pycmd('cfa_connect')" in html
     assert 'id="cfa_account"' in html
-    assert ">Connect</a>" in html
+    assert ">Connect & Sync</a>" in html
     assert out.link_handlers["cfa_connect"] == out._cfaConnectLinkHandler
 
-    # logged in -> the SAME control is Log out, wired to the logout handler
+    # logged in -> the SAME control is Connected, wired to the sync/connect handler
     inn = _toolbar_with_auth(True, "cfa")
     html2 = inn._create_account_link()
-    assert "pycmd('cfa_logout')" in html2
+    assert "pycmd('cfa_connect')" in html2
     assert 'id="cfa_account"' in html2
-    assert ">Log out</a>" in html2
-    assert inn.link_handlers["cfa_logout"] == inn._cfaLogoutLinkHandler
+    assert ">Connected</a>" in html2
+    assert inn.link_handlers["cfa_connect"] == inn._cfaConnectLinkHandler
 
 
 def test_center_links_builds_single_account_control() -> None:

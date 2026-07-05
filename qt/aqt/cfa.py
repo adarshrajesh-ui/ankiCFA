@@ -93,17 +93,20 @@ def setup_menu(mw: AnkiQt) -> None:
     ai_settings.setStatusTip("Turn the optional AI features on or off.")
     qconnect(ai_settings.triggered, lambda: _open_ai_settings(mw))
 
-    connect_sync = menu.addAction("Connect to CFA Sync server")
-    connect_sync.setStatusTip("Sign in to the CFA sync server to sync your progress.")
+    connect_sync = menu.addAction("Connect && Sync CFA Account…")
+    connect_sync.setStatusTip("Open the CFA sync setup/status action.")
     qconnect(connect_sync.triggered, lambda: _connect_cfa_sync(mw))
-
-    logout = menu.addAction("Log out of Sync…")
-    logout.setStatusTip("Sign out of the sync account on this device.")
-    qconnect(logout.triggered, lambda: logout_of_sync(mw))
 
     # Keep a reference so the menu (and its slots) survive garbage collection.
     mw._cfa_menu = menu  # type: ignore[attr-defined]
     mw.form.menubar.addMenu(menu)
+
+    try:
+        from aqt.cfa_sync_connect import register_sync_status_tracking
+
+        register_sync_status_tracking()
+    except Exception:
+        pass
 
     # Re-skin the remaining stock web surfaces (top toolbar + deck list) with the
     # CFA design system so no screen reads as plain Anki. Safe/additive.

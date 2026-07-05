@@ -19,6 +19,7 @@ and are overridable via the same ``CFA_SYNC_*`` env vars.
 from __future__ import annotations
 
 import os
+import time
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -28,6 +29,8 @@ if TYPE_CHECKING:
 CFA_SYNC_URL = os.environ.get("CFA_SYNC_URL", "http://127.0.0.1:27701/")
 CFA_SYNC_USER = os.environ.get("CFA_SYNC_USER", "cfa")
 CFA_SYNC_PASS = os.environ.get("CFA_SYNC_PASS", "cfa-friday")
+CFA_LAST_SYNC_AT_KEY = "cfaLastSyncAt"
+_SYNC_STATUS_HOOKS_REGISTERED = False
 
 
 def account_link_spec(logged_in: bool, account: str | None = None) -> dict[str, str]:
@@ -39,8 +42,8 @@ def account_link_spec(logged_in: bool, account: str | None = None) -> dict[str, 
     was the "clunky Connect/Logout" the redesign targets. Now exactly ONE
     account control renders next to Sync, reflecting the actual login state:
 
-    * logged out → ``Connect`` (invites you to link this desktop), and
-    * logged in  → ``Log out`` (names the account in its tooltip).
+    * logged out → ``Connect & Sync`` (link this desktop and start sync), and
+    * logged in  → ``Connected`` (names the account and triggers sync).
 
     Returned as a plain dict so it is unit-testable without Qt; the toolbar
     turns it into a single ``create_link`` and wires the matching handler.
@@ -48,17 +51,42 @@ def account_link_spec(logged_in: bool, account: str | None = None) -> dict[str, 
     if logged_in:
         who = account or "your sync account"
         return {
-            "cmd": "cfa_logout",
-            "label": "Log out",
-            "tip": f"Signed in as {who} — click to log out of sync",
+            "cmd": "cfa_connect",
+            "label": "Connected",
+            "tip": f"Signed in as {who} — click to sync CFA progress",
             "id": "cfa_account",
         }
     return {
         "cmd": "cfa_connect",
-        "label": "Connect",
-        "tip": "Connect this desktop to the CFA sync server and sync",
+        "label": "Connect & Sync",
+        "tip": "Connect this desktop to the CFA sync server and start sync",
         "id": "cfa_account",
     }
+
+
+def register_sync_status_tracking() -> None:
+    """Track a lightweight last-sync timestamp for CFA status chrome.
+
+    The stock sync engine does not persist a user-facing "last synced" label on
+    desktop, so the CFA Home card records when the existing GUI sync lifecycle
+    reports completion. It is presentation-only profile metadata.
+    """
+    global _SYNC_STATUS_HOOKS_REGISTERED
+    if _SYNC_STATUS_HOOKS_REGISTERED:
+        return
+
+    import aqt
+    from aqt import gui_hooks
+
+    def on_sync_did_finish() -> None:
+        try:
+            if aqt.mw is not None and aqt.mw.pm.profile is not None:
+                aqt.mw.pm.profile[CFA_LAST_SYNC_AT_KEY] = int(time.time())
+        except Exception:
+            pass
+
+    getattr(gui_hooks, "sync_did_finish").append(on_sync_did_finish)
+    _SYNC_STATUS_HOOKS_REGISTERED = True
 
 
 def connect_cfa_sync(mw: AnkiQt) -> None:
@@ -67,6 +95,13 @@ def connect_cfa_sync(mw: AnkiQt) -> None:
 
     if mw.col is None:
         showWarning("Open a profile first, then Connect.", parent=mw, title="CFA Sync")
+        return
+
+    sync_auth = getattr(mw.pm, "sync_auth", lambda: None)
+    if sync_auth() is not None:
+        account = mw.pm.profile.get("syncUser") or "your sync account"
+        tooltip(f"Syncing CFA progress for {account}…", parent=mw)
+        mw.on_sync_button_clicked()
         return
 
     # 1. Point at the local CFA server. set_custom_sync_url also drops any stale
@@ -92,7 +127,7 @@ def connect_cfa_sync(mw: AnkiQt) -> None:
     mw.pm.set_sync_key(auth.hkey)
     mw.pm.set_sync_username(CFA_SYNC_USER)
 
-    # Flip the top-bar account control from "Connect" to "Log out" right away
+    # Flip the top-bar account control from "Connect & Sync" to "Connected" right away
     # (the single context-aware control keys off pm.sync_auth()).
     try:
         mw.toolbar.draw()

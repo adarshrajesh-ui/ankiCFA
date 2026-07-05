@@ -107,6 +107,15 @@ export interface CfaHomePayload extends ExamReadinessPayload {
     daysToExam: number | null;
     /** Master AI toggle (col.conf `cfa_ai_enabled`); default OFF. */
     aiEnabled: boolean;
+    /** CFA sync/account status for the Home chrome. */
+    sync: {
+        connected: boolean;
+        account: string;
+        status: string;
+        lastSynced: string;
+        detail: string;
+        actionLabel: string;
+    };
 }
 
 /** One ranked row of the Deadline planner table. */
