@@ -407,3 +407,26 @@ Named must-fix: desktop Readiness renders with data (**functional gate DONE** +
 **populated real-range render DONE, iter 32**); **Connect/Logout redesigned
 (DONE, iter 31)**; native-CFA feel everywhere (desktop shell chrome WIP; mobile
 shell DONE); AnkiDroid CFA UI full refactor (Pass 1 DONE).
+
+## Final VERIFIER pass (iter 49) — stop condition reconfirmed GREEN
+Re-ran the targeted cfa tests + rebuilt the desktop stack from a clean check
+after Phase B completed; every gate green, so the run's stop condition is met.
+- **Targeted cfa tests (desktop worktree):** `cfa-eval-test` **67**, `cfa-outline-test`
+  **11**, `cfa-model-docs-test` **5**, `cfa-rust-note-test` **6**, `cfa-results-test`
+  **5**, `cfa-scores-test` **10**, `cfa-parity-test` **2**, `cfa-chrome-test` **7**,
+  `cfa-menu-test` **13**; CFA vitest (`contrast`/`deadline`/`readiness`) **41** — all pass.
+- **Desktop build green:** web stack builds (`rebuild-web` "Build succeeded"; the
+  trailing Chromium-remote-debugger error is the documented harmless hot-reload
+  probe — Anki not open) and the shared Rust backend compiles clean with
+  `scheduler::cfa_scores` **3/3** passing.
+- **Mobile build green:** unchanged since iter 48's green reconfirmation — mobile
+  `HEAD` is still `85ef4fc718` (zero mobile commits since; `installFullDebug` /
+  `lintVitalFullRelease` / `ktlintCheck` / CFA unit tests were green at that SHA).
+- **Evidence present:** desktop **43** before/after PNGs across pass-1/2/3
+  (+ nontext/colorcue variants); mobile **41** committed PNGs across
+  pass-1/1-before/1-shell/2/2-before/3/3-before, plus the M1–M5 L3 device-proof
+  dirs — before/after captured for every inventoried screen on both apps.
+- **Conclusion:** Phase A (A1–A14 + M1–M5) all DONE with tests/evidence; Phase B
+  ran **3 escalating passes for BOTH apps**, all BLOCKER/MAJOR issues fixed and
+  logged in `UI-CRITIQUE-LOG.md`; targeted cfa tests + both builds green. **Stop
+  condition fully met.**
