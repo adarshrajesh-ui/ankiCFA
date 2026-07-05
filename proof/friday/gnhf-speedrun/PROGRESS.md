@@ -30,7 +30,7 @@ Legend: TODO / WIP / DONE (evidence path) / BLOCKED (root cause).
 ## Phase B — UI/UX passes (≥3, escalating; both apps)
 | Pass | Desktop | Mobile | Log |
 |------|---------|--------|-----|
-| 1 (critical) | WIP (MAJORs done) | DONE (all 7 MAJORs fixed) | `UI-CRITIQUE-LOG.md` Pass 1 |
+| 1 (critical) | DONE (CFA web 5 MAJOR + 4 MINOR fixed; Qt chrome → Pass 2) | DONE (all 7 MAJORs fixed) | `UI-CRITIQUE-LOG.md` Pass 1 |
 | 2 (harsher) | TODO | TODO | |
 | 3 (ruthless) | TODO | TODO | |
 
@@ -60,9 +60,20 @@ mobile screen/state) and `proof/friday/UI-CRITIQUE-LOG.md` created.
 - **Honesty:** GPT-4o vision CRITIC is UNAVAILABLE (no `OPENAI_API_KEY`/`.env`);
   critique is a labelled structured senior-designer heuristic pass, not a
   fabricated model transcript.
-- **Still TODO this pass:** desktop MINORs (D1-4/5/6, D2-5); Qt-chrome surfaces
-  (D5–D8, D10–D12); populated (non-abstain) render; then Passes 2–3; and ALL
-  mobile passes. (Desktop Pass-1 MAJORs all resolved.)
+- **ALL Pass-1 desktop MINORs FIXED (iter 30)** — D1-4 (CTA-grid asymmetry →
+  full-width primary + clean 2×2), D1-5 (mixed footer affordances → both pills),
+  D1-6 (dense methodology paragraph → `<details>` "How these scores work"
+  disclosure), D2-5 (flat 10-row "no data" table → a calm hint line above the
+  map). New vitest `ts/lib/cfa/pages/readiness.test.ts` (5 tests green) locks
+  `noRecallYet`/`topicRows`/`captionText`; re-captured `desktop-ui/pass-1/01` +
+  `02`; `test-e2e` cfa_readiness_render 3/3, `check:eslint`/svelte/tsc green.
+  **Every CFA-web-page Pass-1 desktop issue (5 MAJOR + 4 MINOR) resolved** — the
+  CFA Home + Exam Readiness web surfaces are Pass-1 complete.
+- **Deferred to the escalating Pass 2/3:** Qt-chrome native surfaces (D3 Deadline,
+  D4 Ethics reviewer, D6 AI Settings, **D7 Connect/Logout — the objective's named
+  clunky controls**, D8 deck browser, D11 chrome) via `screencapture`; a populated
+  (non-abstain / Bayesian-call) render of D1/D2; then Pass 2 (harsher) + Pass 3
+  (ruthless) for BOTH apps.
 
 **Pass 1 mobile — started (capture + critique DONE, fixes TODO):**
 - 7-screen "before" set captured on `emulator-5554` via `adb screencap` (real

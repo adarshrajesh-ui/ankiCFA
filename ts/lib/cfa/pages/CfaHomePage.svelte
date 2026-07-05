@@ -111,12 +111,15 @@ pass/fail/warn semantic triad preserved.
             >
                 AI {data.aiEnabled ? "On" : "Off"} · settings
             </button>
-            <button type="button" class="cfa-home__decks" on:click={() => go("cfa:decks")}>
-                Browse decks →
+            <button type="button" class="cfa-home__chip" on:click={() => go("cfa:decks")}>
+                Browse decks
             </button>
         </div>
 
-        <Caption tone="muted">{data.footerText}</Caption>
+        <details class="cfa-home__methodology">
+            <summary>How these scores work</summary>
+            <Caption tone="muted">{data.footerText}</Caption>
+        </details>
     </div>
 </div>
 
@@ -176,11 +179,18 @@ pass/fail/warn semantic triad preserved.
             color: cfa.$cfa-faint;
         }
 
-        // CTA grid — flat cards, calm hover, warm accent on the primary drill.
+        // CTA grid — the flagship primary drill spans the full width as a
+        // featured tile; the remaining four form a clean, symmetric 2×2 so the
+        // grid never leaves an orphaned empty cell (D1-4). Collapses to a single
+        // column on narrow widths.
         &__ctas {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: cfa.space(4);
+
+            @media (max-width: 560px) {
+                grid-template-columns: minmax(0, 1fr);
+            }
         }
 
         &__cta {
@@ -210,6 +220,7 @@ pass/fail/warn semantic triad preserved.
             }
 
             &.is-primary {
+                grid-column: 1 / -1;
                 background: cfa.$cfa-accent-soft;
                 border-color: cfa.$cfa-accent;
             }
@@ -234,8 +245,9 @@ pass/fail/warn semantic triad preserved.
             gap: cfa.space(3);
         }
 
-        &__chip,
-        &__decks {
+        // Both footer controls share ONE pill affordance (D1-5) — no mixed
+        // pill-vs-text-link-with-arrow treatment.
+        &__chip {
             cursor: pointer;
             padding: cfa.space(2) cfa.space(4);
             font-family: inherit;
@@ -260,6 +272,45 @@ pass/fail/warn semantic triad preserved.
         &__chip.is-on {
             color: cfa.$cfa-pass;
             border-color: cfa.$cfa-pass;
+        }
+
+        // The dense methodology paragraph is collapsed behind a quiet disclosure
+        // (D1-6) so first-run microcopy no longer dominates the page foot; the
+        // summary is a calm, tappable one-liner.
+        &__methodology {
+            > summary {
+                cursor: pointer;
+                list-style: none;
+                font-size: cfa.$cfa-fs-meta;
+                font-weight: cfa.$cfa-weight-semibold;
+                color: cfa.$cfa-muted;
+
+                &::-webkit-details-marker {
+                    display: none;
+                }
+
+                &::before {
+                    content: "▸ ";
+                    color: cfa.$cfa-faint;
+                }
+
+                &:hover {
+                    color: cfa.$cfa-ink;
+                }
+
+                &:focus-visible {
+                    outline: 2px solid cfa.$cfa-accent;
+                    outline-offset: 2px;
+                }
+            }
+
+            &[open] > summary {
+                margin-bottom: cfa.space(2);
+
+                &::before {
+                    content: "▾ ";
+                }
+            }
         }
     }
 </style>

@@ -30,6 +30,7 @@ the pass/fail/warn semantic triad preserved throughout.
         bandTone,
         bandValue,
         captionText,
+        noRecallYet,
         pct,
         readinessName,
         TOPIC_COLUMNS,
@@ -61,6 +62,7 @@ the pass/fail/warn semantic triad preserved throughout.
     ] satisfies ScoreCard[];
 
     $: rows = topicRows(data.topics);
+    $: awaitingRecall = noRecallYet(rows);
 </script>
 
 <div class="cfa-app cfa-readiness">
@@ -129,6 +131,12 @@ the pass/fail/warn semantic triad preserved throughout.
 
         <section class="cfa-readiness__block">
             <Eyebrow tone="muted">Per-topic recall</Eyebrow>
+            {#if awaitingRecall}
+                <p class="cfa-readiness__table-hint">
+                    No reviews yet — per-topic recall appears here after you study.
+                    The map below lists every exam area and its weight.
+                </p>
+            {/if}
             <DataTable
                 columns={TOPIC_COLUMNS}
                 {rows}
@@ -228,6 +236,16 @@ the pass/fail/warn semantic triad preserved throughout.
             font-size: cfa.$cfa-fs-meta;
             line-height: cfa.$cfa-lh-snug;
             color: cfa.$cfa-faint;
+        }
+
+        // A single calm hint above the coverage table when no topic has recall
+        // data yet, so a fresh deck reads as "awaiting study" rather than ten
+        // flat identical "no data" rows (D2-5).
+        &__table-hint {
+            margin: 0;
+            font-size: cfa.$cfa-fs-meta;
+            line-height: cfa.$cfa-lh-snug;
+            color: cfa.$cfa-muted;
         }
 
         // Recall cell: tabular figures, warn for low/uncovered, faint no-data.

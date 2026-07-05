@@ -77,9 +77,9 @@ Readiness screen demonstrably opens and renders with real data.
 | D1-1 | MAJOR | 3 score cards | On abstain the cards have large dead vertical space below the give-up text; card heights look padded/empty and the third card wraps to 4 lines while the first two are short — inconsistent internal density. | **FIXED** — abstain value down-sized to a short one/two-word "Awaiting reviews" (not a 4-line headline); cards now consistent. |
 | D1-2 | MAJOR | "Not enough data" ×3 | The empty-state headline renders as a huge warn-orange serif three times, dominating the page above the exam countdown — hierarchy inversion (the loudest thing is the *absence* of data). | **FIXED** — abstain value is now a quiet, down-sized (22px) muted-grey "Awaiting reviews" with the reason in the faint sub; the verdict is said once in the hero. |
 | D1-3 | MAJOR | peach "Ethics" CTA vs warn-orange | The highlighted primary CTA (peach) shares the warn/orange family used by "Not enough data", so the same hue reads as both "primary action" and "warning" — semantic color collision. | **FIXED** — abstain now uses the `muted` grey tone (not warn); unset-exam countdown is now neutral navy so the peach CTA is the single warm accent. |
-| D1-4 | MINOR | study CTA grid | 3-then-2 card grid leaves an empty cell on the right of row 2 — asymmetric. | Balance to a 2×? or center the trailing row / promote a 5th tile. |
-| D1-5 | MINOR | AI pill vs "Browse decks →" | Two footer controls use inconsistent affordances (outline pill vs text-link-with-arrow). | Unify into one control style (both pills, or both links). |
-| D1-6 | MINOR | footer paragraph | Long, low-contrast methodology paragraph; dense first-run microcopy. | Collapse behind a "How scores work" disclosure or trim. |
+| D1-4 | MINOR | study CTA grid | 3-then-2 card grid leaves an empty cell on the right of row 2 — asymmetric. | **FIXED (iter 30)** — the flagship primary "Study Ethics" CTA now spans the full width (`grid-column: 1/-1`) as a featured tile and the remaining four form a clean, symmetric 2×2 (`repeat(2, minmax(0,1fr))`, collapses to 1 col ≤560px); no orphaned cell. Verified `pass-1/01`. |
+| D1-5 | MINOR | AI pill vs "Browse decks →" | Two footer controls use inconsistent affordances (outline pill vs text-link-with-arrow). | **FIXED (iter 30)** — both footer controls are now ONE pill affordance (`cfa-home__chip`); the "→" arrow was dropped from "Browse decks" so there is no mixed pill-vs-text-link treatment. Verified `pass-1/01`. |
+| D1-6 | MINOR | footer paragraph | Long, low-contrast methodology paragraph; dense first-run microcopy. | **FIXED (iter 30)** — the dense methodology paragraph is collapsed behind a quiet `<details>` disclosure ("▸ How these scores work"); the page foot is now a calm one-liner. Verified `pass-1/01`. |
 
 ### D2 — Exam Readiness
 | # | Severity | Element | Issue | Fix |
@@ -88,7 +88,7 @@ Readiness screen demonstrably opens and renders with real data.
 | D2-2 | MAJOR | hero + 3 cards | "Not enough data" appears 4× in loud orange on one screen (hero + 3 cards) — repetitive and alarmist for a normal first-run. | **FIXED** — said **once** in the hero; the 3 cards now show a quiet muted "Awaiting reviews" (verified in `pass-1/02`). |
 | D2-3 | MINOR | coverage caption | "as of —" renders an em-dash placeholder → looks unfinished. | **FIXED** — clause omitted when no timestamp (`captionText`). |
 | D2-4 | MINOR | per-topic table sort | The five 0.12-weight areas are not in a stable/canonical order (arbitrary tiebreak). | **FIXED** — deterministic secondary sort by topic name (`topicRows`). |
-| D2-5 | MINOR | 10 identical "no data" rows | Honest but visually flat empty table. | A single-line "No reviews yet — recall appears here after you study" hint above/within the table. |
+| D2-5 | MINOR | 10 identical "no data" rows | Honest but visually flat empty table. | **FIXED (iter 30)** — a single calm hint line ("No reviews yet — per-topic recall appears here after you study. The map below lists every exam area and its weight.") now renders above the table when no topic has recall data yet (`noRecallYet(rows)` + `cfa-readiness__table-hint`); the coverage map still lists all 10 areas + weights. Verified `pass-1/02`. |
 
 **Pass-1 desktop verdict:** the CFA web surfaces are already close to premium
 (brand serif lockup, calm palette, real coverage map). The dominant real defects
@@ -98,16 +98,26 @@ color-semantic collision (D1-1/D2-1, D1-3). **All five Pass-1 desktop MAJORs are
 now FIXED, re-captured (`pass-1/`), and re-verified** (`test-e2e` 6/6 green,
 `check:eslint`/svelte/tsc green) — the abstain state is now a calm muted-grey
 "Awaiting reviews" with the verdict stated once in the hero, and the peach
-primary CTA is the single warm accent that leads the eye. Remaining Pass-1
-desktop items are MINORs (D1-4/5/6, D2-5) + surfaces not yet captured this run:
-D3 Deadline, D4 Ethics reviewer, D6 AI Settings, D7 Connect/Logout, D8 deck
-browser, D11 chrome (Qt surfaces) + a populated (non-abstain) render of D1/D2.
+primary CTA is the single warm accent that leads the eye.
 
-### Still-TODO (desktop, later this pass / next)
+**ALL Pass-1 desktop MINORs FIXED (iter 30)** — D1-4 (CTA-grid asymmetry →
+full-width primary + clean 2×2), D1-5 (mixed footer affordances → both pills),
+D1-6 (dense methodology paragraph → `<details>` disclosure), D2-5 (flat 10-row
+"no data" table → a single calm hint line above the map). Re-captured
+(`pass-1/01` + `pass-1/02`) and re-verified: new vitest `readiness.test.ts`
+(5 tests green), `test-e2e` 3/3 (cfa_readiness_render), `check:eslint`/svelte/tsc
+green. **With this, every CFA-web-page Pass-1 desktop issue (5 MAJOR + 4 MINOR)
+is resolved** — the CFA Home + Exam Readiness web surfaces are Pass-1 complete.
+
+### Still-TODO (desktop — deferred to the escalating Pass 2/3)
+- Qt-chrome surfaces not yet captured this run: D3 Deadline, D4 Ethics reviewer,
+  D6 AI Settings, **D7 Connect/Logout (the objective's named clunky controls)**,
+  D8 deck browser, D11 chrome — via `screencapture`/`grab()`. These are the
+  native Qt shell (not the CFA web pages fixed above) and are the substance of
+  the next desktop pass.
 - Populated (real ranges + Bayesian pass/fail call) capture of D1/D2 — needs a
   reviewed collection; the Python payload path is already unit-tested (F4 /
   `bayesian_readiness`), the web render capture is pending.
-- Qt-chrome surfaces (D5–D8, D10–D12) via `screencapture`/`grab()`.
 
 ---
 

@@ -115,6 +115,16 @@ export function topicRows(topics: TopicRow[]): TopicDisplayRow[] {
         }));
 }
 
+/**
+ * True when the coverage table has topic rows but none has any recall data yet
+ * (every recall cell reads "no data"). Used to show a SINGLE calm hint line
+ * above the table on a fresh deck rather than leaving ten visually flat,
+ * identical "no data" rows with no explanation (D2-5).
+ */
+export function noRecallYet(rows: TopicDisplayRow[]): boolean {
+    return rows.length > 0 && rows.every((r) => r.recall === "no data");
+}
+
 /** The quiet coverage/graded/first-exposure caption line. The "as of …" clause
  * is omitted entirely until there is a real last-review timestamp, so a fresh
  * deck never shows an unfinished-looking "as of —" placeholder. */
