@@ -1,0 +1,77 @@
+Phase B — DESKTOP Pass 2 (harsher): the POPULATED CFA render
+=============================================================
+
+Named must-fix (SPEEDRUN-PLAN §4): "the desktop Readiness screen ... make it
+actually render the three scores, ranges, and coverage map with real data."
+
+Pass 1 proved the honest zero-review ABSTAIN state (the true first-run screen).
+This pass proves the OTHER half — the state a RETURNING learner sees, with a
+real graded review history behind it: real score ranges + a fully lit-up
+coverage map, NOT abstain. The numbers are computed by the same shared engine
+(ComputeCfaScores) from a real seeded study history — honest evidence, not a
+static mock or a fabricated score.
+
+How it is produced (reproducible)
+---------------------------------
+  just cfa-capture-populated
+    -> ./ninja pyenv ts:generated pylib qt
+    -> CFA_SEED_REVIEWS=1 CFA_UI_OUT=.../desktop-ui/pass-2 playwright test
+       cfa_readiness_populated
+
+The launcher (qt/tests/launch_anki_for_e2e.py), when CFA_SEED_REVIEWS is set,
+opens the profile's collection headlessly BEFORE mediasrv, seeds the CFA decks
+(seed_collection) + a graded review history (tools/cfa/seed_reviews.py) that
+crosses every give-up threshold, then closes it; mediasrv opens the populated
+collection and the Svelte pages render real data. Default runs (no env var) keep
+the fresh-profile abstain behaviour, so the Pass-1 abstain gate stays green.
+
+Seeded history (deterministic)
+------------------------------
+  cards touched   : 80  (8 per topic x 10 canonical topics)
+  graded reviews  : 320 (>= MIN_GRADED_REVIEWS 200)     across distinct days
+  first exposures : 80  (>= MIN_FIRST_EXPOSURES 30)
+  topic coverage  : 100% (10/10)  (>= MIN_TOPIC_COVERAGE 50%, no high-wt skipped)
+  accuracy mix    : ~70% correct (ease 3) / ~30% incorrect (ease 1)
+  FSRS state      : fixed stability 30d, per-card elapsed 0.3x..5x stability ->
+                    a realistic recall SPREAD (not a fake flat 100%)
+
+Scores rendered (BEFORE -> AFTER)
+---------------------------------
+  BEFORE (fresh profile, Pass-1 capture pass-1/02-cfa-readiness.png):
+    ABSTAIN — "not enough data: 0 graded reviews (need 200), 0% coverage"
+  AFTER (this pass, 02-cfa-readiness-populated.png):
+    Memory       77%-81%   (point 0.7941, range [0.7749, 0.8133])
+    Performance  59%-79%   (point 0.7000, Wilson 95%)
+    Readiness    42%-92%   (point 0.6849, wide uncalibrated P(pass))
+    Bayesian hero: "likely pass  p=0.59" (est. exam-weighted acc 66%, CI 57-75%)
+    Coverage: 100% (10/10 topics) · 320 graded reviews · 80 first-seen
+    Per-topic recall spans 69%-92% across the 10 areas (real spread, not flat).
+
+Screenshots
+-----------
+  01-cfa-home-populated.png      — Exam Home with real ranges + "52 days to the
+                                   exam · Current call: likely pass (p=0.59)".
+  02-cfa-readiness-populated.png — Exam Readiness: Bayesian hero, three real
+                                   score ranges, full per-topic coverage map
+                                   with varied recall + weights.
+
+Honesty
+-------
+* The pass/fail call is explicitly labelled "not validated against real exam
+  data" on-screen; the readiness band is wide and uncalibrated.
+* No AI is involved — pure spaced-repetition stats (the same numbers render with
+  AI off).
+* GPT-4o vision CRITIC remains UNAVAILABLE (no OPENAI_API_KEY); this is a
+  structured senior-designer heuristic critique on the real captures.
+
+Verification (green)
+--------------------
+  tools/cfa/tests/test_seed_reviews.py  — 7 tests (just cfa-seed-reviews-test):
+    fresh deck abstains; seeding crosses all thresholds; accuracy realistic
+    (not 100%); per-topic recall varies (not flat); deterministic; raises on an
+    empty collection; constants clear the thresholds.
+  ts/tests/e2e/cfa_readiness_populated.test.ts — 2 tests (green): Home +
+    Readiness render real % ranges, no "Awaiting reviews" abstain text, no
+    empty-state hint, coverage map lit.
+  ts/tests/e2e/cfa_readiness_render.test.ts — 3 tests still green unseeded
+    (abstain gate unaffected).

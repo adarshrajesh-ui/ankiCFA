@@ -126,7 +126,23 @@ mobile screen/state) and `proof/friday/UI-CRITIQUE-LOG.md` created.
   `test_cfa_toolbar.py` (25/25 green with menu+chrome), ruff clean. Before/after
   `desktop-ui/pass-2-before/` + `desktop-ui/pass-2/` (logged-out + logged-in).
 
-Named must-fix: desktop Readiness renders with data (**functional gate DONE**);
-**Connect/Logout redesigned (DONE, iter 31)**; native-CFA feel everywhere
-(desktop shell chrome WIP; mobile shell DONE); AnkiDroid CFA UI full refactor
-(Pass 1 DONE).
+**Pass 2 desktop — POPULATED render (iter 32): the returning-learner state.**
+- **D9 populated render DONE** — Pass 1 only captured the zero-review ABSTAIN
+  state; the named must-fix asks for the pages to render the three scores,
+  **RANGES**, and coverage map with **REAL data**. Added `tools/cfa/seed_reviews.py`
+  (seeds a graded history that crosses every give-up threshold on the real
+  shared engine — 320 graded reviews / 80 first exposures / 100% coverage) + a
+  `CFA_SEED_REVIEWS` hook in `qt/tests/launch_anki_for_e2e.py` +
+  `ts/tests/e2e/cfa_readiness_populated.test.ts` (2 green). Captured
+  `desktop-ui/pass-2/01-cfa-home-populated.png` + `02-cfa-readiness-populated.png`:
+  Memory 77%–81%, Performance 59%–79%, Readiness 42%–92%, hero "likely pass
+  p=0.59", per-topic recall spans 69%–92% (realistic spread, not a fake flat
+  100% — D9-2). Ranges stay honestly labelled ("not validated against real exam
+  data"), computed with NO AI. Verify: `just cfa-seed-reviews-test` (7 green),
+  `just cfa-capture-populated`; the Pass-1 abstain gate `cfa_readiness_render`
+  stays green unseeded (3/3). Evidence `desktop-ui/pass-2/populated-render.txt`.
+
+Named must-fix: desktop Readiness renders with data (**functional gate DONE** +
+**populated real-range render DONE, iter 32**); **Connect/Logout redesigned
+(DONE, iter 31)**; native-CFA feel everywhere (desktop shell chrome WIP; mobile
+shell DONE); AnkiDroid CFA UI full refactor (Pass 1 DONE).

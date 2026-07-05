@@ -80,10 +80,45 @@ def _seed_prefs(base: Path) -> None:
     conn.close()
 
 
+def _seed_populated_collection(base: Path) -> None:
+    """Pre-build the profile's collection with a populated CFA review history.
+
+    Opt-in via ``CFA_SEED_REVIEWS`` — used only by the Phase-B "populated render"
+    capture (`cfa_readiness_populated.test.ts`). We open the profile's collection
+    headlessly BEFORE mediasrv, seed the CFA decks + a graded review history that
+    crosses the honest give-up thresholds, and close it; mediasrv then opens the
+    already-populated collection so the Readiness/Home pages render REAL score
+    ranges + a lit coverage map instead of the zero-review abstain state. Left
+    untouched (default) the harness keeps its fresh-profile abstain behaviour.
+    """
+    sys.path.insert(0, str(REPO_ROOT / "out" / "pylib"))
+    sys.path.insert(0, str(REPO_ROOT / "pylib"))
+    sys.path.insert(0, str(REPO_ROOT / "tools" / "cfa"))
+    import seed_collection  # noqa: E402  # tools/cfa
+    import seed_reviews  # noqa: E402  # tools/cfa
+
+    from anki.collection import Collection  # noqa: E402
+
+    profile_dir = base / TEST_PROFILE
+    profile_dir.mkdir(parents=True, exist_ok=True)
+    col = Collection(str(profile_dir / "collection.anki2"))
+    try:
+        seed_collection.seed_collection(col, repo_root=str(REPO_ROOT))
+        # Guard the aqt first-launch seeder (aqt.cfa_seed.maybe_seed) from
+        # re-running on the already-populated collection.
+        col.set_config("cfa_seeded", True)
+        summary = seed_reviews.seed_review_history(col)
+        print(f"CFA populated-render seed: {summary}", flush=True)
+    finally:
+        col.close()
+
+
 def main() -> int:
     with tempfile.TemporaryDirectory(prefix="anki-e2e-") as base_str:
         base = Path(base_str)
         _seed_prefs(base)
+        if os.environ.get("CFA_SEED_REVIEWS"):
+            _seed_populated_collection(base)
 
         env = {
             **os.environ,

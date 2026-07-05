@@ -262,6 +262,19 @@ cfa-bench-test:
     {{ ninja }} pylib
     PYTHONPATH="out/pylib:cfa/ethics_pairs" ANKI_TEST_MODE=1 {{ py }} -m pytest tools/cfa/tests/test_bench.py -q
 
+# Phase B desktop Pass 2: populated-render review seeder test suite.
+cfa-seed-reviews-test:
+    {{ ninja }} pylib
+    PYTHONPATH="out/pylib:cfa/ethics_pairs" ANKI_TEST_MODE=1 {{ py }} -m pytest tools/cfa/tests/test_seed_reviews.py -q
+
+# Phase B desktop Pass 2: capture the POPULATED CFA Home + Readiness render
+# (real score ranges + lit coverage map) into desktop-ui/pass-2/. Seeds a graded
+# review history via CFA_SEED_REVIEWS so the pages are past the abstain wall.
+cfa-capture-populated: _install-playwright-browsers
+    {{ ninja }} pyenv ts:generated pylib qt
+    CFA_SEED_REVIEWS=1 CFA_UI_OUT=proof/friday/gnhf-speedrun/desktop-ui/pass-2 \
+      {{ playwright_env }} {{ yarn }} test:e2e cfa_readiness_populated
+
 # A13: verify a packaged Anki.app is a self-contained CFA-fork installer bundle.
 cfa-installer-verify app:
     {{ py }} tools/cfa/verify_installer.py {{ app }}

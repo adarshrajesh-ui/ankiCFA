@@ -245,10 +245,23 @@ builds exactly one `_create_account_link()` and the old `"cfa_connect"` /
 `test_cfa_chrome` **25/25 green**; ruff check + format clean. The CFA *menu*
 keeps both explicit entries (a menu enumerates all actions; each self-guards).
 
+### D9 — Populated render of Home + Readiness (the returning-learner state)
+| # | Severity | Element | Issue | Fix |
+|---|----------|---------|-------|-----|
+| D9-1 | MAJOR | Readiness / Home whole page | Only the honest zero-review ABSTAIN state had ever been captured. The named must-fix asks for the pages to "render the three scores, RANGES, and coverage map with REAL data" — the *populated* returning-learner state (real ranges + a lit coverage map + a Bayesian pass/fail call) was never proven, so half the must-fix was unevidenced. | **FIXED (iter 32)** — added `tools/cfa/seed_reviews.py` (seeds a graded review history that crosses every give-up threshold on the real shared engine) + a `CFA_SEED_REVIEWS` hook in `launch_anki_for_e2e.py` + `ts/tests/e2e/cfa_readiness_populated.test.ts` (2 green). Captured `pass-2/01-cfa-home-populated.png` + `02-cfa-readiness-populated.png`: Memory 77%–81%, Performance 59%–79%, Readiness 42%–92%, hero "likely pass p=0.59", coverage 100% (10/10), 320 graded reviews. Evidence `pass-2/populated-render.txt`. |
+| D9-2 | MINOR | per-topic recall column | First seed attempt rendered a degenerate flat "100%–100%" recall for every topic — reads as fake seed data on a premium product. | **FIXED (iter 32)** — the seeder now gives each card a distinct elapsed/stability ratio so the FSRS forgetting curve yields a realistic per-topic recall SPREAD (69%–92% across the 10 areas), unit-tested (`test_recall_spread_is_realistic_not_flat`). |
+
+**Populated-render verdict:** with the returning-learner capture, BOTH halves of
+the named "Readiness renders with real data" must-fix are now evidenced — the
+honest first-run abstain (Pass 1) AND the real-range / Bayesian-call populated
+state (this pass). The premium Pass-1 fixes (calm hero, symmetric CTA grid,
+`<details>` methodology disclosure) all hold in the populated state too. All
+score ranges stay honestly labelled ("not validated against real exam data",
+wide uncalibrated band) and are computed with **no AI**.
+
 ### Still-TODO (desktop Pass 2/3)
 - Remaining Qt-chrome surfaces: D3 Deadline dialog, D4 Ethics reviewer, D6 AI
   Settings dialog, D8 deck browser, D11 window chrome — capture + critique.
-- Populated (real ranges / Bayesian pass-fail call) render of D1/D2.
 
 ## Pass 2 (harsher) — MOBILE: TODO
 ## Pass 3 (ruthless, pixel-level) — TODO (both apps)
