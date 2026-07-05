@@ -532,7 +532,6 @@
   }
 
   function requestAiGrade(effSel) {
-    if (typeof pycmd === "undefined") return;
     var goldSpansPayload = [];
     for (var i = 0; i < goldPhrases.length; i++) {
       goldSpansPayload.push({ phrase: goldPhrases[i], rationale: goldRationales[i] });
@@ -565,15 +564,18 @@
         return;
       }
       try {
-        fetch("http://10.0.2.2:27702/cfa/grade", {
+        var proxyUrl = (window.CFA_AI_PROXY_URL || "http://10.0.2.2:27702").replace(/\/+$/, "");
+        var proxyToken = window.CFA_AI_PROXY_TOKEN || "cfa-ai-proxy";
+        fetch(proxyUrl + "/cfa/grade", {
           method: "POST",
-          headers: { "Content-Type": "application/json", "Authorization": "Bearer cfa-ai-proxy" },
+          headers: { "Content-Type": "application/json", "Authorization": "Bearer " + proxyToken },
           body: JSON.stringify(payload)
-        }).then(function (r) { return r.json(); }).then(function (resp) { renderAiGrade(resp); })
+        }).then(function (r) { if (!r.ok) throw new Error("http_" + r.status); return r.json(); }).then(function (resp) { renderAiGrade(resp); })
           .catch(function () { renderAiGrade({ source: "fallback", error: "proxy_unreachable" }); });
       } catch (e) { renderAiGrade({ source: "fallback", error: "proxy_unreachable" }); }
       return;
     }
+    if (typeof pycmd === "undefined") return;
     try {
       pycmd("cfaGradeEthics:" + JSON.stringify(payload), function (resp) { renderAiGrade(resp); });
     } catch (e) { /* AI-off / no bridge: deterministic reveal stands */ }

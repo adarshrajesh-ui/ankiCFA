@@ -147,3 +147,12 @@ def test_token_default():
     # The gate token is NOT the OpenAI key.
     assert ai_proxy._token() == ai_proxy.DEFAULT_TOKEN
     assert "sk-" not in ai_proxy._token()
+
+
+def test_cors_headers_allow_android_webview_preflight():
+    headers = ai_proxy.cors_headers()
+    assert headers["Access-Control-Allow-Origin"] == "*"
+    assert "POST" in headers["Access-Control-Allow-Methods"]
+    assert "OPTIONS" in headers["Access-Control-Allow-Methods"]
+    assert "Authorization" in headers["Access-Control-Allow-Headers"]
+    assert "Content-Type" in headers["Access-Control-Allow-Headers"]

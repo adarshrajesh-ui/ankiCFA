@@ -460,13 +460,13 @@
   }
 
   function requestAiGrade(effSel) {
-    if (typeof pycmd === "undefined") return;
     var goldSpansPayload = [];
     for (var i = 0; i < goldPhrases.length; i++) {
       goldSpansPayload.push({ phrase: goldPhrases[i], rationale: goldRationales[i] });
     }
     var payload = {
       itemId: itemId,
+      standard: srcText("standard"),
       passage: passage,
       answerVerdict: answerVerdict,
       judgedVerdict: judgedVerdict,
@@ -474,6 +474,25 @@
       learnerSpans: learnerSpanTexts(),
       selectionIndices: effSel
     };
+    if (/android/i.test(navigator.userAgent || "")) {
+      if (window.CFA_AI_GRADING_ENABLED === false) {
+        renderAiGrade({ source: "fallback", error: "ai_off" });
+        return;
+      }
+      try {
+        var proxyUrl = (window.CFA_AI_PROXY_URL || "http://10.0.2.2:27702").replace(/\/+$/, "");
+        var proxyToken = window.CFA_AI_PROXY_TOKEN || "cfa-ai-proxy";
+        fetch(proxyUrl + "/cfa/grade", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": "Bearer " + proxyToken },
+          body: JSON.stringify(payload)
+        }).then(function (r) { if (!r.ok) throw new Error("http_" + r.status); return r.json(); }).then(function (resp) {
+          renderAiGrade(resp);
+        }).catch(function () { renderAiGrade({ source: "fallback", error: "proxy_unreachable" }); });
+      } catch (e) { renderAiGrade({ source: "fallback", error: "proxy_unreachable" }); }
+      return;
+    }
+    if (typeof pycmd === "undefined") return;
     try {
       pycmd("cfaGradeEthics:" + JSON.stringify(payload), function (resp) {
         renderAiGrade(resp);
@@ -526,10 +545,16 @@
         (ps[i].note ? " — " + esc(ps[i].note) : "") + "</li>";
     }
     var g = (resp.grade || "").toString();
+    var standard = resp.standard || srcText("standard");
+    var conf = (typeof resp.confidence === "number")
+      ? " · confidence " + Math.round(resp.confidence * 100) + "%" : "";
     box.innerHTML =
       '<div class="cfa-ai-head"><span class="cfa-badge cfa-ai-badge">AI feedback</span>' +
-        "Semantic grade: <b>" + esc(g.charAt(0).toUpperCase() + g.slice(1)) + "</b></div>" +
+        "Graded by AI" + (standard ? " · " + esc(standard) : "") + conf + "</div>" +
+      '<div class="cfa-ai-grade">Semantic grade: <b>' + esc(g.charAt(0).toUpperCase() + g.slice(1)) + "</b></div>" +
       '<div class="cfa-ai-explain">' + esc(resp.explanation || "") + "</div>" +
+      (resp.coaching ? '<div class="cfa-ai-coach">' + esc(resp.coaching) + "</div>" : "") +
+      (resp.study_tip ? '<div class="cfa-ai-tip"><b>Study tip:</b> ' + esc(resp.study_tip) + "</div>" : "") +
       (spansHtml ? '<ul class="cfa-span-detail cfa-ai-spans">' + spansHtml + "</ul>" : "");
     box.hidden = false;
   }

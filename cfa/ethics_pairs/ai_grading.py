@@ -50,8 +50,9 @@ _SYSTEM_PROMPT = (
     "learner. They read a passage, judged the conduct Ethical or Unethical, and "
     "highlighted the phrase(s) they believe are the evidence. You get the "
     "passage, their verdict, the correct verdict, their highlighted phrases, and "
-    "the authored GOLD evidence spans (each with a rationale). Grade the "
-    "highlight SEMANTICALLY (meaning, not exact wording) and give feedback that "
+    "the governing Standard, and the authored GOLD evidence spans (each with a "
+    "rationale). Grade the highlight SEMANTICALLY (meaning, not exact wording) "
+    "and give feedback that "
     "is PERSONAL to THIS learner's actual answer — the whole point is that AI "
     "grading is more useful than an exact-match check.\n\n"
     "Tolerance rules (the error margin):\n"
@@ -69,8 +70,10 @@ _SYSTEM_PROMPT = (
     "Feedback rules — make it TAILORED, not generic:\n"
     "- Quote or reference the learner's OWN highlighted words when praising or "
     "correcting them.\n"
-    "- Name the specific CFA Standard at issue and, in one plain-language "
-    "sentence, WHY the gold evidence is decisive here.\n"
+    "- Cite the governing CFA Standard. If the card supplies one, use it; "
+    "otherwise infer the best Standard from the facts and gold rationales.\n"
+    "- Explain in natural CFA tutor language why the decisive evidence matters. "
+    "Do not force a template; vary the coaching to the learner's actual mistake.\n"
     "- If their verdict was wrong, explain the misread; if right but the "
     "highlight was off, say what stronger evidence to point to.\n"
     "- The study tip must be concrete and specific to THIS Standard/skill.\n\n"
@@ -79,10 +82,10 @@ _SYSTEM_PROMPT = (
     '"highlight_grade": "correct|somewhat|partial|wrong", '
     '"confidence": <0.0-1.0>, '
     '"standard": "<the governing CFA Standard code and name you identify>", '
-    '"explanation": "<=40 words: what evidence was nailed and what was missed", '
-    '"coaching": "<=70 words: personal feedback that references the learner\'s own '
+    '"explanation": "<what evidence was nailed and what was missed>", '
+    '"coaching": "<personal feedback that references the learner\'s own '
     "verdict + highlighted words and the Standard; this is the payoff for AI grading>\", "
-    '"study_tip": "<=25 words: one concrete next step for this Standard/skill", '
+    '"study_tip": "<one concrete next step for this Standard/skill>", '
     '"spans": [{"phrase": "<gold phrase>", "matched": <true|false>, '
     '"note": "<why THIS phrase is (or is not) the decisive evidence>"}]}'
 )
@@ -100,6 +103,7 @@ def _build_user_prompt(
     judged_verdict: str,
     gold_spans: Sequence[dict],
     learner_spans: Sequence[str],
+    standard: str = "",
 ) -> str:
     gold_lines = "\n".join(
         f'  {i + 1}. "{g.get("phrase", "")}" — {g.get("rationale", "")}'
@@ -109,8 +113,14 @@ def _build_user_prompt(
         "\n".join(f'  - "{p}"' for p in learner_spans if str(p).strip())
         or "  (the learner highlighted nothing)"
     )
+    standard_line = (
+        f"GOVERNING STANDARD SUPPLIED BY CARD: {standard}\n"
+        if str(standard).strip()
+        else "GOVERNING STANDARD SUPPLIED BY CARD: (not supplied; infer it)\n"
+    )
     return (
         f"PASSAGE:\n{passage}\n\n"
+        f"{standard_line}"
         f"CORRECT VERDICT: {answer_verdict}\n"
         f"LEARNER'S VERDICT: {judged_verdict}\n\n"
         f"GOLD EVIDENCE SPANS:\n{gold_lines}\n\n"
@@ -235,7 +245,7 @@ def grade_semantic(
     learner_spans: Sequence[str] = (),
     *,
     selection_indices: Optional[Sequence[int]] = None,
-    max_tokens: int = 400,
+    max_tokens: int = 650,
     timeout: float = 30.0,
     complete_fn=None,
     item_id: str = "",
@@ -248,10 +258,10 @@ def grade_semantic(
     problem (AI off, network error, cost cap, unparseable reply) this returns
     the deterministic F1 grade with ``source == "fallback"``. Never raises.
 
-    ``item_id`` and ``standard`` are PROVENANCE the card supplies and are echoed
-    into the result on BOTH paths, so the UI can render the named governing
-    Standard (e.g. "Graded by AI · II(A) Material Nonpublic Information"). The key
-    is NEVER placed in the prompt or any returned value.
+    ``item_id`` is provenance the card supplies and ``standard`` is both prompt
+    context and result provenance, so the UI can render the named governing
+    Standard (e.g. "Graded by AI · II(A) Material Nonpublic Information"). The
+    key is NEVER placed in the prompt or any returned value.
 
     ``complete_fn`` is an injection point for tests; production passes ``None``
     and the shared :mod:`cfa.ai.llm_client` is used.
@@ -278,13 +288,13 @@ def grade_semantic(
 
     system = _SYSTEM_PROMPT
     user = _build_user_prompt(
-        passage, answer_verdict, judged_verdict, gold_spans, learner_spans
+        passage, answer_verdict, judged_verdict, gold_spans, learner_spans, standard
     )
     result = complete_fn(
         system=system,
         user=user,
         max_tokens=max_tokens,
-        temperature=0.0,
+        temperature=0.25,
         timeout=timeout,
         purpose="grade_ethics_highlight",
     )
