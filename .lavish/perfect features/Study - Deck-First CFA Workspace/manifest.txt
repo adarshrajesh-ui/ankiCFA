@@ -1,0 +1,18 @@
+Freeze bundle: Study - Deck-First CFA Workspace
+Timestamp: 2026-07-05 17:10:22
+Source artifact: .lavish/study-screen.html
+Frozen source: .lavish/perfect features/Study - Deck-First CFA Workspace/source.html
+
+Generated artifacts:
+- .lavish/perfect features/Study - Deck-First CFA Workspace/source.html
+- .lavish/perfect features/Study - Deck-First CFA Workspace/desktop.png
+- .lavish/perfect features/Study - Deck-First CFA Workspace/mobile.png
+- .lavish/perfect features/Study - Deck-First CFA Workspace/packet.html
+- .lavish/perfect features/Study - Deck-First CFA Workspace/feature.pdf
+- .lavish/perfect features/Study - Deck-First CFA Workspace/FEATURE.md
+- .lavish/perfect features/Study - Deck-First CFA Workspace/manifest.txt
+
+Caveats:
+- Chrome headless emitted background service/updater logs during capture, but screenshots were generated with non-zero sizes.
+- The source references Google-hosted fonts; captures reflect font availability at generation time.
+- This freeze preserves the approved source exactly and is a pixel-perfect production contract.

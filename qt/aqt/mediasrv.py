@@ -427,6 +427,7 @@ def is_sveltekit_page(path: str) -> bool:
         "cfa-readiness",
         "cfa-deadline",
         "cfa-home",
+        "cfa-study",
         "cfa-concept-map",
     ]
 
@@ -967,6 +968,104 @@ def get_cfa_home_view() -> bytes:
     return generic_pb2.Json(json=json.dumps(payload).encode()).SerializeToString()
 
 
+def _study_deck_description(name: str) -> str:
+    base = name.split("::")[-1]
+    descriptions = {
+        "CFA Level II": "Core Level II review queue, formulas, vignettes, and topic drills.",
+        "Financial Statement Analysis": "Consolidation, leases, pensions, impairment, and intercorporate investments.",
+        "Financial Reporting & Analysis": "Consolidation, leases, pensions, impairment, and intercorporate investments.",
+        "Equity Investments": "Residual income, DDM, multiples, private company valuation, and FCFE.",
+        "Equity Valuation": "Residual income, DDM, multiples, private company valuation, and FCFE.",
+        "Ethics & Professional Standards": "Professional conduct, conflicts, diligence, fair dealing, and client duties.",
+        "Ethics Standards": "Professional conduct, conflicts, diligence, fair dealing, and client duties.",
+        "Quantitative Methods": "Regression, time-series, probability, sampling, and model interpretation.",
+    }
+    return descriptions.get(base, f"{base} cards, examples, and exam-style prompts.")
+
+
+def _topic_mastery_for_deck(name: str, topics: list[dict[str, Any]]) -> float | None:
+    lower = name.lower()
+    aliases = {
+        "financial statement analysis": "financial reporting & analysis",
+        "fra": "financial reporting & analysis",
+        "equity valuation": "equity investments",
+        "ethics standards": "ethics & professional standards",
+        "quant methods": "quantitative methods",
+    }
+    for topic in topics:
+        topic_name = str(topic["topic"])
+        candidates = {topic_name.lower(), aliases.get(lower, "")}
+        if topic_name.lower() in lower or lower in candidates:
+            recall = topic.get("recallRange")
+            if recall is None:
+                return None
+            return (float(recall["low"]) + float(recall["high"])) / 2
+    return None
+
+
+def _flatten_deck_tree(node: Any) -> list[Any]:
+    rows = []
+    for child in getattr(node, "children", []):
+        rows.append(child)
+        rows.extend(_flatten_deck_tree(child))
+    return rows
+
+
+def _cfa_study_payload(col: Collection) -> dict[str, Any]:
+    """Deck-first Study payload from existing deck counts + CFA topic evidence."""
+    home = _cfa_home_payload(col)
+    tree = col.sched.deck_due_tree()
+    rows = _flatten_deck_tree(tree)
+    cfa_rows = [
+        row
+        for row in rows
+        if "cfa" in row.name.lower()
+        or any(str(t["topic"]).lower() in row.name.lower() for t in home["topics"])
+    ] or rows
+
+    def due(row: Any) -> int:
+        return int(row.learn_count) + int(row.review_count)
+
+    ranked = sorted(
+        cfa_rows,
+        key=lambda row: (due(row) * 2 + int(row.new_count), int(row.new_count), row.name),
+        reverse=True,
+    )[:3]
+    deck_cards = [
+        {
+            "id": int(row.deck_id),
+            "name": row.name.split("::")[-1],
+            "description": _study_deck_description(row.name),
+            "due": due(row),
+            "newCount": int(row.new_count),
+            "learn": int(row.learn_count),
+            "review": int(row.review_count),
+            "mastery": _topic_mastery_for_deck(row.name, home["topics"]),
+            "featured": index == 0,
+        }
+        for index, row in enumerate(ranked)
+    ]
+    return {
+        "sync": home["sync"],
+        "totals": {
+            "activeDecks": len(cfa_rows),
+            "dueToday": sum(due(row) for row in cfa_rows),
+            "newQueued": sum(int(row.new_count) for row in cfa_rows),
+        },
+        "decks": deck_cards,
+        "selectedDeckId": int(ranked[0].deck_id) if ranked else None,
+        "footerText": (
+            "Study is intentionally deck-first here. Deck creation, import, "
+            "studying and Add Cards all route to existing Anki flows."
+        ),
+    }
+
+
+def get_cfa_study_view() -> bytes:
+    payload = _cfa_study_payload(aqt.mw.col)
+    return generic_pb2.Json(json=json.dumps(payload).encode()).SerializeToString()
+
+
 post_handler_list = [
     congrats_info,
     get_deck_configs_for_update,
@@ -987,6 +1086,7 @@ post_handler_list = [
     get_cfa_deadline_view,
     set_cfa_exam_date,
     get_cfa_home_view,
+    get_cfa_study_view,
 ]
 
 
@@ -1103,6 +1203,7 @@ def _check_dynamic_request_permissions():
         # no API token), so its read-only score payload is whitelisted here —
         # exactly like congratsInfo.
         "/_anki/getCfaHomeView",
+        "/_anki/getCfaStudyView",
         # CFA fork: Exam Readiness and Concept Map are also first-class
         # main-window states loaded into the same no-token MAIN webview. They
         # read a read-only score payload (Readiness via getCfaExamReadiness; the

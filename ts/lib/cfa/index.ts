@@ -22,6 +22,8 @@ export { default as StatCard } from "./StatCard.svelte";
 export type {
     CfaColumn,
     CfaHomePayload,
+    CfaStudyDeck,
+    CfaStudyPayload,
     CfaRow,
     CfaTone,
     DeadlinePayload,

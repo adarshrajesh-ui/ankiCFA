@@ -311,11 +311,12 @@ class Toolbar:
         gui_hooks.top_toolbar_did_redraw(self)
 
     # CFA fork: which main-window states own a persistent top-bar nav tab, and
-    # the id of the tab that should read as "active" while in that state. (Study
-    # and Ethics launch into the shared overview/review flow rather than a
-    # dedicated state, so they have no persistent active tab.)
+    # the id of the tab that should read as "active" while in that state. Ethics
+    # launches into the shared overview/review flow rather than a dedicated state,
+    # so it has no persistent active tab.
     _CFA_STATE_TABS = {
         "cfaHome": "cfa_home",
+        "cfaStudy": "cfa_study",
         "cfaConceptMap": "cfa_concept_map",
         "cfaReadiness": "cfa_readiness",
         "cfaProgress": "cfa_progress",
@@ -517,9 +518,7 @@ class Toolbar:
         self.mw.moveToState("cfaConceptMap")
 
     def _cfaStudyLinkHandler(self) -> None:
-        import aqt.cfa
-
-        aqt.cfa.study_by_exam_priority(self.mw)
+        self.mw.moveToState("cfaStudy")
 
     def _cfaEthicsLinkHandler(self) -> None:
         import aqt.cfa

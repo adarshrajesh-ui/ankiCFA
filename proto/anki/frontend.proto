@@ -42,6 +42,9 @@ service FrontendService {
   // snapshot + exam countdown + AI state). No request args — resolves the CFA
   // deck server-side.
   rpc GetCfaHomeView(generic.Empty) returns (generic.Json);
+  // CFA fork: JSON payload for the SvelteKit Study deck workspace. No request
+  // args — derives deck cards from the existing collection deck tree.
+  rpc GetCfaStudyView(generic.Empty) returns (generic.Json);
 }
 
 service BackendFrontendService {}

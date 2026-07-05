@@ -122,6 +122,32 @@ export interface CfaHomePayload extends ExamReadinessPayload {
     };
 }
 
+/** One deck card shown in the frozen Study workspace. */
+export interface CfaStudyDeck {
+    id: number;
+    name: string;
+    description: string;
+    due: number;
+    newCount: number;
+    learn: number;
+    review: number;
+    mastery: number | null;
+    featured: boolean;
+}
+
+/** Full payload for the deck-first CFA Study page. */
+export interface CfaStudyPayload {
+    sync: CfaHomePayload["sync"];
+    totals: {
+        activeDecks: number;
+        dueToday: number;
+        newQueued: number;
+    };
+    decks: CfaStudyDeck[];
+    selectedDeckId: number | null;
+    footerText: string;
+}
+
 /** One ranked row of the Deadline planner table. */
 export interface DeadlineRow {
     cardId: number;

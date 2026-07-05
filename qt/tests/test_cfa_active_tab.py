@@ -3,8 +3,8 @@
 
 """The CFA top-bar nav shows WHICH section you're in (active-tab marker).
 
-Stock Anki's toolbar has no active-tab concept, so the CFA nav (Home / Concept
-Map / Readiness) rendered as an undifferentiated row of links — a product nav
+Stock Anki's toolbar has no active-tab concept, so the CFA nav (Home / Study /
+Concept Map / Readiness) rendered as an undifferentiated row of links — a product nav
 should always highlight the current section. The toolbar now marks the tab for
 the current main-window state with `is-active` + `aria-current="page"` (styled
 as a filled accent pill by cfa_chrome), and clears it on every state change so
@@ -38,6 +38,7 @@ def test_state_tab_mapping_covers_the_native_cfa_states() -> None:
     m = toolbar.Toolbar._CFA_STATE_TABS
     assert m == {
         "cfaHome": "cfa_home",
+        "cfaStudy": "cfa_study",
         "cfaConceptMap": "cfa_concept_map",
         "cfaReadiness": "cfa_readiness",
         "cfaProgress": "cfa_progress",
@@ -49,8 +50,8 @@ def test_active_tab_highlights_current_cfa_state() -> None:
     tb._update_active_cfa_tab()
     js = evals[-1]
     assert 'active="cfa_readiness"' in js
-    # all three ids are candidates so the others get cleared
-    for tab in ("cfa_home", "cfa_concept_map", "cfa_readiness"):
+    # all native CFA ids are candidates so the others get cleared
+    for tab in ("cfa_home", "cfa_study", "cfa_concept_map", "cfa_readiness"):
         assert tab in js
     assert "classList.add('is-active')" in js
     assert "setAttribute('aria-current','page')" in js

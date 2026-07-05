@@ -85,6 +85,7 @@ install_pylib_legacy()
 MainWindowState = Literal[
     "startup",
     "cfaHome",
+    "cfaStudy",
     "cfaConceptMap",
     "cfaReadiness",
     "cfaProgress",
@@ -249,6 +250,7 @@ class AnkiQt(QMainWindow):
         self.setup_focus()
         # screens
         self.setupCfaHome()
+        self.setupCfaStudy()
         self.setupCfaConceptMap()
         self.setupCfaReadiness()
         self.setupCfaProgress()
@@ -798,6 +800,15 @@ class AnkiQt(QMainWindow):
             traceback.print_exc()
             self.moveToState("deckBrowser")
 
+    def _cfaStudyState(self, oldState: MainWindowState) -> None:
+        # CFA fork: the frozen deck-first Study workspace (defensive — a failure
+        # must not blank-screen; fall back to the CFA Home dashboard).
+        try:
+            self.cfaStudy.show()
+        except Exception:
+            traceback.print_exc()
+            self.moveToState("cfaHome")
+
     def _cfaConceptMapState(self, oldState: MainWindowState) -> None:
         # CFA fork: the radial mastery map (defensive — a failure must not
         # blank-screen; fall back to the CFA Home dashboard).
@@ -1125,6 +1136,11 @@ title="{}" {}>{}</button>""".format(
         from aqt.cfa_home import CfaHome
 
         self.cfaHome = CfaHome(self)
+
+    def setupCfaStudy(self) -> None:
+        from aqt.cfa_study import CfaStudy
+
+        self.cfaStudy = CfaStudy(self)
 
     def setupCfaConceptMap(self) -> None:
         from aqt.cfa_concept_map import CfaConceptMap
