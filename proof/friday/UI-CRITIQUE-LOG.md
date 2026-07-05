@@ -1138,3 +1138,31 @@ evidence** (`proof/change-notetype/change-notetype-theme.{html,png}`): BEFORE a
 blue Save button, blue focus ring, blue link and light-blue selected row; AFTER a
 CFA navy Save button, warm-accent focus ring + link, accent-soft selected row, a
 brand eyebrow, and serif-navy section titles — one cohesive CFA setup surface.
+
+## Pass 4 — D-P4-20: Import shell (Anki-package + CSV + results log) was 100% stock Anki
+
+**Surface:** the shared **Import shell** (`ts/routes/import-page/ImportPage.svelte`),
+which renders BOTH import flows — **Anki-package import** (`ImportAnkiPackagePage`),
+the surface a candidate uses to import the shared **CFA deck `.apkg`** during
+onboarding, and **CSV import** (`ImportCsvPage`) — plus the **post-import results
+log** (`ImportLogPage`). All of these route through the one `ImportPage` component
+(sticky header + options slot / progress / results / error branches). It was still
+pure stock Anki: a **stock-blue primary Import button**, **blue focus rings**,
+**blue links**, and **blue selected rows** — so the very first thing a new user
+does (import the CFA deck) read as "Anki with a CFA tab."
+
+| # | Severity | Element | Issue | Fix |
+|---|----------|---------|-------|-----|
+| D-P4-20 | MAJOR (design-system consistency / product feel — the deck-import onboarding surface) | Import shell (`ImportPage.svelte`) — primary Import button, focus, links, selected rows, section titles | No CFA identity: stock `--button-primary-bg`/`--border-focus`/`--fg-link`/`--selected-bg` blue throughout every import branch. | **FIXED (iter 42)** — wrapped the whole shell (all branches) in `.cfa-import.cfa-app` with a brand `ankiCFA · Level II · Import` **Eyebrow**, and **overrode the stock-blue design-token CSS vars in-scope** (`--button-primary-bg`/gradient → CFA **navy**; `--border-focus`/`--fg-link` → warm **accent**; `--selected-bg` → **accent-soft**) so the primary Import button, focus rings, links, and selected rows adopt CFA colours at once, plus a light CFA **page tint** and serif-navy section titles (**Import options** / **Overview** / **Details**). Theming one shared component retones **both** import flows and the results log at once. Presentation-only: the error/results/progress branches, the sticky header + options slot, and the `doImport`/`importDone` lifecycle are untouched. Scoped under `.cfa-import.is-light` (gated `!$pageTheme.isDark`) so the dark theme keeps its own tokens and no other `TitledContainer` user is restyled. |
+
+**Verification:** `ts/routes/import-page/import-theme.test.ts` — 3 source-parse
+tests (theme + eyebrow + `cfa-app` wrapper + `is-light` gate present; the four
+stock-blue vars overridden to CFA tokens scoped under `.cfa-import.is-light`; the
+error/results/progress branches + sticky-header slot + `doImport`/`importDone`
+lifecycle preserved), wired as `just cfa-import-theme-test`, green.
+`npx svelte-check` passes 0 errors / 0 warnings across 1306 files. **Before/after
+evidence** (`proof/import-shell/import-theme.{html,png}`): BEFORE a blue Import
+button, blue switches, blue link and light-blue selected row; AFTER a CFA navy
+Import button, navy switches, warm-accent link + focus, accent-soft selected row,
+a brand eyebrow, and a serif-navy "Import options" title — one cohesive CFA
+onboarding surface.

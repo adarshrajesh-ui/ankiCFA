@@ -157,6 +157,13 @@ cfa-deck-options-theme-test:
 cfa-change-notetype-theme-test:
     {{ yarn }} vitest:once routes/change-notetype/change-notetype-theme
 
+# Import shell (Anki-package import used for CFA-deck onboarding + CSV import +
+# the post-import results log, all via the shared ImportPage.svelte) themed to
+# the CFA design system by overriding the stock-blue interactive tokens to CFA
+# navy/accent, scoped + light-mode gated.
+cfa-import-theme-test:
+    {{ yarn }} vitest:once routes/import-page/import-theme
+
 # A10: crash + offline robustness — kill mid-review ~20x -> zero corruption
 # (backend integrity check), plus offline + AI-off still returns a score.
 cfa-crash-test:
