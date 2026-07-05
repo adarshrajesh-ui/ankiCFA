@@ -579,3 +579,27 @@ as a TextView `textColor`. Green: CFA unit tests, `lintVitalFullRelease`,
 `AnkiDroid: proof/gnhf-speedrun/mobile-ui/pass-3{,-before}/` + `contrast-audit.txt`.
 **Honesty:** GPT-4o vision critic still unavailable (no `OPENAI_API_KEY`); the
 ratios are *computed*, which is stronger than a vision opinion for this defect.
+
+### M-P3-2 — Exam Readiness score cards & topic rows fragment for TalkBack (screen-reader audit)
+
+The ruthless lens escalates from colour/contrast (M-P3-1) into assistive-tech
+semantics: the flagship Exam Readiness screen was audited for a NON-sighted
+(TalkBack) user.
+
+| ID | Severity | Where | Finding | Fix |
+|----|----------|-------|---------|-----|
+| M-P3-2 | MAJOR (accessibility) | `CfaExamReadinessActivity` — the 3 honest score cards + every per-topic recall row | Cards & rows are built programmatically as **separate sibling `TextView`s** in a plain `LinearLayout` with **no accessibility grouping**, so each `TextView` is its own accessibility node. TalkBack announces disconnected swipes and the **name↔number relationship is lost**: a topic row reads "Alternative Investments" … (swipe, unrelated) … "no data"; a score card fragments into "MEMORY" / "Awaiting reviews" / "\<reason\>". **WCAG 2.1 SC 1.3.1 Info and Relationships (A)** and **SC 4.1.2 Name, Role, Value (A)**. | **FIXED (iter 47)** — new pure helpers `CfaAccessibility.kt` (`topicRowContentDescription`, `scoreCardContentDescription`; singular/plural "review(s)"; hero-override does not leak the verbatim reason) build ONE coherent phrase per card/row. `CfaExamReadinessActivity` sets `contentDescription` + `ViewCompat.setScreenReaderFocusable(view, true)` on each card/row container and `importantForAccessibility=NO` on every inner `TextView`. Presentation/semantics only — scores, RPC, abstain rule and the visible pixels are unchanged. |
+
+**Verification:** `AnkiDroid/src/test/java/com/ichi2/anki/cfa/CfaAccessibilityTest.kt`
+(**7 tests, green**) locks the pure label builders + a **source-parsing
+regression guard** asserting the activity groups cards & rows and hides
+≥5 inner fragments. **Device-observable** on `emulator-5554` via
+`uiautomator dump` (the a11y tree is the honest artifact — a screen-reader fix
+changes no pixels): BEFORE the only non-empty `content-desc` is "Navigate up";
+AFTER every card and topic row carries a single coherent `content-desc`
+("Alternative Investments: no recall data yet", "Memory: awaiting reviews.
+not enough data: 22 graded reviews (need 200)…"). Stash-isolated before/after
+dumps + the (unchanged) screen under `AnkiDroid:
+proof/gnhf-speedrun/mobile-ui/pass-3/` (`a11y-tree-readiness-{before,after}.xml`,
+`05-readiness-a11y-after.png`, `a11y-audit.txt`). Green: CFA unit tests,
+`ktlintCheck`, `lintVitalFullRelease`, `installFullDebug`.

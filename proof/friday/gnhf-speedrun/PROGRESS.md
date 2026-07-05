@@ -32,7 +32,7 @@ Legend: TODO / WIP / DONE (evidence path) / BLOCKED (root cause).
 |------|---------|--------|-----|
 | 1 (critical) | DONE (CFA web 5 MAJOR + 4 MINOR fixed; Qt chrome → Pass 2) | DONE (all 7 MAJORs fixed) | `UI-CRITIQUE-LOG.md` Pass 1 |
 | 2 (harsher) | DONE (D7 Connect/Logout — named must-fix — FIXED; D9 populated render; D3 Deadline; D4 Ethics reviewer gold-phrase ladder FIXED; D6 AI Settings dialog redesigned FIXED; D8 deck-browser stock-blue leak FIXED; D11 CFA menu grouped into labelled sections FIXED — every D1–D11 surface captured+critiqued) | DONE (M6-1 DeckPicker stock-blue leak FIXED; M7-1 Readiness abstain triple-repeat FIXED; M4-2 Exam-Config context line + live countdown FIXED; M8-1 Reviewer "Show answer" CTA stock-blue→navy FIXED — every mobile surface captured+critiqued) | `UI-CRITIQUE-LOG.md` Pass 2 |
-| 3 (ruthless) | WIP (D-P3-1 text contrast + D-P3-2 non-text contrast + D-P3-3 use-of-color/CVD — all FIXED; 26+10 vitest + e2e guards) | WIP (M-P3-1 WCAG AA contrast audit — accent-as-text fails AA → accent-ink/on-navy, 10-test guard, FIXED) | `UI-CRITIQUE-LOG.md` Pass 3 |
+| 3 (ruthless) | WIP (D-P3-1 text contrast + D-P3-2 non-text contrast + D-P3-3 use-of-color/CVD — all FIXED; 26+10 vitest + e2e guards) | WIP (M-P3-1 WCAG AA contrast → accent-ink/on-navy, 10-test guard; M-P3-2 screen-reader grouping — Readiness cards/rows fragment for TalkBack → coherent content-desc, 7-test guard + uiautomator before/after; both FIXED) | `UI-CRITIQUE-LOG.md` Pass 3 |
 
 Phase B kicked off (iter 25). `proof/friday/UI-INVENTORY.md` (every desktop +
 mobile screen/state) and `proof/friday/UI-CRITIQUE-LOG.md` created.
