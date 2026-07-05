@@ -526,6 +526,32 @@ before/after (same populated seed, stash-isolated) + a FAIL→PASS ratio swatch
 under `desktop-ui/pass-3-nontext{,-before}/` + `nontext-contrast.txt`. **Honesty:**
 ratios are *computed* (sRGB relative luminance), no vision model, no AI in render.
 
+### D-P3-3 — At-risk status flagged by colour alone (WCAG 1.4.1 Use of Color)
+
+D-P3-1/D-P3-2 audited contrast *ratios*; the ruthless lens then went to the
+*channel* question — is any information carried by colour **alone**? WCAG 2.1 SC
+**1.4.1** (LEVEL A — the most fundamental bar, deeper than the AA findings above)
+forbids it.
+
+| # | Severity | Element | Issue | Fix |
+|---|----------|---------|-------|-----|
+| D-P3-3 | MAJOR (accessibility) | Deadline planner at-risk recall cell (`.cfa-deadline__recall.is-warn`) | An at-risk row — a studied card whose predicted exam-day recall has fallen below 0.85 — was flagged by colouring the figure warn-orange (`$cfa-warn`) and **nothing else**: `recallCell()` returned the identical "62.1%" string for an at-risk and a healthy row, so the ONLY difference was the CSS `color`. A reader with a red-green colour vision deficiency (~8% of men) had **no cue** to which rows are at risk. Simulated dichromacy (Viénot severity-1) on the brand hues: the classic **pass↔warn hue pair collapses** — CIE76 ΔE **84 → 15 under protanopia** (>65% of the separation lost) — the canonical reason hue-only status is unsafe. (Honest: the specific warn-vs-ink pair in this table keeps its *luminance* separation, so severity is bounded to a Level-A compliance gap, not a luminance collapse — but 1.4.1 is a binary bar and the redundant cue is required.) | **FIXED (iter 46)** — a redundant NON-colour cue so the at-risk state survives with no colour: a **shape marker "▲"** rendered before the figure (new pure `isAtRisk()` / `riskMarker()` helpers) + a visually-hidden screen-reader label "at risk:" (`RISK_LABEL` via a `.cfa-deadline__sr` clip-rect). New cards never carry it; the warn colour is kept for sighted users (defence in depth). Shared engine + payload untouched. |
+
+**Verification:** `ts/lib/cfa/pages/deadline.test.ts` **7 → 10** (isAtRisk /
+riskMarker / RISK_LABEL) and `ts/lib/cfa/contrast.test.ts` **21 → 26** — a new
+"use-of-color audit (WCAG 2.1 SC 1.4.1)" block: a CVD-simulator sanity check,
+the **asserted** pass/warn collapse (ΔE ratio < 0.35 under protanopia), the
+honest warn/ink retention (> 0.6), a FIX check (the page renders `riskMarker` +
+`RISK_LABEL` + `.cfa-deadline__sr`) and a **regression guard** (deadline.ts
+keeps the shape-based cue). New e2e gate `ts/tests/e2e/cfa_deadline_colorcue.test.ts`
+(green vs the REAL backend, seeded): every warn cell ALSO carries the ▲ marker
+(count == warn count), healthy rows carry none. Full CFA vitest **41/41**;
+`./ninja check:svelte check:typescript check:eslint` all green. Genuine
+before/after (same seeded deck, stash-isolated, scrolled to the at-risk rows) +
+`colorcue-audit.txt` under `desktop-ui/pass-3-colorcue{,-before}/`. **Honesty:**
+the CVD simulation is *computed* (linear-RGB dichromacy matrices → CIE76 ΔE), no
+vision model, no AI.
+
 ## Pass 3 — MOBILE (ruthless, pixel-level): accessibility / contrast
 
 Same ruthless lens as the desktop Pass-3 audit, applied to the CFA Android

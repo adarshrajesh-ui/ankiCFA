@@ -29,7 +29,7 @@ SetCfaExamDate RPC.
         type DeadlinePayload,
         type DeadlineRow,
     } from "$lib/cfa";
-    import { intervalCell, newCardHint, recallCell } from "./deadline";
+    import { intervalCell, isAtRisk, newCardHint, recallCell, RISK_LABEL, riskMarker } from "./deadline";
 
     /** The full Deadline payload (exam date, ranked rows, provenance). */
     export let data: DeadlinePayload;
@@ -116,6 +116,12 @@ SetCfaExamDate RPC.
                             class:is-warn={deadlineRow.warnLowRecall}
                             class:is-new={deadlineRow.isNew}
                         >
+                            {#if isAtRisk(deadlineRow)}
+                                <span class="cfa-deadline__risk" aria-hidden="true"
+                                    >{riskMarker(deadlineRow)}</span
+                                >
+                                <span class="cfa-deadline__sr">{RISK_LABEL}:</span>
+                            {/if}
                             {recallCell(deadlineRow)}
                         </span>
                     {:else}
@@ -218,6 +224,29 @@ SetCfaExamDate RPC.
 
         &.is-warn {
             color: cfa.$cfa-warn; // at-risk (recall < 0.85), semantic preserved
+        }
+
+        // WCAG 1.4.1 Use of Color: the at-risk state must not depend on the warn
+        // colour alone. A shape marker (▲) carries the same meaning for a reader
+        // with a red-green colour vision deficiency who sees the figure as ink.
+        .cfa-deadline__risk {
+            margin-right: 0.3em;
+            font-size: 0.82em; // a small caution glyph, not a shout
+            line-height: 1;
+        }
+
+        // The redundant text label is announced to screen readers but visually
+        // hidden (the shape marker already carries the sighted non-colour cue).
+        .cfa-deadline__sr {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
         }
 
         // A never-studied card has no memory state yet — render a calm muted

@@ -216,3 +216,124 @@ describe("CFA control-boundary contrast audit (WCAG 2.1 SC 1.4.11)", () => {
         }
     });
 });
+
+// -----------------------------------------------------------------------------
+// Pass 3 (ruthless) finding #3 — WCAG 2.1 SC 1.4.1 Use of Color (LEVEL A, the
+// most fundamental of the three findings). Colour must NOT be the ONLY visual
+// means of conveying information. The Deadline planner flagged an at-risk row
+// (predicted exam-day recall < 0.85) by colouring the figure warn-orange and
+// NOTHING else — a reader with a red-green colour vision deficiency (~8% of men)
+// has no other cue. The scientific grounding below SIMULATES dichromacy on the
+// brand semantic hues and measures the loss: the classic pass↔warn hue pair
+// collapses under protanopia (ΔE 84→15), which is exactly why a hue-only status
+// flag is unsafe. The fix adds a redundant NON-colour cue (a ▲ shape marker + a
+// screen-reader "at risk" label) so the state survives on shape/text alone.
+// -----------------------------------------------------------------------------
+
+/** sRGB channel (0..255) → linear light. */
+function toLinear(v: number): number {
+    const c = v / 255;
+    return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+}
+function fromLinear(c: number): number {
+    const x = Math.max(0, Math.min(1, c));
+    return x <= 0.0031308 ? 12.92 * x : 1.055 * x ** (1 / 2.4) - 0.055;
+}
+function hexToRgb(hex: string): [number, number, number] {
+    return [
+        parseInt(hex.slice(1, 3), 16),
+        parseInt(hex.slice(3, 5), 16),
+        parseInt(hex.slice(5, 7), 16),
+    ];
+}
+
+type M3 = [number[], number[], number[]];
+// Dichromacy simulation matrices in linear RGB (Viénot/Brettel-style, severity 1).
+const DEUTAN: M3 = [
+    [0.367322, 0.860646, -0.227968],
+    [0.280085, 0.672501, 0.047413],
+    [-0.01182, 0.04294, 0.968881],
+];
+const PROTAN: M3 = [
+    [0.152286, 1.052583, -0.204868],
+    [0.114503, 0.786281, 0.099216],
+    [-0.003882, -0.048116, 1.051998],
+];
+
+/** Apply a CVD matrix in linear RGB, return an sRGB #rrggbb. */
+function simulate(hex: string, M: M3): string {
+    const lin = hexToRgb(hex).map(toLinear);
+    const out = M.map((row) => row[0] * lin[0] + row[1] * lin[1] + row[2] * lin[2]);
+    const to2 = (v: number): string =>
+        Math.round(fromLinear(v) * 255)
+            .toString(16)
+            .padStart(2, "0");
+    return `#${to2(out[0])}${to2(out[1])}${to2(out[2])}`;
+}
+
+/** Approx CIE-L*a*b* of a #rrggbb (D65) for a perceptual ΔE (CIE76) distance. */
+function toLab(hex: string): [number, number, number] {
+    const [r, g, b] = hexToRgb(hex).map(toLinear);
+    const X = r * 0.4124 + g * 0.3576 + b * 0.1805;
+    const Y = r * 0.2126 + g * 0.7152 + b * 0.0722;
+    const Z = r * 0.0193 + g * 0.1192 + b * 0.9505;
+    const f = (t: number): number => (t > 0.008856 ? t ** (1 / 3) : 7.787 * t + 16 / 116);
+    const [fx, fy, fz] = [f(X / 0.95047), f(Y / 1.0), f(Z / 1.08883)];
+    return [116 * fy - 16, 500 * (fx - fy), 200 * (fy - fz)];
+}
+function deltaE(a: string, b: string): number {
+    const la = toLab(a);
+    const lb = toLab(b);
+    return Math.hypot(la[0] - lb[0], la[1] - lb[1], la[2] - lb[2]);
+}
+
+describe("CFA use-of-color audit (WCAG 2.1 SC 1.4.1, Level A)", () => {
+    test("the CVD simulator maps pure colours to plausible dichromat percepts", () => {
+        // Sanity: white and black are invariant under dichromacy (achromatic).
+        expect(deltaE(simulate("#ffffff", DEUTAN), "#ffffff")).toBeLessThan(3);
+        expect(deltaE(simulate("#000000", PROTAN), "#000000")).toBeLessThan(3);
+    });
+
+    test("SCIENTIFIC GROUNDING: the pass↔warn hue pair collapses under dichromacy", () => {
+        // Green (pass) vs orange (warn) are ~84 ΔE apart to normal vision but
+        // fall to a near-indistinguishable band once red-green perception is
+        // removed — the canonical reason a hue-only status flag is unsafe.
+        const normal = deltaE(T["pass"], T["warn"]);
+        const prot = deltaE(simulate(T["pass"], PROTAN), simulate(T["warn"], PROTAN));
+        const deut = deltaE(simulate(T["pass"], DEUTAN), simulate(T["warn"], DEUTAN));
+        expect(normal, `normal pass/warn ΔE=${normal.toFixed(1)}`).toBeGreaterThan(60);
+        expect(prot, `protan pass/warn ΔE=${prot.toFixed(1)}`).toBeLessThan(25);
+        expect(prot / normal).toBeLessThan(0.35); // >65% of the separation is lost
+        expect(deut / normal).toBeLessThan(0.5);
+    });
+
+    test("HONEST: the Deadline warn↔ink pair keeps luminance separation", () => {
+        // Not every pair collapses — warn-orange vs ink-navy differ strongly in
+        // lightness, so a dichromat can still tell them apart. This bounds the
+        // Deadline finding's severity: it is a Level-A COMPLIANCE gap (hue as the
+        // sole channel), not a luminance collapse. The fix is still required.
+        const normal = deltaE(T["warn"], T["ink"]);
+        const prot = deltaE(simulate(T["warn"], PROTAN), simulate(T["ink"], PROTAN));
+        expect(prot / normal, `warn/ink retained ${(prot / normal).toFixed(2)}`)
+            .toBeGreaterThan(0.6);
+    });
+
+    test("FIX: the Deadline page carries a NON-colour at-risk cue", () => {
+        // The at-risk row must render a shape marker (▲) AND a screen-reader
+        // label, not just the warn colour, so the state survives with no colour.
+        const src = readFileSync(join(here, "pages/CfaDeadlinePage.svelte"), "utf8");
+        expect(/riskMarker\(/.test(src), "renders the shape marker").toBe(true);
+        expect(/RISK_LABEL/.test(src), "renders the screen-reader label").toBe(true);
+        // The visually-hidden label class must exist so the cue reaches AT users.
+        expect(/cfa-deadline__sr/.test(src)).toBe(true);
+    });
+
+    test("REGRESSION GUARD: the deadline helper exposes the redundant cue", () => {
+        // If a refactor drops riskMarker/isAtRisk the colour becomes the sole
+        // channel again — keep them exported and shape-based.
+        const helper = readFileSync(join(here, "pages/deadline.ts"), "utf8");
+        expect(/export function riskMarker\b/.test(helper)).toBe(true);
+        expect(/export function isAtRisk\b/.test(helper)).toBe(true);
+        expect(/▲/.test(helper), "the cue is a shape glyph, not a colour").toBe(true);
+    });
+});

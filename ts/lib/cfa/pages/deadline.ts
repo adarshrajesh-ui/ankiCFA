@@ -23,6 +23,28 @@ export function intervalCell(row: DeadlineRow): string {
     return row.isNew ? "–" : String(row.suggestedIntervalDays);
 }
 
+/** Whether a row is a studied card whose predicted exam-day recall has fallen
+ * below the 0.85 at-risk threshold. A never-studied NEW card is NEVER "at risk" —
+ * it has no memory model yet, so its 0.0 is a placeholder, not a real recall. */
+export function isAtRisk(row: DeadlineRow): boolean {
+    return row.warnLowRecall && !row.isNew;
+}
+
+/**
+ * A non-colour (shape) marker prefixed to an at-risk recall figure so the
+ * at-risk state is perceivable WITHOUT relying on the warn-orange colour alone
+ * (WCAG 2.1 SC 1.4.1 Use of Color — ~8% of men have a red-green colour vision
+ * deficiency and cannot see orange-vs-ink). A solid up-triangle reads as
+ * "attention" by shape; empty for healthy or new rows.
+ */
+export function riskMarker(row: DeadlineRow): string {
+    return isAtRisk(row) ? "▲" : "";
+}
+
+/** The screen-reader / non-visual label for an at-risk row (redundant with the
+ * shape marker + colour so the state never depends on a single channel). */
+export const RISK_LABEL = "at risk";
+
 /** How many of the ranked rows are never-studied new cards. */
 export function newCardCount(rows: DeadlineRow[]): number {
     return rows.filter((r) => r.isNew).length;

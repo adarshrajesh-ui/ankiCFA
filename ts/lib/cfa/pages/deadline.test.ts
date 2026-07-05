@@ -4,7 +4,16 @@
 import { assert, test } from "vitest";
 
 import type { DeadlineRow } from "../types";
-import { allNew, intervalCell, newCardCount, newCardHint, recallCell } from "./deadline";
+import {
+    allNew,
+    intervalCell,
+    isAtRisk,
+    newCardCount,
+    newCardHint,
+    recallCell,
+    RISK_LABEL,
+    riskMarker,
+} from "./deadline";
 
 function studied(recall: number, interval: number, warn = recall < 0.85): DeadlineRow {
     return {
@@ -56,4 +65,23 @@ test("newCardHint explains a mixed deck with a correct count + plural", () => {
 
 test("newCardHint is empty for a studied-only deck (no explanation needed)", () => {
     assert.equal(newCardHint([studied(0.9, 4), studied(0.5, 1)]), "");
+});
+
+// Pass-3 (ruthless) WCAG 1.4.1 Use of Color: the at-risk state must be carried
+// by a redundant non-colour cue, not by the warn-orange colour alone.
+test("isAtRisk flags a studied below-threshold card, never a new card", () => {
+    assert.isTrue(isAtRisk(studied(0.6, 1))); // recall < 0.85 → warn
+    assert.isFalse(isAtRisk(studied(0.9, 12))); // healthy studied card
+    assert.isFalse(isAtRisk(fresh())); // a new card is never "at risk"
+});
+
+test("riskMarker returns a shape glyph only for at-risk rows", () => {
+    // The shape (▲) is the non-colour cue a colour-blind reader relies on.
+    assert.equal(riskMarker(studied(0.6, 1)), "▲");
+    assert.equal(riskMarker(studied(0.9, 12)), "");
+    assert.equal(riskMarker(fresh()), "");
+});
+
+test("RISK_LABEL is the redundant screen-reader label for an at-risk row", () => {
+    assert.equal(RISK_LABEL, "at risk");
 });

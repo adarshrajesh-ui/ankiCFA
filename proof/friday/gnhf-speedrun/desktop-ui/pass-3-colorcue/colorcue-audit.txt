@@ -1,0 +1,72 @@
+Phase B — Pass 3 (ruthless), DESKTOP. Finding D-P3-3.
+WCAG 2.1 SC 1.4.1 "Use of Color" (LEVEL A — the most fundamental conformance
+criterion; deeper than the AA contrast findings D-P3-1/D-P3-2).
+
+FINDING (MAJOR, accessibility)
+------------------------------
+The Deadline planner (/cfa-deadline/{deckId} -> CfaDeadlinePage.svelte) flagged
+an at-risk row — a studied card whose predicted exam-day recall has fallen below
+the 0.85 threshold — by colouring the recall figure warn-orange ($cfa-warn
+#b45309) and NOTHING ELSE. `recallCell()` returned the identical "62.1%" string
+for an at-risk row as it would for any figure; the ONLY difference between an
+at-risk and a healthy studied row was the CSS `color`. A reader with a red-green
+colour vision deficiency (protanopia / deuteranopia — ~8% of men, ~0.5% of
+women) therefore has no reliable cue to which rows are at risk.
+
+SCIENTIFIC GROUNDING (computed, not by-eye)
+-------------------------------------------
+Dichromacy was SIMULATED on the brand semantic hues (Viénot/Brettel-style
+severity-1 matrices, applied in linear RGB) and the perceptual separation
+measured as CIE76 ΔE in L*a*b*:
+
+  pair            normal ΔE   deuteranopia      protanopia
+  pass  vs warn      84.3      30.6  (36%)       15.2  (18%)   <- COLLAPSES
+  warn  vs muted     76.0      68.7  (90%)       59.5  (78%)
+  warn  vs ink       87.1      82.9  (95%)       70.3  (81%)   <- survives
+
+The classic green/orange (pass/warn) hue pair collapses to a near-
+indistinguishable band once red-green perception is removed (>65% of the
+separation lost under protanopia) — the canonical reason a hue-only status flag
+is unsafe. HONESTY NOTE: the specific warn(orange)-vs-ink(navy) pair used in the
+Deadline table retains its LUMINANCE separation (81% under protanopia), so this
+is a Level-A COMPLIANCE gap (colour used as the sole visual channel), not a
+luminance collapse. The redundant non-colour cue is required regardless — Level
+A is a binary conformance bar, and the product uses the full pass/warn/fail
+triad elsewhere.
+
+FIX (parity-safe, presentation-only)
+------------------------------------
+Add a redundant NON-colour cue to at-risk rows so the state survives with no
+colour perception at all:
+  * a SHAPE marker "▲" (a solid up-triangle = "attention" by shape) rendered
+    before the recall figure — new pure helpers `isAtRisk()` / `riskMarker()` in
+    ts/lib/cfa/pages/deadline.ts;
+  * a visually-hidden screen-reader label "at risk:" (RISK_LABEL) via a
+    `.cfa-deadline__sr` clip-rect class, so assistive tech announces the state
+    too (WCAG 1.1.1 / 4.1.2).
+New cards (no memory model) are never "at risk" and never carry the marker; the
+warn colour is preserved for sighted users (defence in depth). The shared engine,
+the deadline payload shape and every number are untouched.
+
+TESTS (all green)
+-----------------
+* ts/lib/cfa/pages/deadline.test.ts (7 -> 10): isAtRisk classifies studied/new,
+  riskMarker returns "▲" only for at-risk, RISK_LABEL == "at risk".
+* ts/lib/cfa/contrast.test.ts (21 -> 26): a WCAG 1.4.1 audit block — a CVD
+  simulator sanity check, the pass/warn collapse (asserted), the honest
+  warn/ink retention, the FIX (the page renders riskMarker + RISK_LABEL +
+  .cfa-deadline__sr) and a REGRESSION GUARD (deadline.ts keeps the shape-based
+  redundant cue).
+* ts/tests/e2e/cfa_deadline_colorcue.test.ts (NEW, 1 test, green vs the REAL
+  backend, seeded): every warn-coloured recall cell ALSO carries the ▲ marker
+  (count == warn count), healthy rows carry none, and the page is captured.
+* Full CFA vitest 41/41; check:eslint / check:svelte / check:typescript green.
+
+EVIDENCE (genuine before/after, same seeded deck, stash-isolated)
+-----------------------------------------------------------------
+* pass-3-colorcue-before/01-cfa-deadline-colorcue.png — at-risk rows are plain
+  orange "62.1%" with NO marker (colour is the only cue).
+* pass-3-colorcue/01-cfa-deadline-colorcue.png — at-risk rows read "▲ 62.1%"
+  (the shape marker is the redundant non-colour cue).
+Both scroll the inner 460px table past the "New" rows (which rank first) to the
+at-risk studied rows so the difference is visible.

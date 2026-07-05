@@ -32,7 +32,7 @@ Legend: TODO / WIP / DONE (evidence path) / BLOCKED (root cause).
 |------|---------|--------|-----|
 | 1 (critical) | DONE (CFA web 5 MAJOR + 4 MINOR fixed; Qt chrome → Pass 2) | DONE (all 7 MAJORs fixed) | `UI-CRITIQUE-LOG.md` Pass 1 |
 | 2 (harsher) | DONE (D7 Connect/Logout — named must-fix — FIXED; D9 populated render; D3 Deadline; D4 Ethics reviewer gold-phrase ladder FIXED; D6 AI Settings dialog redesigned FIXED; D8 deck-browser stock-blue leak FIXED; D11 CFA menu grouped into labelled sections FIXED — every D1–D11 surface captured+critiqued) | DONE (M6-1 DeckPicker stock-blue leak FIXED; M7-1 Readiness abstain triple-repeat FIXED; M4-2 Exam-Config context line + live countdown FIXED; M8-1 Reviewer "Show answer" CTA stock-blue→navy FIXED — every mobile surface captured+critiqued) | `UI-CRITIQUE-LOG.md` Pass 2 |
-| 3 (ruthless) | WIP (D-P3-1 WCAG AA contrast audit — faint→faint-ink, 16-test guard, FIXED) | WIP (M-P3-1 WCAG AA contrast audit — accent-as-text fails AA → accent-ink/on-navy, 10-test guard, FIXED) | `UI-CRITIQUE-LOG.md` Pass 3 |
+| 3 (ruthless) | WIP (D-P3-1 text contrast + D-P3-2 non-text contrast + D-P3-3 use-of-color/CVD — all FIXED; 26+10 vitest + e2e guards) | WIP (M-P3-1 WCAG AA contrast audit — accent-as-text fails AA → accent-ink/on-navy, 10-test guard, FIXED) | `UI-CRITIQUE-LOG.md` Pass 3 |
 
 Phase B kicked off (iter 25). `proof/friday/UI-INVENTORY.md` (every desktop +
 mobile screen/state) and `proof/friday/UI-CRITIQUE-LOG.md` created.
@@ -340,6 +340,27 @@ mobile screen/state) and `proof/friday/UI-CRITIQUE-LOG.md` created.
   `check:svelte`/`typescript`/`eslint` green. Device-observable before/after
   (same populated seed, stash-isolated) + `03-nontext-contrast-proof.png` under
   `desktop-ui/pass-3-nontext{,-before}/` + `nontext-contrast.txt`.
+- **D-P3-3 (MAJOR, accessibility) FIXED (iter 46)** — the ruthless lens moved
+  from contrast *ratios* to the *channel* question and applied **WCAG 2.1 SC
+  1.4.1 Use of Color (Level A)**. Finding: the Deadline planner flagged an
+  at-risk row (studied card, predicted exam-day recall < 0.85) by colouring the
+  figure warn-orange and **nothing else** — `recallCell()` returned the same
+  "62.1%" string, so colour was the SOLE cue (invisible to ~8% of men with a
+  red-green CVD). Scientific grounding: **simulated dichromacy** (Viénot
+  severity-1 matrices in linear RGB → CIE76 ΔE) shows the pass↔warn hue pair
+  **collapses 84→15 ΔE under protanopia** (>65% lost); honestly the warn-vs-ink
+  pair in this table keeps luminance separation, so it's a Level-A compliance
+  gap, fixed regardless. Fix: a redundant **non-colour shape marker "▲"** before
+  the figure (new `isAtRisk`/`riskMarker` helpers) + a visually-hidden
+  screen-reader "at risk:" label (`.cfa-deadline__sr`); new cards never carry it;
+  warn colour kept for sighted users. `deadline.test.ts` **7→10**,
+  `contrast.test.ts` **21→26** (a 1.4.1 audit block: CVD sanity, asserted
+  pass/warn collapse, honest warn/ink retention, FIX + regression guard), and a
+  new REAL-backend e2e gate `cfa_deadline_colorcue.test.ts` (every warn cell also
+  carries ▲, count-matched). Full CFA vitest **41/41**; `./ninja check:svelte
+  check:typescript check:eslint` green. Genuine before/after (seeded, scrolled to
+  the at-risk rows, stash-isolated) + `colorcue-audit.txt` under
+  `desktop-ui/pass-3-colorcue{,-before}/`.
 
 **Pass 3 mobile — started (iter 44): scientific WCAG AA contrast audit.**
 - **M-P3-1 (MAJOR, accessibility) FIXED** — the ruthless mobile pass opened with
