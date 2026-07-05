@@ -37,15 +37,19 @@ def _make_menu() -> "tuple[QWidget, object]":
     return mw, mw._cfa_menu  # type: ignore[attr-defined]
 
 
+def _command_actions(menu) -> list:
+    """The invocable menu commands, excluding section-header separators (D11)."""
+    return [a for a in menu.actions() if not a.isSeparator()]
+
+
 def test_cfa_menu_has_eight_actions() -> None:
     _mw, menu = _make_menu()
-    actions = menu.actions()
-    assert len(actions) == 8
+    assert len(_command_actions(menu)) == 8
 
 
 def test_cfa_menu_action_labels() -> None:
     _mw, menu = _make_menu()
-    labels = [a.text() for a in menu.actions()]
+    labels = [a.text() for a in _command_actions(menu)]
     assert labels == [
         "CFA Home",
         "Exam Readiness…",
@@ -56,6 +60,34 @@ def test_cfa_menu_action_labels() -> None:
         "Connect to CFA Sync server",
         "Log out of Sync…",
     ]
+
+
+def test_cfa_menu_is_grouped_into_labelled_sections() -> None:
+    # D11 (Phase B Pass 2): the eight commands are grouped under three labelled
+    # native section separators, not a flat undifferentiated list.
+    _mw, menu = _make_menu()
+    sections = [a.text() for a in menu.actions() if a.isSeparator() and a.text()]
+    assert sections == ["Dashboard", "Study modes", "Settings & account"]
+
+    # Each command carries a discoverability status-tip (premium desktop hover).
+    assert all(a.statusTip() for a in _command_actions(menu))
+
+
+def test_cfa_menu_sections_order_commands_correctly() -> None:
+    # The first non-separator after each section header belongs to that group.
+    _mw, menu = _make_menu()
+    order: list[tuple[str, str]] = []
+    current = ""
+    for a in menu.actions():
+        if a.isSeparator() and a.text():
+            current = a.text()
+        elif not a.isSeparator():
+            order.append((current, a.text()))
+    assert ("Dashboard", "CFA Home") in order
+    assert ("Study modes", "Study Ethics Minimal-Pairs") in order
+    assert ("Settings & account", "AI Settings…") in order
+    # No command leaks out ahead of the first section header.
+    assert all(section for section, _ in order)
 
 
 def test_cfa_menu_has_logout_entry_and_handler() -> None:

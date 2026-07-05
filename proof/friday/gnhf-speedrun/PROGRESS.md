@@ -31,7 +31,7 @@ Legend: TODO / WIP / DONE (evidence path) / BLOCKED (root cause).
 | Pass | Desktop | Mobile | Log |
 |------|---------|--------|-----|
 | 1 (critical) | DONE (CFA web 5 MAJOR + 4 MINOR fixed; Qt chrome → Pass 2) | DONE (all 7 MAJORs fixed) | `UI-CRITIQUE-LOG.md` Pass 1 |
-| 2 (harsher) | WIP (D7 Connect/Logout — named must-fix — FIXED; D9 populated render; D3 Deadline; D4 Ethics reviewer gold-phrase ladder FIXED; D6 AI Settings dialog redesigned FIXED; D8 deck-browser stock-blue leak FIXED) | WIP (M6-1 DeckPicker stock-blue leak FIXED) | `UI-CRITIQUE-LOG.md` Pass 2 |
+| 2 (harsher) | DONE (D7 Connect/Logout — named must-fix — FIXED; D9 populated render; D3 Deadline; D4 Ethics reviewer gold-phrase ladder FIXED; D6 AI Settings dialog redesigned FIXED; D8 deck-browser stock-blue leak FIXED; D11 CFA menu grouped into labelled sections FIXED — every D1–D11 surface captured+critiqued) | WIP (M6-1 DeckPicker stock-blue leak FIXED) | `UI-CRITIQUE-LOG.md` Pass 2 |
 | 3 (ruthless) | TODO | TODO | |
 
 Phase B kicked off (iter 25). `proof/friday/UI-INVENTORY.md` (every desktop +
@@ -211,6 +211,25 @@ mobile screen/state) and `proof/friday/UI-CRITIQUE-LOG.md` created.
   `desktop-ui/pass-2-before/d8-deck-browser.png` → `pass-2/d8-deck-browser.png`
   (+ `d8-deck-browser.txt`). Verify: `test_cfa_chrome.py` **7 green** (5 prior +
   2 new), broader CFA qt suite **27 green**, ruff clean.
+
+**Pass 2 desktop — CFA MENU (D11 window chrome) captured + fixed (iter 39).**
+- **D11 CFA menu** (`aqt.cfa.setup_menu` → the "CFA" menu on the main-window
+  menu bar) — the desktop "window chrome (menus/title bar)" surface, the last
+  Still-TODO Pass-2 item, **never captured/critiqued** in any prior pass.
+  Captured (offscreen `QMenu.grab()` via `tools/cfa/render_cfa_menu.py`, the
+  same real menu the unit test builds) and fixed **D11-1 (MAJOR)**: the eight
+  actions were a flat undifferentiated list (dashboard + report + 3 study modes
+  + settings + 2 account controls as sibling rows). Now grouped into three
+  **labelled native sections** via `addSection` — **Dashboard** / **Study
+  modes** / **Settings & account** — that degrade to plain separators where
+  section text isn't rendered; plus **D11-2 (MINOR)** a `setStatusTip` on every
+  command for hover discoverability. Structure-only (no handler/token change).
+  Before/after `desktop-ui/pass-2-before/d11-cfa-menu.png` →
+  `pass-2/d11-cfa-menu.png` (+ `d11-cfa-menu.txt`). New recipe
+  `just cfa-capture-cfa-menu`. Verify: `just cfa-menu-test` **13 green** (11
+  prior + 2 new section-structure tests); menu+toolbar+chrome **29 green**;
+  `ruff` clean. **With D11, every inventoried desktop surface (D1–D11) is
+  captured+critiqued and all MAJORs fixed → Phase B Pass 2 desktop COMPLETE.**
 
 **Pass 2 mobile — started (iter 34): DeckPicker stock-blue leak (M6-1).**
 - After the Pass-1 shell refactor branded the shell navy, the harsher Pass-2

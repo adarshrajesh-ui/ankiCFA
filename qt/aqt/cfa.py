@@ -54,31 +54,51 @@ def setup_menu(mw: AnkiQt) -> None:
 
     Single ethics entry (Minimal-Pairs, the flagship); the one-passage drill is
     retired from the menu. ``study_ethics_passages`` remains callable for
-    compatibility, it is simply no longer surfaced here."""
+    compatibility, it is simply no longer surfaced here.
+
+    D11 (Phase B Pass 2): the eight actions are grouped into three labelled
+    native sections — Dashboard, Study modes, Settings & account — instead of a
+    flat undifferentiated list, and each carries a status-tip so hovering
+    explains what it does (premium desktop discoverability). Section headers are
+    ``addSection`` separators, so they degrade gracefully to plain separators on
+    platforms that don't render section text."""
     menu = QMenu("&CFA", mw)
 
+    menu.addSection("Dashboard")
     home = menu.addAction("CFA Home")
+    home.setStatusTip("Open the CFA exam-prep dashboard.")
     qconnect(home.triggered, lambda: mw.moveToState("cfaHome"))
 
     readiness = menu.addAction("Exam Readiness…")
+    readiness.setStatusTip(
+        "See your memory, performance and readiness scores with honest ranges."
+    )
     qconnect(readiness.triggered, lambda: show_exam_readiness(mw))
 
+    menu.addSection("Study modes")
     ethics = menu.addAction("Study Ethics Minimal-Pairs")
+    ethics.setStatusTip("Drill the flagship Ethics minimal-pairs deck.")
     qconnect(ethics.triggered, lambda: study_ethics_pairs(mw))
 
     priority = menu.addAction("Study by Exam Priority")
+    priority.setStatusTip("Review a queue ordered by exam weight × your weakness.")
     qconnect(priority.triggered, lambda: study_by_exam_priority(mw))
 
     deadline = menu.addAction("Peak-on-Exam-Day (Deadline)…")
+    deadline.setStatusTip("Rank this deck by predicted recall on exam day.")
     qconnect(deadline.triggered, lambda: show_deadline(mw))
 
+    menu.addSection("Settings & account")
     ai_settings = menu.addAction("AI Settings…")
+    ai_settings.setStatusTip("Turn the optional AI features on or off.")
     qconnect(ai_settings.triggered, lambda: _open_ai_settings(mw))
 
     connect_sync = menu.addAction("Connect to CFA Sync server")
+    connect_sync.setStatusTip("Sign in to the CFA sync server to sync your progress.")
     qconnect(connect_sync.triggered, lambda: _connect_cfa_sync(mw))
 
     logout = menu.addAction("Log out of Sync…")
+    logout.setStatusTip("Sign out of the sync account on this device.")
     qconnect(logout.triggered, lambda: logout_of_sync(mw))
 
     # Keep a reference so the menu (and its slots) survive garbage collection.

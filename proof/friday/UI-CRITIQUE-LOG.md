@@ -358,9 +358,38 @@ toolbar + menu) → **27 passed**; `ruff check`/`format` clean; parity-gated
 `cfa_style` TOKENS values UNCHANGED (the fix only reassigns which token the
 deck-list states use). `just cfa-chrome-test` / `just cfa-capture-deck-browser`.
 
+### D11 — Window chrome: the top-level CFA menu (menu bar)
+Captures (real `aqt.cfa.setup_menu` built against a QMenuBar stand-in — exactly
+as `qt/tests/test_cfa_menu.py` — popped up offscreen and grabbed to PNG;
+reproduce with `just cfa-capture-cfa-menu`):
+- `desktop-ui/pass-2-before/d11-cfa-menu.png` — the old flat list.
+- `desktop-ui/pass-2/d11-cfa-menu.png` — the grouped, sectioned menu.
+- Evidence: `desktop-ui/pass-2/d11-cfa-menu.txt`
+
+The desktop window chrome (the CFA menu on the menu bar) was the last
+Still-TODO Pass-2 surface — never captured or critiqued in any prior pass.
+Captured this pass and critiqued:
+
+| # | Severity | Element | Issue | Fix |
+|---|----------|---------|-------|-----|
+| D11-1 | MAJOR | whole CFA menu | The eight actions were a **flat, undifferentiated list** — a dashboard (CFA Home), a report (Exam Readiness), three study modes, a settings dialog, and two account controls all as sibling rows at the same level, with no grouping. A user scanning the menu can't tell "go somewhere" from "study" from "settings/account"; it reads as a stock add-on dump, not a premium product's information architecture. | **FIXED (iter 39)** — grouped into three **labelled native sections** via `addSection`: **Dashboard** (CFA Home, Exam Readiness…), **Study modes** (Study Ethics Minimal-Pairs, Study by Exam Priority, Peak-on-Exam-Day (Deadline)…), **Settings & account** (AI Settings…, Connect to CFA Sync server, Log out of Sync…). Section headers degrade gracefully to plain separators on platforms that don't render section text. Verified `pass-2/d11-cfa-menu.png`. |
+| D11-2 | MINOR | every action | No hover discoverability — a menu row gives no hint of what it does before you click it. | **FIXED (iter 39)** — each command now carries a concise `setStatusTip` (e.g. "See your memory, performance and readiness scores with honest ranges."), shown in the main-window status bar on hover — a standard premium desktop affordance. |
+| D11-3 | — | account entries (Connect / Log out) | Both are always present regardless of login state (unlike the toolbar D7 chip, which is context-aware). | **Kept as-is (documented decision).** A *menu* enumerates all available actions and each handler self-guards (Log out no-ops + informs when already logged out; Connect is idempotent). The always-visible top-bar chip (D7) is the context-aware surface; the menu is the exhaustive one. |
+
+**Verification:** `qt/tests/test_cfa_menu.py` → **13 passed** (11 prior +
+2 new: `test_cfa_menu_is_grouped_into_labelled_sections` asserts the three
+section headers in order + a status-tip on every command;
+`test_cfa_menu_sections_order_commands_correctly` asserts each command falls
+under the right section and none leaks ahead of the first header). The prior
+count/label tests now filter separators via a `_command_actions` helper (still
+exactly the 8 commands, unchanged order). CFA menu + toolbar + chrome →
+**29 passed**; `ruff check`/`format` clean; no `cfa_style` token touched
+(structure-only change to `setup_menu`).
+
 ### Still-TODO (desktop Pass 2/3)
-- Remaining Qt-chrome surface: D11 window chrome (menus/title bar) — capture +
-  critique.
+- Pass 2 desktop is **complete** — every inventoried Qt-chrome + web surface
+  (D1–D11) captured, critiqued, and all MAJORs fixed. Remaining desktop work is
+  the escalating **Pass 3 (ruthless, pixel-level)** sweep.
 
 ## Pass 2 — MOBILE (harsher): stock-blue leaks through the navy shell
 

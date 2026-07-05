@@ -1,0 +1,61 @@
+D11 — Desktop window chrome: the top-level CFA menu (Phase B Pass 2)
+====================================================================
+
+Surface: the "CFA" menu added to the main-window menu bar by
+aqt.cfa.setup_menu (qt/aqt/cfa.py). This is the desktop "window chrome"
+(menus/title bar) item that was the last Still-TODO Pass-2 surface — never
+captured or critiqued in any prior Phase-B pass.
+
+CAPTURE METHOD (reproducible, no live Anki launch)
+--------------------------------------------------
+tools/cfa/render_cfa_menu.py builds the REAL menu exactly as the unit test
+does (a QWidget stand-in for the main window with form.menubar = QMenuBar(),
+then cfa.setup_menu(mw)), pops the menu up under QT_QPA_PLATFORM=offscreen,
+and grabs it to a PNG. Recipe: `just cfa-capture-cfa-menu`.
+
+  before: desktop-ui/pass-2-before/d11-cfa-menu.png  (flat 8-item list)
+  after : desktop-ui/pass-2/d11-cfa-menu.png          (3 labelled sections)
+
+The "before" was captured by `git stash push qt/aqt/cfa.py` (leaving the new
+render tool untracked), rendering, then `git stash pop` — so it is a genuine
+render of the pre-fix code, not a mock-up.
+
+CRITIQUE (senior-designer heuristic; GPT-4o vision unavailable — no OPENAI key)
+------------------------------------------------------------------------------
+D11-1 (MAJOR): the eight actions were a flat, undifferentiated list — a
+  dashboard, a report, three study modes, a settings dialog, and two account
+  controls all as sibling rows with no grouping. Reads as a stock add-on dump,
+  not a premium product's information architecture.
+D11-2 (MINOR): no hover discoverability (no status tips).
+D11-3 (—): both account entries always present — kept by design (a menu is the
+  exhaustive surface; the D7 toolbar chip is the context-aware one).
+
+FIX
+---
+Grouped into three labelled native sections via QMenu.addSection:
+  Dashboard          -> CFA Home, Exam Readiness…
+  Study modes        -> Study Ethics Minimal-Pairs, Study by Exam Priority,
+                        Peak-on-Exam-Day (Deadline)…
+  Settings & account -> AI Settings…, Connect to CFA Sync server,
+                        Log out of Sync…
+Section headers degrade to plain separators where section text isn't rendered.
+Every command gained a concise setStatusTip for hover discoverability.
+Structure-only change to setup_menu — no handler wiring changed, no cfa_style
+token touched.
+
+VERIFICATION
+------------
+$ just cfa-menu-test          # qt/tests/test_cfa_menu.py
+  13 passed  (11 prior + 2 new)
+    - test_cfa_menu_is_grouped_into_labelled_sections
+    - test_cfa_menu_sections_order_commands_correctly
+  (the prior count/label tests filter separators via _command_actions — still
+   exactly the same 8 commands in the same order)
+
+$ pytest test_cfa_menu.py test_cfa_toolbar.py test_cfa_chrome.py -q
+  29 passed
+
+ruff check / ruff format --check: clean.
+
+With D11 fixed, every inventoried desktop surface (D1–D11) has been captured,
+critiqued, and its MAJORs fixed — Phase B Pass 2 desktop is COMPLETE.

@@ -297,6 +297,12 @@ cfa-capture-deck-browser out="proof/friday/gnhf-speedrun/desktop-ui/pass-2/d8-de
     {{ ninja }} qt
     QT_QPA_PLATFORM=offscreen PYTHONPATH="out/pylib:pylib:qt:out/qt" {{ py }} tools/cfa/render_deck_browser.py {{ out }}
 
+# Phase B desktop Pass 2: render the desktop CFA menu (D11 window chrome) to a
+# PNG (offscreen grab) for before/after capture — grouped labelled sections.
+cfa-capture-cfa-menu out="proof/friday/gnhf-speedrun/desktop-ui/pass-2/d11-cfa-menu.png":
+    {{ ninja }} pylib qt
+    QT_QPA_PLATFORM=offscreen PYTHONPATH="out/pylib:pylib:qt:out/qt" {{ py }} tools/cfa/render_cfa_menu.py {{ out }}
+
 # A13: verify a packaged Anki.app is a self-contained CFA-fork installer bundle.
 cfa-installer-verify app:
     {{ py }} tools/cfa/verify_installer.py {{ app }}
