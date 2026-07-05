@@ -969,3 +969,38 @@ faithful editor-DOM reconstruction over the real stock editor CSS variables):
 BEFORE plain lowercase sans labels, a stock-blue focus ring and black text on a
 grey canvas; AFTER tracked navy-muted labels, navy text, hairline CFA borders and
 a warm-accent focus ring on the CFA page tint — one cohesive CFA editor.
+
+---
+
+## Pass 4 — D-P4-14: the main reviewer body is un-themed stock Anki
+
+**Surface:** the **main reviewer webview** — the frame around every card during
+Study (renders via `Reviewer._showQuestion/_showAnswer` → `web.stdHtml(context=self)`,
+so the context class name is `Reviewer`). Distinct from the already-themed
+`ReviewerBottomBar` (D-P4-10) answer bar.
+
+**How it was found:** auditing `cfa_chrome.on_webview_will_set_content`, the CFA
+chrome re-skins `TopToolbar` / `DeckBrowser` / `Overview` / `ReviewerBottomBar` /
+`Editor` but had **no `Reviewer` branch**. The card CONTENT is CFA-branded (the
+"CFA Knowledge" notetype CSS from iter 29 + the ethics templates), but the
+surface AROUND the card — the reviewer page background and the type-in-answer
+diff — was pure stock Anki: a bare-white body void, and the harsh stock
+traffic-light type feedback (`.typeGood` bright-green `#afa`, `.typeBad`
+bright-red `#faa`, `.typeMissed` grey `#ccc`), which clash badly with the CFA
+design system on the highest-time-on-screen surface.
+
+| # | Severity | Element | Issue | Fix |
+|---|----------|---------|-------|-----|
+| D-P4-14 | MAJOR (design-system consistency / product feel — highest-time-on-screen surface) | The main reviewer webview (`Reviewer` context) | The study page had no CFA identity around the card: a bare-white body (so any card not painting its own background is a plain-white rectangle, unlike the CFA-tinted Overview/Editor), and the type-in-answer diff used the stock bright-green/bright-red/grey traffic-light blocks (`#afa`/`#faa`/`#ccc`) — jarring against the calm CFA palette. | **FIXED (iter 37)** — added a `Reviewer` branch + `_reviewer_css()` to `cfa_chrome`: the study page sits on the same calm CFA **page tint** (`--primary-soft #F3F6F8`) as Overview/Editor, scoped to `body:not(.nightMode)` so night mode keeps its dark `--canvas`; the type-in-answer diff is retoned to the CFA **pass/fail/neutral washes** (`.typeGood` → `--pass-soft #f0fdf4`, `.typeBad` → `--fail-soft #fef2f2`, `.typeMissed` → `--line #E7E9EC`) with brand-ink/muted text for legibility. Presentation-only and additive via the existing `webview_will_set_content` gui_hook; `#qa` card content is never touched, so the notetype CSS + ethics templates stay authoritative on the card itself. |
+
+**Verification:** `just cfa-chrome-test` / `just cfa-desktop-shell-test` — 2 new
+tests (`test_reviewer_gets_cfa_skin`, `test_reviewer_retones_page_tint_and_type_answer_feedback`,
+15 in `test_cfa_chrome.py`): the `Reviewer` context gets the `cfa-chrome-reviewer`
+skin with `#qa` left intact, and the CSS retones the body tint (light mode only)
+and the three type-answer classes to the CFA washes with the stock `#afa`/`#faa`/`#ccc`
+removed. **Before/after evidence** (`proof/reviewer-chrome/reviewer-{before,after}.{html,png}`,
+`tools/cfa/render_reviewer_chrome.py` — the shipped `_reviewer_css()` overlaid on a
+faithful reviewer-body reconstruction over the real stock reviewer CSS): BEFORE a
+bare-white void with bright-green/red/grey traffic-light diff blocks; AFTER the
+card sits on the CFA page tint with the diff shown in calm CFA pass/fail/neutral
+washes — one cohesive CFA study surface.

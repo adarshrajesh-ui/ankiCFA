@@ -21,6 +21,11 @@ plain Anki:
   CFA page tint + quiet CFA field labels + a warm-accent focus ring, so the
   surface that hosts the flagship "Tab to complete the back" AI feature reads
   as a CFA screen rather than stock Anki.
+* the main reviewer body (``Reviewer`` webview — the frame around every card):
+  CFA page tint (light mode) + CFA pass/fail/neutral type-answer feedback
+  washes replacing the stock #afa/#faa/#ccc traffic-light blocks, so the
+  highest-time-on-screen surface reads as CFA even for cards that don't paint
+  their own background.
 
 Palette/type come from :data:`aqt.cfa_style.TOKENS` (parity-locked to the web
 ``_tokens.scss``), so the chrome matches the SvelteKit pages exactly. Everything
@@ -317,6 +322,44 @@ def _editor_css() -> str:
 </style>"""
 
 
+def _reviewer_css() -> str:
+    t = _t()
+    # The MAIN reviewer webview (context ``Reviewer`` — the frame around every
+    # card during Study) shipped as pure stock Anki: a plain white body void and
+    # stock traffic-light type-answer feedback (#afa / #faa / #ccc). The card
+    # CONTENT is CFA-branded (the "CFA Knowledge" notetype CSS + the ethics
+    # templates), but the surface AROUND it was not. Retone it so the highest-
+    # time-on-screen surface reads as a purpose-built CFA product:
+    #   * the study page sits on the same calm CFA tint as Overview / Editor
+    #     (light mode only — night mode keeps its dark --canvas), so a card that
+    #     doesn't paint its own background isn't a bare-white rectangle,
+    #   * the type-in-answer diff (typeGood / typeBad / typeMissed) uses the CFA
+    #     pass / fail / neutral washes instead of the harsh stock #afa/#faa/#ccc,
+    #     with brand-ink text for legibility.
+    # Presentation-only and additive: it never touches #qa card content, so the
+    # notetype CSS and ethics templates stay authoritative on the card itself.
+    return f"""
+<style id="cfa-chrome-reviewer">
+  body:not(.nightMode) {{
+    background: {t["primary_soft"]} !important;
+  }}
+  /* Type-in-answer diff — CFA pass / fail / neutral washes, brand-ink text,
+     replacing the stock bright-green / bright-red / grey traffic-light blocks. */
+  .typeGood {{
+    background: {t["pass_soft"]} !important;
+    color: {t["ink"]} !important;
+  }}
+  .typeBad {{
+    background: {t["fail_soft"]} !important;
+    color: {t["ink"]} !important;
+  }}
+  .typeMissed {{
+    background: {t["line"]} !important;
+    color: {t["muted"]} !important;
+  }}
+</style>"""
+
+
 def _deckbrowser_banner() -> str:
     return (
         '<div class="cfa-deck-banner">'
@@ -354,6 +397,8 @@ def on_webview_will_set_content(web_content: Any, context: object | None) -> Non
         web_content.head += _reviewer_bottom_css()
     elif name == "Editor":
         web_content.head += _editor_css()
+    elif name == "Reviewer":
+        web_content.head += _reviewer_css()
 
 
 def on_deck_browser_will_render_content(deck_browser: Any, content: Any) -> None:

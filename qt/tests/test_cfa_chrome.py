@@ -38,6 +38,10 @@ class Editor:
     pass
 
 
+class Reviewer:
+    pass
+
+
 def test_toolbar_gets_cfa_skin() -> None:
     wc = SimpleNamespace(head="", body="<div class='header'></div>")
     cfa_chrome.on_webview_will_set_content(wc, TopToolbar())
@@ -156,6 +160,35 @@ def test_editor_retones_labels_and_focus_to_cfa() -> None:
     assert f"border-color: {line} !important;" in css
     # page tint, not a bare canvas
     assert cfa_style.TOKENS["primary_soft"] in css
+
+
+def test_reviewer_gets_cfa_skin() -> None:
+    # The MAIN reviewer webview (context Reviewer — the frame around every card)
+    # shipped as pure stock Anki; the CFA skin must retone it without touching
+    # the #qa card content (the notetype CSS / ethics templates own that).
+    wc = SimpleNamespace(head="", body='<div id="qa" dir="auto"></div>')
+    cfa_chrome.on_webview_will_set_content(wc, Reviewer())
+    assert "cfa-chrome-reviewer" in wc.head
+    assert wc.body == '<div id="qa" dir="auto"></div>'  # card content untouched
+
+
+def test_reviewer_retones_page_tint_and_type_answer_feedback() -> None:
+    # The study page sits on the CFA tint (light mode only, so night mode keeps
+    # its dark canvas), and the type-in-answer diff uses the CFA pass/fail/
+    # neutral washes instead of the stock #afa / #faa / #ccc traffic-light blocks.
+    css = cfa_chrome._reviewer_css()
+    t = cfa_style.TOKENS
+    assert (
+        f"body:not(.nightMode) {{\n    background: {t['primary_soft']} !important;"
+        in css
+    )
+    assert f".typeGood {{\n    background: {t['pass_soft']} !important;" in css
+    assert f".typeBad {{\n    background: {t['fail_soft']} !important;" in css
+    assert ".typeMissed" in css
+    # the harsh stock traffic-light colours are gone
+    assert "#afa" not in css
+    assert "#faa" not in css
+    assert "#ccc" not in css
 
 
 def test_other_contexts_untouched() -> None:

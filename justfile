@@ -320,6 +320,12 @@ cfa-capture-reviewer-bottom out="proof/reviewer-bottom/reviewer-bottom-after.htm
     {{ ninja }} qt
     QT_QPA_PLATFORM=offscreen PYTHONPATH="out/pylib:pylib:qt:out/qt" {{ py }} tools/cfa/render_reviewer_bottom.py {{ out }}
 
+# Phase B desktop Pass 4: render the CFA-skinned MAIN reviewer body (D-P4-14) —
+# page tint + retoned type-answer feedback — to before/after HTML for capture.
+cfa-capture-reviewer-chrome:
+    {{ ninja }} qt
+    QT_QPA_PLATFORM=offscreen PYTHONPATH="out/pylib:pylib:qt:out/qt" {{ py }} tools/cfa/render_reviewer_chrome.py
+
 # Phase B desktop Pass 2: render the desktop CFA menu (D11 window chrome) to a
 # PNG (offscreen grab) for before/after capture — grouped labelled sections.
 cfa-capture-cfa-menu out="proof/friday/gnhf-speedrun/desktop-ui/pass-2/d11-cfa-menu.png":
