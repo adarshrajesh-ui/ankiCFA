@@ -18,10 +18,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import aqt
 from aqt.sound import av_player
 from aqt.utils import openLink, tooltip
-from aqt.webview import AnkiWebViewKind
 
 if TYPE_CHECKING:
     from aqt.main import AnkiQt
@@ -51,7 +49,7 @@ class CfaHome:
     def _link_handler(self, url: str) -> bool:
         # Every CTA delegates to an existing, self-healing CFA entry point so the
         # Home dashboard adds NO new study/scoring logic of its own.
-        import aqt.cfa as cfa
+        from aqt import cfa
 
         mw = self.mw
         if url == "cfa:ethics":
@@ -59,9 +57,13 @@ class CfaHome:
         elif url == "cfa:priority":
             cfa.study_by_exam_priority(mw)
         elif url == "cfa:study":
-            self._study_cfa_deck()
+            mw.moveToState("cfaStudy")
         elif url == "cfa:readiness":
             cfa.show_exam_readiness(mw)
+        elif url == "cfa:conceptmap":
+            mw.moveToState("cfaConceptMap")
+        elif url == "cfa:home":
+            mw.moveToState("cfaHome")
         elif url == "cfa:deadline":
             cfa.show_deadline(mw)
         elif url == "cfa:decks":

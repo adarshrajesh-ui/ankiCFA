@@ -1,418 +1,927 @@
-<!--
-Copyright: Ankitects Pty Ltd and contributors
-License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
-
-CfaHomePage — the native CFA landing dashboard the app opens into (in place of
-the stock Anki deck list). Built from the shared CFA design system ($lib/cfa):
-
-  * a quiet brand lockup + the EXAM COUNTDOWN hero (warn tone inside 14 days),
-    with the current honest pass/fail one-liner as the lead,
-  * three VALUE-FIRST honest-score StatCards (Memory / Performance / Readiness),
-    identical formatting to the Exam Readiness page (shared ./readiness helpers),
-  * a STUDY grid of primary CTAs (Ethics minimal-pairs, Exam Priority, the CFA
-    deck, Exam Readiness, Peak-on-Exam-Day) — each a bridgeCommand routed to the
-    existing CFA entry points,
-  * an AI-state chip (opens AI settings) and a Decks escape hatch.
-
-Calm by design: weights <= 600, flat cards, 4px/pill radii, 8px rhythm, and the
-pass/fail/warn semantic triad preserved.
--->
 <script lang="ts">
     import { bridgeCommand } from "@tslib/bridgecommand";
 
-    import { Caption, Eyebrow, Hero, PageHeading, StatCard } from "$lib/cfa";
-    import type { CfaHomePayload, CfaTone, ScoreBand } from "$lib/cfa";
+    import type { CfaHomePayload, TopicRow } from "$lib/cfa";
 
-    import { bandSub, bandTone, bandValue, captionText, readinessName } from "./readiness";
-    import { examCountdown, HOME_CTAS, heroLead } from "./home";
+    import {
+        buildConceptMap,
+        masteryLabel,
+        type ConceptNode,
+        VIEW_H,
+        VIEW_W,
+    } from "./conceptmap";
+    import {
+        buildPriorityRisks,
+        commandCenterLead,
+        examCountdown,
+        homeMetricChips,
+        HOME_NAV,
+        recommendedSessions,
+        shortTopicName,
+        syncChipLabel,
+    } from "./home";
 
-    /** The full CFA Home payload (three scores + exam countdown + AI state). */
+    /** The full CFA Home payload (scores, topics, exam countdown, AI and sync state). */
     export let data: CfaHomePayload;
 
-    interface ScoreCard {
-        name: string;
-        meaning: string;
-        band: ScoreBand;
+    interface PinchStart {
+        distance: number;
+        scale: number;
+        x: number;
+        y: number;
+        centerX: number;
+        centerY: number;
     }
 
     $: countdown = examCountdown(data);
-    $: scoreCards = [
-        { name: data.memory.name, meaning: data.memory.meaning, band: data.memory },
-        {
-            name: data.performance.name,
-            meaning: data.performance.meaning,
-            band: data.performance,
-        },
-        {
-            name: readinessName(data.readiness),
-            meaning: data.readiness.meaning,
-            band: data.readiness,
-        },
-    ] satisfies ScoreCard[];
+    $: lead = commandCenterLead(data);
+    $: metricChips = homeMetricChips(data);
+    $: syncLabel = syncChipLabel(data);
+    $: risks = buildPriorityRisks(data.topics);
+    $: sessions = recommendedSessions(risks, data.topics);
+    $: map = buildConceptMap(data.topics);
+
+    let nearestMapId = "cfa";
+    let hotMapId: string | null = null;
+    let selectedMapId: string | null = null;
+    let mapState = { x: 0, y: 0, scale: 1 };
+    let pinchStart: PinchStart | null = null;
+
+    $: activeMapId = selectedMapId ?? hotMapId ?? nearestMapId;
+    $: activeNode = map.nodes.find((n) => n.id === activeMapId) ?? map.center;
+    $: activeTitle = mapActiveTitle(activeNode, selectedMapId === activeNode.id);
+    $: activeDetail = mapDetail(activeNode, selectedMapId === activeNode.id);
 
     function go(cmd: string): void {
         bridgeCommand(cmd);
     }
+
+    function clamp(value: number, min: number, max: number): number {
+        return Math.max(min, Math.min(max, value));
+    }
+
+    function shortNodeLabel(node: ConceptNode): string {
+        if (node.kind === "cfa") {
+            return "CFA";
+        }
+        return shortTopicName(node.full);
+    }
+
+    function topicForNode(node: ConceptNode): TopicRow | null {
+        const topicName = node.kind === "sub" ? node.parent : node.full;
+        return data.topics.find((topic) => topic.topic === topicName) ?? null;
+    }
+
+    function integer(n: number): string {
+        return n.toLocaleString("en-US");
+    }
+
+    function mapPriority(node: ConceptNode): string {
+        if (node.kind === "cfa") {
+            return "Overall";
+        }
+        const topicName = node.kind === "sub" ? node.parent : node.full;
+        return risks.find((risk) => risk.topic === topicName)?.label ?? masteryLabel(node.mastery);
+    }
+
+    function mapEvidence(node: ConceptNode): string {
+        if (node.kind === "cfa") {
+            return `${integer(data.caption.gradedReviews)} graded reviews across ${data.caption.topicsCovered}/${data.caption.topicsTotal} topics`;
+        }
+        const topic = topicForNode(node);
+        if (!topic) {
+            return "Topic evidence unavailable";
+        }
+        return `${integer(topic.gradedReviews)} graded reviews · ${integer(topic.reviewedCards)} reviewed cards`;
+    }
+
+    function mapDetail(node: ConceptNode, selected: boolean): string {
+        const dependency = node.kind === "sub" && node.parent
+            ? `inherits ${node.parent} section evidence`
+            : "dependency graph pending";
+        if (selected) {
+            return `Open the existing priority queue for this area. Exact per-concept due counts require a backend concept queue.`;
+        }
+        return `Priority: ${mapPriority(node)} · ${mapEvidence(node)} · ${dependency}.`;
+    }
+
+    function mapActiveTitle(node: ConceptNode, selected: boolean): string {
+        if (selected) {
+            return `Cards Due: ${shortNodeLabel(node)}`;
+        }
+        if (node.kind === "cfa") {
+            return "Nearest: CFA";
+        }
+        return node.full;
+    }
+
+    function updateNearestConcept(): void {
+        let nearest = map.nodes[0] ?? map.center;
+        let nearestDistance = Infinity;
+        const cx = VIEW_W / 2;
+        const cy = VIEW_H / 2;
+
+        for (const node of map.nodes) {
+            const x = node.x * mapState.scale + mapState.x;
+            const y = node.y * mapState.scale + mapState.y;
+            const distance = Math.hypot(x - cx, y - cy);
+            if (distance < nearestDistance) {
+                nearest = node;
+                nearestDistance = distance;
+            }
+        }
+        nearestMapId = nearest.id;
+    }
+
+    function onMapWheel(event: WheelEvent): void {
+        event.preventDefault();
+        selectedMapId = null;
+        mapState = {
+            x: clamp(mapState.x - event.deltaX * 0.38, -96, 96),
+            y: clamp(mapState.y - event.deltaY * 0.3, -78, 78),
+            scale: clamp(mapState.scale + Math.abs(event.deltaY) * 0.0009, 1, 1.38),
+        };
+        updateNearestConcept();
+    }
+
+    function onMapLeave(): void {
+        hotMapId = null;
+        mapState = { ...mapState, scale: Math.max(1, mapState.scale - 0.06) };
+        updateNearestConcept();
+    }
+
+    function onTouchStart(event: TouchEvent): void {
+        if (event.touches.length !== 2) {
+            return;
+        }
+        const a = event.touches[0];
+        const b = event.touches[1];
+        pinchStart = {
+            distance: Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY),
+            scale: mapState.scale,
+            x: mapState.x,
+            y: mapState.y,
+            centerX: (a.clientX + b.clientX) / 2,
+            centerY: (a.clientY + b.clientY) / 2,
+        };
+    }
+
+    function onTouchMove(event: TouchEvent): void {
+        if (event.touches.length !== 2 || !pinchStart) {
+            return;
+        }
+        event.preventDefault();
+        selectedMapId = null;
+        const a = event.touches[0];
+        const b = event.touches[1];
+        const distance = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+        const centerX = (a.clientX + b.clientX) / 2;
+        const centerY = (a.clientY + b.clientY) / 2;
+        const ratio = distance / Math.max(1, pinchStart.distance);
+        mapState = {
+            scale: clamp(pinchStart.scale * ratio, 0.74, 1.55),
+            x: clamp(pinchStart.x + (centerX - pinchStart.centerX) * 0.42, -112, 112),
+            y: clamp(pinchStart.y + (centerY - pinchStart.centerY) * 0.42, -88, 88),
+        };
+        updateNearestConcept();
+    }
+
+    function onTouchEnd(event: TouchEvent): void {
+        if (event.touches.length < 2) {
+            pinchStart = null;
+        }
+    }
+
+    function selectNode(node: ConceptNode): void {
+        selectedMapId = selectedMapId === node.id ? null : node.id;
+        nearestMapId = node.id;
+    }
+
+    function onNodeKey(event: KeyboardEvent, node: ConceptNode): void {
+        if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            selectNode(node);
+        } else if (event.key === "Escape") {
+            selectedMapId = null;
+        }
+    }
+
+    function nodeRadius(node: ConceptNode): number {
+        return node.kind === "sub" && activeMapId === node.id ? node.r * 1.55 : node.r;
+    }
 </script>
 
 <div class="cfa-app cfa-home">
-    <div class="cfa-home__inner">
-        <PageHeading eyebrow="ankiCFA · Level II" title="Exam Home" eyebrowTone="green" />
+    <main class="cfa-home__page">
+        <nav class="cfa-home__appbar" aria-label="CFA sections">
+            <div class="cfa-home__appbar-in">
+                <div class="cfa-home__brand">ankiCFA <small>CFA Level II</small></div>
+                <div class="cfa-home__tabs">
+                    {#each HOME_NAV as item (item.cmd)}
+                        <button
+                            type="button"
+                            class:on={item.cmd === "cfa:home"}
+                            aria-current={item.cmd === "cfa:home" ? "page" : undefined}
+                            on:click={() => go(item.cmd)}
+                        >
+                            {item.label}
+                        </button>
+                    {/each}
+                </div>
+                <button type="button" class="cfa-home__sync-chip" on:click={() => go("cfa:sync")}>
+                    <span class="cfa-home__dot"></span>{syncLabel}
+                </button>
+            </div>
+        </nav>
 
-        <Hero
-            tone={countdown.tone as CfaTone}
-            headline={countdown.headline}
-            sub={countdown.sub}
-        >
-            {heroLead(data)}
-        </Hero>
-
-        <section class="cfa-home__block">
-            <Eyebrow tone="muted">Your honest scores</Eyebrow>
-            <div class="cfa-home__stats">
-                {#each scoreCards as card (card.name)}
-                    <StatCard
-                        value={bandValue(card.band)}
-                        tone={bandTone(card.band)}
-                        sub={bandSub(card.band)}
-                        nowrap={!card.band.abstain}
-                    >
-                        <span class="cfa-home__stat-name">{card.name}</span>
-                        <span class="cfa-home__stat-meaning">{card.meaning}</span>
-                    </StatCard>
+        <section class="cfa-home__hero">
+            <div class="cfa-home__eyebrow">Home · CFA Command Center</div>
+            <h1>Today’s work</h1>
+            <p class="cfa-home__lede">{lead}</p>
+            <div class="cfa-home__actions" aria-label="Primary Home actions">
+                <button type="button" class="cfa-home__btn primary" on:click={() => go("cfa:priority")}>
+                    Begin priority session
+                </button>
+                <button type="button" class="cfa-home__btn secondary" on:click={() => go("cfa:conceptmap")}>
+                    Open Concept Map
+                </button>
+                <button type="button" class="cfa-home__btn secondary" on:click={() => go("cfa:readiness")}>
+                    View weak areas
+                </button>
+            </div>
+            <div class="cfa-home__meta-row" aria-label="Current CFA metrics">
+                {#each metricChips as chip}
+                    <span class="cfa-home__meta-chip">{chip}</span>
                 {/each}
             </div>
-            <Caption>{captionText(data.caption)}</Caption>
-        </section>
-
-        <section class="cfa-home__block">
-            <Eyebrow tone="muted">Study</Eyebrow>
-            <div class="cfa-home__ctas">
-                {#each HOME_CTAS as cta (cta.cmd)}
-                    <button
-                        type="button"
-                        class="cfa-home__cta"
-                        class:is-primary={cta.primary}
-                        on:click={() => go(cta.cmd)}
-                    >
-                        <span class="cfa-home__cta-label">{cta.label}</span>
-                        <span class="cfa-home__cta-sub">{cta.sub}</span>
-                    </button>
-                {/each}
+            <div class="cfa-home__countdown" data-tone={countdown.tone}>
+                <b>{countdown.headline}</b><span>{countdown.sub}</span>
             </div>
         </section>
 
-        <section class="cfa-home__block">
-            <Eyebrow tone="muted">Settings & sync</Eyebrow>
-            <div class="cfa-home__sync-card" class:is-connected={data.sync.connected}>
-                <div>
-                    <div class="cfa-home__sync-status">{data.sync.status}</div>
-                    <div class="cfa-home__sync-detail">{data.sync.detail}</div>
+        <section class="cfa-home__grid cfa-home__grid--main">
+            <article class="cfa-home__glass-card">
+                <div class="cfa-home__card-title">
+                    <div>
+                        <div class="cfa-home__eyebrow">Priority risk</div>
+                        <h2>Heavy topics holding readiness down</h2>
+                    </div>
+                    <span class="cfa-home__status-pill">Exam-weighted</span>
                 </div>
-                <dl class="cfa-home__sync-meta">
+                <div class="cfa-home__risk-list">
+                    {#each risks as risk (risk.topic)}
+                        <button type="button" class="cfa-home__risk" on:click={() => go("cfa:readiness")}>
+                            <span>
+                                <strong>{risk.topic}</strong>
+                                <small>{risk.detail}</small>
+                            </span>
+                            <span class="cfa-home__score" data-tone={risk.tone}>{risk.label}</span>
+                        </button>
+                    {/each}
+                </div>
+            </article>
+
+            <article class="cfa-home__glass-card cfa-home__map-card">
+                <div class="cfa-home__card-title">
                     <div>
-                        <dt>Account</dt>
-                        <dd>{data.sync.account}</dd>
+                        <div class="cfa-home__eyebrow">Concept Map preview</div>
+                        <h2>Mastery shape</h2>
                     </div>
-                    <div>
-                        <dt>Last synced</dt>
-                        <dd>{data.sync.lastSyncedLabel}</dd>
-                    </div>
-                    <div>
-                        <dt>Server</dt>
-                        <dd>{data.sync.endpoint}</dd>
-                    </div>
-                </dl>
-                <div class="cfa-home__sync-actions">
-                    <button type="button" class="cfa-home__cta is-primary" on:click={() => go("cfa:sync")}>
-                        <span class="cfa-home__cta-label">{data.sync.actionLabel}</span>
-                        <span class="cfa-home__cta-sub">Set up this device or run sync now</span>
-                    </button>
-                    <button
-                        type="button"
-                        class="cfa-home__chip"
-                        on:click={() => go("cfa:sync-settings")}
-                    >
-                        Sync settings
+                    <button type="button" class="cfa-home__status-pill as-button" on:click={() => go("cfa:conceptmap")}>
+                        Live graph
                     </button>
                 </div>
-            </div>
+                <div
+                    class="cfa-home__map-mini"
+                    role="group"
+                    aria-label="Interactive Concept Map preview"
+                    on:wheel={onMapWheel}
+                    on:mouseleave={onMapLeave}
+                    on:touchstart={onTouchStart}
+                    on:touchmove={onTouchMove}
+                    on:touchend={onTouchEnd}
+                >
+                    <svg viewBox="0 0 {VIEW_W} {VIEW_H}" role="group" aria-label="Interactive CFA concept map preview nodes">
+                        <defs>
+                            <radialGradient id="home-map-node-gloss" cx="30%" cy="22%" r="78%">
+                                <stop offset="0" stop-color="#ffffff" stop-opacity="0.95" />
+                                <stop offset="0.44" stop-color="#7edbd6" stop-opacity="0.62" />
+                                <stop offset="1" stop-color="#0e9c97" stop-opacity="0.82" />
+                            </radialGradient>
+                            <filter id="home-map-shadow" x="-40%" y="-40%" width="180%" height="180%">
+                                <feDropShadow dx="0" dy="12" stdDeviation="10" flood-color="#053b45" flood-opacity="0.16" />
+                            </filter>
+                        </defs>
+                        <g transform="translate({mapState.x} {mapState.y}) scale({mapState.scale})">
+                            <g fill="none" stroke-linecap="round">
+                                {#each map.edges as edge}
+                                    <line
+                                        x1={edge.x1}
+                                        y1={edge.y1}
+                                        x2={edge.x2}
+                                        y2={edge.y2}
+                                        stroke={edge.width > 1.5 ? "rgba(20,184,177,.32)" : "rgba(5,59,69,.14)"}
+                                        stroke-width={edge.width}
+                                    />
+                                {/each}
+                            </g>
+                            {#each map.nodes as node (node.id)}
+                                {@const on = activeMapId === node.id}
+                                <g
+                                    class="cfa-home__map-node"
+                                    class:is-active={on}
+                                    class:is-sub={node.kind === "sub"}
+                                    role="button"
+                                    tabindex="0"
+                                    aria-label="{node.full}: {mapDetail(node, selectedMapId === node.id)}"
+                                    on:mouseenter={() => (hotMapId = node.id)}
+                                    on:mouseleave={() => (hotMapId = null)}
+                                    on:focus={() => (hotMapId = node.id)}
+                                    on:blur={() => (hotMapId = null)}
+                                    on:click={() => selectNode(node)}
+                                    on:keydown={(event) => onNodeKey(event, node)}
+                                >
+                                    <circle
+                                        class="cfa-home__orb-fill"
+                                        cx={node.x}
+                                        cy={node.y}
+                                        r={nodeRadius(node)}
+                                        fill={node.fill}
+                                        filter="url(#home-map-shadow)"
+                                    />
+                                    <circle
+                                        class="cfa-home__orb-gloss"
+                                        cx={node.x}
+                                        cy={node.y}
+                                        r={nodeRadius(node)}
+                                        fill="url(#home-map-node-gloss)"
+                                    />
+                                    {#if node.kind === "cfa" || node.kind === "topic" || on}
+                                        <text
+                                            class="cfa-home__map-label"
+                                            x={node.x}
+                                            y={node.y + (node.kind === "cfa" ? 6 : 4)}
+                                            text-anchor="middle"
+                                        >{shortNodeLabel(node)}</text>
+                                    {/if}
+                                </g>
+                            {/each}
+                        </g>
+                    </svg>
+                </div>
+                <div class="cfa-home__hover-note">
+                    <b>{activeTitle}</b>{activeDetail}
+                </div>
+                <p class="cfa-home__tiny">
+                    Scroll or trackpad over the map to move through the field; pinch zoom is supported on touch screens.
+                </p>
+            </article>
         </section>
 
-        <div class="cfa-home__foot">
-            <button
-                type="button"
-                class="cfa-home__chip"
-                class:is-on={data.aiEnabled}
-                on:click={() => go("cfa:ai")}
-            >
-                AI {data.aiEnabled ? "On" : "Off"} · settings
-            </button>
-            <button type="button" class="cfa-home__chip" on:click={() => go("cfa:decks")}>
-                Browse decks
-            </button>
-        </div>
-
-        <details class="cfa-home__methodology">
-            <summary>How these scores work</summary>
-            <Caption tone="muted">{data.footerText}</Caption>
-        </details>
-    </div>
+        <section class="cfa-home__grid cfa-home__grid--sessions">
+            {#each sessions as session (session.eyebrow)}
+                <article class="cfa-home__glass-card cfa-home__session-card">
+                    <div class="cfa-home__eyebrow">{session.eyebrow}</div>
+                    <h3>{session.title}</h3>
+                    <p>{session.detail}</p>
+                    <div class="cfa-home__impact" aria-hidden="true"><i style="width: {session.impactPct}%"></i></div>
+                    <span class="cfa-home__tiny">{session.meta}</span>
+                </article>
+            {/each}
+        </section>
+    </main>
 </div>
 
 <style lang="scss">
     @use "../tokens" as cfa;
 
     .cfa-home {
+        --ink: #122b46;
+        --muted: #4d5c6d;
+        --faint: #68707d;
+        --line: rgba(255, 255, 255, 0.72);
+        --pearl: #fbfaf5;
+        --turq: #14b8b1;
+        --turq-deep: #0e9c97;
+        --turq-ink: #064a54;
+        --turq-soft: #e4f6f5;
+        --deep: #053b45;
+        --red: #b42318;
+        --green: #15803d;
+        --glass: rgba(255, 255, 255, 0.62);
+        --glass-strong: rgba(255, 255, 255, 0.78);
+        --shadow: 0 28px 90px rgba(5, 59, 69, 0.16);
+
         box-sizing: border-box;
         width: 100%;
-        padding: cfa.space(7) cfa.space(6);
-        background: cfa.$cfa-page;
-        color: cfa.$cfa-ink;
-        font-family: cfa.$cfa-font-body;
-        font-size: cfa.$cfa-fs-body;
-        font-weight: cfa.$cfa-weight-regular;
-        line-height: cfa.$cfa-lh-body;
+        min-height: 100vh;
+        color: var(--ink);
+        font-family: var(--cfa-font-body);
+        font-size: 18.75px;
+        line-height: 1.5;
+        background:
+            radial-gradient(circle at 12% 0%, rgba(255, 255, 255, 0.96), transparent 23rem),
+            radial-gradient(circle at 86% 8%, rgba(20, 184, 177, 0.22), transparent 28rem),
+            radial-gradient(circle at 55% 70%, rgba(5, 59, 69, 0.16), transparent 34rem),
+            linear-gradient(135deg, var(--pearl) 0%, #eef9f7 42%, #d8f3ef 64%, rgba(5, 59, 69, 0.24) 100%);
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
+        position: relative;
+        overflow: hidden;
 
-        :global(*),
-        :global(*::before),
-        :global(*::after) {
-            box-sizing: border-box;
+        &::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background:
+                radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.72), transparent 13rem),
+                radial-gradient(circle at 78% 22%, rgba(20, 184, 177, 0.2), transparent 19rem);
+            mix-blend-mode: screen;
         }
 
-        &__inner {
-            display: flex;
-            flex-direction: column;
-            gap: cfa.space(6);
-            max-width: 820px;
+        button {
+            font: inherit;
+        }
+
+        &__page {
+            position: relative;
+            z-index: 1;
+            max-width: 1525px;
             margin: 0 auto;
+            padding: 35px 28px 100px;
         }
 
-        &__block {
+        &__appbar {
+            position: sticky;
+            top: 20px;
+            z-index: 30;
+            border: 1px solid var(--line);
+            border-radius: 28px;
+            background: rgba(255, 255, 255, 0.7);
+            box-shadow: 0 14px 50px rgba(5, 59, 69, 0.1);
+            backdrop-filter: blur(22px) saturate(1.25);
+            -webkit-backdrop-filter: blur(22px) saturate(1.25);
+        }
+
+        &__appbar-in {
             display: flex;
-            flex-direction: column;
-            gap: cfa.space(3);
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            padding: 15px 18px;
         }
 
-        &__stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: cfa.space(5);
-        }
+        &__brand {
+            font-family: var(--cfa-font-heading);
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            color: var(--ink);
 
-        &__stat-name {
-            display: block;
-            font-weight: cfa.$cfa-weight-semibold;
-            color: cfa.$cfa-muted;
-        }
-
-        &__stat-meaning {
-            display: block;
-            margin-top: cfa.space(1);
-            font-size: cfa.$cfa-fs-meta;
-            line-height: cfa.$cfa-lh-snug;
-            color: cfa.$cfa-faint-ink;
-        }
-
-        // CTA grid — the flagship primary drill spans the full width as a
-        // featured tile; the remaining four form a clean, symmetric 2×2 so the
-        // grid never leaves an orphaned empty cell (D1-4). Collapses to a single
-        // column on narrow widths.
-        &__ctas {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: cfa.space(4);
-
-            @media (max-width: 560px) {
-                grid-template-columns: minmax(0, 1fr);
-            }
-        }
-
-        &__cta {
-            display: flex;
-            flex-direction: column;
-            gap: cfa.space(1);
-            padding: cfa.space(4) cfa.space(5);
-            text-align: left;
-            cursor: pointer;
-            background: cfa.$cfa-bg;
-            border: 1px solid cfa.$cfa-control-border; // AA non-text (WCAG 1.4.11)
-            border-radius: cfa.$cfa-radius-block;
-            color: cfa.$cfa-ink;
-            transition:
-                border-color 0.12s ease,
-                background 0.12s ease,
-                transform 0.12s ease;
-
-            &:hover {
-                border-color: cfa.$cfa-accent;
-                transform: translateY(-1px);
-            }
-
-            &:focus-visible {
-                outline: 2px solid cfa.$cfa-accent;
-                outline-offset: 2px;
-            }
-
-            &.is-primary {
-                grid-column: 1 / -1;
-                background: cfa.$cfa-accent-soft;
-                border-color: cfa.$cfa-accent;
-            }
-        }
-
-        &__cta-label {
-            font-weight: cfa.$cfa-weight-semibold;
-            font-size: cfa.$cfa-fs-body;
-        }
-
-        &__cta-sub {
-            font-size: cfa.$cfa-fs-meta;
-            line-height: cfa.$cfa-lh-snug;
-            color: cfa.$cfa-muted;
-        }
-
-        &__sync-card {
-            display: flex;
-            flex-direction: column;
-            gap: cfa.space(4);
-            padding: cfa.space(5);
-            background: cfa.$cfa-bg;
-            border: 1px solid cfa.$cfa-control-border;
-            border-left: 4px solid cfa.$cfa-muted;
-            border-radius: cfa.$cfa-radius-block;
-
-            &.is-connected {
-                border-left-color: cfa.$cfa-pass;
-            }
-        }
-
-        &__sync-status {
-            font-weight: cfa.$cfa-weight-semibold;
-            color: cfa.$cfa-ink;
-        }
-
-        &__sync-detail {
-            margin-top: cfa.space(1);
-            font-size: cfa.$cfa-fs-meta;
-            line-height: cfa.$cfa-lh-snug;
-            color: cfa.$cfa-muted;
-        }
-
-        &__sync-meta {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: cfa.space(3);
-            margin: 0;
-
-            div,
-            dt,
-            dd {
-                margin: 0;
-            }
-
-            dt {
-                font-size: cfa.$cfa-fs-eyebrow;
-                font-weight: cfa.$cfa-weight-semibold;
-                letter-spacing: 0.08em;
+            small {
+                display: block;
+                font-family: var(--cfa-font-body);
+                font-size: 11px;
+                font-weight: 700;
+                letter-spacing: 0.16em;
+                color: var(--turq-ink);
                 text-transform: uppercase;
-                color: cfa.$cfa-faint-ink;
-            }
-
-            dd {
-                margin-top: cfa.space(1);
-                font-size: cfa.$cfa-fs-meta;
-                overflow-wrap: anywhere;
-                color: cfa.$cfa-ink;
             }
         }
 
-        &__sync-actions {
+        &__tabs {
             display: flex;
+            gap: 4px;
+            margin-left: auto;
             flex-wrap: wrap;
-            align-items: center;
-            gap: cfa.space(3);
 
-            .cfa-home__cta {
-                flex: 1 1 220px;
-            }
-        }
-
-        &__foot {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: space-between;
-            gap: cfa.space(3);
-        }
-
-        // Both footer controls share ONE pill affordance (D1-5) — no mixed
-        // pill-vs-text-link-with-arrow treatment.
-        &__chip {
-            cursor: pointer;
-            padding: cfa.space(2) cfa.space(4);
-            font-family: inherit;
-            font-size: cfa.$cfa-fs-meta;
-            font-weight: cfa.$cfa-weight-semibold;
-            border-radius: cfa.$cfa-radius-pill;
-            border: 1px solid cfa.$cfa-control-border; // AA non-text (WCAG 1.4.11)
-            background: cfa.$cfa-bg;
-            color: cfa.$cfa-muted;
-
-            &:hover {
-                border-color: cfa.$cfa-accent;
-                color: cfa.$cfa-ink;
-            }
-
-            &:focus-visible {
-                outline: 2px solid cfa.$cfa-accent;
-                outline-offset: 2px;
-            }
-        }
-
-        &__chip.is-on {
-            color: cfa.$cfa-pass;
-            border-color: cfa.$cfa-pass;
-        }
-
-        // The dense methodology paragraph is collapsed behind a quiet disclosure
-        // (D1-6) so first-run microcopy no longer dominates the page foot; the
-        // summary is a calm, tappable one-liner.
-        &__methodology {
-            > summary {
+            button {
                 cursor: pointer;
-                list-style: none;
-                font-size: cfa.$cfa-fs-meta;
-                font-weight: cfa.$cfa-weight-semibold;
-                color: cfa.$cfa-muted;
+                border: 0;
+                color: var(--muted);
+                background: transparent;
+                font-size: 16px;
+                font-weight: 700;
+                padding: 10px 16px;
+                border-radius: 999px;
 
-                &::-webkit-details-marker {
-                    display: none;
-                }
-
-                &::before {
-                    content: "▸ ";
-                    color: cfa.$cfa-faint-ink;
-                }
-
-                &:hover {
-                    color: cfa.$cfa-ink;
+                &:hover,
+                &.on {
+                    color: var(--turq-ink);
+                    background: rgba(20, 184, 177, 0.12);
+                    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
                 }
 
                 &:focus-visible {
-                    outline: 2px solid cfa.$cfa-accent;
+                    outline: 3px solid rgba(20, 184, 177, 0.36);
                     outline-offset: 2px;
                 }
             }
+        }
 
-            &[open] > summary {
-                margin-bottom: cfa.space(2);
+        &__sync-chip,
+        &__status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            border: 1px solid cfa.$cfa-control-border;
+            background: rgba(228, 246, 245, 0.58);
+            color: var(--turq-ink);
+            border-radius: 999px;
+            padding: 10px 15px;
+            font-size: 15px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
 
-                &::before {
-                    content: "▾ ";
-                }
+        &__sync-chip,
+        &__status-pill.as-button {
+            cursor: pointer;
+
+            &:hover {
+                background: rgba(228, 246, 245, 0.8);
+            }
+        }
+
+        &__dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 999px;
+            background: var(--turq);
+        }
+
+        &__hero,
+        &__glass-card {
+            border: 1px solid var(--line);
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(26px) saturate(1.18);
+            -webkit-backdrop-filter: blur(26px) saturate(1.18);
+        }
+
+        &__hero {
+            position: relative;
+            overflow: hidden;
+            margin-top: 33px;
+            border-radius: 40px;
+            background:
+                linear-gradient(135deg, rgba(255, 255, 255, 0.84), rgba(255, 255, 255, 0.48)),
+                radial-gradient(circle at 75% 20%, rgba(20, 184, 177, 0.2), transparent 24rem);
+            padding: 35px;
+
+            &::after {
+                content: "";
+                position: absolute;
+                inset: 1px;
+                border-radius: 39px;
+                pointer-events: none;
+                background: linear-gradient(120deg, rgba(255, 255, 255, 0.68), transparent 30%, rgba(255, 255, 255, 0.16));
+                mask: linear-gradient(#000, transparent 70%);
+            }
+        }
+
+        &__eyebrow {
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--turq-ink);
+        }
+
+        h1,
+        h2,
+        h3 {
+            margin: 0;
+            font-family: var(--cfa-font-heading);
+            color: var(--ink);
+        }
+
+        h1 {
+            font-size: 55px;
+            line-height: 1.02;
+            letter-spacing: -0.035em;
+        }
+
+        h2 {
+            font-size: 29px;
+            line-height: 1.12;
+        }
+
+        h3 {
+            font-size: 22px;
+            line-height: 1.2;
+        }
+
+        p {
+            margin: 0;
+            color: var(--muted);
+        }
+
+        &__lede {
+            margin-top: 13px;
+            max-width: 900px;
+            font-size: 20px;
+        }
+
+        &__actions {
+            display: flex;
+            gap: 13px;
+            flex-wrap: wrap;
+            margin-top: 28px;
+        }
+
+        &__btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 18px;
+            padding: 15px 19px;
+            font-weight: 800;
+            font-size: 16px;
+            text-decoration: none;
+            border: 1px solid rgba(255, 255, 255, 0.72);
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.78),
+                0 16px 44px rgba(5, 59, 69, 0.1);
+
+            &.primary {
+                background: linear-gradient(135deg, #7edbd6, #14b8b1, #0e9c97);
+                color: #fff;
+                border-color: rgba(255, 255, 255, 0.84);
+            }
+
+            &.secondary {
+                background: rgba(255, 255, 255, 0.58);
+                color: var(--turq-ink);
+                border: 1px solid cfa.$cfa-control-border;
+            }
+
+            &:focus-visible {
+                outline: 3px solid rgba(20, 184, 177, 0.36);
+                outline-offset: 2px;
+            }
+        }
+
+        &__meta-row {
+            display: flex;
+            gap: 13px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        &__meta-chip {
+            border: 1px solid rgba(255, 255, 255, 0.62);
+            background: rgba(255, 255, 255, 0.46);
+            border-radius: 15px;
+            padding: 11px 14px;
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--muted);
+        }
+
+        &__countdown {
+            display: inline-flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-top: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.62);
+            background: rgba(255, 255, 255, 0.38);
+            border-radius: 999px;
+            padding: 10px 14px;
+            font-size: 14px;
+            color: var(--muted);
+
+            b {
+                color: var(--turq-ink);
+            }
+
+            &[data-tone="warn"] b {
+                color: #8a4a00;
+            }
+        }
+
+        &__grid {
+            display: grid;
+            gap: 20px;
+            margin-top: 23px;
+        }
+
+        &__grid--main {
+            grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+        }
+
+        &__grid--sessions {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        &__glass-card {
+            min-width: 0;
+            border-radius: 28px;
+            padding: 23px;
+            background: var(--glass);
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.78),
+                0 20px 70px rgba(5, 59, 69, 0.12);
+        }
+
+        &__card-title {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        &__risk-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        &__risk {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 15px;
+            align-items: center;
+            cursor: pointer;
+            text-align: left;
+            border: 1px solid rgba(255, 255, 255, 0.62);
+            background: rgba(255, 255, 255, 0.44);
+            border-radius: 20px;
+            padding: 15px;
+
+            strong {
+                display: block;
+                color: #0b2f38;
+            }
+
+            small {
+                display: block;
+                color: var(--muted);
+                font-size: 15px;
+                margin-top: 3px;
+            }
+
+            &:hover {
+                border-color: rgba(20, 184, 177, 0.38);
+                transform: translateY(-1px);
+            }
+        }
+
+        &__score {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--red);
+
+            &[data-tone="maintain"] {
+                color: var(--green);
+            }
+
+            &[data-tone="watch"] {
+                color: #8a4a00;
+            }
+        }
+
+        &__map-mini {
+            position: relative;
+            min-height: 350px;
+            border-radius: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.68);
+            background:
+                radial-gradient(circle at 50% 45%, rgba(20, 184, 177, 0.1), transparent 10rem),
+                linear-gradient(135deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.3));
+            overflow: hidden;
+            min-width: 0;
+            cursor: grab;
+            touch-action: none;
+
+            &:active {
+                cursor: grabbing;
+            }
+
+            svg {
+                display: block;
+                width: 100%;
+                height: 350px;
+            }
+        }
+
+        &__map-node {
+            cursor: pointer;
+
+            &:focus-visible {
+                outline: none;
+            }
+
+            &:focus-visible .cfa-home__orb-fill {
+                stroke: var(--turq-deep);
+                stroke-width: 5px;
+            }
+        }
+
+        &__orb-fill {
+            stroke: rgba(255, 255, 255, 0.82);
+            stroke-width: 2px;
+        }
+
+        &__orb-gloss {
+            opacity: 0.48;
+            pointer-events: none;
+        }
+
+        &__map-node.is-active {
+            .cfa-home__orb-fill {
+                stroke: rgba(20, 184, 177, 0.7);
+                stroke-width: 5px;
+            }
+
+            .cfa-home__orb-gloss {
+                opacity: 0.72;
+            }
+        }
+
+        &__map-label {
+            pointer-events: none;
+            fill: #fff;
+            font-family: var(--cfa-font-body);
+            font-size: 18px;
+            font-weight: 800;
+            line-height: 1.05;
+            text-shadow: 0 1px 10px rgba(5, 59, 69, 0.34);
+
+            .cfa-home__map-node.is-sub & {
+                font-size: 13px;
+            }
+        }
+
+        &__hover-note {
+            margin-top: 13px;
+            border: 1px solid rgba(255, 255, 255, 0.72);
+            background: rgba(255, 255, 255, 0.56);
+            border-radius: 18px;
+            padding: 11px 13px;
+            font-size: 15px;
+            color: var(--muted);
+            box-shadow: 0 14px 34px rgba(5, 59, 69, 0.08);
+            overflow-wrap: anywhere;
+
+            b {
+                display: block;
+                color: var(--turq-ink);
+                font-size: 15px;
+                margin-bottom: 3px;
+            }
+        }
+
+        &__tiny {
+            font-size: 15px;
+            color: var(--faint);
+        }
+
+        &__session-card {
+            display: grid;
+            gap: 10px;
+        }
+
+        &__impact {
+            height: 7px;
+            border-radius: 999px;
+            background: rgba(233, 237, 241, 0.72);
+            overflow: hidden;
+
+            i {
+                display: block;
+                height: 100%;
+                background: linear-gradient(90deg, #7edbd6, #0e9c97);
+            }
+        }
+
+        @media (max-width: 940px) {
+            &__grid--main,
+            &__grid--sessions {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            &__tabs {
+                margin-left: 0;
+            }
+        }
+
+        @media (max-width: 620px) {
+            font-size: 16px;
+
+            &__page {
+                padding: 20px 14px 72px;
+            }
+
+            h1 {
+                font-size: 44px;
+            }
+
+            &__hero {
+                padding: 26px;
             }
         }
     }

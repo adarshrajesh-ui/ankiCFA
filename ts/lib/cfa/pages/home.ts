@@ -7,7 +7,9 @@
 // testable and the CTAs are declared in one place.
 // -----------------------------------------------------------------------------
 
-import type { CfaHomePayload, CfaTone } from "../types";
+import type { CfaHomePayload, CfaTone, TopicRow } from "../types";
+
+import { masteryFromTopic } from "./conceptmap";
 
 /** A dashboard call-to-action. `cmd` is the bridgeCommand the Qt side routes. */
 export interface HomeCta {
@@ -49,6 +51,171 @@ export const HOME_CTAS: HomeCta[] = [
         sub: "Deadline-aware review plan",
     },
 ];
+
+/** The frozen Home app-bar destinations, all delegated to existing flows. */
+export const HOME_NAV: HomeCta[] = [
+    { cmd: "cfa:home", label: "Home", sub: "Command center", primary: true },
+    { cmd: "cfa:study", label: "Study", sub: "Deck workspace" },
+    { cmd: "cfa:conceptmap", label: "Concept Map", sub: "Mastery map" },
+    { cmd: "cfa:readiness", label: "Readiness", sub: "Weak areas" },
+    { cmd: "cfa:sync", label: "Sync", sub: "Connect or sync" },
+];
+
+export interface HomeRisk {
+    topic: string;
+    shortTopic: string;
+    detail: string;
+    label: string;
+    tone: "risk" | "watch" | "maintain";
+    priority: number;
+    mastery: number | null;
+    weight: number;
+    gradedReviews: number;
+}
+
+export interface HomeSession {
+    eyebrow: string;
+    title: string;
+    detail: string;
+    meta: string;
+    impactPct: number;
+}
+
+function integer(n: number): string {
+    return n.toLocaleString("en-US");
+}
+
+function pct(x: number | null | undefined): string {
+    return x === null || x === undefined ? "—" : `${Math.round(x * 100)}%`;
+}
+
+function recallRange(row: TopicRow): string {
+    return row.recallRange === null
+        ? "no recall range yet"
+        : `${pct(row.recallRange.low)}–${pct(row.recallRange.high)} recall`;
+}
+
+export function shortTopicName(topic: string): string {
+    const known: Record<string, string> = {
+        "Alternative Investments": "Alt Inv",
+        "Corporate Issuers": "Corp",
+        "Derivatives": "Derivatives",
+        "Economics": "Econ",
+        "Equity Investments": "Equity",
+        "Ethics & Professional Standards": "Ethics",
+        "Financial Reporting & Analysis": "FRA",
+        "Financial Reporting Analysis": "FRA",
+        "Fixed Income": "Fixed Income",
+        "Portfolio Management": "Portfolio",
+        "Quantitative Methods": "Quant",
+    };
+    return known[topic] ?? topic;
+}
+
+function riskLabel(priority: number, mastery: number | null): Pick<HomeRisk, "label" | "tone"> {
+    if (mastery !== null && mastery >= 0.7) {
+        return { label: "Maintain", tone: "maintain" };
+    }
+    if (mastery === null || mastery < 0.45 || priority >= 0.07) {
+        return { label: "High risk", tone: "risk" };
+    }
+    return { label: "Med risk", tone: "watch" };
+}
+
+export function buildPriorityRisks(topics: TopicRow[], limit = 3): HomeRisk[] {
+    return [...topics]
+        .map((topic) => {
+            const mastery = masteryFromTopic(topic);
+            const weakness = mastery === null ? 0.72 : 1 - mastery;
+            const priority = topic.weight * weakness;
+            const label = riskLabel(priority, mastery);
+            return {
+                topic: topic.topic,
+                shortTopic: shortTopicName(topic.topic),
+                detail: `${recallRange(topic)} · ${integer(topic.gradedReviews)} graded reviews · ${pct(topic.weight)} exam weight.`,
+                priority,
+                mastery,
+                weight: topic.weight,
+                gradedReviews: topic.gradedReviews,
+                ...label,
+            };
+        })
+        .sort((a, b) => b.priority - a.priority || b.weight - a.weight || a.topic.localeCompare(b.topic))
+        .slice(0, limit);
+}
+
+export function homeMetricChips(data: CfaHomePayload): string[] {
+    let days = "Exam date unset";
+    if (data.daysToExam === 1) {
+        days = "1 day to exam";
+    } else if (data.daysToExam !== null) {
+        days = `${data.daysToExam} days to exam`;
+    }
+    return [
+        days,
+        `${integer(data.caption.gradedReviews)} graded reviews`,
+        `${pct(data.caption.coveragePct)} topic coverage`,
+        data.aiEnabled ? "AI explanations ready" : "AI explanations off",
+    ];
+}
+
+export function syncChipLabel(data: CfaHomePayload): string {
+    if (!data.sync.connected) {
+        return "Connect & Sync";
+    }
+    return data.sync.lastSyncedAt ? `Synced ${data.sync.lastSyncedLabel}` : "Sync ready";
+}
+
+export function commandCenterLead(data: CfaHomePayload): string {
+    if (data.heroMode === "bayesian_call" && data.heroBayesian) {
+        return `Current call: ${data.heroBayesian.call} (p=${data.heroBayesian.callProb.toFixed(2)}). The next session is built from the weakest exam-weighted topics.`;
+    }
+    if (data.heroAbstain) {
+        return `${data.heroAbstain.reason} The priority queue remains available while the scores gather evidence.`;
+    }
+    return "A focused starting point: the next session, the weak areas driving it, and quick access to the Concept Map.";
+}
+
+function sessionCardCount(risk: HomeRisk | undefined, fallback: number): number {
+    if (!risk) {
+        return fallback;
+    }
+    if (risk.tone === "risk") {
+        return 25;
+    }
+    if (risk.tone === "watch") {
+        return 18;
+    }
+    return 10;
+}
+
+export function recommendedSessions(risks: HomeRisk[], topics: TopicRow[]): HomeSession[] {
+    const primary = risks[0];
+    const maintenanceTopic = [...topics]
+        .map((topic) => ({ topic, mastery: masteryFromTopic(topic) }))
+        .filter((row) => row.mastery !== null)
+        .sort((a, b) => (b.mastery ?? 0) - (a.mastery ?? 0) || b.topic.weight - a.topic.weight)[0]?.topic;
+    const maintenanceName = maintenanceTopic ? shortTopicName(maintenanceTopic.topic) : "Ethics";
+
+    return [
+        {
+            eyebrow: "Recommended session",
+            title: `${sessionCardCount(primary, 25)}-card ${primary?.shortTopic ?? "exam"} priority session`,
+            detail: primary
+                ? `Highest expected readiness lift from current topic evidence: ${primary.detail}`
+                : "Uses the existing exam-priority queue when topic evidence is still sparse.",
+            meta: "Routes to existing weakest-first priority study",
+            impactPct: primary ? Math.max(42, Math.min(92, Math.round(primary.priority * 900))) : 62,
+        },
+        {
+            eyebrow: "Maintenance",
+            title: `10-card ${maintenanceName} retention pass`,
+            detail: "A short pass for the strongest available node so high-weight material stays fresh.",
+            meta: "Maintenance target is derived from current mastery data",
+            impactPct: 48,
+        },
+    ];
+}
 
 /** Days at or under which the countdown turns warn-coloured. */
 export const EXAM_SOON_DAYS = 14;

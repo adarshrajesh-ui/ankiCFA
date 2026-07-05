@@ -1,0 +1,10 @@
+freeze generated: 2026-07-05 16:23:32
+feature: Home - CFA Command Center
+approved source: /Users/adarshrajesh/AlphaWeek2/ankiCFA/.lavish/home-screen.html
+folder: /Users/adarshrajesh/AlphaWeek2/ankiCFA/.lavish/perfect features/Home - CFA Command Center
+source: /Users/adarshrajesh/AlphaWeek2/ankiCFA/.lavish/perfect features/Home - CFA Command Center/source.html
+feature spec: /Users/adarshrajesh/AlphaWeek2/ankiCFA/.lavish/perfect features/Home - CFA Command Center/FEATURE.md
+packet html: /Users/adarshrajesh/AlphaWeek2/ankiCFA/.lavish/perfect features/Home - CFA Command Center/packet.html
+pdf: /Users/adarshrajesh/AlphaWeek2/ankiCFA/.lavish/perfect features/Home - CFA Command Center/feature.pdf
+desktop screenshot: /Users/adarshrajesh/AlphaWeek2/ankiCFA/.lavish/perfect features/Home - CFA Command Center/desktop.png
+mobile screenshot: /Users/adarshrajesh/AlphaWeek2/ankiCFA/.lavish/perfect features/Home - CFA Command Center/mobile.png

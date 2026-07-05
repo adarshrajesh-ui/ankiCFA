@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Home - CFA Command Center</title>
+<style>
+body{margin:0;background:#f6f8fa;color:#122b46;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.45;}
+.wrap{max-width:1100px;margin:0 auto;padding:40px 24px 80px;}
+h1{font-size:44px;line-height:1;margin:0 0 10px;letter-spacing:-.04em;}
+h2{margin:34px 0 12px;font-size:24px;}
+p{color:#4d5c6d;}
+.card{background:rgba(255,255,255,.78);border:1px solid rgba(255,255,255,.8);border-radius:22px;padding:18px;margin-top:16px;box-shadow:0 20px 70px rgba(5,59,69,.12);}
+img{max-width:100%;border-radius:16px;border:1px solid #e7ebef;background:white;}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#0b1f3a;color:#effffd;border-radius:18px;padding:18px;font-size:10px;line-height:1.35;}
+.badge{display:inline-block;background:#e4f6f5;color:#064a54;border-radius:999px;padding:5px 10px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;}
+</style>
+</head>
+<body>
+<main class="wrap">
+<span class="badge">Frozen Perfect Feature</span>
+<h1>Home - CFA Command Center</h1>
+<p>This packet freezes the exact approved Home screen envision session for production implementation. Build to this reference without visual degradation.</p>
+<div class="card"><h2>Desktop Screenshot</h2><img src="desktop.png" alt="Desktop screenshot" /></div>
+<div class="card"><h2>Mobile Screenshot</h2><img src="mobile.png" alt="Mobile screenshot" /></div>
+<div class="card"><h2>Frozen Source Code</h2><p>The authoritative source is <code>source.html</code>. Embedded below for review.</p><pre>&lt;!doctype html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;utf-8&quot; /&gt;
+&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot; /&gt;
+&lt;title&gt;ankiCFA — Home Screen Concept&lt;/title&gt;
+&lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.googleapis.com&quot; /&gt;
+&lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.gstatic.com&quot; crossorigin /&gt;
+&lt;link href=&quot;https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap&quot; rel=&quot;stylesheet&quot; /&gt;
+&lt;style&gt;
+  :root{
+    --ink:#122B46;
+    --muted:#4D5C6D;
+    --faint:#8b97a4;
+    --line:rgba(255,255,255,.72);
+    --surface:#F6F8FA;
+    --pearl:#fbfaf5;
+    --turq:#14B8B1;
+    --turq-deep:#0E9C97;
+    --turq-ink:#064a54;
+    --turq-soft:#E4F6F5;
+    --deep:#053b45;
+    --gold:#d4a017;
+    --red:#b42318;
+    --green:#15803d;
+    --glass:rgba(255,255,255,.62);
+    --glass-strong:rgba(255,255,255,.78);
+    --shadow:0 28px 90px rgba(5,59,69,.16);
+    --sans:&#x27;IBM Plex Sans&#x27;,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    --serif:&#x27;Source Serif 4&#x27;,Georgia,serif;
+    --mono:&#x27;IBM Plex Mono&#x27;,ui-monospace,Menlo,monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    min-height:100vh;
+    font-family:var(--sans);
+    color:var(--ink);
+    background:
+      radial-gradient(circle at 12% 0%, rgba(255,255,255,.96), transparent 23rem),
+      radial-gradient(circle at 86% 8%, rgba(20,184,177,.22), transparent 28rem),
+      radial-gradient(circle at 55% 70%, rgba(5,59,69,.16), transparent 34rem),
+      linear-gradient(135deg,var(--pearl) 0%, #eef9f7 42%, #d8f3ef 64%, rgba(5,59,69,.24) 100%);
+    font-size:18.75px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  body::before{
+    content:&quot;&quot;;
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    background:
+      radial-gradient(circle at 18% 18%, rgba(255,255,255,.72), transparent 13rem),
+      radial-gradient(circle at 78% 22%, rgba(20,184,177,.20), transparent 19rem);
+    mix-blend-mode:screen;
+  }
+  h1,h2,h3,.serif{font-family:var(--serif);}
+  h1{font-size:55px;line-height:1.02;letter-spacing:-.035em;margin:0;}
+  h2{font-size:29px;line-height:1.12;margin:0;}
+  h3{font-size:22px;line-height:1.2;margin:0;}
+  p{margin:0;color:var(--muted);}
+  .page{max-width:1525px;margin:0 auto;padding:35px 28px 100px;}
+  .appbar{
+    position:sticky;
+    top:20px;
+    z-index:30;
+    border:1px solid var(--line);
+    border-radius:28px;
+    background:rgba(255,255,255,.70);
+    box-shadow:0 14px 50px rgba(5,59,69,.10);
+    backdrop-filter:blur(22px) saturate(1.25);
+    -webkit-backdrop-filter:blur(22px) saturate(1.25);
+  }
+  .appbar-in{display:flex;align-items:center;gap:20px;flex-wrap:wrap;padding:15px 18px;}
+  .brand{font-family:var(--serif);font-size:24px;font-weight:700;letter-spacing:-.01em;color:var(--ink);}
+  .brand small{display:block;font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:.16em;color:var(--turq-ink);text-transform:uppercase;}
+  .tabs{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap;}
+  .tabs a{text-decoration:none;color:var(--muted);font-size:16px;font-weight:700;padding:10px 16px;border-radius:999px;}
+  .tabs a.on,.tabs a:hover{color:var(--turq-ink);background:rgba(20,184,177,.12);box-shadow:inset 0 1px 0 rgba(255,255,255,.65);}
+  .sync-chip{display:inline-flex;align-items:center;gap:9px;border:1px solid rgba(20,184,177,.22);background:rgba(228,246,245,.58);color:var(--turq-ink);border-radius:999px;padding:10px 15px;font-size:15px;font-weight:700;}
+  .dot{width:8px;height:8px;border-radius:999px;background:var(--turq);}
+  .hero{
+    position:relative;
+    overflow:hidden;
+    margin-top:33px;
+    border:1px solid var(--line);
+    border-radius:40px;
+    background:
+      linear-gradient(135deg,rgba(255,255,255,.84),rgba(255,255,255,.48)),
+      radial-gradient(circle at 75% 20%, rgba(20,184,177,.20), transparent 24rem);
+    box-shadow:var(--shadow);
+    backdrop-filter:blur(26px) saturate(1.18);
+    -webkit-backdrop-filter:blur(26px) saturate(1.18);
+    padding:35px;
+  }
+  .hero::after{
+    content:&quot;&quot;;
+    position:absolute;
+    inset:1px;
+    border-radius:39px;
+    pointer-events:none;
+    background:linear-gradient(120deg,rgba(255,255,255,.68),transparent 30%,rgba(255,255,255,.16));
+    mask:linear-gradient(#000,transparent 70%);
+  }
+  .hero-grid{position:relative;z-index:1;display:block;}
+  .eyebrow{font-size:14px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:var(--turq-ink);}
+  .lede{margin-top:13px;font-size:20px;max-width:900px;color:var(--muted);}
+  .hero-actions{display:flex;gap:13px;flex-wrap:wrap;margin-top:28px;}
+  .btn{display:inline-flex;align-items:center;justify-content:center;border-radius:18px;padding:15px 19px;font-weight:800;font-size:16px;text-decoration:none;border:1px solid rgba(255,255,255,.72);box-shadow:inset 0 1px 0 rgba(255,255,255,.78),0 16px 44px rgba(5,59,69,.10);}
+  .btn.primary{background:linear-gradient(135deg,#7edbd6,#14B8B1,#0E9C97);color:#fff;border-color:rgba(255,255,255,.84);}
+  .btn.secondary{background:rgba(255,255,255,.58);color:var(--turq-ink);}
+  .summary-card,.glass-card{
+    border:1px solid var(--line);
+    background:var(--glass);
+    border-radius:28px;
+    padding:23px;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.78),0 20px 70px rgba(5,59,69,.12);
+    backdrop-filter:blur(22px) saturate(1.18);
+    -webkit-backdrop-filter:blur(22px) saturate(1.18);
+    min-width:0;
+  }
+  .status-pill{display:inline-flex;align-items:center;gap:9px;border-radius:999px;background:rgba(20,184,177,.12);color:var(--turq-ink);font-weight:800;font-size:15px;padding:9px 13px;white-space:nowrap;}
+  .gauge{height:10px;border-radius:999px;background:rgba(233,237,241,.72);overflow:hidden;margin:14px 0 8px;box-shadow:inset 0 1px 2px rgba(5,59,69,.08);}
+  .gauge i{display:block;height:100%;width:62%;background:linear-gradient(90deg,#e8edf0,#7edbd6,#0e9c97);}
+  .meta-row{display:flex;gap:13px;flex-wrap:wrap;margin-top:15px;}
+  .meta-chip{border:1px solid rgba(255,255,255,.62);background:rgba(255,255,255,.46);border-radius:15px;padding:11px 14px;font-size:15px;font-weight:700;color:var(--muted);}
+  .grid{display:grid;gap:20px;margin-top:23px;}
+  .g3{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .g2{grid-template-columns:1.15fr .85fr;}
+  .card-title{display:flex;align-items:flex-start;justify-content:space-between;gap:15px;margin-bottom:15px;}
+  .tiny{font-size:15px;color:var(--faint);}
+  .risk-list{display:grid;gap:10px;}
+  .risk{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:15px;align-items:center;border:1px solid rgba(255,255,255,.62);background:rgba(255,255,255,.44);border-radius:20px;padding:15px;}
+  .risk strong{display:block;color:#0b2f38;}
+  .risk small{display:block;color:var(--muted);font-size:15px;margin-top:3px;}
+  .risk .score{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--red);}
+  .map-mini{position:relative;min-height:350px;border-radius:25px;border:1px solid rgba(255,255,255,.68);background:radial-gradient(circle at 50% 45%, rgba(20,184,177,.10), transparent 10rem),linear-gradient(135deg,rgba(255,255,255,.72),rgba(255,255,255,.30));overflow:hidden;min-width:0;cursor:grab;}
+  .map-mini:active{cursor:grabbing;}
+  .map-3d{position:absolute;inset:0;transition:transform .18s ease-out;will-change:transform;}
+  .orbit{display:none;}
+  .orbit.o1{width:210px;height:210px;margin-left:-105px;margin-top:-105px;}
+  .orbit.o2{width:310px;height:310px;margin-left:-155px;margin-top:-155px;border-color:rgba(5,59,69,.12);}
+  .depth-line{position:absolute;left:50%;top:50%;height:1px;background:linear-gradient(90deg,rgba(20,184,177,.03),rgba(20,184,177,.35));transform-origin:left center;}
+  .sub-line{position:absolute;height:1px;background:linear-gradient(90deg,rgba(5,59,69,.08),rgba(20,184,177,.22));transform-origin:left center;}
+  .d1{width:94px;transform:rotate(-72deg)}.d2{width:112px;transform:rotate(-25deg)}.d3{width:112px;transform:rotate(22deg)}.d4{width:104px;transform:rotate(78deg)}.d5{width:108px;transform:rotate(138deg)}.d6{width:102px;transform:rotate(205deg)}
+  .s1{left:32%;top:28%;width:54px;transform:rotate(-36deg)}.s2{left:68%;top:31%;width:52px;transform:rotate(36deg)}.s3{left:70%;top:66%;width:48px;transform:rotate(-18deg)}.s4{left:30%;top:66%;width:50px;transform:rotate(200deg)}
+  .node{position:absolute;display:grid;place-items:center;border-radius:999px;border:1px solid rgba(255,255,255,.8);background:radial-gradient(circle at 30% 24%, rgba(255,255,255,.92), rgba(20,184,177,.72));box-shadow:0 14px 35px rgba(5,59,69,.16),inset 0 1px 0 rgba(255,255,255,.78);}
+  .node::after{content:attr(data-name);max-width:86%;padding:0 2px;text-align:center;color:#fff;font-family:var(--sans);font-size:9px;font-weight:800;line-height:1.05;text-shadow:0 1px 10px rgba(5,59,69,.34);overflow-wrap:anywhere;}
+  .node.active{outline:3px solid rgba(20,184,177,.32);outline-offset:5px;box-shadow:0 20px 46px rgba(5,59,69,.22),0 0 0 12px rgba(20,184,177,.08),inset 0 1px 0 rgba(255,255,255,.78);}
+  .n-center{width:74px;height:74px;left:50%;top:50%;transform:translate(-50%,-50%);color:#fff;font-family:var(--serif);font-size:0;line-height:1;font-weight:700;background:radial-gradient(circle at 30% 24%, rgba(255,255,255,.90), rgba(20,184,177,.86));}
+  .n-center::after{content:&quot;CFA&quot;;font-family:var(--serif);font-size:15px;}
+  .n1{width:54px;height:54px;left:47%;top:16%}.n2{width:46px;height:46px;right:22%;top:26%;background:#c9d3da}.n3{width:58px;height:58px;right:17%;bottom:27%}.n4{width:42px;height:42px;left:46%;bottom:17%;background:#dfe6ea}.n5{width:50px;height:50px;left:22%;bottom:28%}.n6{width:46px;height:46px;left:20%;top:28%;background:#b7e8e5}
+  .subnode{position:absolute;width:22px;height:22px;border-radius:999px;border:1px solid rgba(255,255,255,.74);background:rgba(20,184,177,.38);box-shadow:0 8px 22px rgba(5,59,69,.10),inset 0 1px 0 rgba(255,255,255,.72);}
+  .subnode::after{content:&quot;&quot;;display:none;}
+  .subnode.active{width:44px;height:44px;z-index:4;background:radial-gradient(circle at 30% 24%, rgba(255,255,255,.92), rgba(20,184,177,.70));}
+  .subnode.active::after{content:attr(data-name);display:grid;place-items:center;position:absolute;inset:0;padding:3px;text-align:center;color:#fff;font-size:7px;font-weight:800;line-height:1.02;text-shadow:0 1px 10px rgba(5,59,69,.38);overflow-wrap:anywhere;}
+  .sub1{left:27%;top:18%}.sub2{left:17%;top:22%;background:#dfe6ea}.sub3{right:17%;top:17%}.sub4{right:9%;top:28%;background:#dfe6ea}.sub5{right:8%;bottom:27%}.sub6{right:18%;bottom:15%;background:#dfe6ea}.sub7{left:17%;bottom:20%}.sub8{left:28%;bottom:12%;background:#dfe6ea}
+  .scroll-cue{display:none;}
+  .hover-note{margin-top:13px;border:1px solid rgba(255,255,255,.72);background:rgba(255,255,255,.56);border-radius:18px;padding:11px 13px;font-size:15px;color:var(--muted);box-shadow:0 14px 34px rgba(5,59,69,.08);overflow-wrap:anywhere;}
+  .hover-note b{display:block;color:var(--turq-ink);font-size:15px;margin-bottom:3px;}
+  .session-card{display:grid;gap:10px;}
+  .impact{height:7px;border-radius:999px;background:rgba(233,237,241,.72);overflow:hidden;}
+  .impact i{display:block;height:100%;background:linear-gradient(90deg,#7edbd6,#0e9c97);}
+  .feedback{margin-top:22px;border:1px solid var(--line);border-radius:22px;padding:16px;background:rgba(255,255,255,.56);backdrop-filter:blur(18px);}
+  .feedback form{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:12px;}
+  .choice{border:1px solid rgba(255,255,255,.72);border-radius:16px;background:rgba(255,255,255,.48);padding:12px;cursor:pointer;min-width:0;}
+  input{accent-color:var(--turq);}
+  button{grid-column:1/-1;border:0;border-radius:14px;background:linear-gradient(135deg,#7edbd6,#14B8B1,#0E9C97);color:#fff;font:inherit;font-weight:800;padding:12px;cursor:pointer;}
+  @media(max-width:940px){
+    .hero-grid,.g2,.g3{grid-template-columns:minmax(0,1fr);}
+    .tabs{margin-left:0;}
+    .feedback form{grid-template-columns:minmax(0,1fr);}
+  }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;main class=&quot;page&quot;&gt;
+  &lt;nav class=&quot;appbar&quot;&gt;
+    &lt;div class=&quot;appbar-in&quot;&gt;
+      &lt;div class=&quot;brand&quot;&gt;ankiCFA &lt;small&gt;CFA Level II&lt;/small&gt;&lt;/div&gt;
+      &lt;div class=&quot;tabs&quot;&gt;
+        &lt;a class=&quot;on&quot; href=&quot;#&quot;&gt;Home&lt;/a&gt;
+        &lt;a href=&quot;#&quot;&gt;Study&lt;/a&gt;
+        &lt;a href=&quot;#&quot;&gt;Concept Map&lt;/a&gt;
+        &lt;a href=&quot;#&quot;&gt;Readiness&lt;/a&gt;
+        &lt;a href=&quot;#&quot;&gt;Sync&lt;/a&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;sync-chip&quot;&gt;&lt;span class=&quot;dot&quot;&gt;&lt;/span&gt; Synced 14:32&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/nav&gt;
+
+  &lt;section class=&quot;hero&quot;&gt;
+    &lt;div class=&quot;hero-grid&quot;&gt;
+      &lt;div&gt;
+        &lt;div class=&quot;eyebrow&quot;&gt;Home · CFA Command Center&lt;/div&gt;
+        &lt;h1&gt;Today’s work&lt;/h1&gt;
+        &lt;p class=&quot;lede&quot;&gt;A focused starting point: the next session, the weak areas driving it, and quick access to the Concept Map. No motivational copy, no generic deck dashboard.&lt;/p&gt;
+        &lt;div class=&quot;hero-actions&quot;&gt;
+          &lt;a class=&quot;btn primary&quot; href=&quot;#&quot;&gt;Begin priority session&lt;/a&gt;
+          &lt;a class=&quot;btn secondary&quot; href=&quot;#&quot;&gt;Open Concept Map&lt;/a&gt;
+          &lt;a class=&quot;btn secondary&quot; href=&quot;#&quot;&gt;View weak areas&lt;/a&gt;
+        &lt;/div&gt;
+        &lt;div class=&quot;meta-row&quot;&gt;
+          &lt;span class=&quot;meta-chip&quot;&gt;42 days to exam&lt;/span&gt;
+          &lt;span class=&quot;meta-chip&quot;&gt;1,842 graded reviews&lt;/span&gt;
+          &lt;span class=&quot;meta-chip&quot;&gt;71% topic coverage&lt;/span&gt;
+          &lt;span class=&quot;meta-chip&quot;&gt;AI explanations ready&lt;/span&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/section&gt;
+
+  &lt;section class=&quot;grid g2&quot;&gt;
+    &lt;div class=&quot;glass-card&quot;&gt;
+      &lt;div class=&quot;card-title&quot;&gt;
+        &lt;div&gt;
+          &lt;div class=&quot;eyebrow&quot;&gt;Priority risk&lt;/div&gt;
+          &lt;h2&gt;Heavy topics holding readiness down&lt;/h2&gt;
+        &lt;/div&gt;
+        &lt;span class=&quot;status-pill&quot;&gt;Exam-weighted&lt;/span&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;risk-list&quot;&gt;
+        &lt;div class=&quot;risk&quot;&gt;&lt;div&gt;&lt;strong&gt;Financial Reporting Analysis&lt;/strong&gt;&lt;small&gt;Largest weak node; consolidation and leases are dragging the score.&lt;/small&gt;&lt;/div&gt;&lt;span class=&quot;score&quot;&gt;High risk&lt;/span&gt;&lt;/div&gt;
+        &lt;div class=&quot;risk&quot;&gt;&lt;div&gt;&lt;strong&gt;Fixed Income&lt;/strong&gt;&lt;small&gt;Duration, convexity, and term structure errors are clustering.&lt;/small&gt;&lt;/div&gt;&lt;span class=&quot;score&quot;&gt;Med risk&lt;/span&gt;&lt;/div&gt;
+        &lt;div class=&quot;risk&quot;&gt;&lt;div&gt;&lt;strong&gt;Ethics&lt;/strong&gt;&lt;small&gt;Strong overall, but Standards VI-VII still need maintenance.&lt;/small&gt;&lt;/div&gt;&lt;span class=&quot;score&quot; style=&quot;color:var(--green)&quot;&gt;Maintain&lt;/span&gt;&lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div class=&quot;glass-card&quot;&gt;
+      &lt;div class=&quot;card-title&quot;&gt;
+        &lt;div&gt;
+          &lt;div class=&quot;eyebrow&quot;&gt;Concept Map preview&lt;/div&gt;
+          &lt;h2&gt;Mastery shape&lt;/h2&gt;
+        &lt;/div&gt;
+        &lt;span class=&quot;status-pill&quot;&gt;Live graph&lt;/span&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;map-mini&quot; id=&quot;home-map&quot; aria-label=&quot;Interactive Concept map preview&quot;&gt;
+        &lt;div class=&quot;map-3d&quot; id=&quot;home-map-field&quot;&gt;
+          &lt;span class=&quot;depth-line d1&quot;&gt;&lt;/span&gt;
+          &lt;span class=&quot;depth-line d2&quot;&gt;&lt;/span&gt;
+          &lt;span class=&quot;depth-line d3&quot;&gt;&lt;/span&gt;
+          &lt;span class=&quot;depth-line d4&quot;&gt;&lt;/span&gt;
+          &lt;span class=&quot;depth-line d5&quot;&gt;&lt;/span&gt;
+          &lt;span class=&quot;depth-line d6&quot;&gt;&lt;/span&gt;
+          &lt;span class=&quot;sub-line s1&quot;&gt;&lt;/span&gt;
+          &lt;span class=&quot;sub-line s2&quot;&gt;&lt;/span&gt;
+          &lt;span class=&quot;sub-line s3&quot;&gt;&lt;/span&gt;
+          &lt;span class=&quot;sub-line s4&quot;&gt;&lt;/span&gt;
+          &lt;span class=&quot;node n-center active&quot; data-name=&quot;CFA&quot; data-detail=&quot;Overall map · next concept depends on nearest sphere.&quot; aria-label=&quot;CFA center node&quot;&gt;&lt;/span&gt;
+          &lt;span class=&quot;node n1&quot; data-name=&quot;FRA&quot; data-detail=&quot;Priority: high · 38 cards due · build consolidation first.&quot;&gt;&lt;/span&gt;
+          &lt;span class=&quot;node n2&quot; data-name=&quot;Derivatives&quot; data-detail=&quot;Priority: medium · 14 cards due · options before swaps.&quot;&gt;&lt;/span&gt;
+          &lt;span class=&quot;node n3&quot; data-name=&quot;Fixed Income&quot; data-detail=&quot;Priority: medium · 22 cards due · term structure before credit.&quot;&gt;&lt;/span&gt;
+          &lt;span class=&quot;node n4&quot; data-name=&quot;Ethics&quot; data-detail=&quot;Maintain · 9 cards due · Standards VI-VII.&quot;&gt;&lt;/span&gt;
+          &lt;span class=&quot;node n5&quot; data-name=&quot;Equity&quot; data-detail=&quot;Stable · 11 cards due · residual income next.&quot;&gt;&lt;/span&gt;
+          &lt;span class=&quot;node n6&quot; data-name=&quot;Quant&quot; data-detail=&quot;Dependency · 17 cards due · regression supports FRA.&quot;&gt;&lt;/span&gt;
+          &lt;span class=&quot;subnode sub1&quot; data-name=&quot;FRA · Consolidation&quot; data-detail=&quot;Need: urgent · 12 cards due · build consolidation before leases.&quot;&gt;&lt;/span&gt;
+          &lt;span class=&quot;subnode sub2&quot; data-name=&quot;FRA · Leases&quot; data-detail=&quot;Need: high · 9 cards due · depends on consolidation basics.&quot;&gt;&lt;/span&gt;
+          &lt;span class=&quot;subnode sub3&quot; data-name=&quot;Derivatives · Options&quot; data-detail=&quot;Need: medium · 7 cards due · pricing before hedging.&quot;&gt;&lt;/span&gt;
+          &lt;span class=&quot;subnode sub4&quot; data-name=&quot;Derivatives · Swaps&quot; data-detail=&quot;Need: low · 4 cards due · after options refresh.&quot;&gt;&lt;/span&gt;
+          &lt;span class=&quot;subnode sub5&quot; data-name=&quot;Fixed Income · Term Structure&quot; data-detail=&quot;Need: high · 11 cards due · prerequisite for credit spread work.&quot;&gt;&lt;/span&gt;
+          &lt;span class=&quot;subnode sub6&quot; data-name=&quot;Fixed Income · Credit&quot; data-detail=&quot;Need: medium · 8 cards due · build after term structure.&quot;&gt;&lt;/span&gt;
+          &lt;span class=&quot;subnode sub7&quot; data-name=&quot;Equity · Residual Income&quot; data-detail=&quot;Need: medium · 6 cards due · next lift after FRA session.&quot;&gt;&lt;/span&gt;
+          &lt;span class=&quot;subnode sub8&quot; data-name=&quot;Ethics · Standards VI-VII&quot; data-detail=&quot;Need: maintain · 5 cards due · keep warm, do not over-study.&quot;&gt;&lt;/span&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;hover-note&quot; id=&quot;home-map-note&quot;&gt;&lt;b&gt;Nearest: CFA&lt;/b&gt;Overall map · scroll over the map to move into nearby spheres.&lt;/div&gt;
+      &lt;p class=&quot;tiny&quot; style=&quot;margin-top:10px;&quot;&gt;Same sphere look as before. Scroll or trackpad over the map to move through it; the nearest sphere surfaces its concept name, priority, cards due, and dependencies.&lt;/p&gt;
+    &lt;/div&gt;
+  &lt;/section&gt;
+
+  &lt;section class=&quot;grid g3&quot;&gt;
+    &lt;div class=&quot;glass-card session-card&quot;&gt;
+      &lt;div class=&quot;eyebrow&quot;&gt;Recommended session&lt;/div&gt;
+      &lt;h3&gt;25-card FRA priority session&lt;/h3&gt;
+      &lt;p&gt;Highest expected readiness lift. Focuses on consolidation method, impairment, and lease classification.&lt;/p&gt;
+      &lt;div class=&quot;impact&quot;&gt;&lt;i style=&quot;width:82%&quot;&gt;&lt;/i&gt;&lt;/div&gt;
+      &lt;span class=&quot;tiny&quot;&gt;Estimated 18 minutes · strong impact&lt;/span&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;glass-card session-card&quot;&gt;
+      &lt;div class=&quot;eyebrow&quot;&gt;Maintenance&lt;/div&gt;
+      &lt;h3&gt;10-card Ethics minimal-pairs&lt;/h3&gt;
+      &lt;p&gt;Short retention pass to keep the high-weight Ethics node turquoise.&lt;/p&gt;
+      &lt;div class=&quot;impact&quot;&gt;&lt;i style=&quot;width:48%&quot;&gt;&lt;/i&gt;&lt;/div&gt;
+      &lt;span class=&quot;tiny&quot;&gt;Estimated 7 minutes · maintain&lt;/span&gt;
+    &lt;/div&gt;
+  &lt;/section&gt;
+
+  &lt;section class=&quot;feedback&quot;&gt;
+    &lt;div class=&quot;eyebrow&quot;&gt;Review this concept&lt;/div&gt;
+    &lt;h2&gt;Should Home feel like this?&lt;/h2&gt;
+    &lt;p&gt;Pick the closest direction, or annotate the screen directly in Lavish.&lt;/p&gt;
+    &lt;form data-lavish-question=&quot;home-screen-direction&quot; onsubmit=&quot;queueDirection(event)&quot;&gt;
+      &lt;label class=&quot;choice&quot;&gt;&lt;input type=&quot;radio&quot; name=&quot;direction&quot; value=&quot;Approved as direction&quot;&gt; Approved as direction&lt;/label&gt;
+      &lt;label class=&quot;choice&quot;&gt;&lt;input type=&quot;radio&quot; name=&quot;direction&quot; value=&quot;More liquid glass&quot;&gt; More liquid glass&lt;/label&gt;
+      &lt;label class=&quot;choice&quot;&gt;&lt;input type=&quot;radio&quot; name=&quot;direction&quot; value=&quot;More institutional and restrained&quot;&gt; More institutional / restrained&lt;/label&gt;
+      &lt;label class=&quot;choice&quot;&gt;&lt;input type=&quot;radio&quot; name=&quot;direction&quot; value=&quot;More data dense&quot;&gt; More data dense&lt;/label&gt;
+      &lt;button type=&quot;submit&quot;&gt;Queue Home Screen direction&lt;/button&gt;
+    &lt;/form&gt;
+  &lt;/section&gt;
+&lt;/main&gt;
+&lt;script&gt;
+const homeMap = document.getElementById(&quot;home-map&quot;);
+const homeMapField = document.getElementById(&quot;home-map-field&quot;);
+const homeMapNote = document.getElementById(&quot;home-map-note&quot;);
+const homeMapNodes = [...document.querySelectorAll(&quot;#home-map-field .node, #home-map-field .subnode&quot;)];
+let mapState = { x: 0, y: 0, scale: 1 };
+let pinchStart = null;
+
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
+}
+
+function updateMapTransform() {
+  homeMapField.style.transform = `translate(${mapState.x}px, ${mapState.y}px) scale(${mapState.scale})`;
+}
+
+function updateNearestConcept() {
+  const box = homeMap.getBoundingClientRect();
+  const center = { x: box.left + box.width / 2, y: box.top + box.height / 2 };
+  let nearest = homeMapNodes[0];
+  let nearestDistance = Infinity;
+
+  for (const node of homeMapNodes) {
+    const nodeBox = node.getBoundingClientRect();
+    const nodeCenter = { x: nodeBox.left + nodeBox.width / 2, y: nodeBox.top + nodeBox.height / 2 };
+    const distance = Math.hypot(nodeCenter.x - center.x, nodeCenter.y - center.y);
+    if (distance &lt; nearestDistance) {
+      nearest = node;
+      nearestDistance = distance;
+    }
+  }
+
+  homeMapNodes.forEach((node) =&gt; node.classList.toggle(&quot;active&quot;, node === nearest));
+  const name = nearest.dataset.name || &quot;Concept&quot;;
+  const detail = nearest.dataset.detail || &quot;Priority and cards due appear here.&quot;;
+  homeMapNote.innerHTML = `&lt;b&gt;Nearest: ${name}&lt;/b&gt;${detail}`;
+}
+
+if (homeMap &amp;&amp; homeMapField &amp;&amp; homeMapNote) {
+  updateMapTransform();
+  updateNearestConcept();
+
+  homeMap.addEventListener(&quot;wheel&quot;, (event) =&gt; {
+    event.preventDefault();
+    mapState.x = clamp(mapState.x - event.deltaX * 0.38, -96, 96);
+    mapState.y = clamp(mapState.y - event.deltaY * 0.30, -78, 78);
+    mapState.scale = clamp(mapState.scale + Math.abs(event.deltaY) * 0.0009, 1, 1.38);
+
+    updateMapTransform();
+    updateNearestConcept();
+  }, { passive: false });
+
+  homeMap.addEventListener(&quot;mouseleave&quot;, () =&gt; {
+    mapState.scale = Math.max(1, mapState.scale - 0.06);
+    updateMapTransform();
+    updateNearestConcept();
+  });
+
+  homeMap.addEventListener(&quot;touchstart&quot;, (event) =&gt; {
+    if (event.touches.length === 2) {
+      const [a, b] = event.touches;
+      pinchStart = {
+        distance: Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY),
+        scale: mapState.scale,
+        x: mapState.x,
+        y: mapState.y,
+        centerX: (a.clientX + b.clientX) / 2,
+        centerY: (a.clientY + b.clientY) / 2
+      };
+    }
+  }, { passive: true });
+
+  homeMap.addEventListener(&quot;touchmove&quot;, (event) =&gt; {
+    if (event.touches.length === 2 &amp;&amp; pinchStart) {
+      event.preventDefault();
+      const [a, b] = event.touches;
+      const distance = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+      const centerX = (a.clientX + b.clientX) / 2;
+      const centerY = (a.clientY + b.clientY) / 2;
+      const ratio = distance / Math.max(1, pinchStart.distance);
+
+      mapState.scale = clamp(pinchStart.scale * ratio, 0.74, 1.55);
+      mapState.x = clamp(pinchStart.x + (centerX - pinchStart.centerX) * 0.42, -112, 112);
+      mapState.y = clamp(pinchStart.y + (centerY - pinchStart.centerY) * 0.42, -88, 88);
+
+      updateMapTransform();
+      updateNearestConcept();
+    }
+  }, { passive: false });
+
+  homeMap.addEventListener(&quot;touchend&quot;, (event) =&gt; {
+    if (event.touches.length &lt; 2) {
+      pinchStart = null;
+    }
+  });
+
+  homeMapNodes.forEach((node) =&gt; {
+    node.addEventListener(&quot;mouseenter&quot;, () =&gt; {
+      homeMapNodes.forEach((candidate) =&gt; candidate.classList.toggle(&quot;active&quot;, candidate === node));
+      const name = node.dataset.name || &quot;Concept&quot;;
+      const detail = node.dataset.detail || &quot;Need and due status appear here.&quot;;
+      homeMapNote.innerHTML = `&lt;b&gt;${name}&lt;/b&gt;${detail}`;
+    });
+
+    node.addEventListener(&quot;click&quot;, () =&gt; {
+      const name = node.dataset.name || &quot;Concept&quot;;
+      const detail = node.dataset.detail || &quot;Cards due for this concept.&quot;;
+      homeMapNodes.forEach((candidate) =&gt; candidate.classList.toggle(&quot;active&quot;, candidate === node));
+      homeMapNote.innerHTML = `&lt;b&gt;Cards Due: ${name}&lt;/b&gt;${detail} · Opening filtered due-card queue for this section.`;
+    });
+  });
+}
+
+function queueDirection(event){
+  event.preventDefault();
+  const form = event.currentTarget;
+  const direction = new FormData(form).get(&quot;direction&quot;);
+  if(!direction) return;
+  if(window.lavish &amp;&amp; window.lavish.queuePrompt){
+    window.lavish.queuePrompt(&quot;Home Screen direction: &quot; + direction, {
+      tag: &quot;home-screen&quot;,
+      text: &quot;Home Screen: &quot; + direction,
+      element: form,
+      queueKey: &quot;home-screen-direction&quot;,
+      data: { direction }
+    });
+  }
+}
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre></div>
+</main>
+</body>
+</html>

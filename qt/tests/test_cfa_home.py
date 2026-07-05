@@ -137,6 +137,8 @@ def test_link_handler_routes_ctas_to_cfa_entry_points(monkeypatch) -> None:
         "cfa:ethics",
         "cfa:priority",
         "cfa:readiness",
+        "cfa:conceptmap",
+        "cfa:home",
         "cfa:deadline",
         "cfa:ai",
         "cfa:sync",
@@ -154,4 +156,4 @@ def test_link_handler_routes_ctas_to_cfa_entry_points(monkeypatch) -> None:
         "sync",
         "sync-settings",
     ]
-    assert moved == ["deckBrowser"]
+    assert moved == ["cfaConceptMap", "cfaHome", "deckBrowser"]
