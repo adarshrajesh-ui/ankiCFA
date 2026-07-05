@@ -283,3 +283,27 @@ test("D-P4-4: map SVG is a named group, not an a11y-pruning role=img", () => {
     // The nodes are still focusable buttons (the reason role=img is wrong here).
     expect(src).toMatch(/role="button"\s*\n\s*tabindex="0"/);
 });
+
+// --- Phase B regression guard (D-P4-5) ----------------------------------
+// Clicking a node pins its explanation, but the user must always be able to get
+// BACK to the calm overview — no dead-end where a pinned node is stuck open with
+// no exit (Nielsen #3, user control & freedom). Lock in the toggle-off click,
+// the Escape-to-unpin key handling (both on-node and window-level), and the
+// discoverability hint so the exits can't silently regress.
+test("D-P4-5: a pinned node can always be unpinned (toggle + Escape)", () => {
+    const fs = require("node:fs") as typeof import("node:fs");
+    const path = require("node:path") as typeof import("node:path");
+    const src = fs.readFileSync(
+        path.join(__dirname, "CfaConceptMapPage.svelte"),
+        "utf8",
+    );
+    // Clicking the same pinned node toggles the selection off (not a one-way set).
+    expect(src).toMatch(/selId = selId === n\.id \? null : n\.id/);
+    // Escape clears the pin from anywhere via a window keydown listener…
+    expect(src).toContain("svelte:window on:keydown={onWindowKey}");
+    expect(src).toMatch(/function onWindowKey[\s\S]*?e\.key === "Escape"[\s\S]*?selId = null/);
+    // …and also when a node itself has focus (the on-node key handler).
+    expect(src).toMatch(/e\.key === "Escape" && selId !== null/);
+    // The exit is discoverable in the lede copy.
+    expect(src).toContain("to unpin");
+});

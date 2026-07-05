@@ -171,13 +171,27 @@ The batched-AI wording, when AI is on, warms these same templated strings.
     function onLeave(): void {
         hotId = null;
     }
+    // Clicking a node pins its explanation; clicking the SAME pinned node again
+    // UNPINS it (toggle) so there is always a way back to the calm hover/centre
+    // default — no dead-end where one node's explanation is stuck open with no
+    // exit (Nielsen #3, user control & freedom).
     function onSelect(n: ConceptNode): void {
-        selId = n.id;
+        selId = selId === n.id ? null : n.id;
     }
     function onKey(e: KeyboardEvent, n: ConceptNode): void {
         if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
             onSelect(n);
+        } else if (e.key === "Escape" && selId !== null) {
+            e.preventDefault();
+            selId = null;
+        }
+    }
+    // Escape unpins from anywhere (the keyboard "emergency exit"), even if focus
+    // has moved off the pinned node — so a keyboard user is never trapped.
+    function onWindowKey(e: KeyboardEvent): void {
+        if (e.key === "Escape" && selId !== null) {
+            selId = null;
         }
     }
 
@@ -200,6 +214,8 @@ The batched-AI wording, when AI is on, warms these same templated strings.
                   : "AI is on, but this node fell back to its deterministic templated explanation.";
 </script>
 
+<svelte:window on:keydown={onWindowKey} />
+
 <div class="cfa-app cfa-map">
     <div class="cfa-map__inner">
         <PageHeading
@@ -212,7 +228,8 @@ The batched-AI wording, when AI is on, warms these same templated strings.
             centre, the <b>10 test sections</b> orbiting it, each section's
             <b>subsections</b> beyond. Node <b>size = exam weight</b>; node
             <b>fill = your mastery</b>, light gray → turquoise. Hover for a
-            node's name and fill; click to pin a plain-English why.
+            node's name and fill; click to pin a plain-English why (click it
+            again or press <kbd>Esc</kbd> to unpin).
         </p>
 
         <div class="cfa-map__stage">
@@ -440,6 +457,20 @@ The batched-AI wording, when AI is on, warms these same templated strings.
             b {
                 color: cfa.$cfa-ink;
                 font-weight: cfa.$cfa-weight-semibold;
+            }
+
+            // A small "key cap" for the Esc hint — quiet, hairline, body font
+            // (the design system bans monospace), matching the chip affordance.
+            kbd {
+                display: inline-block;
+                padding: 0 cfa.space(1);
+                font-family: inherit;
+                font-size: cfa.$cfa-fs-meta;
+                font-weight: cfa.$cfa-weight-semibold;
+                color: cfa.$cfa-ink;
+                background: cfa.$cfa-bg;
+                border: 1px solid cfa.$cfa-control-border;
+                border-radius: cfa.$cfa-radius-pill;
             }
         }
 

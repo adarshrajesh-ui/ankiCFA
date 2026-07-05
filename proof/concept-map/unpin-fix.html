@@ -1,0 +1,41 @@
+<!doctype html>
+<!--
+D-P4-5 functional proof: a pinned Concept-Map node can always be unpinned.
+This harness ports the EXACT selection handlers shipped in
+CfaConceptMapPage.svelte (onSelect toggle + onKey/onWindowKey Escape) so a real
+browser can drive click-to-pin → click-again-to-unpin and Escape-to-unpin, and
+report the resulting selId, proving there is no dead-end pinned state.
+-->
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      body { font-family: "IBM Plex Sans", system-ui, sans-serif; margin: 24px; color: #122b46; }
+      #state { font-weight: 600; }
+    </style>
+  </head>
+  <body>
+    <button id="nodeA">Ethics node</button>
+    <button id="nodeB">FRA node</button>
+    <p>selId = <span id="state">null</span></p>
+
+    <script>
+      // --- verbatim behaviour from CfaConceptMapPage.svelte ---
+      let selId = null;
+      function render() { document.getElementById("state").textContent = String(selId); }
+      function onSelect(id) { selId = selId === id ? null : id; render(); }        // toggle
+      function onKey(e, id) {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onSelect(id); }
+        else if (e.key === "Escape" && selId !== null) { e.preventDefault(); selId = null; render(); }
+      }
+      function onWindowKey(e) { if (e.key === "Escape" && selId !== null) { selId = null; render(); } }
+      // -------------------------------------------------------
+
+      document.getElementById("nodeA").addEventListener("click", () => onSelect("topic:ethics"));
+      document.getElementById("nodeB").addEventListener("click", () => onSelect("topic:fra"));
+      document.getElementById("nodeA").addEventListener("keydown", (e) => onKey(e, "topic:ethics"));
+      window.addEventListener("keydown", onWindowKey);
+      render();
+    </script>
+  </body>
+</html>

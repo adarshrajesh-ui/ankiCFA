@@ -731,3 +731,24 @@ has only `image "Interactive CFA concept mastery map"` and the node button is
 **absent/pruned**; AFTER (`role="group"`) the tree exposes
 `button "Ethics: 63% mastered"`, proving the focusable node is now reachable by
 assistive tech.
+
+### D-P4-5 — Concept-Map pinned node has no exit (user control & freedom / keyboard operability audit)
+
+Pass 4 escalates on the Concept Map from what a user can *see* (D-P4-1 gauge,
+D-P4-3 tooltip, D-P4-4 a11y tree) to what a user can *do* — auditing it as
+someone who clicked a node to read its explanation and now wants to leave.
+
+| ID | Severity | Where | Finding | Fix |
+|----|----------|-------|---------|-----|
+| D-P4-5 | MAJOR (user control & freedom / keyboard operability) | `CfaConceptMapPage.svelte` — the node selection (`selId` / `onSelect`) | Clicking a node **pinned** its explanation by a one-way `selId = n.id`, and there was **no way to unpin it**: clicking the same node again did nothing new, there was no Escape handler, and no background-click clear. The only "escape" was to click a *different* node — you could never return to the calm hover-driven overview / centre summary. For a keyboard user it was worse: after Enter-to-pin, focus sat on the node with **no key** that dismissed the panel — a trapped pinned state. **Nielsen #3 (user control & freedom — always provide an "emergency exit"); no keyboard operable exit.** | **FIXED (iter 12)** — `onSelect` now **toggles**: `selId = selId === n.id ? null : n.id`, so clicking (or Enter/Space on) a pinned node unpins it and returns to the hover/centre default. **Escape** unpins from anywhere via a `<svelte:window on:keydown>` listener AND the on-node key handler, so a keyboard user is never trapped even if focus has moved. The exit is made discoverable in the lede copy ("click it again or press `Esc` to unpin"). Pure interaction — the engine, scores, node fills, tooltip and panel content are unchanged. |
+
+**Verification:** `ts/lib/cfa/pages/conceptmap.test.ts` **25 → 26 tests, green**
+(new `D-P4-5` source guard: the toggle-off `selId === n.id ? null : n.id`, the
+`svelte:window` Escape listener + `onWindowKey`, the on-node `Escape` branch,
+and the discoverability hint). `just cfa-conceptmap-test` green; `svelte-check`
+0 errors/0 warnings. **Device-observable functional evidence** (the fix is
+interaction, not pixels): `proof/concept-map/unpin-fix.html` ports the SHIPPED
+selection handlers verbatim and is driven in a real browser —
+`selId` goes `null → topic:ethics` (click pins) `→ null` (click same node again,
+toggle unpins), and a separate node pins then **Escape** returns it to `null`
+(`unpin-fix-pinned.png` / `unpin-fix-unpinned.png`).
