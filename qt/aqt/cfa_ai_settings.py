@@ -25,14 +25,31 @@ from aqt.qt import (
     QCheckBox,
     QDialog,
     QDialogButtonBox,
+    QFrame,
     QLabel,
+    Qt,
     QVBoxLayout,
+    QWidget,
     qconnect,
 )
 
 CFA_AI_MASTER = "cfa_ai_enabled"
 CFA_AI_GRADING = "cfa_ai_grading_enabled"
 CFA_AI_TABFILL = "cfa_ai_tabfill_enabled"
+
+
+def _api_key_present() -> bool:
+    """Whether an OpenAI key is configured right now (best-effort, never raises).
+
+    The dialog surfaces this so the user can tell whether the switches below
+    will actually reach the model or silently fall back — the key never appears,
+    only its presence. Mirrors the exact check the AI modules gate on."""
+    try:
+        from cfa.ai.llm_client import key_present
+
+        return bool(key_present())
+    except Exception:
+        return False
 
 
 def get_ai_toggles(col) -> dict[str, bool]:
@@ -71,26 +88,53 @@ class CfaAiSettingsDialog(QDialog):
         self.mw = mw
         self._on_saved = on_saved
         self.setWindowTitle("ankiCFA — AI settings")
-        self.setMinimumWidth(420)
+        self.setMinimumWidth(460)
 
         cur = get_ai_toggles(mw.col)
-        self.master_cb = QCheckBox("Enable AI features (master switch)")
+
+        # Brand heading (eyebrow + serif title) so the dialog reads as one CFA
+        # product, not a generic add-on sheet.
+        heading = self._rich_label(self._heading_html())
+
+        # Live key-status line — the whole toggle contract hinges on whether a
+        # key is present, so state it plainly instead of burying it in prose.
+        self._key_present = _api_key_present()
+        status = self._rich_label(self._status_html(self._key_present))
+
+        self.master_cb = QCheckBox("Enable AI features")
         self.master_cb.setChecked(cur["master"])
+        master_sub = self._rich_label(
+            self._sub_html("Master switch for every AI feature below.")
+        )
+
         self.grading_cb = QCheckBox("AI semantic ethics grading")
         self.grading_cb.setChecked(cur["grading"])
         self.tabfill_cb = QCheckBox("AI tab-to-fill (draft the Back field)")
         self.tabfill_cb.setChecked(cur["tabfill"])
 
         qconnect(self.master_cb.toggled, self._sync_enabled)
-        self._sync_enabled()
 
-        note = QLabel(
-            "AI runs for a feature only when the master switch AND that feature "
-            "are on AND an OpenAI API key is configured. Otherwise every feature "
-            "uses its deterministic fallback — identical, offline behaviour. "
-            "AI is on by default."
+        # Per-feature switches, indented under a quiet section divider so their
+        # parent/child relationship to the master is visible, not just implied.
+        features_label = self._rich_label(self._section_html("Per feature"))
+        self._features = QWidget()
+        feat_layout = QVBoxLayout()
+        feat_layout.setContentsMargins(18, 0, 0, 0)
+        feat_layout.setSpacing(6)
+        feat_layout.addWidget(self.grading_cb)
+        feat_layout.addWidget(self.tabfill_cb)
+        self._features.setLayout(feat_layout)
+
+        divider = QFrame()
+        divider.setFrameShape(QFrame.Shape.HLine)
+        divider.setFrameShadow(QFrame.Shadow.Plain)
+
+        note = self._rich_label(
+            self._sub_html(
+                "Without a key — or with any switch off — every feature uses its "
+                "deterministic fallback: identical, fully offline behaviour."
+            )
         )
-        note.setWordWrap(True)
 
         buttons = QDialogButtonBox(
             QDialogButtonBox.StandardButton.Save
@@ -100,10 +144,20 @@ class CfaAiSettingsDialog(QDialog):
         qconnect(buttons.rejected, self.reject)
 
         layout = QVBoxLayout()
+        layout.setContentsMargins(20, 18, 20, 16)
+        layout.setSpacing(4)
+        layout.addWidget(heading)
+        layout.addWidget(status)
+        layout.addSpacing(8)
         layout.addWidget(self.master_cb)
-        layout.addWidget(self.grading_cb)
-        layout.addWidget(self.tabfill_cb)
+        layout.addWidget(master_sub)
+        layout.addSpacing(6)
+        layout.addWidget(features_label)
+        layout.addWidget(self._features)
+        layout.addSpacing(8)
+        layout.addWidget(divider)
         layout.addWidget(note)
+        layout.addSpacing(8)
         layout.addWidget(buttons)
         self.setLayout(layout)
 
@@ -115,10 +169,65 @@ class CfaAiSettingsDialog(QDialog):
         except Exception:
             pass
 
+        self._sync_enabled()
+
+    @staticmethod
+    def _rich_label(html: str) -> QLabel:
+        lbl = QLabel(html)
+        lbl.setTextFormat(Qt.TextFormat.RichText)
+        lbl.setWordWrap(True)
+        return lbl
+
+    @staticmethod
+    def _heading_html() -> str:
+        try:
+            from aqt.cfa_style import page_heading
+
+            return page_heading("ankiCFA · AI", "AI features")
+        except Exception:
+            return "<b>AI features</b>"
+
+    @staticmethod
+    def _section_html(text: str) -> str:
+        try:
+            from aqt.cfa_style import section
+
+            return section(text)
+        except Exception:
+            return f"<b>{text}</b>"
+
+    @staticmethod
+    def _sub_html(text: str) -> str:
+        try:
+            from aqt.cfa_style import caption
+
+            return caption(text)
+        except Exception:
+            return text
+
+    @staticmethod
+    def _status_html(key_present: bool) -> str:
+        try:
+            from aqt.cfa_style import notice
+
+            if key_present:
+                return notice(
+                    "OpenAI API key detected — AI runs for the switches you enable.",
+                    tone="pass",
+                )
+            return notice(
+                "No OpenAI API key set — every feature runs its offline fallback.",
+                tone="warn",
+            )
+        except Exception:
+            return "API key detected." if key_present else "No API key set."
+
     def _sync_enabled(self) -> None:
         on = self.master_cb.isChecked()
         self.grading_cb.setEnabled(on)
         self.tabfill_cb.setEnabled(on)
+        if hasattr(self, "_features"):
+            self._features.setEnabled(on)
 
     def accept(self) -> None:
         set_ai_toggles(

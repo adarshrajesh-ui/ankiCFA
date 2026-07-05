@@ -275,6 +275,17 @@ cfa-capture-populated: _install-playwright-browsers
     CFA_SEED_REVIEWS=1 CFA_UI_OUT=proof/friday/gnhf-speedrun/desktop-ui/pass-2 \
       {{ playwright_env }} {{ yarn }} test:e2e cfa_readiness_populated
 
+# Phase B desktop Pass 2: AI-settings dialog (D6) test suite.
+cfa-ai-settings-test:
+    {{ ninja }} pylib
+    QT_QPA_PLATFORM=offscreen PYTHONPATH="out/pylib:pylib:qt:out/qt" {{ py }} -m pytest qt/tests/test_cfa_ai_settings.py -q
+
+# Phase B desktop Pass 2: render the AI-settings dialog (D6) to PNGs (offscreen)
+# into desktop-ui/pass-2/ — master ON / master OFF / key-present states.
+cfa-capture-ai-settings:
+    {{ ninja }} pylib qt
+    QT_QPA_PLATFORM=offscreen PYTHONPATH="out/pylib:pylib:qt:out/qt" {{ py }} tools/cfa/render_ai_settings.py proof/friday/gnhf-speedrun/desktop-ui/pass-2
+
 # A13: verify a packaged Anki.app is a self-contained CFA-fork installer bundle.
 cfa-installer-verify app:
     {{ py }} tools/cfa/verify_installer.py {{ app }}

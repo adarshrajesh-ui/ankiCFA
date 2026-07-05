@@ -31,7 +31,7 @@ Legend: TODO / WIP / DONE (evidence path) / BLOCKED (root cause).
 | Pass | Desktop | Mobile | Log |
 |------|---------|--------|-----|
 | 1 (critical) | DONE (CFA web 5 MAJOR + 4 MINOR fixed; Qt chrome → Pass 2) | DONE (all 7 MAJORs fixed) | `UI-CRITIQUE-LOG.md` Pass 1 |
-| 2 (harsher) | WIP (D7 Connect/Logout — named must-fix — FIXED; D9 populated render; D3 Deadline; D4 Ethics reviewer gold-phrase ladder FIXED) | WIP (M6-1 DeckPicker stock-blue leak FIXED) | `UI-CRITIQUE-LOG.md` Pass 2 |
+| 2 (harsher) | WIP (D7 Connect/Logout — named must-fix — FIXED; D9 populated render; D3 Deadline; D4 Ethics reviewer gold-phrase ladder FIXED; D6 AI Settings dialog redesigned FIXED) | WIP (M6-1 DeckPicker stock-blue leak FIXED) | `UI-CRITIQUE-LOG.md` Pass 2 |
 | 3 (ruthless) | TODO | TODO | |
 
 Phase B kicked off (iter 25). `proof/friday/UI-INVENTORY.md` (every desktop +
@@ -176,6 +176,23 @@ mobile screen/state) and `proof/friday/UI-CRITIQUE-LOG.md` created.
   (5 tests) + full ethics suite **121 passed, 3 skipped** (`test_highlight.py`
   byte-mirror green). Before/after `desktop-ui/pass-2-before/d4-ethics-*` →
   `pass-2/d4-ethics-*` (+ `d4-ethics-reviewer.txt`).
+
+**Pass 2 desktop — AI SETTINGS dialog captured + redesigned (iter 37).**
+- **D6 AI Settings** (`qt/aqt/cfa_ai_settings.py` → `CfaAiSettingsDialog`) — the
+  native Qt AI on/off control, a real inventory gap never captured in any pass.
+  Was a bare 3-checkbox stack + dense grey paragraph with no CFA identity and no
+  indication of whether AI would actually run. **FIXED** three MAJORs: D6-1 added
+  the CFA brand heading (eyebrow "ankiCFA · AI" + serif title); D6-2 grouped the
+  two per-feature switches into one indented "PER FEATURE" container that greys
+  out as a group under the master; D6-3 added a **live key-status line** (green
+  "OpenAI API key detected — AI runs…" vs orange "No OpenAI API key set — every
+  feature runs its offline fallback", via `cfa.ai.llm_client.key_present()`, key
+  never shown) + D6-4 spacing/divider polish. Offscreen `QDialog.grab()` captures
+  `desktop-ui/pass-2-before/d6-ai-settings-*` → `pass-2/d6-ai-settings-*`
+  (master-on / master-off / key-present) via `just cfa-capture-ai-settings`.
+  Verify: `just cfa-ai-settings-test` (8 green: 5 prior + 3 new); broader CFA qt
+  suite 39 green; ruff clean; parity-gated `cfa_style` TOKENS unchanged. Evidence
+  `desktop-ui/pass-2/d6-ai-settings.txt`.
 
 **Pass 2 mobile — started (iter 34): DeckPicker stock-blue leak (M6-1).**
 - After the Pass-1 shell refactor branded the shell navy, the harsher Pass-2

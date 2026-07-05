@@ -306,9 +306,36 @@ is gone. Full ethics suite `pytest cfa/ethics_pairs/tests -q` → **121 passed,
 Python↔JS grade agreement) is untouched (the fix is `style.css`-only, not the
 `CFA-SPAN-SHARED` JS block).
 
+### D6 — AI Settings dialog (`qt/aqt/cfa_ai_settings.py`)
+Captures (real `CfaAiSettingsDialog`, offscreen `QDialog.grab()` → PNG, no live
+Anki launch; reproduce with `just cfa-capture-ai-settings`):
+- `desktop-ui/pass-2-before/d6-ai-settings-{master-on,master-off}.png`
+- `desktop-ui/pass-2/d6-ai-settings-{master-on,master-off,key-present}.png`
+- Evidence: `desktop-ui/pass-2/d6-ai-settings.txt`
+
+This native Qt dialog (the visible desktop AI on/off control) had **never been
+captured or critiqued** in any Phase-B pass. It was a bare vertical stack of
+three checkboxes + one dense grey paragraph + Save/Cancel — the generic-add-on
+look, no CFA identity, and (worse) it never told the user whether AI would
+actually run. Captured and critiqued:
+
+| # | Severity | Element | Issue | Fix |
+|---|----------|---------|-------|-----|
+| D6-1 | MAJOR | whole dialog | No brand identity — a bare checkbox stack with no eyebrow/title, unlike every other CFA surface (Home, Readiness, mobile all carry the brand lockup). Reads as a stock Anki add-on sheet, not a premium CFA product. | **FIXED (iter 37)** — added the CFA brand heading (eyebrow "ankiCFA · AI" + serif title "AI features") via `cfa_style.page_heading`. |
+| D6-2 | MAJOR | 3 checkboxes | The master switch (which gates the two feature switches) was a flat peer in the list; the parent/child relationship was invisible — on master-off the two just greyed out with no grouping. | **FIXED (iter 37)** — the master switch stands alone with a subtitle; the two per-feature switches are in ONE indented container under a quiet "PER FEATURE" divider that greys out **as a group** when the master is off (`self._features.setEnabled(on)`). |
+| D6-3 | MAJOR | key gating | The whole contract hinges on "AND an OpenAI API key is configured", but the dialog never said whether one IS — the user couldn't tell if the switches would reach the model or silently fall back. Buried in a 4-line prose block. | **FIXED (iter 37)** — a live status line states it up front: key present → green (pass) "OpenAI API key detected — AI runs for the switches you enable"; no key → orange (warn) "No OpenAI API key set — every feature runs its offline fallback." Reads `cfa.ai.llm_client.key_present()` (the exact gate the AI modules use); the key value is never shown/logged. |
+| D6-4 | MINOR | spacing / note | Cramped checkbox rows; dense grey paragraph butting the buttons. | **FIXED (iter 37)** — consistent spacing scale + a hairline divider before a single quiet caption footnote. |
+
+**Verification:** `qt/tests/test_cfa_ai_settings.py` → **8 passed** (5 prior + 3
+new: feature-group container gating, `_status_html` reflects key presence + never
+leaks a key, brand heading present). Broader CFA qt suite (ai_settings + toolbar +
+menu + chrome + home) → **39 passed**; `ruff check`/`format` clean. Parity-gated
+`cfa_style` TOKENS values UNCHANGED — the redesign only composes existing builders
+(`page_heading`/`section`/`caption`/`notice`) and reassigns state→tone.
+
 ### Still-TODO (desktop Pass 2/3)
-- Remaining Qt-chrome surfaces: D6 AI Settings dialog, D8 deck browser,
-  D11 window chrome — capture + critique.
+- Remaining Qt-chrome surfaces: D8 deck browser, D11 window chrome — capture +
+  critique.
 
 ## Pass 2 — MOBILE (harsher): stock-blue leaks through the navy shell
 

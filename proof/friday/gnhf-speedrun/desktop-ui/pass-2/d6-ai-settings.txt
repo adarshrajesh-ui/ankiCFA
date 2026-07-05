@@ -1,0 +1,64 @@
+Phase B — DESKTOP Pass 2 (harsher): D6 AI Settings dialog
+=========================================================
+
+Surface: qt/aqt/cfa_ai_settings.py :: CfaAiSettingsDialog  (menu "AI settings")
+Capture: offscreen QDialog.grab() → PNG, no live Anki launch.
+Reproduce:
+  just cfa-capture-ai-settings          # renders the 3 PNGs below
+  just cfa-ai-settings-test             # 8 tests, green
+
+Screenshots (before = pre-redesign, after = this pass):
+  pass-2-before/d6-ai-settings-master-on.png
+  pass-2-before/d6-ai-settings-master-off.png
+  pass-2/d6-ai-settings-master-on.png
+  pass-2/d6-ai-settings-master-off.png
+  pass-2/d6-ai-settings-key-present.png   (forced key-present branch)
+
+Critique (structured senior-designer heuristic — GPT-4o vision UNAVAILABLE, no
+OPENAI_API_KEY; same honesty caveat as every other pass):
+
+  D6-1 MAJOR — No brand identity. The dialog was a bare vertical stack of three
+    checkboxes + one dense grey paragraph + Save/Cancel. Every other CFA surface
+    (Home, Readiness, mobile) carries a brand eyebrow + title; this one had none,
+    so it read as a generic Anki add-on sheet, not a premium CFA product.
+    FIXED — added a CFA brand heading (eyebrow "ankiCFA · AI" + serif title
+    "AI features") via cfa_style.page_heading, so it reads as one product.
+
+  D6-2 MAJOR — Master/feature relationship invisible. The three checkboxes were a
+    flat list of equal weight; the master switch (which gates the two below) looked
+    like a peer. On master-off the two greyed out, but nothing conveyed the
+    parent/child grouping.
+    FIXED — the master switch now stands alone with a subtitle; the two per-feature
+    switches sit in one indented container under a quiet "PER FEATURE" section
+    divider, and the whole group greys out together when the master is off
+    (self._features.setEnabled(on)).
+
+  D6-3 MAJOR — No key-status transparency. The entire toggle contract hinges on
+    "AND an OpenAI API key is configured", but the dialog never said whether one
+    IS — so a user could not tell if the switches would actually reach the model or
+    silently fall back. Buried inside a 4-line prose paragraph.
+    FIXED — a live status line states the real behaviour up front:
+      key present → green (pass) "OpenAI API key detected — AI runs for the
+                    switches you enable."
+      no key      → orange (warn) "No OpenAI API key set — every feature runs its
+                    offline fallback."
+    Reads cfa.ai.llm_client.key_present() (the exact gate the AI modules use); the
+    key value is never shown or logged.
+
+  D6-4 MINOR — Cramped spacing / dense note. FIXED — consistent spacing scale
+    (contentsMargins 20/18, addSpacing between groups), a hairline divider before
+    the footnote, and the prose collapsed to a single quiet caption line.
+
+Verification:
+  qt/tests/test_cfa_ai_settings.py → 8 passed (5 prior + 3 new: feature-group
+    container gating, status-html reflects key presence + never leaks a key,
+    brand heading present).
+  Broader CFA qt suite (ai_settings + toolbar + menu + chrome + home) → 39 passed.
+  ruff check + format clean on cfa_ai_settings.py, test_cfa_ai_settings.py,
+    tools/cfa/render_ai_settings.py.
+
+Honesty: the status line reflects the REAL key presence at capture time; the
+key-present PNG forces that boolean branch (a pure function) so the pass-tone
+render is faithful without a real key. No AI is invoked. Parity-gated cfa_style
+TOKENS values are UNCHANGED — the redesign only composes existing builders
+(page_heading / section / caption / notice) and reassigns which tone a state uses.

@@ -16,9 +16,9 @@ import tempfile
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
-from anki.collection import Collection
 from PyQt6.QtWidgets import QApplication, QWidget
 
+from anki.collection import Collection
 from aqt import cfa_ai_settings as ai
 
 _APP: QApplication | None = None
@@ -122,5 +122,47 @@ def test_feature_toggles_gated_on_master() -> None:
         dlg.master_cb.setChecked(True)
         assert dlg.grading_cb.isEnabled() is True
         assert dlg.tabfill_cb.isEnabled() is True
+    finally:
+        col.close()
+
+
+def test_feature_group_container_gated_on_master() -> None:
+    # Pass-2 redesign: the two per-feature switches live in one indented
+    # container that greys out as a group when the master is off (visible
+    # parent/child relationship, not just two independently-disabled rows).
+    col = _empty_col()
+    try:
+        ai.set_ai_toggles(col, master=False, grading=True, tabfill=True)
+        dlg = ai.CfaAiSettingsDialog(_mw(col))
+        assert dlg._features.isEnabled() is False
+        dlg.master_cb.setChecked(True)
+        assert dlg._features.isEnabled() is True
+    finally:
+        col.close()
+
+
+def test_status_html_reflects_key_presence() -> None:
+    # The live key-status line states the real behaviour up front: with a key,
+    # AI runs (pass tone); without one, every feature falls back (warn tone).
+    present = ai.CfaAiSettingsDialog._status_html(True)
+    absent = ai.CfaAiSettingsDialog._status_html(False)
+    assert "detected" in present.lower()
+    assert "no openai api key" in absent.lower()
+    assert "fallback" in absent.lower()
+    # never leak or invent a key value
+    assert "sk-" not in present and "sk-" not in absent
+
+
+def test_dialog_has_brand_heading() -> None:
+    # Pass-2 redesign: the dialog carries the CFA brand eyebrow + serif title
+    # so it reads as one product, not a generic add-on sheet.
+    from PyQt6.QtWidgets import QLabel
+
+    col = _empty_col()
+    try:
+        dlg = ai.CfaAiSettingsDialog(_mw(col))
+        texts = " ".join(lbl.text() for lbl in dlg.findChildren(QLabel)).lower()
+        assert "ai features" in texts
+        assert "ankicfa" in texts
     finally:
         col.close()
