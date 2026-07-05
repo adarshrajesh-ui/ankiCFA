@@ -31,7 +31,7 @@ Legend: TODO / WIP / DONE (evidence path) / BLOCKED (root cause).
 | Pass | Desktop | Mobile | Log |
 |------|---------|--------|-----|
 | 1 (critical) | DONE (CFA web 5 MAJOR + 4 MINOR fixed; Qt chrome → Pass 2) | DONE (all 7 MAJORs fixed) | `UI-CRITIQUE-LOG.md` Pass 1 |
-| 2 (harsher) | DONE (D7 Connect/Logout — named must-fix — FIXED; D9 populated render; D3 Deadline; D4 Ethics reviewer gold-phrase ladder FIXED; D6 AI Settings dialog redesigned FIXED; D8 deck-browser stock-blue leak FIXED; D11 CFA menu grouped into labelled sections FIXED — every D1–D11 surface captured+critiqued) | WIP (M6-1 DeckPicker stock-blue leak FIXED; M7-1 Readiness abstain triple-repeat FIXED) | `UI-CRITIQUE-LOG.md` Pass 2 |
+| 2 (harsher) | DONE (D7 Connect/Logout — named must-fix — FIXED; D9 populated render; D3 Deadline; D4 Ethics reviewer gold-phrase ladder FIXED; D6 AI Settings dialog redesigned FIXED; D8 deck-browser stock-blue leak FIXED; D11 CFA menu grouped into labelled sections FIXED — every D1–D11 surface captured+critiqued) | WIP (M6-1 DeckPicker stock-blue leak FIXED; M7-1 Readiness abstain triple-repeat FIXED; M4-2 Exam-Config context line + live countdown FIXED — Reviewer harsher sweep remaining) | `UI-CRITIQUE-LOG.md` Pass 2 |
 | 3 (ruthless) | TODO | TODO | |
 
 Phase B kicked off (iter 25). `proof/friday/UI-INVENTORY.md` (every desktop +
@@ -263,6 +263,23 @@ mobile screen/state) and `proof/friday/UI-CRITIQUE-LOG.md` created.
   `installFullDebug`, `ktlintCheck`, `lintVitalFullRelease`, CFA unit tests. Committed
   on `gnhf/speedrun-mobile`. (Carried Pass-1 MINOR M2-2 also confirmed resolved — the
   Exam Readiness nav-drawer entry already uses the `ic_cfa_readiness` bar-chart icon.)
+
+**Pass 2 mobile — EXAM CONFIG context + countdown (iter 41): M4-2.**
+- The **Exam configuration** screen (`CfaExamConfigActivity`) re-looked under the
+  harsher Pass-2 lens: it was a bare title + "No exam date set" field + Pick date
+  + Save over a ~60% empty screen, with no rationale and no feedback after picking
+  a date. **FIXED (M4-2, carried Pass-1 MINOR)** — added a calm `cfa_muted`
+  **context line** ("Set your exam date so ankiCFA can weight study by
+  points-at-stake and show a live countdown on the Exam Readiness screen.") and a
+  **live countdown preview** in warm `cfa_accent` ("N days to the exam" via a
+  `plurals`, today/past special cases, hidden when unset), backed by a pure
+  unit-tested `CfaExamConfig.daysUntil(date, today)`. Presentation-only — the
+  synced `cfa_exam_config` col.conf shape is untouched. Device-observable before
+  `pass-2-before/05-exam-config-sparse.png` (genuine pre-fix on the current navy
+  shell) → after `pass-2/05-exam-config-context.png` + `06-exam-config-countdown.png`
+  (+ `pass-2/exam-config-density.txt`). Green: `CfaExamConfigTest` **7 tests**
+  (3 prior + 4 new `daysUntil`), `ktlintCheck`, `lintVitalFullRelease`,
+  `installFullDebug`. Committed on `gnhf/speedrun-mobile`.
 
 Named must-fix: desktop Readiness renders with data (**functional gate DONE** +
 **populated real-range render DONE, iter 32**); **Connect/Logout redesigned

@@ -426,11 +426,30 @@ with other definitions, so dropping the app reference does not trip
 `UnusedResources`), and `testPlayDebugUnitTest --tests "com.ichi2.anki.cfa.*"` — all
 **BUILD SUCCESSFUL**. Committed on `gnhf/speedrun-mobile`.
 
+### M4 — Exam Config (harsher re-look: sparse screen / no rationale)
+Captures (branch `gnhf/speedrun-mobile`, `emulator-5554`, real fullDebug build):
+- `pass-2-before/05-exam-config-sparse.png` — genuine pre-fix screen on the
+  CURRENT navy shell (git-stash the M4-2 source → `installFullDebug` → capture →
+  stash pop, so before/after differ ONLY by this fix, not the shell refactor).
+- `pass-2/05-exam-config-context.png` (context line, no-date) +
+  `pass-2/06-exam-config-countdown.png` (live countdown with a date set).
+- Evidence: `pass-2/exam-config-density.txt`.
+
+| # | Severity | Element | Issue | Fix |
+|---|----------|---------|-------|-----|
+| M4-2 | MINOR (carried from Pass 1) | whole screen | The Exam-config screen was a bare title + "No exam date set" field + Pick date + Save over a ~60% empty lower half, with **no explanation of why the exam date matters** and **no feedback once a date was chosen** — reads as unfinished on a premium exam-prep product. | **FIXED (iter 41)** — added (a) a calm `cfa_muted` **context line** under the title ("Set your exam date so ankiCFA can weight study by points-at-stake and show a live countdown on the Exam Readiness screen.") and (b) a **live countdown preview** in the warm `cfa_accent` shown the moment a date is set / on re-open ("N days to the exam" via a `plurals`, "Your exam is today — good luck." on the day, "This exam date has already passed." after), hidden when no date is set. Backed by a pure, unit-tested `CfaExamConfig.daysUntil(date, today)` (whole days, positive/0/negative, null on unset/blank/unparseable). Presentation-only — the persisted `cfa_exam_config` col.conf shape (the synced key that drives both apps) is untouched. |
+
+**Verification:** `testPlayDebugUnitTest --tests "com.ichi2.anki.cfa.CfaExamConfigTest"`
+→ **7 tests green** (3 prior persistence + 4 new `daysUntil`); `ktlintCheck` +
+`lintVitalFullRelease` (plurals carry both one/other forms, all new strings
+referenced → no `UnusedResources`) + `installFullDebug` all **BUILD SUCCESSFUL**.
+Committed on `gnhf/speedrun-mobile`.
+
 ### Still-TODO (mobile Pass 2/3)
-- Harsher sweep of the remaining screens (Reviewer, Exam Config) for residual
-  stock colour; MINORs carried from Pass 1 (M2-2 generic drawer icon for Exam
-  Readiness — *resolved: `ic_cfa_readiness` bar-chart icon is wired in
-  `navigation_drawer.xml`*, M4-2 sparse Exam-Config density, M3-5 per-topic
+- Harsher sweep of the remaining screen (Reviewer) for residual stock colour;
+  MINORs carried from Pass 1 (M2-2 generic drawer icon for Exam Readiness —
+  *resolved: `ic_cfa_readiness` bar-chart icon is wired in `navigation_drawer.xml`*;
+  M4-2 sparse Exam-Config density — **resolved this pass**; M3-5 per-topic
   8→10 topic parity when the AAR is rebuilt from the 10-topic branch).
 
 ## Pass 3 (ruthless, pixel-level) — TODO (both apps)
