@@ -30,6 +30,10 @@ class Overview:
     pass
 
 
+class ReviewerBottomBar:
+    pass
+
+
 def test_toolbar_gets_cfa_skin() -> None:
     wc = SimpleNamespace(head="", body="<div class='header'></div>")
     cfa_chrome.on_webview_will_set_content(wc, TopToolbar())
@@ -96,6 +100,32 @@ def test_overview_retones_stock_blue_study_cta_and_count() -> None:
     assert f"background: {primary} !important;" in css  # #study CTA
     assert ".learn-count" not in css
     assert ".review-count" not in css
+
+
+def test_reviewer_bottom_gets_cfa_skin() -> None:
+    # The reviewer answer bar (Show Answer + ease buttons) shipped as pure stock
+    # Anki native buttons; the CFA skin must retone the most-used study surface.
+    wc = SimpleNamespace(head="", body="<center id=outer></center>")
+    cfa_chrome.on_webview_will_set_content(wc, ReviewerBottomBar())
+    assert "cfa-chrome-reviewer-bottom" in wc.head
+    # body is left intact — the bar HTML is Anki's; only the skin is injected.
+    assert wc.body == "<center id=outer></center>"
+
+
+def test_reviewer_bottom_primary_and_caution_cues() -> None:
+    # "Show Answer" (#ansbut) + the recommended default answer (#defease) are the
+    # navy primary pill; "Again" (data-ease=1) carries a quiet fail-red caution.
+    css = cfa_chrome._reviewer_bottom_css()
+    primary = cfa_style.TOKENS["primary"]
+    fail = cfa_style.TOKENS["fail"]
+    assert "#ansbut" in css
+    assert "#defease" in css
+    assert f"background: {primary} !important;" in css
+    assert '#middle button[data-ease="1"]:not(#defease)' in css
+    assert f"border-color: {fail};" in css
+    # rating tiers other than Again stay neutral — no traffic-light data-ease 2/3.
+    assert 'data-ease="2"' not in css
+    assert 'data-ease="3"' not in css
 
 
 def test_other_contexts_untouched() -> None:

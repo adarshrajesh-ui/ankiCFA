@@ -848,3 +848,29 @@ cascade are faithfully present): BEFORE a white page with a plain-sans title, a
 CFA-tinted page with an accent eyebrow, a **serif navy** deck title, a **navy**
 New count (Learn=red / Review=green preserved), and a **navy pill "Study Now"**
 CTA — one cohesive CFA study-intro.
+
+### D-P4-10 — Reviewer answer bar (Show Answer + Again/Hard/Good/Easy) shipped as un-themed stock Anki (design-system consistency / "no un-themed stock-Anki screens" audit)
+
+Pass 4 continues along the study **flow**. After D-P4-9 themed the Overview
+study-intro, the very next screen — the one a user stares at on *every single
+card* — is the Reviewer answer bar (`ReviewerBottomBar` bottom webview:
+`Reviewer._bottomHTML` + `_showAnswerButton` + `_answerButtons`). It shipped as
+**pure stock Anki**: native gray `<button>` elements (Edit / More / Show Answer /
+Again / Hard / Good / Easy) on a plain bar. This is the single most-used surface
+in a spaced-repetition app, and it read as plain Anki with no CFA identity.
+
+| ID | Severity | Where | Finding | Fix |
+|----|----------|-------|---------|-----|
+| D-P4-10 | MAJOR (design-system consistency / product feel — most-used surface) | `qt/aqt/cfa_chrome.py` `on_webview_will_set_content` — the `ReviewerBottomBar` stdHtml webview (`qt/aqt/reviewer.py`, `css/reviewer-bottom.css`) | The reviewer answer bar rendered **100% stock Anki**: native OS-gray `<button>`s for Edit / More, the "Show Answer" CTA, and the Again/Hard/Good/Easy rating buttons, on a plain white bar. No brand type, no CFA palette, no primary-CTA emphasis, no rating cue — the most-studied screen in the product looked like vanilla Anki. | **FIXED (iter 21)** — added a `ReviewerBottomBar` branch to `on_webview_will_set_content` calling `_reviewer_bottom_css()`: the bar sits on the calm CFA page with a hairline `line` top rule; **Edit / More** become quiet transparent text buttons (accent on hover); the rating buttons become rounded **CFA chips** (hairline border → accent-soft hover) in the brand font; **"Show Answer" (`#ansbut`)** is the single **navy primary pill** CTA; the recommended/default answer (`#defease`) is a **filled navy pill** so the eye is guided to it; and **"Again" (`data-ease="1"`, always Again regardless of button count)** carries a quiet **fail-red caution border**. Other tiers stay neutral — deliberately NOT a traffic-light so it avoids the stock-addon look and the Good/Hard ambiguity a count-varying `data-ease` number would introduce. Additive presentation only via a public `gui_hooks` — no reviewer render code rewritten; the pycmd wiring, counts, and scheduling are unchanged. |
+
+**Verification:** `qt/tests/test_cfa_chrome.py` **9 → 11 tests, green**
+(`just cfa-chrome-test`): new guards that the `ReviewerBottomBar` context gets
+the `cfa-chrome-reviewer-bottom` skin (body left intact), that `#ansbut` +
+`#defease` are the navy primary pill, that `data-ease="1"` carries the fail-red
+caution border, and that tiers 2/3 are NOT traffic-light-coloured.
+**Before/after evidence** (`proof/reviewer-bottom/reviewer-bottom-{before,after}{,-q}.{html,png}`,
+`just cfa-capture-reviewer-bottom`, screenshot via chrome-devtools-axi over the
+REAL compiled `toolbar-bottom.css` + `reviewer-bottom.css` so the stock button
+cascade is faithfully present): BEFORE a row of native gray OS buttons; AFTER
+rounded CFA chips with a red-bordered "Again", a filled-navy "Good" (default),
+and a navy-pill "Show Answer" — one cohesive CFA study surface.

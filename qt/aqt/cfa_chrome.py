@@ -13,6 +13,10 @@ plain Anki:
   banner, and a CFA caption via ``deck_browser_will_render_content``.
 * the deck study-intro (``Overview`` webview): CFA page tint + serif deck title
   + a navy "Study Now" primary CTA (was stock-blue) + a brand eyebrow.
+* the reviewer answer bar (``ReviewerBottomBar`` webview): CFA-styled rating
+  chips, a navy "Show Answer" primary pill, a quiet caution border on "Again",
+  and a filled-navy recommended (default) answer — so the most-used study
+  surface no longer shows stock-Anki native buttons.
 
 Palette/type come from :data:`aqt.cfa_style.TOKENS` (parity-locked to the web
 ``_tokens.scss``), so the chrome matches the SvelteKit pages exactly. Everything
@@ -187,6 +191,85 @@ def _overview_css() -> str:
 </style>"""
 
 
+def _reviewer_bottom_css() -> str:
+    t = _t()
+    # The reviewer answer bar (Show Answer + Again/Hard/Good/Easy) is THE
+    # most-used study surface, and it shipped as pure stock Anki: native gray
+    # <button> elements on a plain bar. Retone it to the CFA design system so
+    # studying reads as a purpose-built CFA product:
+    #   * the bar sits on the calm CFA page with a hairline top rule,
+    #   * "Edit"/"More" become quiet text buttons (accent on hover),
+    #   * rating buttons become rounded CFA chips (hairline → accent-soft hover),
+    #   * "Show Answer" (#ansbut) is the single navy primary pill CTA,
+    #   * the recommended/default answer (#defease) is a filled navy pill so the
+    #     eye is guided to it, mirroring the desktop/mobile primary decision,
+    #   * "Again" (data-ease=1 is always Again, regardless of button count)
+    #     carries a quiet fail-red caution border — the one unambiguous rating
+    #     cue worth keeping; the other tiers stay neutral to avoid the
+    #     stock-addon traffic-light look and the Good/Hard ambiguity that a
+    #     count-varying data-ease number would introduce.
+    return f"""
+<style id="cfa-chrome-reviewer-bottom">
+  html, body {{
+    background: {t["bg"]} !important;
+    color: {t["ink"]};
+    font-family: {t["font"]};
+  }}
+  #outer {{ border-top: 1px solid {t["line"]} !important; }}
+  /* Edit / More — quiet text buttons, not native gray chrome. */
+  .stat button {{
+    background: transparent !important;
+    border: none !important;
+    color: {t["muted"]} !important;
+    font-family: {t["font"]};
+    font-weight: 600;
+  }}
+  .stat button:hover {{ color: {t["accent"]} !important; }}
+  /* Rating chips + Show Answer — one rounded CFA pill shape. */
+  #middle button, #ansbut {{
+    font-family: {t["font"]};
+    font-weight: 600;
+    border-radius: 100px;
+    border: 1px solid {t["line"]};
+    background: {t["bg"]};
+    color: {t["ink"]};
+    padding: 8px 20px;
+  }}
+  #middle button:hover {{
+    border-color: {t["accent"]};
+    color: {t["accent"]};
+    background: {t["accent_soft"]};
+  }}
+  /* Show Answer — the single navy primary pill CTA. */
+  #ansbut, #ansbut:hover {{
+    background: {t["primary"]} !important;
+    color: {t["bg"]} !important;
+    border-color: {t["primary"]} !important;
+  }}
+  #ansbut:hover {{ background: {t["primary_hover"]} !important; }}
+  /* Recommended/default answer — filled navy pill so the eye is guided. */
+  #defease, #defease:hover {{
+    background: {t["primary"]} !important;
+    color: {t["bg"]} !important;
+    border-color: {t["primary"]} !important;
+  }}
+  #defease:hover {{ background: {t["primary_hover"]} !important; }}
+  /* "Again" (ease 1) — a quiet caution border, unless it is the default. */
+  #middle button[data-ease="1"]:not(#defease) {{
+    border-color: {t["fail"]};
+    color: {t["fail"]};
+  }}
+  #middle button[data-ease="1"]:not(#defease):hover {{
+    border-color: {t["fail"]};
+    color: {t["fail"]};
+    background: {t["fail_soft"]};
+  }}
+  /* Interval labels + remaining-count stay quiet. */
+  .nobold, .stattxt {{ color: {t["faint"]}; }}
+  .new-count {{ color: {t["ink"]}; }}
+</style>"""
+
+
 def _deckbrowser_banner() -> str:
     return (
         '<div class="cfa-deck-banner">'
@@ -220,6 +303,8 @@ def on_webview_will_set_content(web_content: Any, context: object | None) -> Non
     elif name == "Overview":
         web_content.head += _overview_css()
         web_content.body = _overview_eyebrow() + web_content.body
+    elif name == "ReviewerBottomBar":
+        web_content.head += _reviewer_bottom_css()
 
 
 def on_deck_browser_will_render_content(deck_browser: Any, content: Any) -> None:

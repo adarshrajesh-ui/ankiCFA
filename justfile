@@ -308,6 +308,13 @@ cfa-capture-overview out="proof/overview/overview-after.html":
     {{ ninja }} qt
     QT_QPA_PLATFORM=offscreen PYTHONPATH="out/pylib:pylib:qt:out/qt" {{ py }} tools/cfa/render_overview.py {{ out }}
 
+# Phase B desktop Pass 4: render the CFA-skinned reviewer answer bar (D-P4-10)
+# to a standalone HTML for capture. Pass --stock for the stock-Anki "before"
+# and --question for the Show-Answer phase.
+cfa-capture-reviewer-bottom out="proof/reviewer-bottom/reviewer-bottom-after.html":
+    {{ ninja }} qt
+    QT_QPA_PLATFORM=offscreen PYTHONPATH="out/pylib:pylib:qt:out/qt" {{ py }} tools/cfa/render_reviewer_bottom.py {{ out }}
+
 # Phase B desktop Pass 2: render the desktop CFA menu (D11 window chrome) to a
 # PNG (offscreen grab) for before/after capture — grouped labelled sections.
 cfa-capture-cfa-menu out="proof/friday/gnhf-speedrun/desktop-ui/pass-2/d11-cfa-menu.png":
