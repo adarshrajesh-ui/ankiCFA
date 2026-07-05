@@ -88,10 +88,14 @@ export const TOPIC_COLUMNS: CfaColumn[] = [
     { key: "recall", label: "Recall R (range)", align: "right" },
 ];
 
-/** Build the recall-table rows, weightiest topic first (like the desktop). */
+/**
+ * Build the recall-table rows, weightiest topic first (like the desktop), with
+ * a deterministic secondary sort by topic name so equal-weight areas always
+ * appear in the same, scannable order rather than an arbitrary tiebreak.
+ */
 export function topicRows(topics: TopicRow[]): TopicDisplayRow[] {
     return [...topics]
-        .sort((a, b) => b.weight - a.weight)
+        .sort((a, b) => b.weight - a.weight || a.topic.localeCompare(b.topic))
         .map((t) => ({
             topic: t.topic,
             weight: t.weight.toFixed(2),
@@ -102,11 +106,11 @@ export function topicRows(topics: TopicRow[]): TopicDisplayRow[] {
         }));
 }
 
-/** The quiet coverage/graded/first-exposure caption line. */
+/** The quiet coverage/graded/first-exposure caption line. The "as of …" clause
+ * is omitted entirely until there is a real last-review timestamp, so a fresh
+ * deck never shows an unfinished-looking "as of —" placeholder. */
 export function captionText(c: ExamReadinessCaption): string {
-    return (
-        `Coverage ${pct(c.coveragePct)} (${c.topicsCovered}/${c.topicsTotal} topics) · `
-        + `${c.gradedReviews} graded reviews · ${c.firstExposures} first-seen · `
-        + `as of ${c.lastReviewAt ?? "—"}`
-    );
+    const base = `Coverage ${pct(c.coveragePct)} (${c.topicsCovered}/${c.topicsTotal} topics) · `
+        + `${c.gradedReviews} graded reviews · ${c.firstExposures} first-seen`;
+    return c.lastReviewAt ? `${base} · as of ${c.lastReviewAt}` : base;
 }

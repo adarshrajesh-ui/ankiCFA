@@ -72,11 +72,14 @@ export function examCountdown(p: CfaHomePayload): Countdown {
         };
     }
     const d = p.daysToExam;
-    const headline = d === 0
-        ? "Exam day is here"
-        : d === 1
-            ? "1 day to the exam"
-            : `${d} days to the exam`;
+    let headline: string;
+    if (d === 0) {
+        headline = "Exam day is here";
+    } else if (d === 1) {
+        headline = "1 day to the exam";
+    } else {
+        headline = `${d} days to the exam`;
+    }
     const tone: CfaTone = d <= EXAM_SOON_DAYS ? "warn" : "neutral";
     return { headline, sub: `CFA Level II · ${p.examDate}`, tone, unset: false };
 }

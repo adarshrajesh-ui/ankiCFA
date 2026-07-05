@@ -30,9 +30,32 @@ Legend: TODO / WIP / DONE (evidence path) / BLOCKED (root cause).
 ## Phase B — UI/UX passes (≥3, escalating; both apps)
 | Pass | Desktop | Mobile | Log |
 |------|---------|--------|-----|
-| 1 (critical) | TODO | TODO | |
+| 1 (critical) | WIP | TODO | `UI-CRITIQUE-LOG.md` Pass 1 |
 | 2 (harsher) | TODO | TODO | |
 | 3 (ruthless) | TODO | TODO | |
 
-Named must-fix: desktop Readiness renders with data; Connect/Logout redesigned;
-native-CFA feel everywhere; AnkiDroid CFA UI full refactor.
+Phase B kicked off (iter 25). `proof/friday/UI-INVENTORY.md` (every desktop +
+mobile screen/state) and `proof/friday/UI-CRITIQUE-LOG.md` created.
+
+**Pass 1 desktop — started (not complete):**
+- **Named must-fix "Readiness does nothing" → RESOLVED + regression-guarded.**
+  `ts/tests/e2e/cfa_readiness_render.test.ts` (3 tests, green) boots the real
+  backend and asserts `/cfa-readiness/{deckId}` + `/cfa-home` render the three
+  honest scores, the honest hero, and the full per-topic **coverage map** (all
+  10 canonical CFA areas + real exam weights) bound to real data, plus the
+  empty-deck path renders. Before/after screenshots in
+  `desktop-ui/pass-1-before/` + `desktop-ui/pass-1/`.
+- Pass-1 critique logged (D1 Home, D2 Readiness) with severities. Fixed this
+  pass: D2-3 (caption "as of —" placeholder), D2-4 (deterministic topic sort);
+  drive-by un-nested a pre-existing `no-nested-ternary` eslint failure in
+  `home.ts` so `check:eslint`/svelte/tsc are green.
+- **Honesty:** GPT-4o vision CRITIC is UNAVAILABLE (no `OPENAI_API_KEY`/`.env`);
+  critique is a labelled structured senior-designer heuristic pass, not a
+  fabricated model transcript.
+- **Still TODO this pass:** desktop MAJORs D1-1/D1-2/D1-3/D2-1/D2-2; Qt-chrome
+  surfaces (D5–D8, D10–D12); populated (non-abstain) render; then Passes 2–3;
+  and ALL mobile passes.
+
+Named must-fix: desktop Readiness renders with data (**functional gate DONE**);
+Connect/Logout redesigned; native-CFA feel everywhere; AnkiDroid CFA UI full
+refactor.
