@@ -153,17 +153,17 @@ fixed on desktop (abstain shouts in warn-orange; brand accent == warn colour).
 ### M3 — Exam Readiness (flagship CFA screen)
 | # | Severity | Element | Issue | Fix direction |
 |---|----------|---------|-------|---------------|
-| M3-1 | MAJOR | 3 score values | "N/A — abstaining" renders **3× in loud warn-orange** (`CfaExamReadinessActivity.kt:177` → `cfa_warn`) — hierarchy inversion; the *absence* of data is the loudest thing on screen. **Identical to desktop D1-2/D2-2 (already fixed there).** | Mirror the desktop fix: quiet abstain to `cfa_muted`, down-size, state the verdict once in the hero. |
-| M3-2 | MAJOR | brand eyebrow vs abstain | The orange brand eyebrow "ANKICFA · CFA LEVEL II" is the same warm-orange family as the warn/abstain text → brand accent == warning (colour-semantic collision). **Desktop D1-3 parallel.** | Reserve orange for the brand accent only; abstain/warn must not share the hue. |
-| M3-3 | MAJOR | 3 score "cards" | Inconsistent card treatment — Readiness sits in a grey filled card (`cfa_surface`) while Memory/Performance are flat/borderless; they aren't consistent cards. | Give all three the same card container (surface + radius + spacing). |
+| M3-1 | MAJOR | 3 score values | "N/A — abstaining" renders **3× in loud warn-orange** (`CfaExamReadinessActivity.kt:177` → `cfa_warn`) — hierarchy inversion; the *absence* of data is the loudest thing on screen. **Identical to desktop D1-2/D2-2 (already fixed there).** | **FIXED (iter 28)** — abstain is now a calm muted-grey "Awaiting reviews" (`cfa_muted`, non-bold, down-sized 22/18sp) with the give-up reason in the faint sub-line; verified `pass-1/03-exam-readiness.png`. |
+| M3-2 | MAJOR | brand eyebrow vs abstain | The orange brand eyebrow "ANKICFA · CFA LEVEL II" is the same warm-orange family as the warn/abstain text → brand accent == warning (colour-semantic collision). **Desktop D1-3 parallel.** | **FIXED (iter 28)** — abstain moved off the warm hue to grey `cfa_muted`, so the orange brand eyebrow is now the single warm accent; `cfa_warn` is reserved for a genuine near-deadline warning (currently unused). |
+| M3-3 | MAJOR | 3 score "cards" | Inconsistent card treatment — Readiness sits in a grey filled card (`cfa_surface`) while Memory/Performance are flat/borderless; they aren't consistent cards. | **FIXED (iter 28)** — all three cards now share one container (`drawable/cfa_score_card_bg`: `cfa_surface` fill + `cfa_line` hairline stroke + 12dp radius); the hero is emphasised only by its larger value text. Verified `pass-1/03`. |
 | M3-4 | MINOR | status bar | Light-blue status bar sits above the navy toolbar → two-tone band at the very top. | Set the status-bar colour to `cfa_navy` for CFA activities. |
 | M3-5 | MINOR | per-topic table | 8 flat "no data" rows, no empty-state hint line (desktop D2-5 parallel). Shows **8** canonical topics vs desktop's **10** (known, documented parity gap — the AAR is built from `main`). | Add a one-line "recall appears here after you study" hint; extend to 10 topics when the fork AAR is rebuilt. |
-| M3-6 | MINOR | outlined button | "Exam configuration" outlined-button label is AnkiDroid blue, off-brand. | Recolour outlined-button text/stroke to a CFA token. |
+| M3-6 | MINOR | outlined button | "Exam configuration" outlined-button label is AnkiDroid blue, off-brand. | **FIXED (iter 28)** — new `Widget.Cfa.Button.Outlined` style (navy label + navy stroke + accent ripple) applied to the "Exam configuration" button; verified `pass-1/04`. |
 
 ### M4 — Exam Config
 | # | Severity | Element | Issue | Fix direction |
 |---|----------|---------|-------|---------------|
-| M4-1 | MAJOR | "Pick date" button | Outlined-button label is AnkiDroid blue (off-brand) — same token gap as M3-6; every outlined button across CFA screens inherits the Material default accent instead of a CFA token. | Introduce a CFA outlined-button style (navy/accent) and apply app-wide. |
+| M4-1 | MAJOR | "Pick date" button | Outlined-button label is AnkiDroid blue (off-brand) — same token gap as M3-6; every outlined button across CFA screens inherits the Material default accent instead of a CFA token. | **FIXED (iter 28)** — the shared `Widget.Cfa.Button.Outlined` style (navy label + stroke) is applied to the "Pick date" button too; verified `pass-1/05-exam-config.png` (matches the navy "Save" button). |
 | M4-2 | MINOR | layout density | Large dead vertical space; sparse screen (title + one field + 2 buttons), no context on why the exam date matters. | Add a short helper line; tighten layout or add a countdown preview. |
 
 ### M5 — Reviewer (highest-time-on-screen surface)
@@ -181,6 +181,21 @@ M2-1, M3-1, M3-2, M3-3, M4-1, M5-1 — note M4-1 is the shared outlined-button
 token) plus 8 MINORs. These become the Pass-2 mobile fix backlog (the "full
 AnkiDroid CFA UI refactor" the objective flags as the biggest lift). No BLOCKERs
 (every screen renders correct, honest data).
+
+**Fixes applied (iter 28) — the 4 CFA-activity MAJORs:** M3-1 (abstain shouts),
+M3-2 (accent==warn), M3-3 (inconsistent cards), and M4-1/M3-6 (off-brand
+outlined buttons) are **FIXED, re-captured (`mobile-ui/pass-1/`), and re-verified**
+(`ktlintCheck` + `lintVitalFullRelease` + CFA unit tests all green). The abstain
+state is now a calm muted-grey "Awaiting reviews", all three score cards share one
+rounded surface container, and the CFA outlined buttons use a navy token style.
+This mirrors the desktop iter-26 abstain fix on mobile.
+
+**Still-open mobile MAJORs (Pass-2 backlog — the shell refactor):** M1-1
+(DeckPicker toolbar/status bar stock blue), M1-2 (junk scratch decks "h"/"h gg"),
+M2-1 (nav-drawer header stock-blue mountain), M5-1 (Reviewer chrome 100% stock
+AnkiDroid). These are the "non-native-CFA feel" the objective flags and are the
+biggest remaining lift because they touch the shared AnkiDroid shell theme, not
+bolt-on CFA activities.
 
 ## Pass 2 (harsher) — TODO (both apps)
 ## Pass 3 (ruthless, pixel-level) — TODO (both apps)

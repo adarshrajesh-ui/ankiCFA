@@ -75,10 +75,19 @@ mobile screen/state) and `proof/friday/UI-CRITIQUE-LOG.md` created.
   light-blue** — the "non-native-CFA feel" the objective flags. Two mobile MAJORs
   (M3-1 abstain shouts in `cfa_warn`; M3-2 accent==warn) are the *same* defects
   already fixed on desktop; plus junk test decks "h"/"h gg" (M1-2).
-- **TODO next (Pass 2 mobile fix backlog):** mirror the desktop abstain fix
-  (`CfaExamReadinessActivity.kt:177` warn→muted), theme the DeckPicker/reviewer
-  shell to `cfa_navy`, CFA-brand the nav-drawer header, add a CFA outlined-button
-  style, purge scratch decks.
+- **CFA-activity MAJORs FIXED (iter 28)** — M3-1 (abstain warn→muted calm
+  "Awaiting reviews"), M3-2 (accent==warn collision resolved), M3-3 (all three
+  score cards share one rounded surface container via new
+  `drawable/cfa_score_card_bg`), and M4-1/M3-6 (new `Widget.Cfa.Button.Outlined`
+  navy style on both CFA outlined buttons). Device-observable after set on
+  `emulator-5554` at `AnkiDroid: proof/gnhf-speedrun/mobile-ui/pass-1/`
+  (03 readiness top, 04 readiness bottom, 05 exam-config). Green after the
+  change: `ktlintCheck`, `lintVitalFullRelease`, CFA unit tests
+  (`testPlayDebugUnitTest --tests "com.ichi2.anki.cfa.*"`).
+- **TODO next (Pass 2 mobile — the shell refactor, biggest lift):** theme the
+  DeckPicker/reviewer shell + status bar to `cfa_navy` (M1-1/M5-1/M3-4),
+  CFA-brand the nav-drawer header (M2-1), purge the "h"/"h gg" scratch decks
+  (M1-2).
 
 Named must-fix: desktop Readiness renders with data (**functional gate DONE**);
 Connect/Logout redesigned; native-CFA feel everywhere; AnkiDroid CFA UI full
