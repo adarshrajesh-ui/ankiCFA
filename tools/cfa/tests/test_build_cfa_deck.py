@@ -33,6 +33,11 @@ def _load(name: str, path: str):
 
 validate_deck = _load("cfa_validate_deck", os.path.join(DECK_DIR, "validate_deck.py"))
 build_cfa_deck = _load("cfa_build_deck", os.path.join(TOOLS_CFA, "build_cfa_deck.py"))
+# build_cfa_deck imports cfa_notetype by bare module name at call time, so ensure
+# tools/cfa is importable regardless of the runner's CWD.
+if TOOLS_CFA not in sys.path:
+    sys.path.insert(0, TOOLS_CFA)
+cfa_notetype = _load("cfa_notetype", os.path.join(TOOLS_CFA, "cfa_notetype.py"))
 
 
 def test_item_files_pass_validator():
@@ -204,6 +209,50 @@ def test_build_into_collection():
             assert "Source: CFA Level II" in back
             reading = build_cfa_deck.reading_from_los(los)
             assert reading and reading in back
+    finally:
+        col.close()
+        if os.path.exists(tmp):
+            os.remove(tmp)
+
+
+def test_knowledge_cards_use_cfa_branded_notetype():
+    # The most-viewed surface (the flashcard face) must read as CFA, not stock
+    # Anki: every knowledge note rides the CFA-branded note type, whose CSS +
+    # templates carry the design system and travel with the collection/.apkg.
+    sys.path.insert(0, os.path.join(REPO, "out", "pylib"))
+    sys.path.insert(0, os.path.join(REPO, "pylib"))
+    Collection = pytest.importorskip("anki.collection").Collection
+
+    tmp = os.path.join(os.environ.get("TMPDIR", "/tmp"), "gnhf-cfa-nt-test.anki2")
+    if os.path.exists(tmp):
+        os.remove(tmp)
+    build_cfa_deck.build(tmp, apkg=None)
+
+    col = Collection(tmp)
+    try:
+        name = cfa_notetype.CFA_NOTETYPE_NAME
+        nt = col.models.by_name(name)
+        assert nt is not None, "CFA-branded note type was not created"
+        # No knowledge note left on stock Basic; all moved to the branded type.
+        deck_id = col.decks.id("CFA Level II")
+        for cid in col.decks.cids(deck_id)[:50]:
+            assert col.get_card(cid).note_type()["name"] == name
+
+        # The note type's CSS carries the CFA design tokens (branded, not stock).
+        css = nt["css"]
+        assert "--cfa-accent" in css and "--cfa-font-heading" in css
+        assert ".cfa-prompt" in css and ".cfa-source" in css
+        # The card face structure is CFA (eyebrow + serif prompt + answer), and
+        # the stock centred-Arial default never leaks in.
+        qfmt = nt["tmpls"][0]["qfmt"]
+        afmt = nt["tmpls"][0]["afmt"]
+        assert "cfa-eyebrow" in qfmt and "cfa-prompt" in qfmt
+        assert "cfa-answer" in afmt
+
+        # Idempotent: re-ensuring does not duplicate the note type.
+        cfa_notetype.ensure_cfa_notetype(col)
+        names = [n.name for n in col.models.all_names_and_ids()]
+        assert names.count(name) == 1
     finally:
         col.close()
         if os.path.exists(tmp):

@@ -903,3 +903,35 @@ shipped styling is faithfully rendered): BEFORE a plain sans `<h1>`, stock-blue
 links and a grey `--border` box on white; AFTER a green brand eyebrow, a serif
 navy heading, warm-accent links, and a calm CFA card — one cohesive CFA
 session-complete screen.
+
+---
+
+## Pass 4 — D-P4-12: the knowledge flashcard face was stock-Anki "Basic"
+
+**Surface:** the CFA Level II knowledge card **face** shown during *Study by Exam
+Priority* / *Study* — the single surface a candidate spends the **most** time on.
+
+**How it was found:** auditing the deck builder (`tools/cfa/build_cfa_deck.py`)
+showed all 711 knowledge notes were created on the stock **`Basic`** note type
+(`col.models.by_name("Basic")`). The ethics cards have a bespoke CFA template,
+but the 700+ knowledge cards inherited stock Anki's default note-type CSS —
+`font-family: arial; font-size: 20px; text-align: center; color: black` — so the
+highest-time-on-screen surface read as **plain Anki**, not a CFA product. Every
+`cfa_chrome` re-skin (toolbar/deck list/Overview/answer bar) surrounds this card,
+yet the card *content itself* was never branded.
+
+| # | Severity | Element | Issue | Fix |
+|---|----------|---------|-------|-----|
+| D-P4-12 | MAJOR (design-system consistency / product feel — highest-time-on-screen surface) | The knowledge deck's note type (was stock `Basic`) | The flashcard face — front prompt and back answer — rendered in stock-Anki **centred Arial, black-on-white**, with a bare `<hr>` and unstyled source footer. Between the CFA navy answer bar below and the CFA chrome around it, the actual card a learner stares at all session read as stock Anki — the objective's "no visibly un-themed stock-Anki screens" clunk, on the *most-viewed* surface. | **FIXED (iter 29)** — added a **CFA-branded note type ("CFA Knowledge")** (`tools/cfa/cfa_notetype.py`) and pointed the deck builder at it. The card face is now the CFA design system: an accent **"ankiCFA · Level II" eyebrow**, the prompt as the **brand serif in navy** (`Source Serif 4` / `#122B46`, left-aligned, 1.6 line-height, matching every other CFA surface), a calm brand-line rule (`--cfa-line`) replacing the stock `<hr>`, a navy answer, and the named-source footer styled as quiet faint-ink. Full night-mode variants included. The CSS/templates live *in the note type*, so they **travel with the collection and the exported `.apkg`** — desktop, every synced device, and the phone import all get the identical CFA card with zero per-platform work. Fields (`Front`/`Back`), tags, exam-queue join key and memory score are unchanged; presentation-only. |
+
+**Verification:** `just cfa-deck-test` (**54 passed**), incl. the new
+`test_knowledge_cards_use_cfa_branded_notetype`: every knowledge card is on the
+`CFA Knowledge` note type (none left on `Basic`), the note-type CSS carries the
+CFA tokens (`--cfa-accent`, `--cfa-font-heading`, `.cfa-prompt`, `.cfa-source`),
+the templates carry the eyebrow + serif prompt + answer structure, and
+re-`ensure`-ing is idempotent (no duplicate note type). `.apkg` export verified
+to carry the `CFA Knowledge` note type (mobile parity). **After evidence**
+(`proof/knowledge-card/knowledge-card-after.{html,png}`, rendered via
+chrome-devtools-axi over the note type's REAL compiled CSS from a real built
+card): a warm accent eyebrow, a serif-navy prompt, a calm rule, a navy answer,
+and a muted source line — one cohesive CFA card face.

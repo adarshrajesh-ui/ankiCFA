@@ -1,0 +1,82 @@
+<html><head><meta charset=utf-8><style>body{margin:0;background:#e9edf0;padding:24px;display:flex;gap:24px;flex-wrap:wrap}.frame{background:#fff;box-shadow:0 2px 12px rgba(0,0,0,.12);border-radius:10px;overflow:hidden;width:560px}.lbl{font:600 12px system-ui;color:#68707d;padding:8px 12px;background:#f3f6f8;text-transform:uppercase;letter-spacing:.08em}:root {
+  --cfa-ink: #122B46;
+  --cfa-muted: #4D5C6D;
+  --cfa-faint: #68707d;
+  --cfa-line: #E7E9EC;
+  --cfa-surface: #F3F6F8;
+  --cfa-accent: #DA5C01;
+  --cfa-font: "IBM Plex Sans", -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --cfa-font-heading: "Source Serif 4", Georgia, "Times New Roman", serif;
+}
+
+.card {
+  font-family: var(--cfa-font);
+  font-size: 19px;
+  background: #FFFFFF;
+  -webkit-font-smoothing: antialiased;
+  padding: 0;
+}
+.nightMode.card { background: #1c1f24; }
+
+.cfa-card {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 28px 22px 32px;
+  text-align: left;
+  color: var(--cfa-ink);
+  line-height: 1.62;
+}
+.nightMode .cfa-card { color: #e8ecf1; }
+
+/* Quiet uppercase brand over-line. */
+.cfa-eyebrow {
+  font-family: var(--cfa-font);
+  font-size: .72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: var(--cfa-accent);
+  margin-bottom: 14px;
+}
+
+/* The prompt is the serif hero, matching every other CFA surface. */
+.cfa-prompt {
+  font-family: var(--cfa-font-heading);
+  font-weight: 400;
+  font-size: 1.38rem;
+  line-height: 1.32;
+  color: var(--cfa-ink);
+}
+.nightMode .cfa-prompt { color: #f2f5f8; }
+
+/* Calm brand-line divider between prompt and answer (replaces the stock <hr>). */
+.cfa-rule {
+  border: none;
+  border-top: 1px solid var(--cfa-line);
+  margin: 22px 0;
+}
+.nightMode .cfa-rule { border-top-color: #2b323b; }
+
+.cfa-answer { color: var(--cfa-ink); }
+.nightMode .cfa-answer { color: #e8ecf1; }
+
+/* The named-source provenance footer (build_cfa_deck.render_source_line). */
+.cfa-source {
+  display: inline-block;
+  margin-top: 6px;
+  font-family: var(--cfa-font);
+  font-size: .78rem;
+  font-weight: 500;
+  letter-spacing: .01em;
+  color: var(--cfa-faint);
+}
+.nightMode .cfa-source { color: #8b95a3; }
+</style></head><body><div class=frame><div class=lbl>Front (question)</div><div class=card><div class="cfa-card">
+  <div class="cfa-eyebrow">ankiCFA · Level II</div>
+  <div class="cfa-prompt">How does 'normal backwardation' differ from ordinary 'backwardation'?</div>
+</div></div></div><div class=frame><div class=lbl>Back (answer + source)</div><div class=card><div class="cfa-card">
+  <div class="cfa-eyebrow">ankiCFA · Level II</div>
+  <div class="cfa-prompt">How does 'normal backwardation' differ from ordinary 'backwardation'?</div>
+  <hr id="answer" class="cfa-rule">
+  <div class="cfa-answer">Backwardation compares the futures price to the current spot price; normal backwardation compares the futures price to the expected future spot price.<br><br><span class="cfa-source">Source: CFA Level II > Alternative Investments > futures curve</span></div>
+</div></div></div></body></html>

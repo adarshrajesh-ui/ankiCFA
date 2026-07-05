@@ -234,6 +234,8 @@ def add_deck_notes(col, deck_dir: str = DECK_DIR) -> dict:
     has cards); this always appends. Returns a summary dict with the number of
     notes added and the topic weights persisted.
     """
+    from cfa_notetype import ensure_cfa_notetype
+
     from anki import cfa
 
     items = load_items(deck_dir)
@@ -241,7 +243,11 @@ def add_deck_notes(col, deck_dir: str = DECK_DIR) -> dict:
 
     deck_id = col.decks.id(MAIN_DECK_NAME)
     assert deck_id is not None
-    notetype = col.models.by_name("Basic")
+    # Brand the most-viewed surface: the knowledge cards ride a CFA-branded note
+    # type (CFA design-system CSS + serif prompt) instead of stock ``Basic``, so
+    # the flashcard face reads as a purpose-built CFA product on desktop, on the
+    # synced phone, and in the exported .apkg. The CSS travels with the note type.
+    notetype = ensure_cfa_notetype(col)
 
     added = 0
     for item in items:
