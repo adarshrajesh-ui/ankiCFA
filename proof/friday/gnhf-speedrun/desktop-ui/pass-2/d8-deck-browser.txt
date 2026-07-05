@@ -1,0 +1,70 @@
+Phase B — Pass 2 (harsher) — DESKTOP — D8 Deck browser (CFA-skinned)
+=====================================================================
+
+Surface: the main-window deck list (stock Anki `DeckBrowser` webview) re-skinned
+additively by `qt/aqt/cfa_chrome.py` (page tint + brand banner "ankiCFA · Level
+II / Your decks" + CFA type/link colours + a quiet CFA footnote). Listed in
+UI-INVENTORY.md as D8 and flagged as a "Still-TODO (desktop Pass 2/3)" surface —
+never captured or critiqued in any prior Phase-B pass. This is a real inventory
+gap and the desktop parallel of the mobile M6-1 DeckPicker fix.
+
+Capture method (no Anki launch): `tools/cfa/render_deck_browser.py` builds the
+EXACT surface the Qt webview renders — the compiled base
+`out/qt/_aqt/data/web/css/deckbrowser.css` (root-vars + card-counts + deck-table
+rules, i.e. the real cascade incl. specificity + `!important`) followed by the
+live `cfa_chrome._deckbrowser_css()` + `_deckbrowser_banner()` — over a realistic
+CFA deck tree (a normal "CFA Level II" deck + three curated filtered study decks:
+"Ethics Pairs", "Study — Ethics Minimal-Pairs", "CFA Exam Priority"), then
+screenshot with chrome-devtools-axi. Reproduce with `just cfa-capture-deck-browser`.
+
+Files:
+  before: desktop-ui/pass-2-before/d8-deck-browser.png (+ .html)
+  after : desktop-ui/pass-2/d8-deck-browser.png (+ .html)
+
+------------------------------------------------------------------
+D8-1  (MAJOR)  stock-blue leak on deck names + "New" counts
+------------------------------------------------------------------
+Defect (before): although the iter-29/31 shell + toolbar work branded the top
+bar and page tint navy, the deck LIST itself still leaked stock Anki blue in two
+places, exactly mirroring the mobile M6-1 defect:
+  * filtered/dynamic deck NAMES — "Ethics Pairs", "Study — Ethics Minimal-Pairs",
+    "CFA Exam Priority" — rendered in stock blue `--fg-link` (#1d4ed8), because
+    the base `.filtered { color: var(--fg-link) !important }` beat the CFA
+    `a { color: ink }` rule (both specificity AND `!important`).
+  * the "New" card COUNT numbers (20 / 29 / 99 / 1) rendered in stock blue
+    `--state-new` (#3b82f6) via `.new-count { color: var(--state-new) }`.
+Together the deck list — the first screen after Home — read blue-accented despite
+the navy CFA shell: the exact "non-native-CFA feel" the objective flags.
+
+Fix (`cfa_chrome._deckbrowser_css()`, presentation-only, no token value change):
+  a.deck            { color: #122B46 !important; }   /* deck names → brand navy */
+  a.deck.filtered   { color: #122B46 !important; }   /* beats .filtered !important */
+  .new-count        { color: #122B46 !important; }   /* New count → brand navy */
+The CFA study decks are curated study modes, not an Anki internal to surface in
+loud blue, so their names read in brand navy → one cohesive branded deck list.
+The "New" count keeps the three-way distinction (new = navy, learn = red,
+review = green); the learned Anki learn/review count semantics are UNCHANGED
+(matching the M5-2 / M6-1 decision), and the orange top-bar accent stays the
+single warm accent.
+
+Verified (after): all four deck names + all "New" counts render brand navy;
+"Learn" stays red (the `2`), "Review" stays green (12 / 4 / 8); zero counts stay
+faint grey. See desktop-ui/pass-2/d8-deck-browser.png.
+
+------------------------------------------------------------------
+Verification
+------------------------------------------------------------------
+`qt/tests/test_cfa_chrome.py` — 7 tests green (5 prior + 2 new):
+  * test_deckbrowser_retones_stock_blue_leaks — the three retone rules
+    (`a.deck` / `a.deck.filtered` / `.new-count`) all carry the navy ink token
+    + `!important`.
+  * test_deckbrowser_keeps_learn_review_count_semantics — `.learn-count` /
+    `.review-count` are NOT recoloured (semantics preserved).
+Broader CFA qt suite (chrome + toolbar + menu) → 27 passed.
+`ruff check` + `ruff format --check` clean on the touched files.
+Parity-gated `cfa_style` TOKENS values UNCHANGED — the fix only reassigns which
+existing token the deck-list states use.
+
+Run:
+  just cfa-chrome-test
+  just cfa-capture-deck-browser   # regenerate the after HTML for screenshotting

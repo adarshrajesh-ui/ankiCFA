@@ -31,7 +31,7 @@ Legend: TODO / WIP / DONE (evidence path) / BLOCKED (root cause).
 | Pass | Desktop | Mobile | Log |
 |------|---------|--------|-----|
 | 1 (critical) | DONE (CFA web 5 MAJOR + 4 MINOR fixed; Qt chrome → Pass 2) | DONE (all 7 MAJORs fixed) | `UI-CRITIQUE-LOG.md` Pass 1 |
-| 2 (harsher) | WIP (D7 Connect/Logout — named must-fix — FIXED; D9 populated render; D3 Deadline; D4 Ethics reviewer gold-phrase ladder FIXED; D6 AI Settings dialog redesigned FIXED) | WIP (M6-1 DeckPicker stock-blue leak FIXED) | `UI-CRITIQUE-LOG.md` Pass 2 |
+| 2 (harsher) | WIP (D7 Connect/Logout — named must-fix — FIXED; D9 populated render; D3 Deadline; D4 Ethics reviewer gold-phrase ladder FIXED; D6 AI Settings dialog redesigned FIXED; D8 deck-browser stock-blue leak FIXED) | WIP (M6-1 DeckPicker stock-blue leak FIXED) | `UI-CRITIQUE-LOG.md` Pass 2 |
 | 3 (ruthless) | TODO | TODO | |
 
 Phase B kicked off (iter 25). `proof/friday/UI-INVENTORY.md` (every desktop +
@@ -193,6 +193,24 @@ mobile screen/state) and `proof/friday/UI-CRITIQUE-LOG.md` created.
   Verify: `just cfa-ai-settings-test` (8 green: 5 prior + 3 new); broader CFA qt
   suite 39 green; ruff clean; parity-gated `cfa_style` TOKENS unchanged. Evidence
   `desktop-ui/pass-2/d6-ai-settings.txt`.
+
+**Pass 2 desktop — DECK BROWSER captured + fixed (iter 38).**
+- **D8 Deck browser** (main-window deck list; stock `DeckBrowser` webview
+  re-skinned by `qt/aqt/cfa_chrome.py`) — a Still-TODO Pass-2 surface **never
+  captured/critiqued** in any prior pass. Captured the exact webview surface
+  (compiled base `deckbrowser.css` + live `_deckbrowser_css()` + banner over a
+  realistic CFA deck tree) and fixed **D8-1 (MAJOR)** — the desktop parallel of
+  the mobile M6-1 defect: filtered/dynamic deck **names** leaked stock blue
+  (`--fg-link` #1d4ed8, its `.filtered !important` beat the CFA rule) and the
+  **"New" counts** leaked stock blue (`--state-new` #3b82f6). `_deckbrowser_css()`
+  now retones both to brand navy (`a.deck` / `a.deck.filtered` / `.new-count`,
+  all `!important` to win Anki's cascade); learn=red / review=green count
+  semantics kept (M5-2/M6-1), orange accent stays the single warm accent;
+  presentation-only, no token value change. New `tools/cfa/render_deck_browser.py`
+  + `just cfa-capture-deck-browser` / `cfa-chrome-test`. Before/after
+  `desktop-ui/pass-2-before/d8-deck-browser.png` → `pass-2/d8-deck-browser.png`
+  (+ `d8-deck-browser.txt`). Verify: `test_cfa_chrome.py` **7 green** (5 prior +
+  2 new), broader CFA qt suite **27 green**, ruff clean.
 
 **Pass 2 mobile — started (iter 34): DeckPicker stock-blue leak (M6-1).**
 - After the Pass-1 shell refactor branded the shell navy, the harsher Pass-2

@@ -83,6 +83,18 @@ def _deckbrowser_css() -> str:
   table tr {{ border-color: {t["line"]}; }}
   .gears {{ opacity: .55; }}
   .gears:hover {{ opacity: 1; }}
+  /* Stock Anki paints the deck list with its own blue: filtered/dynamic deck
+     NAMES use --fg-link and the "New" COUNT uses --state-new, both of which
+     leaked through the navy CFA shell (parity with the mobile M6-1 fix). The
+     CFA study decks are curated study modes, not an Anki internal to surface
+     in loud blue — retone both to brand navy so the deck list reads as one
+     cohesive CFA product. Learn (red) / Review (green) keep their learned
+     Anki count semantics; the orange top-bar accent stays the single warm
+     accent. `a.deck`/`a.deck.filtered` match Anki's own specificity + the
+     `.filtered !important`, so this wins the cascade without a token change. */
+  a.deck {{ color: {t["ink"]} !important; }}
+  a.deck.filtered {{ color: {t["ink"]} !important; }}
+  .new-count {{ color: {t["ink"]} !important; }}
   .cfa-deck-banner {{
     max-width: 820px;
     margin: 22px auto 8px;

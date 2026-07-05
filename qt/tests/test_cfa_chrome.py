@@ -45,6 +45,29 @@ def test_deckbrowser_gets_cfa_skin_and_banner() -> None:
     assert wc.body.index("cfa-deck-banner") < wc.body.index("<table")
 
 
+def test_deckbrowser_retones_stock_blue_leaks() -> None:
+    # D8-1 (Pass 2): stock Anki paints filtered/dynamic deck NAMES with
+    # --fg-link and the "New" COUNT with --state-new (both blue). The CFA skin
+    # must retone both to brand navy (parity with the mobile M6-1 fix) so the
+    # deck list reads as one cohesive navy CFA product.
+    css = cfa_chrome._deckbrowser_css()
+    navy = cfa_style.TOKENS["ink"]
+    for rule in (
+        f"a.deck {{ color: {navy} !important; }}",
+        f"a.deck.filtered {{ color: {navy} !important; }}",
+        f".new-count {{ color: {navy} !important; }}",
+    ):
+        assert rule in css, f"missing rule: {rule}"
+
+
+def test_deckbrowser_keeps_learn_review_count_semantics() -> None:
+    # The learned Anki count colours (Learn=red / Review=green) are NOT
+    # recoloured — only the stock-blue New count is retoned (matches M5-2/M6-1).
+    css = cfa_chrome._deckbrowser_css()
+    assert ".learn-count" not in css
+    assert ".review-count" not in css
+
+
 def test_other_contexts_untouched() -> None:
     wc = SimpleNamespace(head="", body="x")
     cfa_chrome.on_webview_will_set_content(wc, object())

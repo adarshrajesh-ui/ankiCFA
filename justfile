@@ -286,6 +286,17 @@ cfa-capture-ai-settings:
     {{ ninja }} pylib qt
     QT_QPA_PLATFORM=offscreen PYTHONPATH="out/pylib:pylib:qt:out/qt" {{ py }} tools/cfa/render_ai_settings.py proof/friday/gnhf-speedrun/desktop-ui/pass-2
 
+# Phase B desktop Pass 2: CFA chrome (toolbar + deck browser D8) test suite.
+cfa-chrome-test:
+    {{ ninja }} pylib
+    QT_QPA_PLATFORM=offscreen PYTHONPATH="out/pylib:pylib:qt:out/qt" {{ py }} -m pytest qt/tests/test_cfa_chrome.py -q
+
+# Phase B desktop Pass 2: render the CFA-skinned deck browser (D8) to a
+# standalone HTML for capture (screenshot with chrome-devtools-axi).
+cfa-capture-deck-browser out="proof/friday/gnhf-speedrun/desktop-ui/pass-2/d8-deck-browser.html":
+    {{ ninja }} qt
+    QT_QPA_PLATFORM=offscreen PYTHONPATH="out/pylib:pylib:qt:out/qt" {{ py }} tools/cfa/render_deck_browser.py {{ out }}
+
 # A13: verify a packaged Anki.app is a self-contained CFA-fork installer bundle.
 cfa-installer-verify app:
     {{ py }} tools/cfa/verify_installer.py {{ app }}

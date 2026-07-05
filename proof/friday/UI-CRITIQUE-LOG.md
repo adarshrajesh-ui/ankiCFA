@@ -333,8 +333,33 @@ menu + chrome + home) → **39 passed**; `ruff check`/`format` clean. Parity-gat
 `cfa_style` TOKENS values UNCHANGED — the redesign only composes existing builders
 (`page_heading`/`section`/`caption`/`notice`) and reassigns state→tone.
 
+### D8 — Deck browser (CFA-skinned deck list)
+Captures (the EXACT webview surface — compiled base `deckbrowser.css` + live
+`cfa_chrome._deckbrowser_css()` + banner over a realistic CFA deck tree,
+screenshot via `chrome-devtools-axi`; reproduce with `just cfa-capture-deck-browser`):
+- `desktop-ui/pass-2-before/d8-deck-browser.png` (+ `.html`)
+- `desktop-ui/pass-2/d8-deck-browser.png` (+ `.html`)
+- Evidence: `desktop-ui/pass-2/d8-deck-browser.txt`
+
+The main-window deck list (`DeckBrowser` webview re-skinned by `cfa_chrome.py`)
+was listed as a Still-TODO Pass-2 surface — **never captured or critiqued** in
+any prior pass. Captured this pass and critiqued:
+
+| # | Severity | Element | Issue | Fix |
+|---|----------|---------|-------|-----|
+| D8-1 | MAJOR | filtered deck names + "New" counts | Although the shell + toolbar were branded navy, the deck LIST itself still leaked stock Anki blue in two places (the desktop parallel of the mobile **M6-1** defect): the filtered/dynamic deck NAMES ("Ethics Pairs", "Study — Ethics Minimal-Pairs", "CFA Exam Priority") rendered in stock blue `--fg-link` #1d4ed8 (the base `.filtered { color: var(--fg-link) !important }` beat the CFA `a { color: ink }` on both specificity AND `!important`), and the "New" COUNT numbers (20/29/99/1) rendered in stock blue `--state-new` #3b82f6 (`.new-count { color: var(--state-new) }`). The deck list — the first screen after Home — read blue-accented despite the navy shell: the exact "non-native-CFA feel" the objective flags. | **FIXED (iter 38)** — `cfa_chrome._deckbrowser_css()` now retones both to brand navy: `a.deck { color: ink !important }`, `a.deck.filtered { color: ink !important }` (matches Anki's specificity + the `.filtered !important` so it wins the cascade), and `.new-count { color: ink !important }`. Curated CFA study decks read in brand navy → one cohesive branded list. The "New" count keeps the three-way distinction (new = navy, learn = red, review = green); the learned Anki learn/review count semantics are **unchanged** (M5-2/M6-1 decision), orange top-bar accent stays the single warm accent. Presentation-only (no token value change). Verified `pass-2/d8-deck-browser.png`. |
+| D8-2 | — | brand banner + footnote + page tint | The "ankiCFA · Level II / Your decks" banner, the CFA page tint (`primary_soft`), the calm hairline table rules, and the CFA footnote all render cleanly. No defect. | No change needed (documented for completeness). |
+
+**Verification:** `qt/tests/test_cfa_chrome.py` → **7 passed** (5 prior + 2 new:
+`test_deckbrowser_retones_stock_blue_leaks` locks the three navy-`!important`
+retone rules; `test_deckbrowser_keeps_learn_review_count_semantics` asserts the
+learn/review count colours are NOT recoloured). Broader CFA qt suite (chrome +
+toolbar + menu) → **27 passed**; `ruff check`/`format` clean; parity-gated
+`cfa_style` TOKENS values UNCHANGED (the fix only reassigns which token the
+deck-list states use). `just cfa-chrome-test` / `just cfa-capture-deck-browser`.
+
 ### Still-TODO (desktop Pass 2/3)
-- Remaining Qt-chrome surfaces: D8 deck browser, D11 window chrome — capture +
+- Remaining Qt-chrome surface: D11 window chrome (menus/title bar) — capture +
   critique.
 
 ## Pass 2 — MOBILE (harsher): stock-blue leaks through the navy shell
