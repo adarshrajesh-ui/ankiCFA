@@ -30,7 +30,7 @@ Legend: TODO / WIP / DONE (evidence path) / BLOCKED (root cause).
 ## Phase B — UI/UX passes (≥3, escalating; both apps)
 | Pass | Desktop | Mobile | Log |
 |------|---------|--------|-----|
-| 1 (critical) | WIP | WIP | `UI-CRITIQUE-LOG.md` Pass 1 |
+| 1 (critical) | WIP (MAJORs done) | DONE (all 7 MAJORs fixed) | `UI-CRITIQUE-LOG.md` Pass 1 |
 | 2 (harsher) | TODO | TODO | |
 | 3 (ruthless) | TODO | TODO | |
 
@@ -84,10 +84,23 @@ mobile screen/state) and `proof/friday/UI-CRITIQUE-LOG.md` created.
   (03 readiness top, 04 readiness bottom, 05 exam-config). Green after the
   change: `ktlintCheck`, `lintVitalFullRelease`, CFA unit tests
   (`testPlayDebugUnitTest --tests "com.ichi2.anki.cfa.*"`).
-- **TODO next (Pass 2 mobile — the shell refactor, biggest lift):** theme the
-  DeckPicker/reviewer shell + status bar to `cfa_navy` (M1-1/M5-1/M3-4),
-  CFA-brand the nav-drawer header (M2-1), purge the "h"/"h gg" scratch decks
-  (M1-2).
+- **SHELL REFACTOR DONE (iter 29 — the objective's flagged "biggest lift"):**
+  the whole AnkiDroid shell derives from `theme_light.xml` `colorPrimary`, so
+  re-branding it `cfa_navy` (the shipped default day theme) re-themes the
+  DeckPicker toolbar + status bar (M1-1), Reviewer chrome + count bar
+  `cfa_surface` (M5-1), tab bar/action mode and the status-bar band (M3-4) in
+  one place; `fab_normal`→`cfa_accent`/`fab_pressed`→`cfa_accent_hover` makes the
+  `+`/Study FAB the single warm accent (M1-3); `view_navdrawer_header.xml` is now
+  a navy CFA brand lockup ("ankiCFA" + "CFA LEVEL II · EXAM PREP", no image) and
+  `drawer_item_text_light.xml` selected-item colour is `cfa_navy` (M2-1); the
+  junk scratch decks "h"/"h gg" were deleted from the device collection (M1-2).
+  Device-observable after set `AnkiDroid: proof/gnhf-speedrun/mobile-ui/pass-1-shell/`
+  (before = `pass-1-before/`). Green: `lintVitalFullRelease`, `ktlintCheck`, CFA
+  unit tests. **All 7 Pass-1 mobile MAJORs resolved** → mobile Pass 1 complete.
+  (Files edited on `gnhf/speedrun-mobile`, committed manually — orchestrator does
+  not touch the mobile repo.)
+- **TODO next:** desktop Pass-1 MINORs + Qt-chrome surfaces; then the escalating
+  Pass 2 (harsher) and Pass 3 (ruthless) critiques for BOTH apps.
 
 Named must-fix: desktop Readiness renders with data (**functional gate DONE**);
 Connect/Logout redesigned; native-CFA feel everywhere; AnkiDroid CFA UI full

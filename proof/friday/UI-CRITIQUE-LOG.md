@@ -140,15 +140,15 @@ fixed on desktop (abstain shouts in warn-orange; brand accent == warn colour).
 ### M1 — DeckPicker (landing shell)
 | # | Severity | Element | Issue | Fix direction |
 |---|----------|---------|-------|---------------|
-| M1-1 | MAJOR | toolbar + status bar | Stock AnkiDroid light-blue (`#0a9beb`) toolbar/status bar on the primary landing screen — clashes with the navy CFA activities; app doesn't feel like a CFA product on first open. | Theme the DeckPicker action bar + status bar to `cfa_navy`; make navy the shell primary. |
-| M1-2 | MAJOR | deck list | Junk test decks **"h"** and **"h gg"** shipped in the collection — embarrassing leftover data on a premium product. | Purge non-CFA scratch decks from the seeded/synced collection; default list = CFA / Ethics Pairs / CFA Level II only. |
-| M1-3 | MINOR | FAB + no CFA entry | The `+` FAB and sync icon are stock blue; Exam Readiness (the flagship CFA surface) is buried in the drawer with no DeckPicker entry point. | Recolour FAB to `cfa_accent`; consider a persistent "Exam Readiness" CTA on DeckPicker. |
+| M1-1 | MAJOR | toolbar + status bar | Stock AnkiDroid light-blue (`#0a9beb`) toolbar/status bar on the primary landing screen — clashes with the navy CFA activities; app doesn't feel like a CFA product on first open. | **FIXED (shell refactor)** — the whole shell derives from `colorPrimary`, so `theme_light.xml` `colorPrimary`→`cfa_navy` + `colorPrimaryDark`→`cfa_navy_hover` re-brands the DeckPicker toolbar AND status bar navy (white title/icons via `actionBarTextColor`). Verified `pass-1-shell/01-deckpicker.png`. |
+| M1-2 | MAJOR | deck list | Junk test decks **"h"** and **"h gg"** shipped in the collection — embarrassing leftover data on a premium product. | **FIXED (shell refactor)** — both scratch decks deleted from the device collection (long-press → Delete deck); list is now CFA-only (CFA / Ethics Pairs / Study — Ethics Minimal-Pairs / CFA Exam Priority / CFA Level II). Verified `pass-1-shell/01-deckpicker.png`. |
+| M1-3 | MINOR | FAB + no CFA entry | The `+` FAB and sync icon are stock blue; Exam Readiness (the flagship CFA surface) is buried in the drawer with no DeckPicker entry point. | **FIXED (FAB)** — `fab_normal`→`cfa_accent`, `fab_pressed`→`cfa_accent_hover`, so the `+`/Study FAB is now the single warm CFA accent. (Exam-Readiness DeckPicker CTA left as a Pass-2 idea.) Verified `pass-1-shell/01-deckpicker.png`. |
 
 ### M2 — Nav drawer
 | # | Severity | Element | Issue | Fix direction |
 |---|----------|---------|-------|---------------|
-| M2-1 | MAJOR | drawer header | Header is the stock AnkiDroid blue mountain illustration — no CFA logo/wordmark; active item "Decks" highlighted in AnkiDroid blue, not a CFA token. | Replace header with a CFA navy brand lockup; recolour the selected-item accent to `cfa_accent`/`cfa_navy`. |
-| M2-2 | MINOR | icons + labels | "Exam Readiness" uses the same generic bar-chart glyph as "Statistics"; "Support AnkiDroid" reads as upstream, not the product. | Give Exam Readiness a distinct CFA icon; ensure brand consistency of drawer labels. |
+| M2-1 | MAJOR | drawer header | Header is the stock AnkiDroid blue mountain illustration — no CFA logo/wordmark; active item "Decks" highlighted in AnkiDroid blue, not a CFA token. | **FIXED (shell refactor)** — `view_navdrawer_header.xml` replaced with a navy CFA brand lockup (`ankiCFA` wordmark + orange "CFA LEVEL II · EXAM PREP" tagline, no image asset); `drawer_item_text_light.xml` checked-state colour `material_light_blue_500`→`cfa_navy` so the selected item ("Decks") reads CFA-navy. Verified `pass-1-shell/02-nav-drawer.png`. |
+| M2-2 | MINOR | icons + labels | "Exam Readiness" uses the same generic bar-chart glyph as "Statistics"; "Support AnkiDroid" reads as upstream, not the product. | Give Exam Readiness a distinct CFA icon; ensure brand consistency of drawer labels. (Pass-2 polish.) |
 
 ### M3 — Exam Readiness (flagship CFA screen)
 | # | Severity | Element | Issue | Fix direction |
@@ -156,7 +156,7 @@ fixed on desktop (abstain shouts in warn-orange; brand accent == warn colour).
 | M3-1 | MAJOR | 3 score values | "N/A — abstaining" renders **3× in loud warn-orange** (`CfaExamReadinessActivity.kt:177` → `cfa_warn`) — hierarchy inversion; the *absence* of data is the loudest thing on screen. **Identical to desktop D1-2/D2-2 (already fixed there).** | **FIXED (iter 28)** — abstain is now a calm muted-grey "Awaiting reviews" (`cfa_muted`, non-bold, down-sized 22/18sp) with the give-up reason in the faint sub-line; verified `pass-1/03-exam-readiness.png`. |
 | M3-2 | MAJOR | brand eyebrow vs abstain | The orange brand eyebrow "ANKICFA · CFA LEVEL II" is the same warm-orange family as the warn/abstain text → brand accent == warning (colour-semantic collision). **Desktop D1-3 parallel.** | **FIXED (iter 28)** — abstain moved off the warm hue to grey `cfa_muted`, so the orange brand eyebrow is now the single warm accent; `cfa_warn` is reserved for a genuine near-deadline warning (currently unused). |
 | M3-3 | MAJOR | 3 score "cards" | Inconsistent card treatment — Readiness sits in a grey filled card (`cfa_surface`) while Memory/Performance are flat/borderless; they aren't consistent cards. | **FIXED (iter 28)** — all three cards now share one container (`drawable/cfa_score_card_bg`: `cfa_surface` fill + `cfa_line` hairline stroke + 12dp radius); the hero is emphasised only by its larger value text. Verified `pass-1/03`. |
-| M3-4 | MINOR | status bar | Light-blue status bar sits above the navy toolbar → two-tone band at the very top. | Set the status-bar colour to `cfa_navy` for CFA activities. |
+| M3-4 | MINOR | status bar | Light-blue status bar sits above the navy toolbar → two-tone band at the very top. | **FIXED (shell refactor)** — `android:statusBarColor` = `?attr/colorPrimary` = `cfa_navy` app-wide now, so CFA activities have a single navy band top-to-toolbar. Verified `pass-1-shell/03-exam-readiness.png`. |
 | M3-5 | MINOR | per-topic table | 8 flat "no data" rows, no empty-state hint line (desktop D2-5 parallel). Shows **8** canonical topics vs desktop's **10** (known, documented parity gap — the AAR is built from `main`). | Add a one-line "recall appears here after you study" hint; extend to 10 topics when the fork AAR is rebuilt. |
 | M3-6 | MINOR | outlined button | "Exam configuration" outlined-button label is AnkiDroid blue, off-brand. | **FIXED (iter 28)** — new `Widget.Cfa.Button.Outlined` style (navy label + navy stroke + accent ripple) applied to the "Exam configuration" button; verified `pass-1/04`. |
 
@@ -169,8 +169,8 @@ fixed on desktop (abstain shouts in warn-orange; brand accent == warn colour).
 ### M5 — Reviewer (highest-time-on-screen surface)
 | # | Severity | Element | Issue | Fix direction |
 |---|----------|---------|-------|---------------|
-| M5-1 | MAJOR | whole chrome | Reviewer is 100% stock AnkiDroid: light-blue toolbar, light-blue "99 1 0" count bar, default ease-button colours — zero CFA identity on the screen users spend the most time on. | Theme reviewer toolbar/count bar to CFA navy; align typography with the CFA design system. |
-| M5-2 | MINOR | ease buttons | Stock red/grey/green/blue ease bar; count-bar background light-blue. | Optionally align ease palette to the CFA system while keeping the four-grade semantics. |
+| M5-1 | MAJOR | whole chrome | Reviewer is 100% stock AnkiDroid: light-blue toolbar, light-blue "99 1 0" count bar, default ease-button colours — zero CFA identity on the screen users spend the most time on. | **FIXED (shell refactor)** — Reviewer toolbar is now navy (shared `colorPrimary`); the count-bar `topBarColor` `material_light_blue_100`→`cfa_surface` (calm CFA grey). Verified `pass-1-shell/05-reviewer-question.png` / `06-reviewer-answer.png`. |
+| M5-2 | MINOR | ease buttons | Stock red/grey/green/blue ease bar; count-bar background light-blue. | **INTENTIONALLY KEPT** — the four-grade ease palette (Again red / Hard grey / Good green / Easy blue) is a learned Anki affordance; recolouring it risks confusing the grade semantics, so it is preserved. Count-bar bg now `cfa_surface` (fixed with M5-1). |
 
 **Pass-1 mobile verdict:** the two dedicated CFA activities are close to the
 desktop bar in *structure* (brand eyebrow, navy title, honest score cards, real
@@ -190,12 +190,22 @@ state is now a calm muted-grey "Awaiting reviews", all three score cards share o
 rounded surface container, and the CFA outlined buttons use a navy token style.
 This mirrors the desktop iter-26 abstain fix on mobile.
 
-**Still-open mobile MAJORs (Pass-2 backlog — the shell refactor):** M1-1
-(DeckPicker toolbar/status bar stock blue), M1-2 (junk scratch decks "h"/"h gg"),
-M2-1 (nav-drawer header stock-blue mountain), M5-1 (Reviewer chrome 100% stock
-AnkiDroid). These are the "non-native-CFA feel" the objective flags and are the
-biggest remaining lift because they touch the shared AnkiDroid shell theme, not
-bolt-on CFA activities.
+**Shell refactor — the remaining Pass-1 mobile MAJORs — NOW FIXED (this iter):**
+M1-1 (DeckPicker toolbar/status bar), M2-1 (nav-drawer header + selected item),
+M5-1 (Reviewer chrome), plus M1-2 (junk scratch decks purged) and the MINORs
+M1-3 (accent FAB) / M3-4 (status-bar band). This was the objective's flagged
+"non-native-CFA feel / full AnkiDroid CFA UI refactor is the biggest lift": the
+whole shell derives from `colorPrimary`, so re-branding it `cfa_navy` in
+`theme_light.xml` (the shipped default day theme) re-themes the DeckPicker, nav
+drawer, Reviewer, status bar, tab bar and action mode in one place; the FAB/Study
+button becomes the single warm `cfa_accent`; the nav-drawer header is a navy CFA
+lockup; and the selected drawer item is CFA-navy. Device-observable after set:
+`AnkiDroid: proof/gnhf-speedrun/mobile-ui/pass-1-shell/` (before =
+`pass-1-before/`). Green after the change: `lintVitalFullRelease`, `ktlintCheck`,
+CFA unit tests. **With this, ALL Pass-1 mobile MAJORs (7/7) are resolved** — the
+app now reads as a cohesive navy CFA product end-to-end, not "AnkiDroid with two
+bolt-on CFA screens." Remaining mobile items are MINORs (M2-2 drawer icon, M4-2
+config density) + the escalating Pass-2/Pass-3 critiques.
 
 ## Pass 2 (harsher) — TODO (both apps)
 ## Pass 3 (ruthless, pixel-level) — TODO (both apps)
