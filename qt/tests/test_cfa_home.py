@@ -51,6 +51,9 @@ def test_home_payload_shape() -> None:
     assert "examDate" in payload
     assert "daysToExam" in payload
     assert "aiEnabled" in payload
+    assert payload["sync"]["status"] in ("Not connected", "Connected", "Syncing")
+    assert "lastSyncedLabel" in payload["sync"]
+    assert "actionLabel" in payload["sync"]
     assert payload["heroMode"] in ("abstain", "bayesian_call")
 
 
@@ -101,14 +104,34 @@ def test_link_handler_routes_ctas_to_cfa_entry_points(monkeypatch) -> None:
     monkeypatch.setattr(cfa, "show_exam_readiness", lambda mw: calls.append("readiness"))
     monkeypatch.setattr(cfa, "show_deadline", lambda mw: calls.append("deadline"))
     monkeypatch.setattr(cfa_home, "open_ai_settings", lambda mw: calls.append("ai"))
+    monkeypatch.setattr(cfa_home, "trigger_cfa_sync", lambda mw: calls.append("sync"))
+    monkeypatch.setattr(
+        cfa_home, "open_sync_settings", lambda mw: calls.append("sync-settings")
+    )
 
     moved: list[str] = []
     mw = SimpleNamespace(web=object(), moveToState=lambda s: moved.append(s))
     home = cfa_home.CfaHome(mw)  # type: ignore[arg-type]
 
-    for cmd in ("cfa:ethics", "cfa:priority", "cfa:readiness", "cfa:deadline", "cfa:ai"):
+    for cmd in (
+        "cfa:ethics",
+        "cfa:priority",
+        "cfa:readiness",
+        "cfa:deadline",
+        "cfa:ai",
+        "cfa:sync",
+        "cfa:sync-settings",
+    ):
         home._link_handler(cmd)
     home._link_handler("cfa:decks")
 
-    assert calls == ["ethics", "priority", "readiness", "deadline", "ai"]
+    assert calls == [
+        "ethics",
+        "priority",
+        "readiness",
+        "deadline",
+        "ai",
+        "sync",
+        "sync-settings",
+    ]
     assert moved == ["deckBrowser"]

@@ -56,7 +56,7 @@ def setup_menu(mw: AnkiQt) -> None:
     retired from the menu. ``study_ethics_passages`` remains callable for
     compatibility, it is simply no longer surfaced here.
 
-    D11 (Phase B Pass 2): the eight actions are grouped into three labelled
+    D11 (Phase B Pass 2): the actions are grouped into three labelled
     native sections — Dashboard, Study modes, Settings & account — instead of a
     flat undifferentiated list, and each carries a status-tip so hovering
     explains what it does (premium desktop discoverability). Section headers are
@@ -93,13 +93,11 @@ def setup_menu(mw: AnkiQt) -> None:
     ai_settings.setStatusTip("Turn the optional AI features on or off.")
     qconnect(ai_settings.triggered, lambda: _open_ai_settings(mw))
 
-    connect_sync = menu.addAction("Connect to CFA Sync server")
-    connect_sync.setStatusTip("Sign in to the CFA sync server to sync your progress.")
-    qconnect(connect_sync.triggered, lambda: _connect_cfa_sync(mw))
-
-    logout = menu.addAction("Log out of Sync…")
-    logout.setStatusTip("Sign out of the sync account on this device.")
-    qconnect(logout.triggered, lambda: logout_of_sync(mw))
+    sync_settings = menu.addAction("Settings & Sync…")
+    sync_settings.setStatusTip(
+        "Connect this device, sync now, and see account status."
+    )
+    qconnect(sync_settings.triggered, lambda: _open_sync_settings(mw))
 
     # Keep a reference so the menu (and its slots) survive garbage collection.
     mw._cfa_menu = menu  # type: ignore[attr-defined]
@@ -129,6 +127,15 @@ def setup_menu(mw: AnkiQt) -> None:
         from aqt.cfa_ethics_sync import register as _register_ethics_sync
 
         _register_ethics_sync()
+    except Exception:
+        pass
+
+    # Lane 3 sync chrome: keep the Home/status card's "last synced" timestamp
+    # current after normal sync completion. Pure UI metadata in the profile.
+    try:
+        from aqt.cfa_sync_connect import register_sync_status_tracking
+
+        register_sync_status_tracking(mw)
     except Exception:
         pass
 
@@ -213,6 +220,13 @@ def _connect_cfa_sync(mw: AnkiQt) -> None:
     from aqt.cfa_sync_connect import connect_cfa_sync
 
     connect_cfa_sync(mw)
+
+
+def _open_sync_settings(mw: AnkiQt) -> None:
+    # Lazy import keeps aqt.cfa import-light.
+    from aqt.cfa_sync_connect import open_sync_settings
+
+    open_sync_settings(mw)
 
 
 def show_exam_readiness(mw: AnkiQt) -> None:

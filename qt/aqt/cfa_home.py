@@ -68,6 +68,10 @@ class CfaHome:
             mw.moveToState("deckBrowser")
         elif url == "cfa:ai":
             open_ai_settings(mw)
+        elif url == "cfa:sync":
+            trigger_cfa_sync(mw)
+        elif url == "cfa:sync-settings":
+            open_sync_settings(mw)
         elif url.lower().startswith("http"):
             openLink(url)
         return False
@@ -87,3 +91,24 @@ def open_ai_settings(mw: AnkiQt) -> None:
     from aqt.cfa_ai_settings import open_ai_settings as _open
 
     _open(mw)
+
+
+def open_sync_settings(mw: AnkiQt) -> None:
+    """Open the in-app sync status/actions dialog."""
+    from aqt.cfa_sync_connect import open_sync_settings as _open
+
+    _open(mw)
+
+
+def trigger_cfa_sync(mw: AnkiQt) -> None:
+    """Connect if needed; otherwise run the existing normal GUI sync."""
+    from aqt.cfa_sync_connect import connect_cfa_sync
+
+    try:
+        connected = mw.pm.sync_auth() is not None
+    except Exception:
+        connected = False
+    if connected:
+        mw.on_sync_button_clicked()
+    else:
+        connect_cfa_sync(mw)
