@@ -6,9 +6,12 @@ License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
     import type { Writable } from "svelte/store";
 
     import "$lib/sveltelib/export-runtime";
+    import "$lib/cfa/theme.scss";
 
     import Container from "$lib/components/Container.svelte";
     import Row from "$lib/components/Row.svelte";
+    import Eyebrow from "$lib/cfa/Eyebrow.svelte";
+    import { pageTheme } from "$lib/sveltelib/theme";
     import type { DynamicSvelteComponent } from "$lib/sveltelib/dynamicComponent";
 
     import Addons from "./Addons.svelte";
@@ -73,9 +76,14 @@ License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
     }
 </script>
 
-<ConfigSelector {state} on:presetchange={onPresetChange} />
+<div class="cfa-deckopts cfa-app" class:is-light={!$pageTheme.isDark}>
+    <div class="cfa-deckopts-head">
+        <Eyebrow>ankiCFA · Level II · Study settings</Eyebrow>
+    </div>
 
-<div class="deck-options-page">
+    <ConfigSelector {state} on:presetchange={onPresetChange} />
+
+    <div class="deck-options-page">
     <Container
         breakpoint="sm"
         --gutter-inline="0.25rem"
@@ -144,10 +152,44 @@ License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
             </Row>
         </div>
     </Container>
+    </div>
 </div>
 
 <style lang="scss">
     @use "$lib/sass/breakpoints" as bp;
+    @use "../../lib/cfa/tokens" as cfa;
+
+    // CFA chrome for the deck-options (Study settings) dialog. Scoped to
+    // `.cfa-deckopts` so it only retones this surface; the stock-Anki blue
+    // interactive tokens (--button-primary-bg, --border-focus, --fg-link,
+    // --accent-card, --selected-bg) are overridden to CFA navy/accent for every
+    // descendant control at once, so the Save button, focus rings, links, and
+    // selected rows read as CFA rather than stock Anki. Light mode only — the
+    // app's dark theme keeps its own tokens.
+    .cfa-deckopts.is-light {
+        min-height: 100vh;
+        background: cfa.$cfa-page;
+
+        --button-primary-bg: #{cfa.$cfa-primary};
+        --button-primary-gradient-start: #{cfa.$cfa-primary};
+        --button-primary-gradient-end: #{cfa.$cfa-primary};
+        --border-focus: #{cfa.$cfa-accent};
+        --fg-link: #{cfa.$cfa-accent};
+        --accent-card: #{cfa.$cfa-primary};
+        --selected-bg: #{cfa.$cfa-accent-soft};
+    }
+
+    .cfa-deckopts-head {
+        margin: cfa.space(4) 0 cfa.space(2) cfa.space(3);
+    }
+
+    // Serif-navy section titles on CFA hairlines (light mode only), matching the
+    // themed statistics/card-info surfaces.
+    .cfa-deckopts.is-light :global(.container.light h1) {
+        font-family: cfa.$cfa-font-heading;
+        font-weight: cfa.$cfa-weight-semibold;
+        color: cfa.$cfa-ink;
+    }
 
     .deck-options-page {
         overflow-x: hidden;

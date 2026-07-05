@@ -9,7 +9,7 @@ import { expect, test } from "vitest";
 
 const here = dirname(fileURLToPath(import.meta.url));
 
-// --- Phase B regression guard (D-P4-16) ---------------------------------
+// --- Phase B regression guard (D-P4-17) ---------------------------------
 // The Card Info screen (CardInfo.svelte, opened from the reviewer "More → Card
 // Info" and the Browser sidebar) was a 100%-stock-Anki surface: a bare white
 // page, an unstyled key/value stats table, and stock traffic-light revlog
@@ -20,7 +20,7 @@ function cardInfoSource(): string {
     return readFileSync(join(here, "CardInfo.svelte"), "utf8");
 }
 
-test("D-P4-16: card info screen adopts the CFA design system", () => {
+test("D-P4-17: card info screen adopts the CFA design system", () => {
     const src = cardInfoSource();
     // The CFA theme (fonts + :root tokens) and the brand Eyebrow are pulled in…
     expect(src).toContain('import "$lib/cfa/theme.scss";');
@@ -31,7 +31,7 @@ test("D-P4-16: card info screen adopts the CFA design system", () => {
     expect(src).toMatch(/class="cfa-cardinfo cfa-app"/);
 });
 
-test("D-P4-16: card info chrome uses CFA tokens, scoped to this surface", () => {
+test("D-P4-17: card info chrome uses CFA tokens, scoped to this surface", () => {
     const src = cardInfoSource();
     expect(src).toMatch(/@use "\.\.\/\.\.\/lib\/cfa\/tokens" as cfa;/);
     // Serif-navy stat labels + CFA hairline row rules…
@@ -50,7 +50,7 @@ test("D-P4-16: card info chrome uses CFA tokens, scoped to this surface", () => 
     expect(src).not.toMatch(/^\s*:global\(\.stats-table\)/m);
 });
 
-test("D-P4-16: functional card info behaviour is preserved", () => {
+test("D-P4-17: functional card info behaviour is preserved", () => {
     const src = cardInfoSource();
     // The theming is presentation-only — the stats query, revlog table, and
     // forgetting-curve chart that drive the screen must be untouched.

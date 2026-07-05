@@ -1054,3 +1054,59 @@ map, and native-state handler; the controller loads the `graphs` page; the
 `browserSearch:` bridge opens the Browser filtered to the clicked cards).
 `test_cfa_active_tab.py` map assertion updated to include `cfaProgress`. Full
 `cfa-desktop-shell` suite green (73 passed); `ruff check` clean.
+
+---
+
+## Pass 4 — D-P4-17: Card Info was a 100%-stock-Anki surface
+
+**Surface:** the Card Info screen — the shared `CardInfo.svelte` component behind
+both `card-info/[cardId]` routes, opened from the reviewer **"More → Card Info"**
+during Study and from the **Browser** sidebar. Every reviewer/deck-browser chrome
+was re-skinned across iters 20–21/37–38, but the Card Info page itself was still
+pure stock Anki: a bare white page, an **unstyled** key/value `stats-table`, and a
+revlog whose review-kind colours were the stock traffic-light `--state-new`
+(blue) / `--state-review` (green) / `--state-learn` (red). For a CFA exam-prep
+product a card's review history ("how has THIS card gone") is a core detail view,
+so a bare-Anki stats sheet reads as "Anki with a CFA tab."
+
+| # | Severity | Element | Issue | Fix |
+|---|----------|---------|-------|-----|
+| D-P4-17 | MAJOR (design-system consistency / product feel — a core per-card history surface) | Card Info (`CardInfo.svelte`) — stats table + revlog | No CFA identity: bare white page, unstyled stat key/value table, and a stock blue/green/red traffic-light revlog — the largest remaining un-themed SvelteKit surface in the Study flow. | **FIXED (iter 39)** — themed `CfaInfo` (mirroring the D-P4-15 graphs pattern): imports `$lib/cfa/theme.scss` + the brand `Eyebrow`, wraps the content in `.cfa-cardinfo.cfa-app` with a light-mode CFA **page tint**, adds an `ankiCFA · Level II · Card details` eyebrow, and via **scoped** `:global` retones the stat table to **serif-navy labels** on CFA **hairline** row rules (brand-ink values), the revlog column heads to serif-navy, and the stock traffic-light revlog kinds to CFA tones (learn → warm **accent**, review → **ink navy**, relearn → **fail-red**). Presentation-only — the stats query, the `Revlog` table, and the FSRS `ForgettingCurve` chart are untouched; every retone is scoped under `.cfa-cardinfo` so shared stats-table users elsewhere are never restyled, and the light page tint + revlog retones are guarded `:not(.nightMode)` so the dark theme keeps its own tokens. |
+
+**Verification:** `ts/routes/card-info/card-info.test.ts` — 3 source-parse tests
+(theme + eyebrow + `cfa-app` wrapper present; CFA tokens used, scoped under
+`.cfa-cardinfo`, light-mode-guarded page tint, no bare global `stats-table`
+override; the stats/revlog/forgetting-curve behaviour preserved), wired as
+`just cfa-card-info-test`, green. `npx svelte-check` passes 0 errors / 0 warnings
+across 1302 files. **Before/after evidence** (`proof/card-info/card-info.{html,png}`):
+BEFORE a bare-white page with bold-sans stat labels and blue/green/red revlog;
+AFTER the CFA page tint, a green brand eyebrow, serif-navy stat labels on CFA
+hairline rules, and a CFA-toned revlog (navy Review / accent Learn / fail-red
+Relearn) — one cohesive CFA card-history surface.
+
+---
+
+## Pass 4 — D-P4-18: Deck options (Study settings) was a 100%-stock-Anki surface
+
+**Surface:** the deck-options dialog (`DeckOptionsPage.svelte`), opened from the
+deck gear / preset editor. It is the scheduling + FSRS config a sophisticated CFA
+candidate opens to tune their daily new/review load — a genuine part of the study
+flow. Every reviewer/overview/editor/graphs/card-info chrome was re-skinned across
+iters 20–21/36–39, but this dialog was still pure stock Anki: a **stock-blue Save
+button**, **blue focus rings**, **blue links**, and **light-blue selected rows** —
+so a core settings screen read as "Anki with a CFA tab."
+
+| # | Severity | Element | Issue | Fix |
+|---|----------|---------|-------|-----|
+| D-P4-18 | MAJOR (design-system consistency / product feel — a core study-config surface) | Deck options (`DeckOptionsPage.svelte`) — Save button, focus, links, selected rows, section titles | No CFA identity: stock `--button-primary-bg`/`--border-focus`/`--fg-link`/`--selected-bg` blue throughout — the largest remaining un-themed SvelteKit surface in the study flow. | **FIXED (iter 40)** — wrapped the page in `.cfa-deckopts.cfa-app` with a brand `ankiCFA · Level II · Study settings` **Eyebrow**, and instead of per-control selectors **overrode the stock-blue design-token CSS vars in-scope** (`--button-primary-bg`/gradient → CFA **navy**; `--border-focus`/`--fg-link` → warm **accent**; `--accent-card` → navy; `--selected-bg` → **accent-soft**) so every descendant control — Save button, focus rings, links, selected preset row — adopts CFA colours at once, plus a light CFA **page tint** and serif-navy section titles. Presentation-only: the `ConfigSelector`, every option section, the preset-change wiring, and the addon `api` exports are untouched. Everything is scoped under `.cfa-deckopts.is-light` (gated `!$pageTheme.isDark`) so the dark theme keeps its own tokens and no other `TitledContainer`/`InputBox` user is restyled. |
+
+**Verification:** `ts/routes/deck-options/deck-options-theme.test.ts` — 3 source-parse
+tests (theme + eyebrow + `cfa-app` wrapper + `is-light` gate present; the five
+stock-blue vars overridden to CFA tokens scoped under `.cfa-deckopts.is-light`;
+the config-selector / option-section / addon-api behaviour preserved), wired as
+`just cfa-deck-options-theme-test`, green. `npx svelte-check` passes 0 errors /
+0 warnings across 1303 files. **Before/after evidence**
+(`proof/deck-options/deck-options-theme.{html,png}`): BEFORE a blue Save button,
+blue focus ring, blue link and light-blue selected row; AFTER a CFA navy Save
+button, warm-accent focus ring + link, accent-soft selected row, a brand eyebrow,
+and a serif-navy section title — one cohesive CFA settings surface.

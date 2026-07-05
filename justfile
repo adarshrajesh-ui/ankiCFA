@@ -145,6 +145,12 @@ cfa-graphs-test:
 cfa-card-info-test:
     {{ yarn }} vitest:once routes/card-info/card-info
 
+# Deck-options (Study settings) dialog themed to the CFA design system by
+# overriding the stock-blue interactive tokens (Save button/focus/links/selected)
+# to CFA navy/accent, scoped + light-mode gated.
+cfa-deck-options-theme-test:
+    {{ yarn }} vitest:once routes/deck-options/deck-options-theme
+
 # A10: crash + offline robustness — kill mid-review ~20x -> zero corruption
 # (backend integrity check), plus offline + AI-off still returns a score.
 cfa-crash-test:
