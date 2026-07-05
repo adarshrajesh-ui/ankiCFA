@@ -445,11 +445,32 @@ Captures (branch `gnhf/speedrun-mobile`, `emulator-5554`, real fullDebug build):
 referenced → no `UnusedResources`) + `installFullDebug` all **BUILD SUCCESSFUL**.
 Committed on `gnhf/speedrun-mobile`.
 
-### Still-TODO (mobile Pass 2/3)
-- Harsher sweep of the remaining screen (Reviewer) for residual stock colour;
-  MINORs carried from Pass 1 (M2-2 generic drawer icon for Exam Readiness —
+### M8 — Reviewer (harsher sweep of the highest-time-on-screen surface)
+Captures (branch `gnhf/speedrun-mobile`, `emulator-5554`, real fullDebug build):
+- `pass-2-before/07-reviewer-showanswer-bluegrey.png` — the CURRENT navy shell
+  WITHOUT this fix (the installed build predated it): the "Show answer" CTA is a
+  stock blue-grey bar.
+- `pass-2/07-reviewer-showanswer-navy.png` (Show-answer CTA now brand navy) +
+  `pass-2/08-reviewer-ease-buttons-intact.png` (answer side — the four-grade ease
+  colours preserved).
+- Evidence: `pass-2/reviewer-showanswer.txt`.
+
+| # | Severity | Element | Issue | Fix |
+|---|----------|---------|-------|-----|
+| M8-1 | MAJOR | "Show answer" primary CTA | Pass 1 branded the Reviewer's toolbar navy and its count bar `cfa_surface`, but the single **primary call-to-action on the screen users spend the most time on** was still stock AnkiDroid: the legacy reviewer's flip button (`R.id.flashcard_layout_flip`) reused `@style/HardButton` + `?attr/hardButtonRef`, both resolving to the stock blue-grey Hard ease colour (`hardButtonBackground` / `footer_button_hard` = `@color/material_blue_grey_700`); with card animation on it's redrawn via `footer_button_ripple`, which reads `?attr/answerButtonBackground` off the view's theme overlay → blue-grey there too. So the "Show answer" button read as a muted stock blue-grey with zero CFA identity (and looked identical to the unrelated Hard ease button). The new reviewer (`view_answer_area.xml`) had the parallel leak: `?showAnswerButtonBackground` = `@color/material_blue_700` (stock blue). | **FIXED (iter 42)** — new `drawable/footer_button_showanswer` (default `cfa_navy`, pressed/focused `cfa_navy_hover`) + new `@style/CfaShowAnswerButton` (`answerButtonBackground=cfa_navy`, so the animation/ripple path renders navy too, not just the static bg); `flashcard_layout_flip` now uses that drawable + theme instead of `hardButtonRef`/`HardButton`; `theme_light.xml showAnswerButtonBackground` `material_blue_700`→`cfa_navy` (new-reviewer parity). The "Show answer" CTA is now brand navy, matching the toolbar → one cohesive navy product. Presentation-only — the Hard ease button (`ease2`) still uses `?attr/hardButtonRef` + `@style/HardButton`, so the learned four-grade ease scheme (again=red / hard=blue-grey / good=green / easy=light-blue) is **unchanged** (verified `pass-2/08`). Before `pass-2-before/07` → after `pass-2/07` (+ `08`). |
+
+**Verification:** `installFullDebug` (device-observable after capture on
+`emulator-5554`), `ktlintCheck`, `lintVitalFullRelease` (new drawable/style/string
+all referenced → no `UnusedResources`), and `testPlayDebugUnitTest --tests
+"com.ichi2.anki.cfa.*"` — all **BUILD SUCCESSFUL**. Committed on
+`gnhf/speedrun-mobile`. **With M8, every inventoried mobile surface (DeckPicker,
+nav drawer, Exam Readiness, Exam Config, Reviewer) is captured+critiqued and all
+Pass-2 MAJORs fixed → Phase B Pass 2 mobile COMPLETE.**
+
+### Still-TODO (mobile Pass 3)
+- Carried MINORs: M2-2 generic drawer icon for Exam Readiness —
   *resolved: `ic_cfa_readiness` bar-chart icon is wired in `navigation_drawer.xml`*;
-  M4-2 sparse Exam-Config density — **resolved this pass**; M3-5 per-topic
-  8→10 topic parity when the AAR is rebuilt from the 10-topic branch).
+  M4-2 sparse Exam-Config density — *resolved (iter 41)*; M3-5 per-topic
+  8→10 topic parity when the AAR is rebuilt from the 10-topic branch.
 
 ## Pass 3 (ruthless, pixel-level) — TODO (both apps)

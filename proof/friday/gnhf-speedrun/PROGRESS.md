@@ -31,7 +31,7 @@ Legend: TODO / WIP / DONE (evidence path) / BLOCKED (root cause).
 | Pass | Desktop | Mobile | Log |
 |------|---------|--------|-----|
 | 1 (critical) | DONE (CFA web 5 MAJOR + 4 MINOR fixed; Qt chrome → Pass 2) | DONE (all 7 MAJORs fixed) | `UI-CRITIQUE-LOG.md` Pass 1 |
-| 2 (harsher) | DONE (D7 Connect/Logout — named must-fix — FIXED; D9 populated render; D3 Deadline; D4 Ethics reviewer gold-phrase ladder FIXED; D6 AI Settings dialog redesigned FIXED; D8 deck-browser stock-blue leak FIXED; D11 CFA menu grouped into labelled sections FIXED — every D1–D11 surface captured+critiqued) | WIP (M6-1 DeckPicker stock-blue leak FIXED; M7-1 Readiness abstain triple-repeat FIXED; M4-2 Exam-Config context line + live countdown FIXED — Reviewer harsher sweep remaining) | `UI-CRITIQUE-LOG.md` Pass 2 |
+| 2 (harsher) | DONE (D7 Connect/Logout — named must-fix — FIXED; D9 populated render; D3 Deadline; D4 Ethics reviewer gold-phrase ladder FIXED; D6 AI Settings dialog redesigned FIXED; D8 deck-browser stock-blue leak FIXED; D11 CFA menu grouped into labelled sections FIXED — every D1–D11 surface captured+critiqued) | DONE (M6-1 DeckPicker stock-blue leak FIXED; M7-1 Readiness abstain triple-repeat FIXED; M4-2 Exam-Config context line + live countdown FIXED; M8-1 Reviewer "Show answer" CTA stock-blue→navy FIXED — every mobile surface captured+critiqued) | `UI-CRITIQUE-LOG.md` Pass 2 |
 | 3 (ruthless) | TODO | TODO | |
 
 Phase B kicked off (iter 25). `proof/friday/UI-INVENTORY.md` (every desktop +
@@ -280,6 +280,30 @@ mobile screen/state) and `proof/friday/UI-CRITIQUE-LOG.md` created.
   (+ `pass-2/exam-config-density.txt`). Green: `CfaExamConfigTest` **7 tests**
   (3 prior + 4 new `daysUntil`), `ktlintCheck`, `lintVitalFullRelease`,
   `installFullDebug`. Committed on `gnhf/speedrun-mobile`.
+
+**Pass 2 mobile — REVIEWER "Show answer" CTA branded (iter 42): M8-1 → Pass 2 mobile COMPLETE.**
+- The **Reviewer** (`Reviewer`/`AbstractFlashcardViewer` +
+  `include_reviewer_answer_buttons.xml`) — the highest-time-on-screen surface —
+  re-looked under the harsher Pass-2 lens. Pass 1 branded its toolbar navy and
+  count bar `cfa_surface`, but the single **primary CTA** ("Show answer") was
+  still stock: the legacy flip button reused `@style/HardButton` +
+  `?attr/hardButtonRef` (both resolve to the stock blue-grey Hard ease colour
+  `material_blue_grey_700`; the animation path via `footer_button_ripple` reads
+  `answerButtonBackground` off the view theme → blue-grey too), and the new
+  reviewer's `showAnswerButtonBackground` was stock `material_blue_700`.
+  **FIXED (M8-1, MAJOR)** — new `drawable/footer_button_showanswer` (navy) + new
+  `@style/CfaShowAnswerButton` (`answerButtonBackground=cfa_navy`, so BOTH the
+  static and ripple paths render navy); `flashcard_layout_flip` retargeted to
+  them; `theme_light.xml showAnswerButtonBackground`→`cfa_navy`. The "Show
+  answer" CTA is now brand navy, matching the toolbar; the four-grade ease
+  buttons (again=red/hard=blue-grey/good=green/easy=light-blue) are **unchanged**
+  (verified). Device-observable before `pass-2-before/07-reviewer-showanswer-bluegrey.png`
+  → after `pass-2/07-reviewer-showanswer-navy.png` + `08-reviewer-ease-buttons-intact.png`
+  (+ `pass-2/reviewer-showanswer.txt`). Green: `installFullDebug`, `ktlintCheck`,
+  `lintVitalFullRelease`, CFA unit tests. Committed on `gnhf/speedrun-mobile`.
+  **Every inventoried mobile surface captured+critiqued, all Pass-2 MAJORs fixed
+  → Phase B Pass 2 mobile COMPLETE.** Remaining: the escalating **Pass 3
+  (ruthless)** for BOTH apps.
 
 Named must-fix: desktop Readiness renders with data (**functional gate DONE** +
 **populated real-range render DONE, iter 32**); **Connect/Logout redesigned
