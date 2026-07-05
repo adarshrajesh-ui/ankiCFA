@@ -111,10 +111,76 @@ browser, D11 chrome (Qt surfaces) + a populated (non-abstain) render of D1/D2.
 
 ---
 
-## Pass 1 — MOBILE (critical) — TODO
-Captures pending under `proof/friday/gnhf-speedrun/mobile-ui/pass-1/`. Some
-device renders already exist from Phase A (M1–M5 under `AnkiDroid:
-proof/gnhf-speedrun/L3/`) and will be re-shot under the Phase-B rubric.
+## Pass 1 — MOBILE (critical)
+
+Captures live in the **mobile repo** (branch `gnhf/speedrun-mobile`) at
+`AnkiDroid: proof/gnhf-speedrun/mobile-ui/pass-1-before/` (device `emulator-5554`,
+`adb screencap`, real running debug build):
+- `01-deckpicker.png` — native ankiCFA DeckPicker (landing).
+- `02-nav-drawer.png` — nav drawer (Exam Readiness / Decks / Card browser…).
+- `03-exam-readiness.png` — Exam Readiness top (hero + 3 score cards, abstain).
+- `04-exam-readiness-bottom.png` — Readiness per-topic recall + action buttons.
+- `05-exam-config.png` — Exam configuration (no date set).
+- `06-reviewer-question.png` — Reviewer, question side (CFA card).
+- `07-reviewer-answer.png` — Reviewer, answer side + ease buttons.
+
+Same honesty caveat as desktop: **no `OPENAI_API_KEY`**, so this is a labelled
+structured senior-designer heuristic critique on the real device captures, not a
+GPT-4o transcript. Every issue is grounded in a specific screenshot + source
+line so a Pass-2 fix is unambiguous.
+
+**Headline finding (matches the objective's "non-native-CFA feel" + "full
+AnkiDroid CFA UI refactor is the biggest lift"):** the CFA *activities* (Exam
+Readiness / Config) carry the navy+orange brand, but the **shell the user
+actually lives in — DeckPicker, nav drawer, and Reviewer — is 100% stock
+AnkiDroid light-blue**, so the product reads as "AnkiDroid with two bolt-on CFA
+screens," not a native CFA app. Two mobile MAJORs are the *same* defects already
+fixed on desktop (abstain shouts in warn-orange; brand accent == warn colour).
+
+### M1 — DeckPicker (landing shell)
+| # | Severity | Element | Issue | Fix direction |
+|---|----------|---------|-------|---------------|
+| M1-1 | MAJOR | toolbar + status bar | Stock AnkiDroid light-blue (`#0a9beb`) toolbar/status bar on the primary landing screen — clashes with the navy CFA activities; app doesn't feel like a CFA product on first open. | Theme the DeckPicker action bar + status bar to `cfa_navy`; make navy the shell primary. |
+| M1-2 | MAJOR | deck list | Junk test decks **"h"** and **"h gg"** shipped in the collection — embarrassing leftover data on a premium product. | Purge non-CFA scratch decks from the seeded/synced collection; default list = CFA / Ethics Pairs / CFA Level II only. |
+| M1-3 | MINOR | FAB + no CFA entry | The `+` FAB and sync icon are stock blue; Exam Readiness (the flagship CFA surface) is buried in the drawer with no DeckPicker entry point. | Recolour FAB to `cfa_accent`; consider a persistent "Exam Readiness" CTA on DeckPicker. |
+
+### M2 — Nav drawer
+| # | Severity | Element | Issue | Fix direction |
+|---|----------|---------|-------|---------------|
+| M2-1 | MAJOR | drawer header | Header is the stock AnkiDroid blue mountain illustration — no CFA logo/wordmark; active item "Decks" highlighted in AnkiDroid blue, not a CFA token. | Replace header with a CFA navy brand lockup; recolour the selected-item accent to `cfa_accent`/`cfa_navy`. |
+| M2-2 | MINOR | icons + labels | "Exam Readiness" uses the same generic bar-chart glyph as "Statistics"; "Support AnkiDroid" reads as upstream, not the product. | Give Exam Readiness a distinct CFA icon; ensure brand consistency of drawer labels. |
+
+### M3 — Exam Readiness (flagship CFA screen)
+| # | Severity | Element | Issue | Fix direction |
+|---|----------|---------|-------|---------------|
+| M3-1 | MAJOR | 3 score values | "N/A — abstaining" renders **3× in loud warn-orange** (`CfaExamReadinessActivity.kt:177` → `cfa_warn`) — hierarchy inversion; the *absence* of data is the loudest thing on screen. **Identical to desktop D1-2/D2-2 (already fixed there).** | Mirror the desktop fix: quiet abstain to `cfa_muted`, down-size, state the verdict once in the hero. |
+| M3-2 | MAJOR | brand eyebrow vs abstain | The orange brand eyebrow "ANKICFA · CFA LEVEL II" is the same warm-orange family as the warn/abstain text → brand accent == warning (colour-semantic collision). **Desktop D1-3 parallel.** | Reserve orange for the brand accent only; abstain/warn must not share the hue. |
+| M3-3 | MAJOR | 3 score "cards" | Inconsistent card treatment — Readiness sits in a grey filled card (`cfa_surface`) while Memory/Performance are flat/borderless; they aren't consistent cards. | Give all three the same card container (surface + radius + spacing). |
+| M3-4 | MINOR | status bar | Light-blue status bar sits above the navy toolbar → two-tone band at the very top. | Set the status-bar colour to `cfa_navy` for CFA activities. |
+| M3-5 | MINOR | per-topic table | 8 flat "no data" rows, no empty-state hint line (desktop D2-5 parallel). Shows **8** canonical topics vs desktop's **10** (known, documented parity gap — the AAR is built from `main`). | Add a one-line "recall appears here after you study" hint; extend to 10 topics when the fork AAR is rebuilt. |
+| M3-6 | MINOR | outlined button | "Exam configuration" outlined-button label is AnkiDroid blue, off-brand. | Recolour outlined-button text/stroke to a CFA token. |
+
+### M4 — Exam Config
+| # | Severity | Element | Issue | Fix direction |
+|---|----------|---------|-------|---------------|
+| M4-1 | MAJOR | "Pick date" button | Outlined-button label is AnkiDroid blue (off-brand) — same token gap as M3-6; every outlined button across CFA screens inherits the Material default accent instead of a CFA token. | Introduce a CFA outlined-button style (navy/accent) and apply app-wide. |
+| M4-2 | MINOR | layout density | Large dead vertical space; sparse screen (title + one field + 2 buttons), no context on why the exam date matters. | Add a short helper line; tighten layout or add a countdown preview. |
+
+### M5 — Reviewer (highest-time-on-screen surface)
+| # | Severity | Element | Issue | Fix direction |
+|---|----------|---------|-------|---------------|
+| M5-1 | MAJOR | whole chrome | Reviewer is 100% stock AnkiDroid: light-blue toolbar, light-blue "99 1 0" count bar, default ease-button colours — zero CFA identity on the screen users spend the most time on. | Theme reviewer toolbar/count bar to CFA navy; align typography with the CFA design system. |
+| M5-2 | MINOR | ease buttons | Stock red/grey/green/blue ease bar; count-bar background light-blue. | Optionally align ease palette to the CFA system while keeping the four-grade semantics. |
+
+**Pass-1 mobile verdict:** the two dedicated CFA activities are close to the
+desktop bar in *structure* (brand eyebrow, navy title, honest score cards, real
+per-topic recall) but repeat desktop's two worst defects (M3-1 abstain-shouts,
+M3-2 accent==warn) and — more importantly — the **shell around them is
+un-branded stock AnkiDroid** (M1-1, M2-1, M5-1). **7 MAJORs** logged (M1-1, M1-2,
+M2-1, M3-1, M3-2, M3-3, M4-1, M5-1 — note M4-1 is the shared outlined-button
+token) plus 8 MINORs. These become the Pass-2 mobile fix backlog (the "full
+AnkiDroid CFA UI refactor" the objective flags as the biggest lift). No BLOCKERs
+(every screen renders correct, honest data).
 
 ## Pass 2 (harsher) — TODO (both apps)
 ## Pass 3 (ruthless, pixel-level) — TODO (both apps)

@@ -30,7 +30,7 @@ Legend: TODO / WIP / DONE (evidence path) / BLOCKED (root cause).
 ## Phase B — UI/UX passes (≥3, escalating; both apps)
 | Pass | Desktop | Mobile | Log |
 |------|---------|--------|-----|
-| 1 (critical) | WIP | TODO | `UI-CRITIQUE-LOG.md` Pass 1 |
+| 1 (critical) | WIP | WIP | `UI-CRITIQUE-LOG.md` Pass 1 |
 | 2 (harsher) | TODO | TODO | |
 | 3 (ruthless) | TODO | TODO | |
 
@@ -63,6 +63,22 @@ mobile screen/state) and `proof/friday/UI-CRITIQUE-LOG.md` created.
 - **Still TODO this pass:** desktop MINORs (D1-4/5/6, D2-5); Qt-chrome surfaces
   (D5–D8, D10–D12); populated (non-abstain) render; then Passes 2–3; and ALL
   mobile passes. (Desktop Pass-1 MAJORs all resolved.)
+
+**Pass 1 mobile — started (capture + critique DONE, fixes TODO):**
+- 7-screen "before" set captured on `emulator-5554` via `adb screencap` (real
+  running debug build), committed on `gnhf/speedrun-mobile` at
+  `AnkiDroid: proof/gnhf-speedrun/mobile-ui/pass-1-before/` (DeckPicker, nav
+  drawer, Exam Readiness top+bottom, Exam Config, Reviewer question+answer).
+- Structured senior-designer critique logged in `UI-CRITIQUE-LOG.md` (§Pass 1
+  MOBILE): **7 MAJORs + 8 MINORs, 0 BLOCKERs**. Headline: the CFA activities are
+  branded but the **shell (DeckPicker, nav drawer, Reviewer) is stock AnkiDroid
+  light-blue** — the "non-native-CFA feel" the objective flags. Two mobile MAJORs
+  (M3-1 abstain shouts in `cfa_warn`; M3-2 accent==warn) are the *same* defects
+  already fixed on desktop; plus junk test decks "h"/"h gg" (M1-2).
+- **TODO next (Pass 2 mobile fix backlog):** mirror the desktop abstain fix
+  (`CfaExamReadinessActivity.kt:177` warn→muted), theme the DeckPicker/reviewer
+  shell to `cfa_navy`, CFA-brand the nav-drawer header, add a CFA outlined-button
+  style, purge scratch decks.
 
 Named must-fix: desktop Readiness renders with data (**functional gate DONE**);
 Connect/Logout redesigned; native-CFA feel everywhere; AnkiDroid CFA UI full
