@@ -416,11 +416,21 @@ tests are unaffected. `material_indigo_700` is a library (`anki-common`) colour
 with other definitions, so dropping the app reference does not trip
 `UnusedResources`.
 
+### M7 — Exam Readiness (flagship CFA screen, harsher re-look)
+| # | Severity | Element | Issue | Fix |
+|---|----------|---------|-------|-----|
+| M7-1 | MAJOR | the three abstain score cards | In the awaiting-data state all three honest cards render the shared engine's give-up `reason` verbatim, and the engine's READINESS reason is a literal concatenation of the memory + performance reasons — so the hero card repeated the SAME counts ("22 graded reviews (need 200), 0% topic coverage (need 50%)" / "21 first-seen questions (need 30)") that already appear on the two cards below AND in the evidence caption. The user reads the same numbers **three times** on one screen: verbose, low-signal, not premium. Same defect the desktop team fixed in iter 26 ("state the verdict once in the hero, reason in the faint sub-line"). | **FIXED (iter 40)** — `CfaExamReadinessActivity.render()`: when BOTH inputs still abstain, the hero READINESS card shows a **concise composite sub-line** (new string `cfa_readiness_abstain_hint` = "Keep studying — the Memory and Performance scores below need more data first.") via a new `abstainOverride` param on `scoreCard()`, instead of the verbatim engine reason. When only one input abstains (partial), the full engine reason is still shown (no information hidden). The specific counts stay HONEST + visible on the MEMORY card, the PERFORMANCE card, and the evidence caption. Presentation-only — the shared `computeCfaScores` RPC, the abstain give-up rule, and every count are untouched. Before `pass-2-before/03-readiness-repeat.png` → after `pass-2/03-readiness-deduped.png` (+ `pass-2/readiness-dedup.txt`). |
+
+**Verification:** `installFullDebug` (device-observable after capture on `emulator-5554`),
+`ktlintCheck`, `lintVitalFullRelease` (release-only; new string referenced → no
+`UnusedResources`), and `testPlayDebugUnitTest --tests "com.ichi2.anki.cfa.*"` — all
+**BUILD SUCCESSFUL**. Committed on `gnhf/speedrun-mobile`.
+
 ### Still-TODO (mobile Pass 2/3)
 - Harsher sweep of the remaining screens (Reviewer, Exam Config) for residual
   stock colour; MINORs carried from Pass 1 (M2-2 generic drawer icon for Exam
-  Readiness, M4-2 sparse Exam-Config density, M3-5 per-topic "no data" hint line
-  + 8→10 topic parity when the AAR is rebuilt); Readiness give-up microcopy
-  repeats the memory/performance reasons across the three cards (Pass-3 polish).
+  Readiness — *resolved: `ic_cfa_readiness` bar-chart icon is wired in
+  `navigation_drawer.xml`*, M4-2 sparse Exam-Config density, M3-5 per-topic
+  8→10 topic parity when the AAR is rebuilt from the 10-topic branch).
 
 ## Pass 3 (ruthless, pixel-level) — TODO (both apps)

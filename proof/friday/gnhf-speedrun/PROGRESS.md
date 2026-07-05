@@ -31,7 +31,7 @@ Legend: TODO / WIP / DONE (evidence path) / BLOCKED (root cause).
 | Pass | Desktop | Mobile | Log |
 |------|---------|--------|-----|
 | 1 (critical) | DONE (CFA web 5 MAJOR + 4 MINOR fixed; Qt chrome → Pass 2) | DONE (all 7 MAJORs fixed) | `UI-CRITIQUE-LOG.md` Pass 1 |
-| 2 (harsher) | DONE (D7 Connect/Logout — named must-fix — FIXED; D9 populated render; D3 Deadline; D4 Ethics reviewer gold-phrase ladder FIXED; D6 AI Settings dialog redesigned FIXED; D8 deck-browser stock-blue leak FIXED; D11 CFA menu grouped into labelled sections FIXED — every D1–D11 surface captured+critiqued) | WIP (M6-1 DeckPicker stock-blue leak FIXED) | `UI-CRITIQUE-LOG.md` Pass 2 |
+| 2 (harsher) | DONE (D7 Connect/Logout — named must-fix — FIXED; D9 populated render; D3 Deadline; D4 Ethics reviewer gold-phrase ladder FIXED; D6 AI Settings dialog redesigned FIXED; D8 deck-browser stock-blue leak FIXED; D11 CFA menu grouped into labelled sections FIXED — every D1–D11 surface captured+critiqued) | WIP (M6-1 DeckPicker stock-blue leak FIXED; M7-1 Readiness abstain triple-repeat FIXED) | `UI-CRITIQUE-LOG.md` Pass 2 |
 | 3 (ruthless) | TODO | TODO | |
 
 Phase B kicked off (iter 25). `proof/friday/UI-INVENTORY.md` (every desktop +
@@ -244,6 +244,25 @@ mobile screen/state) and `proof/friday/UI-CRITIQUE-LOG.md` created.
   `pass-2/01` + `02` + `deckpicker-brand.txt`). Green:
   `installFullDebug`, `lintVitalFullRelease`, `ktlintCheck`. Committed on
   `gnhf/speedrun-mobile` (orchestrator does not touch the mobile repo).
+
+**Pass 2 mobile — READINESS abstain triple-repeat fixed (iter 40): M7-1.**
+- The flagship **Exam Readiness** screen (`CfaExamReadinessActivity`) re-captured
+  under the harsher Pass-2 lens. In the awaiting-data state all three honest score
+  cards rendered the shared engine's give-up `reason` verbatim, and the engine's
+  READINESS reason is a literal concatenation of the memory + performance reasons —
+  so the hero card repeated the SAME counts already shown on the two cards below AND
+  in the evidence caption (the user read the same numbers **three times**). **FIXED
+  (M7-1, MAJOR)** — when both inputs abstain, the hero card shows a concise composite
+  sub-line (`cfa_readiness_abstain_hint`) via a new `abstainOverride` param on
+  `scoreCard()`, instead of the verbatim reason; the specific counts stay honest +
+  visible on the Memory/Performance cards and the caption. Presentation-only (the
+  shared `computeCfaScores` RPC, the abstain rule, and every count untouched). Same
+  defect the desktop team fixed in iter 26 ("state the verdict once"). Device-observable
+  before `pass-2-before/03-readiness-repeat.png` → after
+  `pass-2/03-readiness-deduped.png` (+ `pass-2/readiness-dedup.txt`). Green:
+  `installFullDebug`, `ktlintCheck`, `lintVitalFullRelease`, CFA unit tests. Committed
+  on `gnhf/speedrun-mobile`. (Carried Pass-1 MINOR M2-2 also confirmed resolved — the
+  Exam Readiness nav-drawer entry already uses the `ic_cfa_readiness` bar-chart icon.)
 
 Named must-fix: desktop Readiness renders with data (**functional gate DONE** +
 **populated real-range render DONE, iter 32**); **Connect/Logout redesigned
