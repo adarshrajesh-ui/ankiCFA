@@ -1,0 +1,69 @@
+D4 — Ethics minimal-pairs reviewer (flagship CFA card) — Phase B Pass 2 (desktop)
+=================================================================================
+
+Surface: cfa/ethics_pairs/templates/front.html + style.css (the multi-span
+minimal-pair reviewer card — the flagship CFA learning surface). Rendered
+faithfully via tools/cfa/render_pairs_attempt.py (substitutes a REAL pair
+SMD-01 into the live template the SAME way the Anki importer does, drives a
+genuine end-to-end attempt with the REAL shared front-template JS grader, and
+screenshots the graded reveal with chrome-devtools-axi). This surface had NEVER
+been captured or critiqued in any Phase-B pass (a real UI-INVENTORY gap, D4).
+
+Captures (pair SMD-01, "SUITABILITY-MNPI-DILIGENCE" cluster):
+  before/  d4-ethics-blank.png   — fresh pre-attempt (question) state
+           d4-ethics-partial.png — graded reveal, 1 of 2 phrases matched (partial)
+           d4-ethics-perfect.png — graded reveal, fully correct
+           d4-ethics-perfect-zoom.png — zoomed Case 2 (shows the defect clearly)
+  after/   same four, post-fix
+
+DEFECT FOUND — D4-1 (MAJOR): gold answer-key phrase renders as a per-word box ladder
+------------------------------------------------------------------------------------
+On the graded reveal the true decisive phrase is highlighted with the brand-green
+"gold" outline. Each word is a separate .cfa-tok span, and the old CSS drew a full
+FOUR-SIDED box-shadow inset on EVERY gold token:
+
+    .cfa-tok.gold { box-shadow: 0 0 0 2px var(--cfa-brand-green) inset; }
+
+So a multi-word decisive phrase — e.g. "exact unreleased quarterly earnings figure"
+(5 words) and "sells the company out of her clients' portfolios." (8 words) —
+rendered as a LADDER of 13 disconnected green boxes with an interior vertical
+divider between every word (see d4-ethics-perfect-zoom.png, before/). This
+fragments the visual meaning of "phrase," reads as a rendering bug, and is clearly
+sub-premium for the product's flagship learning surface. Same class of defect as
+the desktop D1-2/D2-2 "absence shown loud" family: the presentation fights the
+meaning.
+
+FIX (iter 35): continuous-run outline, CSS-only
+------------------------------------------------
+Composed the outline from four inset EDGE rules (top/bottom/left/right) and OPEN
+the interior edges between contiguous gold tokens so a run reads as ONE outlined
+span, while a lone gold token stays a full rounded pill:
+
+  .cfa-tok.gold                                   -> all four edges (rounded pill)
+  .cfa-tok.gold + .cfa-tok.gold                   -> prev sibling gold: open LEFT edge
+  .cfa-tok.gold:has(+ .cfa-tok.gold)              -> next sibling gold: open RIGHT edge
+  .cfa-tok.gold + .cfa-tok.gold:has(+ .cfa-tok.gold) -> interior: top+bottom only
+
+Night-mode variants mirror the same treatment. After the fix, both decisive
+phrases render as single continuous outlined spans with rounded caps only at the
+true run start/end (see after/d4-ethics-perfect-zoom.png). The fix generalizes
+across the pick tiers — verified in partial mode (after/d4-ethics-partial.png):
+the matched phrase (green fill + continuous outline) AND the missed phrase
+(continuous outline, no fill) both read as one span. It also carries to the
+one-passage ethics card (passage_front.html), which shares the same .cfa-tok.gold
+CSS.
+
+Presentation-only: style.css is NOT the byte-mirrored shared JS grader block, so
+the Python<->JS grade agreement (test_highlight.py) is untouched. No collection,
+no Anki build, no AI.
+
+Verification:
+  cfa/ethics_pairs/tests/test_gold_outline_css.py — 5 stdlib tests locking the
+    continuous-run selectors + asserting the old per-token full box is gone.
+  Full ethics suite (out/pyenv/bin/python -m pytest cfa/ethics_pairs/tests -q):
+    121 passed, 3 skipped (node cross-check skips) — test_highlight.py byte-mirror
+    and Python<->JS grade agreement stay green.
+
+Honesty: the GPT-4o vision CRITIC leg remains UNAVAILABLE (no OPENAI_API_KEY);
+this is a structured senior-designer heuristic critique on the real captured
+renders, consistent with the rest of this log.

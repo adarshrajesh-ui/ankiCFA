@@ -31,7 +31,7 @@ Legend: TODO / WIP / DONE (evidence path) / BLOCKED (root cause).
 | Pass | Desktop | Mobile | Log |
 |------|---------|--------|-----|
 | 1 (critical) | DONE (CFA web 5 MAJOR + 4 MINOR fixed; Qt chrome → Pass 2) | DONE (all 7 MAJORs fixed) | `UI-CRITIQUE-LOG.md` Pass 1 |
-| 2 (harsher) | WIP (Qt chrome: D7 Connect/Logout — named must-fix — FIXED; D9 populated render; D3 Deadline) | WIP (M6-1 DeckPicker stock-blue leak FIXED) | `UI-CRITIQUE-LOG.md` Pass 2 |
+| 2 (harsher) | WIP (D7 Connect/Logout — named must-fix — FIXED; D9 populated render; D3 Deadline; D4 Ethics reviewer gold-phrase ladder FIXED) | WIP (M6-1 DeckPicker stock-blue leak FIXED) | `UI-CRITIQUE-LOG.md` Pass 2 |
 | 3 (ruthless) | TODO | TODO | |
 
 Phase B kicked off (iter 25). `proof/friday/UI-INVENTORY.md` (every desktop +
@@ -157,6 +157,25 @@ mobile screen/state) and `proof/friday/UI-CRITIQUE-LOG.md` created.
   (2 e2e, asserts zero warn rows + "New" + hint on the fresh deck). Before/after
   `desktop-ui/pass-2-before/03,04` + `pass-2/03,04`. Green: `check:vitest` 62/62,
   eslint/svelte/tsc, `ruff` on `mediasrv.py`.
+
+**Pass 2 desktop — ETHICS reviewer captured + fixed (iter 35).**
+- **D4 Ethics minimal-pairs reviewer** (`cfa/ethics_pairs/templates/front.html` +
+  `style.css`) — the product's **flagship CFA learning card**, and a real
+  inventory gap: never captured/critiqued in any Phase-B pass. Captured all three
+  states (fresh / partial / fully-correct) via `tools/cfa/render_pairs_attempt.py`
+  (a genuine end-to-end attempt driven by the REAL shared front-template JS
+  grader, screenshot with `chrome-devtools-axi`). Fixed **D4-1 (MAJOR)**: on the
+  graded reveal the gold answer-key phrase outlined **every** word-token with a
+  full four-sided box, so a multi-word decisive phrase rendered as a **ladder of
+  disconnected green word-boxes** (interior vertical dividers per word). Fix
+  composes the outline from four inset **edge** rules and **opens the interior
+  edges between contiguous gold tokens** (`.cfa-tok.gold + .cfa-tok.gold` /
+  `:has(+ .cfa-tok.gold)`) so a phrase reads as ONE continuous outlined span while
+  a lone token stays a rounded pill; night-mode mirrored. CSS-only (the
+  byte-mirrored shared JS grader is untouched). New `test_gold_outline_css.py`
+  (5 tests) + full ethics suite **121 passed, 3 skipped** (`test_highlight.py`
+  byte-mirror green). Before/after `desktop-ui/pass-2-before/d4-ethics-*` →
+  `pass-2/d4-ethics-*` (+ `d4-ethics-reviewer.txt`).
 
 **Pass 2 mobile — started (iter 34): DeckPicker stock-blue leak (M6-1).**
 - After the Pass-1 shell refactor branded the shell navy, the harsher Pass-2

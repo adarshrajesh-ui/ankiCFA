@@ -283,9 +283,32 @@ rows + the calm "New" cells + the hint. Full `check:vitest` 62/62,
 `check:eslint`/svelte/typescript green; `ruff check`/`format` clean on
 `mediasrv.py`.
 
+### D4 — Ethics minimal-pairs reviewer (the flagship CFA card)
+Captures (real template + `style.css`, a genuine end-to-end attempt driven by the
+REAL shared front-template JS grader, screenshot via `chrome-devtools-axi`):
+- `desktop-ui/pass-2-before/d4-ethics-{blank,partial,perfect}.png` + `…-perfect-zoom.png`
+- `desktop-ui/pass-2/d4-ethics-{blank,partial,perfect}.png` + `…-perfect-zoom.png`
+- Evidence: `desktop-ui/pass-2/d4-ethics-reviewer.txt`
+
+This surface — `cfa/ethics_pairs/templates/front.html` — had **never been
+captured or critiqued** in any Phase-B pass (a real inventory gap, D4). It is the
+product's flagship learning card. Captured all three states and critiqued:
+
+| # | Severity | Element | Issue | Fix |
+|---|----------|---------|-------|-----|
+| D4-1 | MAJOR | gold answer-key phrase (graded reveal) | The true decisive phrase is highlighted with the brand-green "gold" outline, but each word is a separate `.cfa-tok` span and the old CSS drew a **full four-sided `box-shadow` inset on EVERY token** (`.cfa-tok.gold { box-shadow: 0 0 0 2px var(--cfa-brand-green) inset }`). So a multi-word decisive phrase — "exact unreleased quarterly earnings figure" (5 words) + "sells the company out of her clients' portfolios." (8 words) — rendered as a **ladder of 13 disconnected green boxes** with an interior vertical divider between every word (see `pass-2-before/d4-ethics-perfect-zoom.png`). It fragments the visual meaning of "phrase," reads as a rendering bug, and is clearly sub-premium on the flagship card — the same "presentation fights the meaning" family as D1-2/D2-2. | **FIXED (iter 35)** — composed the outline from four inset **edge** rules and **open the interior edges between contiguous gold tokens** so a run reads as ONE outlined span, while a lone gold token stays a full rounded pill: `.cfa-tok.gold` (all four edges) → `.cfa-tok.gold + .cfa-tok.gold` (prev gold: open left) → `.cfa-tok.gold:has(+ .cfa-tok.gold)` (next gold: open right) → `.cfa-tok.gold + .cfa-tok.gold:has(+ .cfa-tok.gold)` (interior: top+bottom only), night-mode mirrored. Both phrases now render as continuous outlined spans with caps only at the true run start/end (`pass-2/d4-ethics-perfect-zoom.png`); generalizes across the pick tiers (verified in `pass-2/d4-ethics-partial.png`) and carries to the one-passage card (shared CSS). |
+| D4-2 | — | pre-attempt / partial / standard reveal | The fresh state (cluster over-line, serif question, two co-presented vignettes, verdict buttons, highlight step + CTA), the partial-credit grade band ("Partial credit — you matched some evidence…"), the per-span ✓/✗ breakdown, the GOVERNING STANDARD reveal + rationale all render cleanly and honestly. No defect. | No change needed (documented for completeness). |
+
+**Verification:** `cfa/ethics_pairs/tests/test_gold_outline_css.py` (5 stdlib
+tests) locks the continuous-run selectors and asserts the old per-token full box
+is gone. Full ethics suite `pytest cfa/ethics_pairs/tests -q` → **121 passed,
+3 skipped** — the byte-mirrored shared JS grader (`test_highlight.py`,
+Python↔JS grade agreement) is untouched (the fix is `style.css`-only, not the
+`CFA-SPAN-SHARED` JS block).
+
 ### Still-TODO (desktop Pass 2/3)
-- Remaining Qt-chrome surfaces: D4 Ethics reviewer, D6 AI Settings dialog,
-  D8 deck browser, D11 window chrome — capture + critique.
+- Remaining Qt-chrome surfaces: D6 AI Settings dialog, D8 deck browser,
+  D11 window chrome — capture + critique.
 
 ## Pass 2 — MOBILE (harsher): stock-blue leaks through the navy shell
 
