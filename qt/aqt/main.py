@@ -85,6 +85,7 @@ install_pylib_legacy()
 MainWindowState = Literal[
     "startup",
     "cfaHome",
+    "cfaConceptMap",
     "deckBrowser",
     "overview",
     "review",
@@ -246,6 +247,7 @@ class AnkiQt(QMainWindow):
         self.setup_focus()
         # screens
         self.setupCfaHome()
+        self.setupCfaConceptMap()
         self.setupDeckBrowser()
         self.setupOverview()
         self.setupReviewer()
@@ -792,6 +794,15 @@ class AnkiQt(QMainWindow):
             traceback.print_exc()
             self.moveToState("deckBrowser")
 
+    def _cfaConceptMapState(self, oldState: MainWindowState) -> None:
+        # CFA fork: the radial mastery map (defensive — a failure must not
+        # blank-screen; fall back to the CFA Home dashboard).
+        try:
+            self.cfaConceptMap.show()
+        except Exception:
+            traceback.print_exc()
+            self.moveToState("cfaHome")
+
     def _deckBrowserState(self, oldState: MainWindowState) -> None:
         self.deckBrowser.show()
 
@@ -1087,6 +1098,11 @@ title="{}" {}>{}</button>""".format(
         from aqt.cfa_home import CfaHome
 
         self.cfaHome = CfaHome(self)
+
+    def setupCfaConceptMap(self) -> None:
+        from aqt.cfa_concept_map import CfaConceptMap
+
+        self.cfaConceptMap = CfaConceptMap(self)
 
     def setupDeckBrowser(self) -> None:
         from aqt.deckbrowser import DeckBrowser

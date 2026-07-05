@@ -125,6 +125,11 @@ cfa-scores-test:
     {{ ninja }} pylib
     PYTHONPATH="out/pylib:pylib" {{ py }} -m pytest pylib/tests/test_cfa_scores.py -q
 
+# Concept Map tab: the pure radial-map engine (size = exam weight, fill = mastery
+# light-gray -> turquoise, honest give-up rule, templated AI-off explanations).
+cfa-conceptmap-test:
+    {{ yarn }} vitest:once lib/cfa/pages/conceptmap
+
 # A10: crash + offline robustness — kill mid-review ~20x -> zero corruption
 # (backend integrity check), plus offline + AI-off still returns a score.
 cfa-crash-test:

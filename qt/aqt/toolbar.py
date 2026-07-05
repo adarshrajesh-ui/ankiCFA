@@ -370,6 +370,13 @@ class Toolbar:
                 id="cfa_ethics",
             ),
             self.create_link(
+                "cfa_concept_map",
+                "Concept Map",
+                self._cfaConceptMapLinkHandler,
+                tip="Concept Map — your radial mastery map",
+                id="cfa_concept_map",
+            ),
+            self.create_link(
                 "cfa_readiness",
                 "Readiness",
                 self._cfaReadinessLinkHandler,
@@ -448,6 +455,9 @@ class Toolbar:
     # CFA fork: top-bar CTA handlers (delegate to the existing CFA entry points).
     def _cfaHomeLinkHandler(self) -> None:
         self.mw.moveToState("cfaHome")
+
+    def _cfaConceptMapLinkHandler(self) -> None:
+        self.mw.moveToState("cfaConceptMap")
 
     def _cfaStudyLinkHandler(self) -> None:
         import aqt.cfa
