@@ -50,7 +50,7 @@ sizes). Renders inline when `inline` is set.
             color: cfa.$cfa-muted;
         }
         &.tone-faint {
-            color: cfa.$cfa-faint;
+            color: cfa.$cfa-faint-ink;
         }
     }
 </style>

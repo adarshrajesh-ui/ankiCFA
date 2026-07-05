@@ -176,7 +176,7 @@ pass/fail/warn semantic triad preserved.
             margin-top: cfa.space(1);
             font-size: cfa.$cfa-fs-meta;
             line-height: cfa.$cfa-lh-snug;
-            color: cfa.$cfa-faint;
+            color: cfa.$cfa-faint-ink;
         }
 
         // CTA grid — the flagship primary drill spans the full width as a
@@ -291,7 +291,7 @@ pass/fail/warn semantic triad preserved.
 
                 &::before {
                     content: "▸ ";
-                    color: cfa.$cfa-faint;
+                    color: cfa.$cfa-faint-ink;
                 }
 
                 &:hover {

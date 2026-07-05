@@ -235,7 +235,7 @@ the pass/fail/warn semantic triad preserved throughout.
             margin-top: cfa.space(1);
             font-size: cfa.$cfa-fs-meta;
             line-height: cfa.$cfa-lh-snug;
-            color: cfa.$cfa-faint;
+            color: cfa.$cfa-faint-ink;
         }
 
         // A single calm hint above the coverage table when no topic has recall
@@ -257,7 +257,7 @@ the pass/fail/warn semantic triad preserved throughout.
             }
 
             &.is-faint {
-                color: cfa.$cfa-faint;
+                color: cfa.$cfa-faint-ink;
             }
         }
     }

@@ -1,0 +1,75 @@
+Phase B — Pass 3 (ruthless) — DESKTOP
+D-P3-1 (MAJOR, accessibility): WCAG AA contrast audit of the CFA web tokens
+======================================================================
+
+METHOD
+------
+A scientific WCAG 2.1 relative-luminance contrast audit of every colour token
+in ts/lib/cfa/_tokens.scss that colours READABLE TEXT, computed against the
+three light backgrounds a CFA text token can sit on (bg #ffffff, page #fafbfd,
+surface #f3f6f8). AA thresholds: >=4.5:1 body text, >=3:1 large text (>=18px /
+>=14px bold).
+
+FINDING (the defect)
+--------------------
+$cfa-faint (#939597) — documented "captions / disabled" — was colouring real
+readable text (score meanings, StatCard sub-lines / abstain value, Caption
+tone-faint, Hero sub, per-topic "no data" recall cell) and FAILS AA:
+
+  faint #939597  on white   3.01:1   (< 4.5 AA body)
+                 on page    2.90:1   (< 3.0 — fails even large-text floor)
+                 on surface 2.77:1   (< 3.0 — fails even large-text floor)
+
+FIX (parity-safe; iter-26 pattern — reassign which token a usage points at,
+do NOT change a parity-gated token's value)
+-----------------------------------------------------------------------------
+- $cfa-faint (#939597) is now DECORATIVE-ONLY (scrollbar thumb, Notice
+  border-left, disabled-button bg on desktop). Its parity-gated VALUE is
+  unchanged, so cfa_style.py / the ethics :root stay byte-identical.
+- New web-only token $cfa-faint-ink (#68707d), navy-tinted, AA-safe tertiary
+  TEXT grey — clears AA body on ALL three backgrounds and stays lighter than
+  $cfa-muted so the ink > muted > faint-ink type hierarchy is preserved:
+
+  faint-ink #68707d on white   5.00:1   AA
+                    on page    4.83:1   AA
+                    on surface 4.60:1   AA
+
+  Full readable-text ramp (all AA body):
+    ink  #122b46  14.39 / 13.89 / 13.26
+    muted #4d5c6d  6.85 /  6.61 /  6.31
+    faint-ink #68707d 5.00 / 4.83 / 4.60
+
+- Repointed 8 text usages faint -> faint-ink: Caption.tone-faint,
+  StatCard.tone-muted (abstain value) + StatCard.__sub, Hero.__sub,
+  CfaHomePage.__stat-meaning + the disclosure ::before marker,
+  CfaReadinessPage.__stat-meaning + .is-faint recall cell.
+
+VERIFICATION
+------------
+- ts/lib/cfa/contrast.test.ts (16 vitest tests, GREEN): parses the hexes out of
+  _tokens.scss and asserts every text token clears AA on every background, the
+  faint-ink AA fix, the ink>muted>faint-ink hierarchy, the semantic triad + the
+  mm-green role, DOCUMENTS why faint fails AA, and a REGRESSION GUARD that scans
+  the 8 components and fails if `color: cfa.$cfa-faint` (text) ever returns.
+- Full CFA vitest: 28/28 green (contrast 16 + deadline 7 + readiness 5).
+- ./ninja check:svelte check:typescript check:eslint — all GREEN (0 errors,
+  0 warnings), scss compiles.
+- Populated e2e capture (real backend, CFA_SEED_REVIEWS) regenerated the Home +
+  Readiness screenshots; both e2e specs still 2/2 green.
+
+EVIDENCE (before = faint #939597 text, after = faint-ink #68707d text)
+----------------------------------------------------------------------
+- desktop-ui/pass-3-before/01-cfa-home-populated.png     (before)
+- desktop-ui/pass-3-before/02-cfa-readiness-populated.png(before)
+- desktop-ui/pass-3/01-cfa-home-populated.png            (after)
+- desktop-ui/pass-3/02-cfa-readiness-populated.png       (after)
+- desktop-ui/pass-3/03-contrast-audit-proof.png          (side-by-side swatch +
+  the computed ratio table: faint FAIL -> faint-ink AA)
+
+HONESTY
+-------
+The captured before/after were produced from the SAME populated seed via
+git-stash of only the six source files (stash -> rebuild -> capture before ->
+pop -> rebuild), so the pair differs ONLY by this fix. The contrast numbers are
+computed (not asserted by eye). The at-full-page delta is subtle by design
+(both are quiet greys); the proof card makes the FAIL->PASS unambiguous. No AI.

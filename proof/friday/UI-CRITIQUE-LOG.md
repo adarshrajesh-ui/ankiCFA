@@ -473,4 +473,35 @@ Pass-2 MAJORs fixed → Phase B Pass 2 mobile COMPLETE.**
   M4-2 sparse Exam-Config density — *resolved (iter 41)*; M3-5 per-topic
   8→10 topic parity when the AAR is rebuilt from the 10-topic branch.
 
-## Pass 3 (ruthless, pixel-level) — TODO (both apps)
+## Pass 3 — DESKTOP (ruthless, pixel-level): accessibility / contrast
+
+Pass 1 fixed the loud hierarchy/colour defects; Pass 2 captured & fixed every
+remaining surface (D1–D11). The ruthless Pass-3 lens goes below the eye to the
+*measured* rendering quality a premium product owes every user — starting with a
+**scientific WCAG 2.1 AA contrast audit** of the shared design tokens (not a
+by-eye critique: contrast ratios are computed from the actual hex values).
+
+Captures (before = decorative `$cfa-faint` #939597 colouring text; after = the
+new AA-safe `$cfa-faint-ink` #68707d), same populated seed, differ ONLY by this
+fix (stash→rebuild→capture before→pop→rebuild):
+- `desktop-ui/pass-3-before/01-cfa-home-populated.png`, `02-cfa-readiness-populated.png`
+- `desktop-ui/pass-3/01-cfa-home-populated.png`, `02-cfa-readiness-populated.png`,
+  `03-contrast-audit-proof.png` (side-by-side swatch + computed ratio table),
+  `contrast-audit.txt`
+
+### D-P3-1 — Tertiary text fails WCAG AA (the audit finding)
+| # | Severity | Element | Issue | Fix |
+|---|----------|---------|-------|-----|
+| D-P3-1 | MAJOR (accessibility) | every faint caption / meaning / sub-line | The design token `$cfa-faint` (#939597), documented "captions / disabled", was colouring **readable text** across the product (StatCard sub-lines + the "Awaiting reviews" abstain value, the score-meaning lines on Home & Readiness, `Caption tone="faint"`, the Hero sub, the per-topic "no data" recall cell). Measured contrast: **3.01:1 on white** (< the 4.5:1 AA-body bar) and **2.90 / 2.77 on the page / surface tints — below even the 3:1 large-text floor**. On a premium exam-prep product, the honest secondary information (what each score means, the midpoint, the give-up reason) was the hardest thing on the page to read. | **FIXED (iter 43)** — parity-safe (iter-26 pattern: reassign *which* token a usage points at, never change a parity-gated value). `$cfa-faint` (#939597) is now **decorative-only** (scrollbar thumb, Notice rule, desktop disabled-button bg) with its parity-gated value untouched (cfa_style.py stays byte-identical — desktop uses faint as a bg, never text). A new web-only **`$cfa-faint-ink` (#68707d)** navy-tinted AA-safe tertiary-**text** token clears AA body on **all three** backgrounds (5.00 / 4.83 / 4.60) while staying lighter than `$cfa-muted` (6.85) so the `ink > muted > faint-ink` type hierarchy is preserved. Repointed 8 text usages. |
+
+**Verification:** `ts/lib/cfa/contrast.test.ts` (**16 vitest tests, green**) — a
+self-contained audit that parses the hexes out of `_tokens.scss`, asserts every
+text token clears AA on every background, the faint-ink fix, the hierarchy, the
+semantic triad + mm-green role, DOCUMENTS why faint fails AA, and a **regression
+guard** that scans the 8 components and fails if `color: cfa.$cfa-faint` (text)
+ever returns. Full CFA vitest **28/28**; `./ninja check:svelte check:typescript
+check:eslint` all green; the two populated e2e specs still 2/2. **Honesty:** the
+GPT-4o vision critic is still unavailable (no `OPENAI_API_KEY`); the ratios are
+*computed*, which is stronger than a vision opinion for this class of defect.
+
+## Pass 3 — MOBILE (ruthless, pixel-level) — TODO

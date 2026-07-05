@@ -109,7 +109,7 @@ a hairline border + a thin semantic left spine (NOT a saturated alert ring).
             font-family: cfa.$cfa-font-body;
             font-size: cfa.$cfa-fs-lead;
             font-weight: cfa.$cfa-weight-regular;
-            color: cfa.$cfa-faint;
+            color: cfa.$cfa-faint-ink;
         }
 
         &__lead {

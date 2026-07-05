@@ -32,7 +32,7 @@ Legend: TODO / WIP / DONE (evidence path) / BLOCKED (root cause).
 |------|---------|--------|-----|
 | 1 (critical) | DONE (CFA web 5 MAJOR + 4 MINOR fixed; Qt chrome → Pass 2) | DONE (all 7 MAJORs fixed) | `UI-CRITIQUE-LOG.md` Pass 1 |
 | 2 (harsher) | DONE (D7 Connect/Logout — named must-fix — FIXED; D9 populated render; D3 Deadline; D4 Ethics reviewer gold-phrase ladder FIXED; D6 AI Settings dialog redesigned FIXED; D8 deck-browser stock-blue leak FIXED; D11 CFA menu grouped into labelled sections FIXED — every D1–D11 surface captured+critiqued) | DONE (M6-1 DeckPicker stock-blue leak FIXED; M7-1 Readiness abstain triple-repeat FIXED; M4-2 Exam-Config context line + live countdown FIXED; M8-1 Reviewer "Show answer" CTA stock-blue→navy FIXED — every mobile surface captured+critiqued) | `UI-CRITIQUE-LOG.md` Pass 2 |
-| 3 (ruthless) | TODO | TODO | |
+| 3 (ruthless) | WIP (D-P3-1 WCAG AA contrast audit — faint→faint-ink, 16-test guard, FIXED) | TODO | `UI-CRITIQUE-LOG.md` Pass 3 |
 
 Phase B kicked off (iter 25). `proof/friday/UI-INVENTORY.md` (every desktop +
 mobile screen/state) and `proof/friday/UI-CRITIQUE-LOG.md` created.
@@ -304,6 +304,27 @@ mobile screen/state) and `proof/friday/UI-CRITIQUE-LOG.md` created.
   **Every inventoried mobile surface captured+critiqued, all Pass-2 MAJORs fixed
   → Phase B Pass 2 mobile COMPLETE.** Remaining: the escalating **Pass 3
   (ruthless)** for BOTH apps.
+
+**Pass 3 desktop — started (iter 43): scientific WCAG AA contrast audit.**
+- **D-P3-1 (MAJOR, accessibility) FIXED** — the ruthless pass opened with a
+  *measured* WCAG 2.1 contrast audit of the CFA web tokens (ratios computed from
+  the real hex values, not a by-eye critique). Finding: `$cfa-faint` (#939597),
+  documented "captions / disabled", was colouring **readable text** everywhere
+  (StatCard subs + "Awaiting reviews" value, Home/Readiness score-meaning lines,
+  `Caption tone="faint"`, Hero sub, per-topic "no data" cell) yet fails AA —
+  **3.01:1 on white, 2.90 / 2.77 on the page / surface tints (below even the 3:1
+  large-text floor)**. Parity-safe fix (iter-26 pattern): demote `$cfa-faint` to
+  decorative-only (value untouched → `cfa_style.py` stays byte-identical; desktop
+  uses it as a bg, not text) and add a new web-only AA-safe tertiary-**text**
+  token **`$cfa-faint-ink` (#68707d)** — AA body on all three backgrounds
+  (5.00 / 4.83 / 4.60), lighter than `$cfa-muted` so the `ink > muted >
+  faint-ink` hierarchy holds. Repointed 8 text usages. New
+  `ts/lib/cfa/contrast.test.ts` (**16 vitest, green**) parses the tokens and
+  asserts AA + a regression guard that fails if `color: cfa.$cfa-faint` (text)
+  ever returns. Full CFA vitest **28/28**; `check:svelte`/`typescript`/`eslint`
+  green; both populated e2e specs 2/2. Before/after +
+  `03-contrast-audit-proof.png` under `desktop-ui/pass-3{,-before}/` +
+  `contrast-audit.txt`.
 
 Named must-fix: desktop Readiness renders with data (**functional gate DONE** +
 **populated real-range render DONE, iter 32**); **Connect/Logout redesigned

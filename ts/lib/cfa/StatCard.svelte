@@ -95,7 +95,7 @@ variant separated by whitespace only (like the real stats band).
             // out-shouts the real numbers, the countdown, or the CTAs. Reserve
             // warn-orange for genuine warnings, never for missing data.
             &.tone-muted {
-                color: cfa.$cfa-faint;
+                color: cfa.$cfa-faint-ink;
                 font-size: cfa.$cfa-fs-subtitle;
             }
         }
@@ -112,7 +112,7 @@ variant separated by whitespace only (like the real stats band).
             font-family: cfa.$cfa-font-body;
             font-size: cfa.$cfa-fs-meta;
             line-height: cfa.$cfa-lh-snug;
-            color: cfa.$cfa-faint;
+            color: cfa.$cfa-faint-ink;
         }
     }
 </style>

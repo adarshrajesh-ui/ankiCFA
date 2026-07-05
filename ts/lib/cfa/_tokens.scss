@@ -32,7 +32,15 @@
 // Neutrals — text, borders, quiet surfaces (sourced from the BuddyBoss brand).
 $cfa-ink: #122b46; // [PARITY] primary text / brand navy (--bb-headings-color)
 $cfa-muted: #4d5c6d; // [PARITY] secondary text (--bb-body-text-color)
-$cfa-faint: #939597; // [PARITY] captions / disabled (--bb-alternate-text-color)
+$cfa-faint: #939597; // [PARITY] DECORATIVE ONLY (disabled bg / scrollbar / rules)
+// AA-safe tertiary TEXT grey (Pass 3 contrast audit). `$cfa-faint` (#939597) is
+// only 3.01:1 on white and FAILS even the 3:1 large-text floor on the page /
+// surface tints (2.90 / 2.77), so it must never colour readable text. This
+// navy-tinted grey clears WCAG AA body (>=4.5:1) on white/page/surface (5.00 /
+// 4.83 / 4.60) while staying lighter than `$cfa-muted` (6.85:1) — a clean
+// AA-compliant text ramp ink > muted > faint-ink. Web-only (not parity-gated;
+// desktop uses `faint` as a disabled-button bg, never as text).
+$cfa-faint-ink: #68707d;
 $cfa-line: #e7e9ec; // [PARITY] hairline borders (--bb-content-border-color)
 $cfa-surface: #f3f6f8; // [PARITY] panels / table stripes (cool section band)
 $cfa-bg: #ffffff; // [PARITY] card / content background
@@ -68,6 +76,7 @@ $cfa-colors: (
     "ink": $cfa-ink,
     "muted": $cfa-muted,
     "faint": $cfa-faint,
+    "faint-ink": $cfa-faint-ink,
     "line": $cfa-line,
     "surface": $cfa-surface,
     "bg": $cfa-bg,
