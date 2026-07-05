@@ -76,12 +76,12 @@ def test_old_silent_off_state_is_gone():
 
 
 def test_mobile_fetch_failure_is_reported_not_swallowed():
-    """front.html's Android proxy path no longer swallows a failed fetch —
-    it renders an honest 'AI failed' provenance instead of a bare catch."""
-    front = _read(FRONT)
-    assert "proxy_unreachable" in front
-    # the empty ``.catch(function () {});`` swallow is gone
-    assert ".catch(function () {});" not in front
+    """Android proxy failures render honest 'AI failed' provenance."""
+    for path in _GRADING_TEMPLATES:
+        src = _read(path)
+        assert "proxy_unreachable" in src, path
+        # the empty ``.catch(function () {});`` swallow is gone
+        assert ".catch(function () {});" not in src, path
 
 
 def test_mobile_grade_honours_the_synced_ai_toggle():
@@ -90,16 +90,30 @@ def test_mobile_grade_honours_the_synced_ai_toggle():
     like the desktop pycmd bridge (error="ai_off"). AnkiDroid injects
     ``window.CFA_AI_GRADING_ENABLED`` from col.conf; an explicit ``false`` skips
     the fetch. (undefined => on, so older builds keep working.)"""
-    front = _read(FRONT)
-    # the toggle gate exists, guards the Android fetch, and is checked strictly
-    assert "window.CFA_AI_GRADING_ENABLED === false" in front
-    # when off it renders the deterministic (ai_off) state, not a proxy call
-    assert 'renderAiGrade({ source: "fallback", error: "ai_off" });' in front
-    # the gate sits INSIDE the android branch, BEFORE the proxy fetch
-    android_at = front.index('/android/i.test')
-    gate_at = front.index("window.CFA_AI_GRADING_ENABLED === false")
-    fetch_at = front.index("http://10.0.2.2:27702/cfa/grade")
-    assert android_at < gate_at < fetch_at
+    for path in _GRADING_TEMPLATES:
+        src = _read(path)
+        # the toggle gate exists, guards the Android fetch, and is checked strictly
+        assert "window.CFA_AI_GRADING_ENABLED === false" in src, path
+        # when off it renders the deterministic (ai_off) state, not a proxy call
+        assert 'renderAiGrade({ source: "fallback", error: "ai_off" });' in src, path
+        # the gate sits INSIDE the android branch, BEFORE the proxy fetch
+        android_at = src.index('/android/i.test')
+        gate_at = src.index("window.CFA_AI_GRADING_ENABLED === false")
+        fetch_at = src.index('fetch(proxyUrl + "/cfa/grade"')
+        assert android_at < gate_at < fetch_at
+
+
+def test_mobile_grade_uses_injected_proxy_config_without_pycmd_gate():
+    """Android grading must use configured proxy URL/token before pycmd guard."""
+    for path in _GRADING_TEMPLATES:
+        src = _read(path)
+        android_at = src.index('/android/i.test')
+        fetch_at = src.index('fetch(proxyUrl + "/cfa/grade"')
+        pycmd_guard_at = src.index('if (typeof pycmd === "undefined") return;')
+        assert android_at < fetch_at < pycmd_guard_at
+        assert 'window.CFA_AI_PROXY_URL || "http://10.0.2.2:27702"' in src, path
+        assert 'window.CFA_AI_PROXY_TOKEN || "cfa-ai-proxy"' in src, path
+        assert '"Authorization": "Bearer " + proxyToken' in src, path
 
 
 def test_css_has_distinct_off_and_warn_provenance_styles():

@@ -44,6 +44,16 @@ from cfa.ai import llm_client  # noqa: E402
 DEFAULT_TOKEN = "cfa-ai-proxy"
 DEFAULT_PORT = 27702
 
+
+def cors_headers() -> dict[str, str]:
+    """Allow AnkiDroid's reviewer WebView to POST with Authorization."""
+    return {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+        "Access-Control-Allow-Headers": "Authorization, Content-Type",
+    }
+
+
 def _token() -> str:
     return os.environ.get("CFA_AI_PROXY_TOKEN", DEFAULT_TOKEN)
 
@@ -132,6 +142,8 @@ class Handler(BaseHTTPRequestHandler):
         body = json.dumps(obj).encode("utf-8")
         self.send_response(code)
         self.send_header("Content-Type", "application/json")
+        for name, value in cors_headers().items():
+            self.send_header(name, value)
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)
@@ -139,6 +151,13 @@ class Handler(BaseHTTPRequestHandler):
     # Never log request lines/bodies/headers — key/PII hygiene.
     def log_message(self, *args: Any) -> None:  # noqa: D401
         return
+
+    def do_OPTIONS(self) -> None:
+        self.send_response(204)
+        for name, value in cors_headers().items():
+            self.send_header(name, value)
+        self.send_header("Content-Length", "0")
+        self.end_headers()
 
     def do_GET(self) -> None:
         if self.path.rstrip("/") == "/cfa/health":

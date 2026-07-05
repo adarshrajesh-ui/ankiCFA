@@ -161,8 +161,9 @@ def test_provenance_defaults_are_empty_strings_not_missing():
     assert res["item_id"] == "" and res["standard"] == ""
 
 
-def test_standard_never_leaks_into_prompt_but_flows_to_result():
-    # The provenance Standard is result-only metadata; it must NOT be injected into the LLM prompt.
+def test_standard_is_supplied_to_prompt_and_flows_to_result():
+    # The governing Standard is not secret; supplying it lets the AI cite the
+    # authored Standard reliably instead of guessing from the vignette alone.
     oracle = _oracle_client(json.dumps({"highlight_grade": "correct", "spans": []}))
     res = A.grade_semantic(
         PASSAGE,
@@ -175,7 +176,8 @@ def test_standard_never_leaks_into_prompt_but_flows_to_result():
         standard="II(A) Material Nonpublic Information",
     )
     blob = oracle.last["system"] + "\n" + oracle.last["user"]
-    assert "II(A) Material Nonpublic Information" not in blob
+    assert "GOVERNING STANDARD SUPPLIED BY CARD" in blob
+    assert "II(A) Material Nonpublic Information" in blob
     assert res["standard"] == "II(A) Material Nonpublic Information"
 
 
@@ -322,6 +324,8 @@ def test_prompt_includes_evidence_and_never_the_key():
     assert GOLD[0]["phrase"] in sent["user"]
     assert "sells the company" in sent["user"]  # the learner's span
     assert sent["purpose"] == "grade_ethics_highlight"
+    assert sent["temperature"] == 0.25
+    assert sent["max_tokens"] == 650
 
 
 # ------------------------------------------------------------------- eval harness
