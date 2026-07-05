@@ -48,7 +48,16 @@ build({
     globalName: "anki",
     outfile: bundle_js,
     minify: env.RELEASE && true,
-    loader: { ".svg": "text" },
+    loader: {
+        ".svg": "text",
+        // Legacy esbuild pages (congrats/editor/…) now import the CFA theme,
+        // which @font-face-loads brand woff2s. Vite bundles these for the
+        // SvelteKit pages; here we inline them so the self-contained web-view
+        // bundles carry their fonts without a separate serving path.
+        ".woff2": "dataurl",
+        ".woff": "dataurl",
+        ".ttf": "dataurl",
+    },
     preserveSymlinks: true,
     sourcemap: sourcemap ? "inline" : false,
     plugins: [
