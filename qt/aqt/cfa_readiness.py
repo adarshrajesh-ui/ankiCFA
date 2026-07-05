@@ -54,24 +54,46 @@ class CfaReadiness:
     ##########################################################################
 
     def _link_handler(self, url: str) -> bool:
-        # The readiness report is self-contained, but any CTA it grows delegates
-        # to the existing CFA entry points so this screen adds no new
-        # study/scoring logic of its own.
-        import aqt.cfa as cfa
+        # The frozen Readiness console has several CTAs, but they all delegate to
+        # existing CFA entry points so this screen adds no new study/scoring
+        # logic of its own.
+        from aqt import cfa
 
         mw = self.mw
-        if url == "cfa:priority":
+        if url in {
+            "cfa:priority",
+            "cfa:risk-session",
+            "cfa:readiness-drill",
+            "cfa:plan",
+        }:
             cfa.study_by_exam_priority(mw)
         elif url == "cfa:ethics":
             cfa.study_ethics_pairs(mw)
-        elif url == "cfa:deadline":
+        elif url in {
+            "cfa:deadline",
+            "cfa:mock-review",
+            "cfa:retention-queue",
+            "cfa:mock-schedule",
+        }:
             cfa.show_deadline(mw)
+        elif url == "cfa:study":
+            mw.moveToState("cfaStudy")
+        elif url == "cfa:readiness":
+            mw.moveToState("cfaReadiness")
         elif url == "cfa:conceptmap":
             mw.moveToState("cfaConceptMap")
         elif url == "cfa:home":
             mw.moveToState("cfaHome")
         elif url == "cfa:decks":
             mw.moveToState("deckBrowser")
+        elif url == "cfa:sync":
+            from aqt.cfa_home import trigger_cfa_sync
+
+            trigger_cfa_sync(mw)
+        elif url == "cfa:sync-settings":
+            from aqt.cfa_home import open_sync_settings
+
+            open_sync_settings(mw)
         elif url.lower().startswith("http"):
             openLink(url)
         return False

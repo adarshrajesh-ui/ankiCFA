@@ -1,0 +1,18 @@
+Freeze bundle: Readiness - Exam Risk Console
+Timestamp: 2026-07-05 17:35:33
+Source artifact: .lavish/readiness-screen.html
+Frozen source: .lavish/perfect features/Readiness - Exam Risk Console/source.html
+
+Generated artifacts:
+- .lavish/perfect features/Readiness - Exam Risk Console/source.html
+- .lavish/perfect features/Readiness - Exam Risk Console/desktop.png
+- .lavish/perfect features/Readiness - Exam Risk Console/mobile.png
+- .lavish/perfect features/Readiness - Exam Risk Console/packet.html
+- .lavish/perfect features/Readiness - Exam Risk Console/feature.pdf
+- .lavish/perfect features/Readiness - Exam Risk Console/FEATURE.md
+- .lavish/perfect features/Readiness - Exam Risk Console/manifest.txt
+
+Caveats:
+- The first desktop screenshot command timed out after writing a non-zero screenshot; mobile screenshot and PDF generation completed with a bounded retry.
+- The source references Google-hosted fonts; captures reflect font availability at generation time.
+- This freeze preserves the approved source exactly and is a pixel-perfect production contract.

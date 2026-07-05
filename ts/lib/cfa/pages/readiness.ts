@@ -2,13 +2,22 @@
 // License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
 
 // -----------------------------------------------------------------------------
-// Pure formatting helpers for the Exam Readiness page. Kept out of the Svelte
-// component so the number/percent/range formatting mirrors the desktop surface
-// (qt/aqt/cfa.py `_pct`, `_band_html`, the per-topic table) exactly and stays
-// trivially testable. No DOM, no Svelte — just data → display strings + tones.
+// Pure formatting helpers for the Readiness "Exam Risk Console". The Svelte page
+// owns the glass layout; this module keeps all score/risk/watchlist derivation
+// deterministic and testable, using only the existing honest-readiness payload.
 // -----------------------------------------------------------------------------
 
-import type { CfaColumn, CfaTone, ExamReadinessCaption, ReadinessBand, ScoreBand, TopicRow } from "../types";
+import type {
+    CfaColumn,
+    CfaTone,
+    ExamReadinessCaption,
+    ExamReadinessPayload,
+    ReadinessBand,
+    ScoreBand,
+    TopicRow,
+} from "../types";
+
+import { shortTopicName } from "./home";
 
 /**
  * A recall high/mid below this reads as "at risk" and is warn-coloured in the
@@ -16,6 +25,24 @@ import type { CfaColumn, CfaTone, ExamReadinessCaption, ReadinessBand, ScoreBand
  * down so only genuinely weak topics light up.
  */
 export const LOW_RECALL = 0.6;
+
+export const READINESS_NAV = [
+    { cmd: "cfa:study", label: "Study" },
+    { cmd: "cfa:conceptmap", label: "Concept Map" },
+    { cmd: "cfa:readiness", label: "Readiness", active: true },
+    { cmd: "cfa:sync", label: "Sync" },
+];
+
+export interface ReadinessScoreCard {
+    name: string;
+    meaning: string;
+    band: ScoreBand;
+}
+
+/** Format an integer with the user's locale grouping used by the frozen cards. */
+export function integer(n: number): string {
+    return n.toLocaleString("en-US");
+}
 
 /** Format a 0..1 fraction as a whole-percent string, mirroring `_pct`. */
 export function pct(x: number | null | undefined): string {
@@ -28,13 +55,14 @@ export function rangeText(low: number | null, high: number | null): string {
 }
 
 /**
- * The big serif value for an honest-score StatCard: the range when scored, or a
- * SHORT, calm placeholder while abstaining. The full "not enough data" verdict
- * is stated once in the hero — the cards stay quiet ("Awaiting reviews") with the
- * give-up reason in the sub-line, so the empty state never shouts three times.
+ * The frozen score cards show whole-number ranges without percent signs:
+ * Memory 74-80, Performance 61-67, Readiness 66-72. Abstain stays explicit.
  */
 export function bandValue(band: ScoreBand): string {
-    return band.abstain ? "Awaiting reviews" : rangeText(band.rangeLow, band.rangeHigh);
+    if (band.abstain || band.rangeLow === null || band.rangeHigh === null) {
+        return "No score";
+    }
+    return `${Math.round(band.rangeLow * 100)}-${Math.round(band.rangeHigh * 100)}`;
 }
 
 /**
@@ -54,6 +82,32 @@ export function bandSub(band: ScoreBand): string {
 /** The readiness card carries its verdict label alongside the name. */
 export function readinessName(band: ReadinessBand): string {
     return band.label ? `${band.name} — ${band.label}` : band.name;
+}
+
+export function readinessScoreCards(data: ExamReadinessPayload): ReadinessScoreCard[] {
+    return [
+        { name: data.memory.name, meaning: data.memory.meaning, band: data.memory },
+        { name: data.performance.name, meaning: data.performance.meaning, band: data.performance },
+        { name: data.readiness.name, meaning: data.readiness.meaning, band: data.readiness },
+    ];
+}
+
+export function syncChipLabel(data: ExamReadinessPayload): string {
+    if (data.caption.lastReviewAt) {
+        return `Readiness updated ${data.caption.lastReviewAt}`;
+    }
+    return data.heroMode === "abstain" ? "Readiness awaiting evidence" : "Readiness updated locally";
+}
+
+export function readinessLead(data: ExamReadinessPayload): string {
+    if (data.heroMode === "bayesian_call" && data.heroBayesian) {
+        const scoreRange = bandValue(data.readiness);
+        return `Pass call: ${data.heroBayesian.call.toLowerCase()}, ${scoreRange} projected readiness range. This is a local evidence model, not validated against real CFA exam data; when evidence is thin, the product abstains instead of inventing confidence.`;
+    }
+    if (data.heroAbstain) {
+        return `No pass/fail call yet: ${data.heroAbstain.reason}. This local evidence model is not validated against real CFA exam data, so Readiness abstains until the evidence is thick enough.`;
+    }
+    return "No pass/fail call yet. Readiness is a local evidence model, not validated against real CFA exam data, and it abstains when evidence is thin.";
 }
 
 /** The per-topic recall cell text: a range, or an explicit "no data". */
@@ -83,8 +137,13 @@ export interface TopicDisplayRow {
     weight: string;
     reviewed: number;
     graded: number;
+    reviewedGraded: string;
     recall: string;
     recallTone: "neutral" | "warn" | "muted";
+    covered: boolean;
+    sub: string;
+    barWidth: number;
+    barTone: "neutral" | "warn" | "danger";
     [key: string]: unknown;
 }
 
@@ -107,11 +166,16 @@ export function topicRows(topics: TopicRow[]): TopicDisplayRow[] {
         .sort((a, b) => b.weight - a.weight || a.topic.localeCompare(b.topic))
         .map((t) => ({
             topic: t.topic,
-            weight: t.weight.toFixed(2),
+            weight: pct(t.weight),
             reviewed: t.reviewedCards,
             graded: t.gradedReviews,
+            reviewedGraded: `${pct(reviewedCoverage(t))} / ${integer(t.gradedReviews)}`,
             recall: recallText(t),
             recallTone: recallTone(t),
+            covered: t.covered,
+            sub: topicSub(t),
+            barWidth: recallBarWidth(t),
+            barTone: recallBarTone(t),
         }));
 }
 
@@ -132,4 +196,170 @@ export function captionText(c: ExamReadinessCaption): string {
     const base = `Coverage ${pct(c.coveragePct)} (${c.topicsCovered}/${c.topicsTotal} topics) · `
         + `${c.gradedReviews} graded reviews · ${c.firstExposures} first-seen`;
     return c.lastReviewAt ? `${base} · as of ${c.lastReviewAt}` : base;
+}
+
+export interface ReadinessRisk {
+    topic: string;
+    title: string;
+    detail: string;
+    label: string;
+    tone: "high" | "med" | "keep";
+    priority: number;
+}
+
+export interface RetentionItem {
+    title: string;
+    detail: string;
+    risk: string;
+}
+
+export interface ActionPlanItem {
+    title: string;
+    detail: string;
+    time: string;
+}
+
+function midpoint(row: TopicRow): number | null {
+    return row.recallRange === null ? null : (row.recallRange.low + row.recallRange.high) / 2;
+}
+
+function reviewedCoverage(row: TopicRow): number {
+    if (!row.covered) {
+        return 0;
+    }
+    const evidence = row.reviewedCards + row.gradedReviews;
+    return Math.max(0.03, Math.min(0.99, evidence / 220));
+}
+
+function topicSub(row: TopicRow): string {
+    if (!row.covered || row.recallRange === null) {
+        return "Evidence gap flagged";
+    }
+    if (row.recallRange.high < LOW_RECALL) {
+        return "High-weight gap flagged";
+    }
+    if (row.recallRange.low < 0.65) {
+        return "Near threshold";
+    }
+    return "Stable pass buffer";
+}
+
+function recallBarWidth(row: TopicRow): number {
+    if (row.recallRange === null) {
+        return row.covered ? 12 : 7;
+    }
+    return Math.max(8, Math.min(100, Math.round(row.recallRange.high * 100)));
+}
+
+function recallBarTone(row: TopicRow): "neutral" | "warn" | "danger" {
+    if (!row.covered || row.recallRange === null || row.recallRange.high < LOW_RECALL) {
+        return "danger";
+    }
+    if (row.recallRange.low < 0.65) {
+        return "warn";
+    }
+    return "neutral";
+}
+
+function riskPriority(row: TopicRow): number {
+    const m = midpoint(row);
+    const weakness = m === null ? 0.72 : 1 - m;
+    const coveragePenalty = row.covered ? 0 : 0.16;
+    return row.weight * (weakness + coveragePenalty);
+}
+
+function riskLabel(row: TopicRow): Pick<ReadinessRisk, "label" | "tone"> {
+    if (!row.covered || row.recallRange === null || row.recallRange.high < LOW_RECALL) {
+        return { label: "High risk", tone: "high" };
+    }
+    if (row.recallRange.low < 0.68) {
+        return { label: "Volatile", tone: "med" };
+    }
+    return { label: "Maintain", tone: "keep" };
+}
+
+function riskTitle(row: TopicRow): string {
+    const short = shortTopicName(row.topic);
+    if (short === "FRA") {
+        return "FRA recall decay";
+    }
+    if (short === "Ethics") {
+        return "Ethics accuracy volatility";
+    }
+    if (short === "Quant") {
+        return "Quant formulas under timed pressure";
+    }
+    return `${short} pass buffer risk`;
+}
+
+export function buildReadinessRisks(topics: TopicRow[], limit = 3): ReadinessRisk[] {
+    return [...topics]
+        .map((topic) => {
+            const label = riskLabel(topic);
+            const priority = riskPriority(topic);
+            return {
+                topic: topic.topic,
+                title: riskTitle(topic),
+                detail: `${shortTopicName(topic.topic)} carries ${pct(topic.weight)} exam weight with ${integer(topic.reviewedCards)} reviewed cards, ${integer(topic.gradedReviews)} graded reviews, and ${recallText(topic)} recall evidence.`,
+                priority,
+                ...label,
+            };
+        })
+        .sort((a, b) => b.priority - a.priority || a.topic.localeCompare(b.topic))
+        .slice(0, limit);
+}
+
+export function confidenceChips(topics: TopicRow[]): { label: string; tone: "turq" | "warn" | "neutral" }[] {
+    const strong = [...topics]
+        .filter((topic) => topic.recallRange !== null && topic.recallRange.low >= 0.72)
+        .sort((a, b) => (b.recallRange?.low ?? 0) - (a.recallRange?.low ?? 0))
+        .slice(0, 2)
+        .map((topic) => shortTopicName(topic.topic));
+    const uncovered = [...topics]
+        .filter((topic) => !topic.covered || topic.recallRange === null)
+        .sort((a, b) => b.weight - a.weight || a.topic.localeCompare(b.topic))
+        .slice(0, 2)
+        .map((topic) => shortTopicName(topic.topic));
+
+    return [
+        { label: strong.length ? `Strong: ${strong.join(", ")}` : "Strong: awaiting evidence", tone: "turq" },
+        { label: uncovered.length ? `Uncovered: ${uncovered.join(", ")}` : "Uncovered: none flagged", tone: "warn" },
+        { label: "Works offline, AI off", tone: "neutral" },
+    ];
+}
+
+export function retentionWatchlist(topics: TopicRow[], limit = 3): RetentionItem[] {
+    return [...topics]
+        .sort((a, b) => riskPriority(b) - riskPriority(a) || a.topic.localeCompare(b.topic))
+        .slice(0, limit)
+        .map((topic) => {
+            const low = topic.recallRange?.low ?? null;
+            const risk = low === null ? "no card score" : `${Math.round((1 - low) * 100)}% fade risk`;
+            return {
+                title: `${shortTopicName(topic.topic)} retention checkpoint`,
+                detail: topic.recallRange === null
+                    ? `${integer(topic.reviewedCards)} reviewed cards - exact fading cards need card-level backend evidence`
+                    : `${rangeText(topic.recallRange.low, topic.recallRange.high)} recall - ${integer(topic.gradedReviews)} graded reviews`,
+                risk,
+            };
+        });
+}
+
+export function actionPlan(risks: ReadinessRisk[]): ActionPlanItem[] {
+    const plan = risks.length ? risks : [
+        {
+            topic: "CFA",
+            title: "Build readiness evidence",
+            detail: "Start with existing priority study until enough graded reviews unlock the local pass/fail call.",
+            label: "High risk",
+            tone: "high",
+            priority: 0,
+        } satisfies ReadinessRisk,
+    ];
+    const times = ["18 min", "7 min", "10 min"];
+    return plan.slice(0, 3).map((risk, index) => ({
+        title: `${shortTopicName(risk.topic)} risk drill`,
+        detail: risk.detail,
+        time: times[index] ?? "10 min",
+    }));
 }

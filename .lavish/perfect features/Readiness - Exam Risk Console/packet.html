@@ -1,0 +1,563 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Readiness - Exam Risk Console Freeze Packet</title>
+<style>
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;margin:0;padding:40px;color:#122B46;background:#fbfaf5;}
+  h1,h2{font-family:Georgia,serif;color:#0b2f38;}
+  h1{font-size:42px;margin:0 0 8px;}
+  h2{font-size:26px;margin-top:34px;}
+  p,li{font-size:15px;line-height:1.55;color:#4D5C6D;}
+  .card{border:1px solid rgba(5,59,69,.12);border-radius:22px;padding:22px;margin:20px 0;background:rgba(255,255,255,.7);}
+  img{width:100%;border-radius:18px;border:1px solid rgba(5,59,69,.12);display:block;margin-top:14px;}
+  pre{white-space:pre-wrap;word-break:break-word;background:#092f38;color:#eaf7f5;border-radius:18px;padding:18px;font-size:10px;line-height:1.45;max-height:560px;overflow:hidden;}
+  code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;}
+</style>
+</head>
+<body>
+  <h1>Readiness - Exam Risk Console</h1>
+  <p>Frozen at 2026-07-05 17:35:33 from <code>.lavish/readiness-screen.html</code>. This packet preserves the approved readiness concept for pixel-faithful desktop and Android implementation.</p>
+  <div class="card">
+    <h2>Production Contract</h2>
+    <ul>
+      <li>Preserve the premium pearl/turquoise liquid glass UI and restrained exam-risk console hierarchy.</li>
+      <li>Keep Memory, Performance, and Readiness as separate score ranges, never one blended number.</li>
+      <li>Support honest abstain/no-score states when evidence is thin.</li>
+      <li>Show local evidence: graded reviews, first exposures, coverage, topic weight, reviewed coverage, graded evidence, recall ranges, weak/uncovered flags.</li>
+      <li>Keep the Forgetting Watchlist and Pull retention queue action as core readiness functionality.</li>
+      <li>Scores must work offline and with AI off; AI may explain but not be required.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h2>Desktop Screenshot</h2>
+    <img src="desktop.png" alt="Readiness desktop screenshot" />
+  </div>
+  <div class="card">
+    <h2>Mobile Screenshot</h2>
+    <img src="mobile.png" alt="Readiness mobile screenshot" />
+  </div>
+  <div class="card">
+    <h2>Frozen Source Reference</h2>
+    <pre><code>&lt;!doctype html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;utf-8&quot; /&gt;
+&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot; /&gt;
+&lt;title&gt;ankiCFA - Readiness Screen Concept&lt;/title&gt;
+&lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.googleapis.com&quot; /&gt;
+&lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.gstatic.com&quot; crossorigin /&gt;
+&lt;link href=&quot;https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700;800&amp;family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap&quot; rel=&quot;stylesheet&quot; /&gt;
+&lt;style&gt;
+  :root{
+    --ink:#122B46;
+    --muted:#4D5C6D;
+    --faint:#8b97a4;
+    --line:rgba(255,255,255,.72);
+    --pearl:#fbfaf5;
+    --turq:#14B8B1;
+    --turq-deep:#0E9C97;
+    --turq-ink:#064a54;
+    --turq-soft:#E4F6F5;
+    --deep:#053b45;
+    --red:#b42318;
+    --amber:#b7791f;
+    --green:#15803d;
+    --glass:rgba(255,255,255,.62);
+    --glass-strong:rgba(255,255,255,.78);
+    --shadow:0 28px 90px rgba(5,59,69,.16);
+    --sans:&#x27;IBM Plex Sans&#x27;,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    --serif:&#x27;Source Serif 4&#x27;,Georgia,serif;
+    --mono:&#x27;IBM Plex Mono&#x27;,ui-monospace,Menlo,monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    min-height:100vh;
+    font-family:var(--sans);
+    color:var(--ink);
+    background:
+      radial-gradient(circle at 12% 0%, rgba(255,255,255,.96), transparent 23rem),
+      radial-gradient(circle at 86% 8%, rgba(20,184,177,.22), transparent 28rem),
+      radial-gradient(circle at 56% 70%, rgba(5,59,69,.16), transparent 34rem),
+      linear-gradient(135deg,var(--pearl) 0%, #eef9f7 42%, #d8f3ef 64%, rgba(5,59,69,.24) 100%);
+    font-size:18px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  body::before{
+    content:&quot;&quot;;
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    background:
+      radial-gradient(circle at 18% 18%, rgba(255,255,255,.72), transparent 13rem),
+      radial-gradient(circle at 78% 22%, rgba(20,184,177,.20), transparent 19rem);
+    mix-blend-mode:screen;
+  }
+  h1,h2,h3,.serif{font-family:var(--serif);}
+  h1{font-size:clamp(38px,5vw,66px);line-height:1.01;letter-spacing:-.04em;margin:0;color:#0b2f38;}
+  h2{font-size:clamp(27px,3vw,38px);line-height:1.1;margin:0;color:#0b2f38;}
+  h3{font-size:23px;line-height:1.16;margin:0;color:#0b2f38;}
+  p{margin:0;color:var(--muted);}
+  a{color:inherit;}
+  .page{max-width:1440px;margin:0 auto;padding:35px 28px 90px;min-width:0;}
+  .appbar{
+    position:sticky;
+    top:20px;
+    z-index:30;
+    border:1px solid var(--line);
+    border-radius:28px;
+    background:rgba(255,255,255,.70);
+    box-shadow:0 14px 50px rgba(5,59,69,.10);
+    backdrop-filter:blur(22px) saturate(1.25);
+    -webkit-backdrop-filter:blur(22px) saturate(1.25);
+    min-width:0;
+  }
+  .appbar-in{display:flex;align-items:center;gap:20px;flex-wrap:wrap;padding:15px 18px;min-width:0;}
+  .brand{font-family:var(--serif);font-size:24px;font-weight:700;letter-spacing:-.01em;color:var(--ink);min-width:0;}
+  .brand small{display:block;font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:.16em;color:var(--turq-ink);text-transform:uppercase;}
+  .tabs{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap;min-width:0;}
+  .tabs a{text-decoration:none;color:var(--muted);font-size:16px;font-weight:700;padding:10px 16px;border-radius:999px;white-space:nowrap;}
+  .tabs a.on,.tabs a:hover{color:var(--turq-ink);background:rgba(20,184,177,.12);box-shadow:inset 0 1px 0 rgba(255,255,255,.65);}
+  .sync-chip{display:inline-flex;align-items:center;gap:9px;border:1px solid rgba(20,184,177,.22);background:rgba(228,246,245,.58);color:var(--turq-ink);border-radius:999px;padding:10px 15px;font-size:15px;font-weight:700;white-space:nowrap;min-width:0;}
+  .dot{width:8px;height:8px;border-radius:999px;background:var(--turq);flex:0 0 auto;}
+  .hero,.glass-card,.next-panel{
+    border:1px solid var(--line);
+    background:var(--glass);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.78),0 20px 70px rgba(5,59,69,.12);
+    backdrop-filter:blur(22px) saturate(1.18);
+    -webkit-backdrop-filter:blur(22px) saturate(1.18);
+    min-width:0;
+  }
+  .hero{
+    position:relative;
+    overflow:hidden;
+    margin-top:33px;
+    border-radius:40px;
+    padding:35px;
+    background:
+      linear-gradient(135deg,rgba(255,255,255,.86),rgba(255,255,255,.48)),
+      radial-gradient(circle at 76% 18%, rgba(20,184,177,.20), transparent 24rem);
+    box-shadow:var(--shadow);
+  }
+  .hero::after{
+    content:&quot;&quot;;
+    position:absolute;
+    inset:1px;
+    border-radius:39px;
+    pointer-events:none;
+    background:linear-gradient(120deg,rgba(255,255,255,.68),transparent 30%,rgba(255,255,255,.16));
+    mask:linear-gradient(#000,transparent 70%);
+  }
+  .hero-grid{position:relative;z-index:1;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(300px,.85fr);gap:28px;align-items:stretch;}
+  .eyebrow{font-size:14px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:var(--turq-ink);}
+  .lede{margin-top:13px;font-size:20px;max-width:850px;color:var(--muted);}
+  .hero-actions{display:flex;gap:13px;flex-wrap:wrap;margin-top:28px;}
+  .btn{display:inline-flex;align-items:center;justify-content:center;border-radius:18px;padding:15px 19px;font-weight:800;font-size:16px;text-decoration:none;border:1px solid rgba(255,255,255,.72);box-shadow:inset 0 1px 0 rgba(255,255,255,.78),0 16px 44px rgba(5,59,69,.10);min-width:0;text-align:center;cursor:pointer;}
+  .btn.primary{background:linear-gradient(135deg,#7edbd6,#14B8B1,#0E9C97);color:#fff;border-color:rgba(255,255,255,.84);}
+  .btn.secondary{background:rgba(255,255,255,.58);color:var(--turq-ink);}
+  .btn.ghost{background:rgba(255,255,255,.36);color:var(--ink);}
+  .btn.small{border-radius:15px;padding:12px 13px;font-size:14px;box-shadow:inset 0 1px 0 rgba(255,255,255,.72),0 10px 28px rgba(5,59,69,.08);}
+  .metric-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:24px;}
+  .metric{border:1px solid rgba(255,255,255,.62);background:rgba(255,255,255,.46);border-radius:18px;padding:14px;min-width:0;}
+  .metric strong{display:block;font-family:var(--serif);font-size:28px;line-height:1;color:#0b2f38;}
+  .metric span{display:block;margin-top:4px;color:var(--muted);font-size:13px;font-weight:700;}
+  .score-card{
+    border-radius:30px;
+    padding:24px;
+    background:linear-gradient(145deg,rgba(255,255,255,.80),rgba(228,246,245,.48));
+    display:grid;
+    gap:14px;
+    align-content:start;
+    text-align:left;
+    min-width:0;
+  }
+  .score-stack{display:grid;gap:11px;min-width:0;}
+  .score-mini{
+    display:grid;
+    gap:5px;
+    border:1px solid rgba(255,255,255,.66);
+    background:rgba(255,255,255,.48);
+    border-radius:20px;
+    padding:14px;
+    min-width:0;
+  }
+  .score-mini .score-head{display:flex;align-items:center;justify-content:space-between;gap:10px;min-width:0;}
+  .score-mini b{font-family:var(--serif);font-size:clamp(24px,3.2vw,36px);line-height:1;color:#0b2f38;letter-spacing:-.03em;white-space:nowrap;}
+  .score-mini strong{font-size:15px;color:#0b2f38;overflow-wrap:anywhere;}
+  .score-mini small{display:block;color:var(--muted);font-size:13px;font-weight:700;overflow-wrap:anywhere;}
+  .score-mini.abstain b{font-family:var(--sans);font-size:15px;color:#7a4b08;letter-spacing:0;}
+  .score-note{font-size:13px;color:var(--muted);font-weight:700;overflow-wrap:anywhere;}
+  .confidence{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;min-width:0;}
+  .chip{display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,.62);background:rgba(255,255,255,.46);border-radius:999px;padding:8px 11px;color:var(--muted);font-size:13px;font-weight:800;min-width:0;overflow-wrap:anywhere;}
+  .chip.turq{background:rgba(20,184,177,.12);color:var(--turq-ink);}
+  .chip.warn{background:rgba(183,121,31,.12);color:#7a4b08;}
+  .grid{display:grid;gap:20px;margin-top:23px;min-width:0;}
+  .console-grid{grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);align-items:start;}
+  .glass-card,.next-panel{border-radius:28px;padding:23px;}
+  .card-title{display:flex;align-items:flex-start;justify-content:space-between;gap:15px;margin-bottom:15px;min-width:0;}
+  .card-title &gt; div{min-width:0;}
+  .status-pill{display:inline-flex;align-items:center;border-radius:999px;background:rgba(20,184,177,.12);color:var(--turq-ink);font-size:13px;font-weight:800;padding:7px 10px;white-space:normal;line-height:1.2;text-align:center;}
+  .risk-list{display:grid;gap:12px;min-width:0;}
+  .risk{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    gap:15px;
+    align-items:center;
+    border:1px solid rgba(255,255,255,.62);
+    background:rgba(255,255,255,.44);
+    border-radius:20px;
+    padding:15px;
+    min-width:0;
+  }
+  .risk strong{display:block;color:#0b2f38;overflow-wrap:anywhere;}
+  .risk small{display:block;color:var(--muted);font-size:15px;margin-top:3px;overflow-wrap:anywhere;}
+  .risk-score{font-family:var(--mono);font-size:13px;font-weight:700;border-radius:999px;padding:7px 9px;white-space:nowrap;}
+  .risk-score.high{background:rgba(180,35,24,.10);color:var(--red);}
+  .risk-score.med{background:rgba(183,121,31,.12);color:#7a4b08;}
+  .risk-score.keep{background:rgba(21,128,61,.10);color:var(--green);}
+  .coverage-copy{font-size:14px;margin-bottom:13px;overflow-wrap:anywhere;}
+  .topic-list{display:grid;gap:9px;min-width:0;}
+  .topic{
+    display:grid;
+    grid-template-columns:minmax(135px,.82fr) minmax(64px,.34fr) minmax(92px,.42fr) minmax(0,1fr) auto;
+    gap:10px;
+    align-items:center;
+    border:1px solid rgba(255,255,255,.62);
+    background:rgba(255,255,255,.42);
+    border-radius:18px;
+    padding:12px;
+    min-width:0;
+  }
+  .topic.header{background:rgba(228,246,245,.38);font-size:12px;font-weight:800;color:var(--turq-ink);text-transform:uppercase;letter-spacing:.08em;}
+  .topic-name{min-width:0;}
+  .topic-name strong{display:block;color:#0b2f38;font-size:16px;overflow-wrap:anywhere;}
+  .topic-name span{display:block;color:var(--muted);font-size:13px;font-weight:700;margin-top:1px;}
+  .topic-stat{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--muted);white-space:nowrap;}
+  .bar{height:10px;border-radius:999px;background:rgba(233,237,241,.74);overflow:hidden;box-shadow:inset 0 1px 2px rgba(5,59,69,.08);min-width:0;}
+  .bar i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#7edbd6,#0e9c97);}
+  .bar i.warn{background:linear-gradient(90deg,#f7d997,#b7791f);}
+  .bar i.danger{background:linear-gradient(90deg,#f7b4ac,#b42318);}
+  .pct{font-family:var(--mono);font-weight:700;color:#0b2f38;font-size:14px;white-space:nowrap;}
+  .next-panel{
+    background:
+      linear-gradient(145deg,rgba(255,255,255,.76),rgba(228,246,245,.48)),
+      radial-gradient(circle at 90% 12%, rgba(20,184,177,.18), transparent 20rem);
+  }
+  .action-plan{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);gap:13px;margin-top:17px;min-width:0;}
+  .action{
+    border:1px solid rgba(255,255,255,.66);
+    background:rgba(255,255,255,.48);
+    border-radius:21px;
+    padding:16px;
+    min-width:0;
+  }
+  .action b{display:block;font-family:var(--serif);font-size:20px;line-height:1.16;color:#0b2f38;overflow-wrap:anywhere;}
+  .action span{display:block;margin-top:7px;color:var(--muted);font-size:14px;overflow-wrap:anywhere;}
+  .action .time{display:inline-flex;margin-top:13px;border-radius:999px;background:rgba(20,184,177,.12);color:var(--turq-ink);font-size:12px;font-weight:800;padding:6px 9px;}
+  .next-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px;}
+  .retention-watch{
+    display:grid;
+    grid-template-columns:minmax(0,.82fr) minmax(0,1.18fr);
+    gap:14px;
+    margin-top:18px;
+    min-width:0;
+  }
+  .retention-summary,.forget-list{
+    border:1px solid rgba(255,255,255,.66);
+    background:rgba(255,255,255,.46);
+    border-radius:22px;
+    padding:17px;
+    min-width:0;
+  }
+  .retention-summary strong{
+    display:block;
+    font-family:var(--serif);
+    font-size:clamp(26px,4vw,42px);
+    line-height:1;
+    color:#0b2f38;
+    letter-spacing:-.03em;
+  }
+  .retention-summary span{display:block;margin-top:7px;color:var(--muted);font-size:14px;font-weight:700;overflow-wrap:anywhere;}
+  .forget-list{display:grid;gap:10px;}
+  .forget-item{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    gap:10px;
+    align-items:center;
+    border-radius:16px;
+    background:rgba(255,255,255,.42);
+    padding:11px 12px;
+    min-width:0;
+  }
+  .forget-item b{display:block;color:#0b2f38;font-size:15px;overflow-wrap:anywhere;}
+  .forget-item span{display:block;color:var(--muted);font-size:13px;font-weight:700;margin-top:1px;overflow-wrap:anywhere;}
+  .forget-item em{font-style:normal;font-family:var(--mono);font-size:12px;font-weight:700;color:#7a4b08;background:rgba(183,121,31,.12);border-radius:999px;padding:6px 8px;white-space:nowrap;}
+  .footer-note{margin-top:22px;border:1px solid rgba(255,255,255,.56);background:rgba(255,255,255,.34);border-radius:22px;padding:18px;display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;min-width:0;}
+  .footer-note p{font-size:15px;min-width:0;overflow-wrap:anywhere;}
+  @media(max-width:980px){
+    .hero-grid,.console-grid,.metric-row,.action-plan,.retention-watch{grid-template-columns:minmax(0,1fr);}
+    .tabs{margin-left:0;}
+  }
+  @media(max-width:720px){
+    body{font-size:17px;}
+    .page{padding:22px 14px 70px;}
+    .hero{padding:24px;border-radius:30px;}
+    .hero::after{border-radius:29px;}
+    .appbar{top:10px;border-radius:22px;}
+    .sync-chip{white-space:normal;}
+    .tabs a{font-size:15px;padding:9px 12px;}
+    .topic{grid-template-columns:minmax(0,1fr);gap:9px;}
+    .topic.header{display:none;}
+    .risk{grid-template-columns:minmax(0,1fr);}
+    .risk-score{justify-self:start;}
+    .score-orb{width:min(230px,100%);}
+  }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;main class=&quot;page&quot;&gt;
+  &lt;nav class=&quot;appbar&quot;&gt;
+    &lt;div class=&quot;appbar-in&quot;&gt;
+      &lt;div class=&quot;brand&quot;&gt;ankiCFA &lt;small&gt;CFA Level II&lt;/small&gt;&lt;/div&gt;
+      &lt;div class=&quot;tabs&quot;&gt;
+        &lt;a href=&quot;#&quot;&gt;Study&lt;/a&gt;
+        &lt;a href=&quot;#&quot;&gt;Concept Map&lt;/a&gt;
+        &lt;a class=&quot;on&quot; href=&quot;#&quot;&gt;Readiness&lt;/a&gt;
+        &lt;a href=&quot;#&quot;&gt;Sync&lt;/a&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;sync-chip&quot;&gt;&lt;span class=&quot;dot&quot;&gt;&lt;/span&gt; Readiness updated 14:32&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/nav&gt;
+
+  &lt;section class=&quot;hero&quot;&gt;
+    &lt;div class=&quot;hero-grid&quot;&gt;
+      &lt;div&gt;
+        &lt;div class=&quot;eyebrow&quot;&gt;Readiness - Exam Risk Console&lt;/div&gt;
+        &lt;h1&gt;Are you ready to pass?&lt;/h1&gt;
+        &lt;p class=&quot;lede&quot;&gt;Pass call: borderline positive, 66-72 projected readiness range. This is a local evidence model, not validated against real CFA exam data; when evidence is thin, the product must abstain instead of inventing confidence.&lt;/p&gt;
+        &lt;div class=&quot;hero-actions&quot;&gt;
+          &lt;a class=&quot;btn primary&quot; href=&quot;#&quot; onclick=&quot;queueReadinessAction(&#x27;Start risk-reduction session&#x27;)&quot;&gt;Start risk-reduction session&lt;/a&gt;
+          &lt;a class=&quot;btn secondary&quot; href=&quot;#&quot; onclick=&quot;queueReadinessAction(&#x27;Run readiness drill&#x27;)&quot;&gt;Run readiness drill&lt;/a&gt;
+          &lt;a class=&quot;btn ghost&quot; href=&quot;#&quot; onclick=&quot;queueReadinessAction(&#x27;Open latest mock review&#x27;)&quot;&gt;Open latest mock review&lt;/a&gt;
+        &lt;/div&gt;
+        &lt;div class=&quot;metric-row&quot;&gt;
+          &lt;div class=&quot;metric&quot;&gt;&lt;strong&gt;1,284&lt;/strong&gt;&lt;span&gt;graded reviews&lt;/span&gt;&lt;/div&gt;
+          &lt;div class=&quot;metric&quot;&gt;&lt;strong&gt;96&lt;/strong&gt;&lt;span&gt;first exposures&lt;/span&gt;&lt;/div&gt;
+          &lt;div class=&quot;metric&quot;&gt;&lt;strong&gt;8/10&lt;/strong&gt;&lt;span&gt;topics covered&lt;/span&gt;&lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+
+      &lt;aside class=&quot;score-card&quot; aria-label=&quot;Separate readiness evidence scores&quot;&gt;
+        &lt;div&gt;
+          &lt;div class=&quot;eyebrow&quot;&gt;Three separate scores&lt;/div&gt;
+          &lt;h2&gt;No blended number.&lt;/h2&gt;
+          &lt;p style=&quot;margin-top:7px;&quot;&gt;Memory, performance, and readiness stay separate so the learner can see whether the risk is recall decay, exam execution, or projected pass confidence.&lt;/p&gt;
+        &lt;/div&gt;
+        &lt;div class=&quot;score-stack&quot;&gt;
+          &lt;div class=&quot;score-mini&quot;&gt;
+            &lt;div class=&quot;score-head&quot;&gt;&lt;strong&gt;Memory&lt;/strong&gt;&lt;b&gt;74-80&lt;/b&gt;&lt;/div&gt;
+            &lt;small&gt;Scheduled recall durability and predicted forgetting risk.&lt;/small&gt;
+          &lt;/div&gt;
+          &lt;div class=&quot;score-mini&quot;&gt;
+            &lt;div class=&quot;score-head&quot;&gt;&lt;strong&gt;Performance&lt;/strong&gt;&lt;b&gt;61-67&lt;/b&gt;&lt;/div&gt;
+            &lt;small&gt;Graded vignettes and new-question execution under exam pressure.&lt;/small&gt;
+          &lt;/div&gt;
+          &lt;div class=&quot;score-mini&quot;&gt;
+            &lt;div class=&quot;score-head&quot;&gt;&lt;strong&gt;Readiness&lt;/strong&gt;&lt;b&gt;66-72&lt;/b&gt;&lt;/div&gt;
+            &lt;small&gt;Projected pass readiness range from coverage, memory, and graded evidence.&lt;/small&gt;
+          &lt;/div&gt;
+          &lt;div class=&quot;score-mini abstain&quot;&gt;
+            &lt;div class=&quot;score-head&quot;&gt;&lt;strong&gt;Abstain rule&lt;/strong&gt;&lt;b&gt;No score&lt;/b&gt;&lt;/div&gt;
+            &lt;small&gt;If graded evidence or topic coverage is thin, show the missing reason instead of a fake number.&lt;/small&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+        &lt;div class=&quot;confidence&quot;&gt;
+          &lt;span class=&quot;chip turq&quot;&gt;Strong: Ethics, Equity&lt;/span&gt;
+          &lt;span class=&quot;chip warn&quot;&gt;Uncovered: Derivatives, Alternatives&lt;/span&gt;
+          &lt;span class=&quot;chip&quot;&gt;Works offline, AI off&lt;/span&gt;
+        &lt;/div&gt;
+        &lt;p class=&quot;score-note&quot;&gt;Scores are computed by the local engine from stored reviews, first exposures, graded answers, and topic coverage. AI can explain the result, but must not be required to produce it.&lt;/p&gt;
+      &lt;/aside&gt;
+    &lt;/div&gt;
+  &lt;/section&gt;
+
+  &lt;section class=&quot;grid console-grid&quot;&gt;
+    &lt;div class=&quot;glass-card&quot;&gt;
+      &lt;div class=&quot;card-title&quot;&gt;
+        &lt;div&gt;
+          &lt;div class=&quot;eyebrow&quot;&gt;Major risk drivers&lt;/div&gt;
+          &lt;h2&gt;The 3 issues most likely to change the result&lt;/h2&gt;
+        &lt;/div&gt;
+        &lt;span class=&quot;status-pill&quot;&gt;Exam-weighted&lt;/span&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;risk-list&quot;&gt;
+        &lt;div class=&quot;risk&quot;&gt;
+          &lt;div&gt;
+            &lt;strong&gt;FRA recall decay&lt;/strong&gt;
+            &lt;small&gt;Consolidation and lease adjustments fade after 6 days; missed refreshes are dragging a heavy topic below the pass buffer.&lt;/small&gt;
+          &lt;/div&gt;
+          &lt;span class=&quot;risk-score high&quot;&gt;High risk&lt;/span&gt;
+        &lt;/div&gt;
+        &lt;div class=&quot;risk&quot;&gt;
+          &lt;div&gt;
+            &lt;strong&gt;Ethics accuracy volatility&lt;/strong&gt;
+            &lt;small&gt;Overall score is strong, but Standards VI-VII still swing on near-miss wording and professional-conduct traps.&lt;/small&gt;
+          &lt;/div&gt;
+          &lt;span class=&quot;risk-score med&quot;&gt;Volatile&lt;/span&gt;
+        &lt;/div&gt;
+        &lt;div class=&quot;risk&quot;&gt;
+          &lt;div&gt;
+            &lt;strong&gt;Quant formulas under timed pressure&lt;/strong&gt;
+            &lt;small&gt;Regression and time-series recall is acceptable untimed, then drops when the vignette compresses setup time.&lt;/small&gt;
+          &lt;/div&gt;
+          &lt;span class=&quot;risk-score med&quot;&gt;Speed gap&lt;/span&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div class=&quot;glass-card&quot;&gt;
+      &lt;div class=&quot;card-title&quot;&gt;
+        &lt;div&gt;
+          &lt;div class=&quot;eyebrow&quot;&gt;Topic readiness&lt;/div&gt;
+          &lt;h2&gt;Coverage and recall evidence&lt;/h2&gt;
+        &lt;/div&gt;
+        &lt;span class=&quot;status-pill&quot;&gt;82% exam covered&lt;/span&gt;
+      &lt;/div&gt;
+      &lt;p class=&quot;coverage-copy&quot;&gt;Topic evidence must expose weight, reviewed coverage, graded proof, and recall range so high-weight gaps are visible before the learner trusts the readiness call.&lt;/p&gt;
+      &lt;div class=&quot;topic-list&quot;&gt;
+        &lt;div class=&quot;topic header&quot;&gt;
+          &lt;span&gt;Topic&lt;/span&gt;
+          &lt;span&gt;Weight&lt;/span&gt;
+          &lt;span&gt;Reviewed / graded&lt;/span&gt;
+          &lt;span&gt;Recall range&lt;/span&gt;
+          &lt;span&gt;Range&lt;/span&gt;
+        &lt;/div&gt;
+        &lt;div class=&quot;topic&quot;&gt;
+          &lt;div class=&quot;topic-name&quot;&gt;&lt;strong&gt;Ethics&lt;/strong&gt;&lt;span&gt;High weight, maintain&lt;/span&gt;&lt;/div&gt;
+          &lt;span class=&quot;topic-stat&quot;&gt;10-15%&lt;/span&gt;
+          &lt;span class=&quot;topic-stat&quot;&gt;94% / 182&lt;/span&gt;
+          &lt;div class=&quot;bar&quot;&gt;&lt;i style=&quot;width:84%&quot;&gt;&lt;/i&gt;&lt;/div&gt;
+          &lt;span class=&quot;pct&quot;&gt;81-87&lt;/span&gt;
+        &lt;/div&gt;
+        &lt;div class=&quot;topic&quot;&gt;
+          &lt;div class=&quot;topic-name&quot;&gt;&lt;strong&gt;Equity Valuation&lt;/strong&gt;&lt;span&gt;Stable pass buffer&lt;/span&gt;&lt;/div&gt;
+          &lt;span class=&quot;topic-stat&quot;&gt;10-15%&lt;/span&gt;
+          &lt;span class=&quot;topic-stat&quot;&gt;88% / 164&lt;/span&gt;
+          &lt;div class=&quot;bar&quot;&gt;&lt;i style=&quot;width:76%&quot;&gt;&lt;/i&gt;&lt;/div&gt;
+          &lt;span class=&quot;pct&quot;&gt;72-80&lt;/span&gt;
+        &lt;/div&gt;
+        &lt;div class=&quot;topic&quot;&gt;
+          &lt;div class=&quot;topic-name&quot;&gt;&lt;strong&gt;Portfolio Management&lt;/strong&gt;&lt;span&gt;Near threshold&lt;/span&gt;&lt;/div&gt;
+          &lt;span class=&quot;topic-stat&quot;&gt;10-15%&lt;/span&gt;
+          &lt;span class=&quot;topic-stat&quot;&gt;81% / 119&lt;/span&gt;
+          &lt;div class=&quot;bar&quot;&gt;&lt;i style=&quot;width:70%&quot;&gt;&lt;/i&gt;&lt;/div&gt;
+          &lt;span class=&quot;pct&quot;&gt;66-74&lt;/span&gt;
+        &lt;/div&gt;
+        &lt;div class=&quot;topic&quot;&gt;
+          &lt;div class=&quot;topic-name&quot;&gt;&lt;strong&gt;Fixed Income&lt;/strong&gt;&lt;span&gt;Term structure slips&lt;/span&gt;&lt;/div&gt;
+          &lt;span class=&quot;topic-stat&quot;&gt;10-15%&lt;/span&gt;
+          &lt;span class=&quot;topic-stat&quot;&gt;76% / 103&lt;/span&gt;
+          &lt;div class=&quot;bar&quot;&gt;&lt;i class=&quot;warn&quot; style=&quot;width:64%&quot;&gt;&lt;/i&gt;&lt;/div&gt;
+          &lt;span class=&quot;pct&quot;&gt;59-69&lt;/span&gt;
+        &lt;/div&gt;
+        &lt;div class=&quot;topic&quot;&gt;
+          &lt;div class=&quot;topic-name&quot;&gt;&lt;strong&gt;Quant Methods&lt;/strong&gt;&lt;span&gt;Timed formulas&lt;/span&gt;&lt;/div&gt;
+          &lt;span class=&quot;topic-stat&quot;&gt;5-10%&lt;/span&gt;
+          &lt;span class=&quot;topic-stat&quot;&gt;71% / 96&lt;/span&gt;
+          &lt;div class=&quot;bar&quot;&gt;&lt;i class=&quot;warn&quot; style=&quot;width:61%&quot;&gt;&lt;/i&gt;&lt;/div&gt;
+          &lt;span class=&quot;pct&quot;&gt;56-66&lt;/span&gt;
+        &lt;/div&gt;
+        &lt;div class=&quot;topic&quot;&gt;
+          &lt;div class=&quot;topic-name&quot;&gt;&lt;strong&gt;Financial Reporting&lt;/strong&gt;&lt;span&gt;High-weight gap flagged&lt;/span&gt;&lt;/div&gt;
+          &lt;span class=&quot;topic-stat&quot;&gt;10-15%&lt;/span&gt;
+          &lt;span class=&quot;topic-stat&quot;&gt;63% / 88&lt;/span&gt;
+          &lt;div class=&quot;bar&quot;&gt;&lt;i class=&quot;danger&quot; style=&quot;width:58%&quot;&gt;&lt;/i&gt;&lt;/div&gt;
+          &lt;span class=&quot;pct&quot;&gt;52-64&lt;/span&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/section&gt;
+
+  &lt;section class=&quot;next-panel&quot;&gt;
+    &lt;div class=&quot;card-title&quot;&gt;
+      &lt;div&gt;
+        &lt;div class=&quot;eyebrow&quot;&gt;What to do next&lt;/div&gt;
+        &lt;h2&gt;Turn readiness into today&#x27;s plan&lt;/h2&gt;
+      &lt;/div&gt;
+      &lt;span class=&quot;status-pill&quot;&gt;35 minutes&lt;/span&gt;
+    &lt;/div&gt;
+    &lt;p&gt;Do not start a broad review. Spend one focused session reducing the risks that move pass likelihood fastest.&lt;/p&gt;
+    &lt;div class=&quot;retention-watch&quot; aria-label=&quot;Forgetting watchlist&quot;&gt;
+      &lt;div class=&quot;retention-summary&quot;&gt;
+        &lt;div class=&quot;eyebrow&quot;&gt;Forgetting watchlist&lt;/div&gt;
+        &lt;strong&gt;12 cards&lt;/strong&gt;
+        &lt;span&gt;Predicted to slip below recall threshold before tomorrow morning. Pull them out now for the highest retention return.&lt;/span&gt;
+        &lt;div class=&quot;next-actions&quot; style=&quot;margin-top:14px;&quot;&gt;
+          &lt;a class=&quot;btn primary small&quot; href=&quot;#&quot; onclick=&quot;queueReadinessAction(&#x27;Pull retention watchlist&#x27;)&quot;&gt;Pull retention queue&lt;/a&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;forget-list&quot;&gt;
+        &lt;div class=&quot;forget-item&quot;&gt;
+          &lt;div&gt;&lt;b&gt;Lease classification edge cases&lt;/b&gt;&lt;span&gt;FRA - last clean recall 5.8 days ago&lt;/span&gt;&lt;/div&gt;
+          &lt;em&gt;89% fade risk&lt;/em&gt;
+        &lt;/div&gt;
+        &lt;div class=&quot;forget-item&quot;&gt;
+          &lt;div&gt;&lt;b&gt;Standard VI(B) priority of transactions&lt;/b&gt;&lt;span&gt;Ethics - two near-miss answers in mocks&lt;/span&gt;&lt;/div&gt;
+          &lt;em&gt;76% fade risk&lt;/em&gt;
+        &lt;/div&gt;
+        &lt;div class=&quot;forget-item&quot;&gt;
+          &lt;div&gt;&lt;b&gt;Durbin-Watson interpretation&lt;/b&gt;&lt;span&gt;Quant - formula remembered, decision rule unstable&lt;/span&gt;&lt;/div&gt;
+          &lt;em&gt;71% fade risk&lt;/em&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;action-plan&quot;&gt;
+      &lt;article class=&quot;action&quot;&gt;
+        &lt;b&gt;FRA decay drill&lt;/b&gt;
+        &lt;span&gt;18 cards on consolidation, leases, and impairment. Failures convert into tomorrow&#x27;s first queue.&lt;/span&gt;
+        &lt;span class=&quot;time&quot;&gt;18 min&lt;/span&gt;
+      &lt;/article&gt;
+      &lt;article class=&quot;action&quot;&gt;
+        &lt;b&gt;Ethics minimal pairs&lt;/b&gt;
+        &lt;span&gt;10 traps across Standards VI-VII. The goal is stability, not more study volume.&lt;/span&gt;
+        &lt;span class=&quot;time&quot;&gt;7 min&lt;/span&gt;
+      &lt;/article&gt;
+      &lt;article class=&quot;action&quot;&gt;
+        &lt;b&gt;Timed Quant checkpoint&lt;/b&gt;
+        &lt;span&gt;One regression vignette with formula recall hidden until after answer lock.&lt;/span&gt;
+        &lt;span class=&quot;time&quot;&gt;10 min&lt;/span&gt;
+      &lt;/article&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;next-actions&quot;&gt;
+      &lt;a class=&quot;btn primary&quot; href=&quot;#&quot; onclick=&quot;queueReadinessAction(&#x27;Begin 35-minute plan&#x27;)&quot;&gt;Begin 35-minute plan&lt;/a&gt;
+      &lt;a class=&quot;btn secondary&quot; href=&quot;#&quot; onclick=&quot;queueReadinessAction(&#x27;Schedule full mock exam&#x27;)&quot;&gt;Schedule full mock&lt;/a&gt;
+    &lt;/div&gt;
+  &lt;/section&gt;
+
+  &lt;div class=&quot;footer-note&quot;&gt;
+    &lt;p&gt;&lt;strong&gt;Prototype note:&lt;/strong&gt; Readiness is intentionally restrained here. It answers pass risk and next action instead of becoming a generic analytics dashboard.&lt;/p&gt;
+    &lt;a class=&quot;btn secondary small&quot; href=&quot;#&quot; onclick=&quot;queueReadinessAction(&#x27;Review readiness concept in Lavish&#x27;)&quot;&gt;Review in Lavish&lt;/a&gt;
+  &lt;/div&gt;
+&lt;/main&gt;
+&lt;script&gt;
+function queueReadinessAction(action){
+  if(window.lavish &amp;&amp; window.lavish.queuePrompt){
+    window.lavish.queuePrompt(&quot;Readiness Screen action: &quot; + action, {
+      tag: &quot;readiness-screen&quot;,
+      text: &quot;Readiness Screen: &quot; + action,
+      queueKey: &quot;readiness-screen-action&quot;,
+      data: { action }
+    });
+  }
+}
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+  </div>
+</body>
+</html>

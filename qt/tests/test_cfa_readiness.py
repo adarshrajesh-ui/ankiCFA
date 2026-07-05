@@ -76,21 +76,51 @@ def test_controller_loads_the_whole_collection_readiness_page() -> None:
 
 def test_link_handler_delegates_to_cfa_entry_points(monkeypatch) -> None:
     from aqt import cfa
+    from aqt import cfa_home
 
     calls: list[str] = []
     monkeypatch.setattr(cfa, "study_by_exam_priority", lambda mw: calls.append("priority"))
     monkeypatch.setattr(cfa, "study_ethics_pairs", lambda mw: calls.append("ethics"))
     monkeypatch.setattr(cfa, "show_deadline", lambda mw: calls.append("deadline"))
+    monkeypatch.setattr(cfa_home, "trigger_cfa_sync", lambda mw: calls.append("sync"))
+    monkeypatch.setattr(cfa_home, "open_sync_settings", lambda mw: calls.append("sync-settings"))
 
     moved: list[str] = []
     mw = SimpleNamespace(web=object(), moveToState=lambda s: moved.append(s))
     ctrl = cfa_readiness.CfaReadiness(mw)  # type: ignore[arg-type]
+    handler = ctrl._link_handler  # pylint: disable=protected-access
 
-    for cmd in ("cfa:priority", "cfa:ethics", "cfa:deadline"):
-        ctrl._link_handler(cmd)
-    ctrl._link_handler("cfa:conceptmap")
-    ctrl._link_handler("cfa:home")
-    ctrl._link_handler("cfa:decks")
+    for cmd in (
+        "cfa:priority",
+        "cfa:risk-session",
+        "cfa:readiness-drill",
+        "cfa:plan",
+        "cfa:ethics",
+        "cfa:deadline",
+        "cfa:mock-review",
+        "cfa:retention-queue",
+        "cfa:mock-schedule",
+        "cfa:sync",
+        "cfa:sync-settings",
+    ):
+        handler(cmd)
+    handler("cfa:conceptmap")
+    handler("cfa:study")
+    handler("cfa:readiness")
+    handler("cfa:home")
+    handler("cfa:decks")
 
-    assert calls == ["priority", "ethics", "deadline"]
-    assert moved == ["cfaConceptMap", "cfaHome", "deckBrowser"]
+    assert calls == [
+        "priority",
+        "priority",
+        "priority",
+        "priority",
+        "ethics",
+        "deadline",
+        "deadline",
+        "deadline",
+        "deadline",
+        "sync",
+        "sync-settings",
+    ]
+    assert moved == ["cfaConceptMap", "cfaStudy", "cfaReadiness", "cfaHome", "deckBrowser"]

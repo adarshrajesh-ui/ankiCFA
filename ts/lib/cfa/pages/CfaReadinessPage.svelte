@@ -1,263 +1,1154 @@
-<!--
-Copyright: Ankitects Pty Ltd and contributors
-License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
-
-CfaReadinessPage — the self-contained CFA "Exam Readiness" surface, rebuilt as
-a calm, premium finance-education page (modelled on markmeldrum.com) from the
-shared design system ($lib/cfa). It renders the SAME honest-score data the
-desktop dialog shows (qt/aqt/cfa.py):
-
-  * a quiet brand lockup (eyebrow + serif deck name),
-  * the verdict HERO — a big weight-400 serif call in the pass/fail colour on a
-    hairline/thin-spine card (never a saturated ring), with the accuracy + 95%
-    CI lead and the standing "not validated" caveat (or the abstain state),
-  * three VALUE-FIRST honest-score StatCards (big serif range on top, muted
-    label below, midpoint sub) — while abstaining they stay QUIET (muted-grey
-    "Awaiting reviews", the give-up reason in the sub); the "not enough data"
-    verdict is stated ONCE in the hero rather than shouted across the cards,
-  * the per-topic recall DataTable (uppercase muted headers, right-aligned
-    numerics, warn recall when low/uncovered, "no data" for null ranges),
-  * the coverage caption and the explanatory footer in quiet muted text.
-
-Calm by design: weights <= 600, flat cards, 4px/pill radii, an 8px rhythm, and
-the pass/fail/warn semantic triad preserved throughout.
--->
 <script lang="ts">
-    import { Caption, DataTable, Eyebrow, Hero, PageHeading, StatCard } from "$lib/cfa";
-    import type { CfaTone, ExamReadinessPayload, ScoreBand } from "$lib/cfa";
+    import { bridgeCommand } from "@tslib/bridgecommand";
+
+    import type { ExamReadinessPayload } from "$lib/cfa";
     import {
+        actionPlan,
         bandSub,
-        bandTone,
         bandValue,
+        buildReadinessRisks,
         captionText,
+        confidenceChips,
+        integer,
         noRecallYet,
         pct,
-        readinessName,
-        TOPIC_COLUMNS,
-        type TopicDisplayRow,
+        readinessLead,
+        readinessScoreCards,
+        READINESS_NAV,
+        retentionWatchlist,
+        syncChipLabel,
         topicRows,
     } from "./readiness";
 
     /** The full Exam Readiness payload (same shape the backend builds). */
     export let data: ExamReadinessPayload;
 
-    interface ScoreCard {
-        name: string;
-        meaning: string;
-        band: ScoreBand;
+    function go(cmd: string): void {
+        bridgeCommand(cmd);
     }
 
-    $: scoreCards = [
-        { name: data.memory.name, meaning: data.memory.meaning, band: data.memory },
-        {
-            name: data.performance.name,
-            meaning: data.performance.meaning,
-            band: data.performance,
-        },
-        {
-            name: readinessName(data.readiness),
-            meaning: data.readiness.meaning,
-            band: data.readiness,
-        },
-    ] satisfies ScoreCard[];
-
+    $: scoreCards = readinessScoreCards(data);
     $: rows = topicRows(data.topics);
     $: awaitingRecall = noRecallYet(rows);
+    $: lead = readinessLead(data);
+    $: syncLabel = syncChipLabel(data);
+    $: risks = buildReadinessRisks(data.topics);
+    $: chips = confidenceChips(data.topics);
+    $: watchlist = retentionWatchlist(data.topics);
+    $: plan = actionPlan(risks);
 </script>
 
 <div class="cfa-app cfa-readiness">
-    <div class="cfa-readiness__inner">
-        <PageHeading
-            eyebrow="Exam Readiness"
-            title={data.deckName}
-            eyebrowTone="green"
-        />
+    <main class="cfa-readiness__page">
+        <nav class="cfa-readiness__appbar" aria-label="CFA Readiness sections">
+            <div class="cfa-readiness__appbar-in">
+                <div class="cfa-readiness__brand">
+                    ankiCFA <small class="cfa-page-heading__title">{data.deckName}</small>
+                </div>
+                <div class="cfa-readiness__tabs">
+                    {#each READINESS_NAV as item}
+                        <button
+                            type="button"
+                            class:on={item.active}
+                            aria-current={item.active ? "page" : undefined}
+                            on:click={() => go(item.cmd)}
+                        >
+                            {item.label}
+                        </button>
+                    {/each}
+                </div>
+                <button type="button" class="cfa-readiness__sync-chip" on:click={() => go("cfa:sync")}>
+                    <span class="cfa-readiness__dot"></span>{syncLabel}
+                </button>
+            </div>
+        </nav>
 
-        {#if data.heroMode === "bayesian_call" && data.heroBayesian}
-            {@const hb = data.heroBayesian}
-            {@const heroTone = (hb.passed ? "pass" : "fail") satisfies CfaTone}
-            {@const heroNote =
-                `Bayesian — the band starts wide and narrows as reviews accrue ` +
-                `(${hb.firstExposures} first-seen · ${hb.topicsCovered}/` +
-                `${hb.topicsTotal} topics studied). ${hb.label}.`}
-            <Hero
-                tone={heroTone}
-                headline={hb.call}
-                sub={`p=${hb.callProb.toFixed(2)}`}
-                note={heroNote}
-            >
-                Estimated exam-weighted accuracy
-                <strong class="cfa-readiness__em">{pct(hb.accuracy)}</strong>
-                <span class="cfa-readiness__muted">
-                    (95% CI {pct(hb.ciLow)}–{pct(hb.ciHigh)})
-                </span>
-                vs ~{pct(hb.mps)} MPS proxy{#if hb.recall !== null}
-                    · est. recall
-                    <strong class="cfa-readiness__em">{pct(hb.recall)}</strong>
-                    <span class="cfa-readiness__muted">
-                        (FSRS R, SM-2 fallback)
-                    </span>{/if}
-            </Hero>
-        {:else if data.heroAbstain}
-            {@const ha = data.heroAbstain}
-            <Hero
-                tone="warn"
-                headline="Not enough data — keep studying"
-                note={`${ha.reason} · ${ha.readinessLabel}`}
-            >
-                No pass/fail call yet — the estimate stays hidden until there is enough
-                graded review evidence to be honest. It appears here once the give-up
-                threshold is met.
-            </Hero>
-        {/if}
+        <section class="cfa-readiness__hero cfa-hero">
+            <div class="cfa-readiness__hero-grid">
+                <div>
+                    <div class="cfa-readiness__eyebrow">Readiness - Exam Risk Console</div>
+                    <h1>Are you ready to pass?</h1>
+                    <p class="cfa-readiness__lede">{lead}</p>
+                    <div class="cfa-readiness__hero-actions" aria-label="Readiness actions">
+                        <button type="button" class="cfa-readiness__btn primary" on:click={() => go("cfa:risk-session")}>
+                            Start risk-reduction session
+                        </button>
+                        <button type="button" class="cfa-readiness__btn secondary" on:click={() => go("cfa:readiness-drill")}>
+                            Run readiness drill
+                        </button>
+                        <button type="button" class="cfa-readiness__btn ghost" on:click={() => go("cfa:mock-review")}>
+                            Open latest mock review
+                        </button>
+                    </div>
+                    <div class="cfa-readiness__metric-row" aria-label="Readiness evidence counts">
+                        <div class="cfa-readiness__metric">
+                            <strong>{integer(data.caption.gradedReviews)}</strong><span>graded reviews</span>
+                        </div>
+                        <div class="cfa-readiness__metric">
+                            <strong>{integer(data.caption.firstExposures)}</strong><span>first exposures</span>
+                        </div>
+                        <div class="cfa-readiness__metric">
+                            <strong>{data.caption.topicsCovered}/{data.caption.topicsTotal}</strong><span>topics covered</span>
+                        </div>
+                    </div>
+                </div>
 
-        <section class="cfa-readiness__block">
-            <Eyebrow tone="muted">Honest scores</Eyebrow>
-            <div class="cfa-readiness__stats">
-                {#each scoreCards as card (card.name)}
-                    <StatCard
-                        value={bandValue(card.band)}
-                        tone={bandTone(card.band)}
-                        sub={bandSub(card.band)}
-                        nowrap={!card.band.abstain}
-                    >
-                        <span class="cfa-readiness__stat-name">{card.name}</span>
-                        <span class="cfa-readiness__stat-meaning">{card.meaning}</span>
-                    </StatCard>
+                <aside class="cfa-readiness__score-card" aria-label="Separate readiness evidence scores">
+                    <div>
+                        <div class="cfa-readiness__eyebrow">Three separate scores</div>
+                        <h2>No blended number.</h2>
+                        <p class="cfa-readiness__score-intro">
+                            Memory, performance, and readiness stay separate so the learner can see whether the risk is recall decay, exam execution, or projected pass confidence.
+                        </p>
+                    </div>
+                    <div class="cfa-readiness__score-stack">
+                        {#each scoreCards as card (card.name)}
+                            <article
+                                class="cfa-readiness__score-mini cfa-stat"
+                                class:abstain={card.band.abstain}
+                            >
+                                <div class="cfa-readiness__score-head">
+                                    <strong class="cfa-stat__label">{card.name}</strong>
+                                    <b>{bandValue(card.band)}</b>
+                                </div>
+                                <small>{card.meaning}</small>
+                                <span class="cfa-readiness__score-sub">{bandSub(card.band)}</span>
+                            </article>
+                        {/each}
+                        <article class="cfa-readiness__score-mini abstain">
+                            <div class="cfa-readiness__score-head">
+                                <strong>Abstain rule</strong><b>No score</b>
+                            </div>
+                            <small>If graded evidence or topic coverage is thin, show the missing reason instead of a fake number.</small>
+                        </article>
+                    </div>
+                    <div class="cfa-readiness__confidence">
+                        {#each chips as chip}
+                            <span
+                                class="cfa-readiness__chip"
+                                class:turq={chip.tone === "turq"}
+                                class:warn={chip.tone === "warn"}
+                            >
+                                {chip.label}
+                            </span>
+                        {/each}
+                    </div>
+                    <p class="cfa-readiness__score-note">
+                        Scores are computed by the local engine from stored reviews, first exposures, graded answers, and topic coverage. AI can explain the result, but must not be required to produce it.
+                    </p>
+                </aside>
+            </div>
+        </section>
+
+        <section class="cfa-readiness__grid cfa-readiness__console-grid">
+            <div class="cfa-readiness__glass-card">
+                <div class="cfa-readiness__card-title">
+                    <div>
+                        <div class="cfa-readiness__eyebrow">Major risk drivers</div>
+                        <h2>The 3 issues most likely to change the result</h2>
+                    </div>
+                    <span class="cfa-readiness__status-pill">Exam-weighted</span>
+                </div>
+                <div class="cfa-readiness__risk-list">
+                    {#if risks.length === 0}
+                        <div class="cfa-readiness__risk">
+                            <div>
+                                <strong>No topic evidence yet</strong>
+                                <small>Start studying to populate exam-weighted risks from the existing readiness engine.</small>
+                            </div>
+                            <span class="cfa-readiness__risk-score high">No score</span>
+                        </div>
+                    {:else}
+                        {#each risks as risk}
+                            <div class="cfa-readiness__risk">
+                                <div>
+                                    <strong>{risk.title}</strong>
+                                    <small>{risk.detail}</small>
+                                </div>
+                                <span
+                                    class="cfa-readiness__risk-score"
+                                    class:high={risk.tone === "high"}
+                                    class:med={risk.tone === "med"}
+                                    class:keep={risk.tone === "keep"}
+                                >
+                                    {risk.label}
+                                </span>
+                            </div>
+                        {/each}
+                    {/if}
+                </div>
+            </div>
+
+            <div class="cfa-readiness__glass-card">
+                <div class="cfa-readiness__card-title">
+                    <div>
+                        <div class="cfa-readiness__eyebrow">Topic readiness</div>
+                        <h2>Coverage and recall evidence</h2>
+                    </div>
+                    <span class="cfa-readiness__status-pill">{pct(data.caption.coveragePct)} exam covered</span>
+                </div>
+                <p class="cfa-readiness__coverage-copy">
+                    Topic evidence exposes weight, reviewed coverage, graded proof, and recall range so high-weight gaps are visible before the learner trusts the readiness call.
+                </p>
+                {#if awaitingRecall}
+                    <p class="cfa-readiness__table-hint">
+                        No reviews yet - per-topic recall appears here after you study. The map below lists every exam area and its weight.
+                    </p>
+                {/if}
+                <div class="cfa-readiness__topic-list cfa-table">
+                    <div class="cfa-readiness__topic header">
+                        <span>Topic</span>
+                        <span>Weight</span>
+                        <span>Reviewed / graded</span>
+                        <span>Recall range</span>
+                        <span>Range</span>
+                    </div>
+                    {#each rows as row (row.topic)}
+                        <div class="cfa-readiness__topic">
+                            <div class="cfa-readiness__topic-name">
+                                <strong>{row.topic}</strong><span>{row.sub}</span>
+                            </div>
+                            <span class="cfa-readiness__topic-stat">{row.weight}</span>
+                            <span class="cfa-readiness__topic-stat">{row.reviewedGraded}</span>
+                            <div class="cfa-readiness__bar" aria-hidden="true">
+                                <i
+                                    class:warn={row.barTone === "warn"}
+                                    class:danger={row.barTone === "danger"}
+                                    style={`width: ${row.barWidth}%`}
+                                ></i>
+                            </div>
+                            <span
+                                class="cfa-readiness__pct"
+                                class:is-warn={row.recallTone === "warn"}
+                                class:is-muted={row.recallTone === "muted"}
+                            >
+                                {row.recall}
+                            </span>
+                        </div>
+                    {/each}
+                </div>
+            </div>
+        </section>
+
+        <section class="cfa-readiness__next-panel">
+            <div class="cfa-readiness__card-title">
+                <div>
+                    <div class="cfa-readiness__eyebrow">What to do next</div>
+                    <h2>Turn readiness into today's plan</h2>
+                </div>
+                <span class="cfa-readiness__status-pill">35 minutes</span>
+            </div>
+            <p>Do not start a broad review. Spend one focused session reducing the risks that move pass likelihood fastest.</p>
+            <div class="cfa-readiness__retention-watch" aria-label="Forgetting watchlist">
+                <div class="cfa-readiness__retention-summary">
+                    <div class="cfa-readiness__eyebrow">Forgetting watchlist</div>
+                    <strong>{watchlist.length || 0} topics</strong>
+                    <span>
+                        Topic-level proxy from current recall ranges. Exact card IDs predicted to fade soon require a backend queue; the action routes to the existing deadline-aware retention flow.
+                    </span>
+                    <div class="cfa-readiness__next-actions compact">
+                        <button type="button" class="cfa-readiness__btn primary small" on:click={() => go("cfa:retention-queue")}>
+                            Pull retention queue
+                        </button>
+                    </div>
+                </div>
+                <div class="cfa-readiness__forget-list">
+                    {#if watchlist.length === 0}
+                        <div class="cfa-readiness__forget-item">
+                            <div><b>No retention evidence yet</b><span>Review cards to populate the forgetting watchlist.</span></div>
+                            <em>No score</em>
+                        </div>
+                    {:else}
+                        {#each watchlist as item}
+                            <div class="cfa-readiness__forget-item">
+                                <div><b>{item.title}</b><span>{item.detail}</span></div>
+                                <em>{item.risk}</em>
+                            </div>
+                        {/each}
+                    {/if}
+                </div>
+            </div>
+            <div class="cfa-readiness__action-plan">
+                {#each plan as item}
+                    <article class="cfa-readiness__action">
+                        <b>{item.title}</b>
+                        <span>{item.detail}</span>
+                        <span class="cfa-readiness__time">{item.time}</span>
+                    </article>
                 {/each}
             </div>
-            <Caption>{captionText(data.caption)}</Caption>
+            <div class="cfa-readiness__next-actions">
+                <button type="button" class="cfa-readiness__btn primary" on:click={() => go("cfa:plan")}>
+                    Begin 35-minute plan
+                </button>
+                <button type="button" class="cfa-readiness__btn secondary" on:click={() => go("cfa:mock-schedule")}>
+                    Schedule full mock
+                </button>
+            </div>
         </section>
 
-        <section class="cfa-readiness__block">
-            <Eyebrow tone="muted">Per-topic recall</Eyebrow>
-            {#if awaitingRecall}
-                <p class="cfa-readiness__table-hint">
-                    No reviews yet — per-topic recall appears here after you study.
-                    The map below lists every exam area and its weight.
-                </p>
-            {/if}
-            <DataTable
-                columns={TOPIC_COLUMNS}
-                {rows}
-                emptyText="No topics studied yet."
-            >
-                <svelte:fragment slot="cell" let:column let:row>
-                    {@const r = row as TopicDisplayRow}
-                    {#if column.key === "recall"}
-                        <span
-                            class="cfa-readiness__recall"
-                            class:is-warn={r.recallTone === "warn"}
-                            class:is-faint={r.recallTone === "muted"}
-                        >
-                            {r.recall}
-                        </span>
-                    {:else if column.key === "topic"}
-                        {r.topic}
-                    {:else if column.key === "weight"}
-                        {r.weight}
-                    {:else if column.key === "reviewed"}
-                        {r.reviewed}
-                    {:else if column.key === "graded"}
-                        {r.graded}
-                    {/if}
-                </svelte:fragment>
-            </DataTable>
-        </section>
-
-        <Caption tone="muted">{data.footerText}</Caption>
-    </div>
+        <div class="cfa-readiness__footer-note">
+            <p><strong>Production note:</strong> {data.footerText} {captionText(data.caption)}</p>
+            <button type="button" class="cfa-readiness__btn secondary small" on:click={() => go("cfa:conceptmap")}>
+                Review coverage map
+            </button>
+        </div>
+    </main>
 </div>
 
 <style lang="scss">
-    @use "../tokens" as cfa;
-
     .cfa-readiness {
-        box-sizing: border-box;
-        width: 100%;
-        padding: cfa.space(7) cfa.space(6);
-        background: cfa.$cfa-page;
-        color: cfa.$cfa-ink;
-        font-family: cfa.$cfa-font-body;
-        font-size: cfa.$cfa-fs-body;
-        font-weight: cfa.$cfa-weight-regular;
-        line-height: cfa.$cfa-lh-body;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
+        --ink: #122b46;
+        --muted: #4d5c6d;
+        --faint: #68707d;
+        --line: rgba(255, 255, 255, 0.72);
+        --pearl: #fbfaf5;
+        --turq: #14b8b1;
+        --turq-deep: #0e9c97;
+        --turq-ink: #064a54;
+        --red: #b42318;
+        --amber: #7a4b08;
+        --green: #15803d;
+        --glass: rgba(255, 255, 255, 0.62);
+        --shadow: 0 28px 90px rgba(5, 59, 69, 0.16);
 
-        :global(*),
-        :global(*::before),
-        :global(*::after) {
+        min-height: 100vh;
+        overflow-x: hidden;
+        color: var(--ink);
+        background:
+            radial-gradient(circle at 12% 0%, rgba(255, 255, 255, 0.96), transparent 23rem),
+            radial-gradient(circle at 86% 8%, rgba(20, 184, 177, 0.22), transparent 28rem),
+            radial-gradient(circle at 56% 70%, rgba(5, 59, 69, 0.16), transparent 34rem),
+            linear-gradient(135deg, var(--pearl) 0%, #eef9f7 42%, #d8f3ef 64%, rgba(5, 59, 69, 0.24) 100%);
+        font-family: var(--cfa-font-body);
+        font-size: 18px;
+        line-height: 1.5;
+        -webkit-font-smoothing: antialiased;
+
+        &::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background:
+                radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.72), transparent 13rem),
+                radial-gradient(circle at 78% 22%, rgba(20, 184, 177, 0.2), transparent 19rem);
+            mix-blend-mode: screen;
+        }
+
+        *,
+        *::before,
+        *::after {
             box-sizing: border-box;
         }
 
-        &__inner {
-            display: flex;
-            flex-direction: column;
-            gap: cfa.space(6);
-            max-width: 820px;
-            margin: 0 auto;
-        }
-
-        // A titled section: an uppercase over-line tight above its content.
-        &__block {
-            display: flex;
-            flex-direction: column;
-            gap: cfa.space(3);
-        }
-
-        // Calm weight-600 emphasis inside the hero lead (never 700 bold).
-        &__em {
-            font-weight: cfa.$cfa-weight-semibold;
-            color: cfa.$cfa-ink;
-        }
-
-        &__muted {
-            color: cfa.$cfa-muted;
-        }
-
-        // Three value-first stat cards, generous gaps, responsive stacking.
-        &__stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: cfa.space(5);
-        }
-
-        // StatCard label slot: the name reads first, the meaning fainter below.
-        &__stat-name {
-            display: block;
-            font-weight: cfa.$cfa-weight-semibold;
-            color: cfa.$cfa-muted;
-        }
-
-        &__stat-meaning {
-            display: block;
-            margin-top: cfa.space(1);
-            font-size: cfa.$cfa-fs-meta;
-            line-height: cfa.$cfa-lh-snug;
-            color: cfa.$cfa-faint-ink;
-        }
-
-        // A single calm hint above the coverage table when no topic has recall
-        // data yet, so a fresh deck reads as "awaiting study" rather than ten
-        // flat identical "no data" rows (D2-5).
-        &__table-hint {
+        h1,
+        h2 {
             margin: 0;
-            font-size: cfa.$cfa-fs-meta;
-            line-height: cfa.$cfa-lh-snug;
-            color: cfa.$cfa-muted;
+            color: #0b2f38;
+            font-family: var(--cfa-font-heading);
         }
 
-        // Recall cell: tabular figures, warn for low/uncovered, faint no-data.
-        &__recall {
-            font-variant-numeric: tabular-nums;
+        h1 {
+            font-size: clamp(38px, 5vw, 66px);
+            line-height: 1.01;
+            letter-spacing: -0.04em;
+        }
 
-            &.is-warn {
-                color: cfa.$cfa-warn;
+        h2 {
+            font-size: clamp(27px, 3vw, 38px);
+            line-height: 1.1;
+        }
+
+        p {
+            margin: 0;
+            color: var(--muted);
+        }
+
+        button {
+            cursor: pointer;
+            font: inherit;
+
+            &:focus-visible {
+                outline: 3px solid rgba(20, 184, 177, 0.36);
+                outline-offset: 2px;
+            }
+        }
+
+        &__page {
+            position: relative;
+            z-index: 1;
+            max-width: 1440px;
+            min-width: 0;
+            margin: 0 auto;
+            padding: 35px 28px 90px;
+        }
+
+        &__appbar {
+            position: sticky;
+            top: 20px;
+            z-index: 30;
+            border: 1px solid var(--line);
+            border-radius: 28px;
+            background: rgba(255, 255, 255, 0.7);
+            box-shadow: 0 14px 50px rgba(5, 59, 69, 0.1);
+            backdrop-filter: blur(22px) saturate(1.25);
+            -webkit-backdrop-filter: blur(22px) saturate(1.25);
+        }
+
+        &__appbar-in {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            min-width: 0;
+            padding: 15px 18px;
+        }
+
+        &__brand {
+            min-width: 0;
+            color: var(--ink);
+            font-family: var(--cfa-font-heading);
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+
+            small {
+                display: block;
+                color: var(--turq-ink);
+                font-family: var(--cfa-font-body);
+                font-size: 11px;
+                font-weight: 700;
+                letter-spacing: 0.16em;
+                text-transform: uppercase;
+            }
+        }
+
+        &__tabs {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            min-width: 0;
+            margin-left: auto;
+
+            button {
+                border: 0;
+                border-radius: 999px;
+                background: transparent;
+                color: var(--muted);
+                padding: 10px 16px;
+                font-size: 16px;
+                font-weight: 700;
+                white-space: nowrap;
+
+                &:hover,
+                &.on {
+                    color: var(--turq-ink);
+                    background: rgba(20, 184, 177, 0.12);
+                    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+                }
+            }
+        }
+
+        &__sync-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            min-width: 0;
+            border: 1px solid rgba(20, 184, 177, 0.22);
+            border-radius: 999px;
+            background: rgba(228, 246, 245, 0.58);
+            color: var(--turq-ink);
+            padding: 10px 15px;
+            font-size: 15px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        &__dot {
+            flex: 0 0 auto;
+            width: 8px;
+            height: 8px;
+            border-radius: 999px;
+            background: var(--turq);
+        }
+
+        &__hero,
+        &__glass-card,
+        &__next-panel {
+            min-width: 0;
+            border: 1px solid var(--line);
+            background: var(--glass);
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.78),
+                0 20px 70px rgba(5, 59, 69, 0.12);
+            backdrop-filter: blur(22px) saturate(1.18);
+            -webkit-backdrop-filter: blur(22px) saturate(1.18);
+        }
+
+        &__hero {
+            position: relative;
+            overflow: hidden;
+            margin-top: 33px;
+            border-radius: 40px;
+            padding: 35px;
+            background:
+                linear-gradient(135deg, rgba(255, 255, 255, 0.86), rgba(255, 255, 255, 0.48)),
+                radial-gradient(circle at 76% 18%, rgba(20, 184, 177, 0.2), transparent 24rem);
+            box-shadow: var(--shadow);
+
+            &::after {
+                content: "";
+                position: absolute;
+                inset: 1px;
+                border-radius: 39px;
+                pointer-events: none;
+                background: linear-gradient(120deg, rgba(255, 255, 255, 0.68), transparent 30%, rgba(255, 255, 255, 0.16));
+                mask: linear-gradient(#000, transparent 70%);
+            }
+        }
+
+        &__hero-grid {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            grid-template-columns: minmax(0, 1.15fr) minmax(300px, 0.85fr);
+            gap: 28px;
+            align-items: stretch;
+        }
+
+        &__eyebrow {
+            color: var(--turq-ink);
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+        }
+
+        &__lede {
+            max-width: 850px;
+            margin-top: 13px;
+            color: var(--muted);
+            font-size: 20px;
+        }
+
+        &__hero-actions,
+        &__next-actions {
+            display: flex;
+            gap: 13px;
+            flex-wrap: wrap;
+            margin-top: 28px;
+        }
+
+        &__next-actions {
+            &.compact {
+                margin-top: 14px;
+            }
+        }
+
+        &__btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 0;
+            border: 1px solid rgba(255, 255, 255, 0.72);
+            border-radius: 18px;
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.78),
+                0 16px 44px rgba(5, 59, 69, 0.1);
+            padding: 15px 19px;
+            text-align: center;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 800;
+
+            &.primary {
+                border-color: rgba(255, 255, 255, 0.84);
+                background: linear-gradient(135deg, #7edbd6, #14b8b1, #0e9c97);
+                color: #fff;
             }
 
-            &.is-faint {
-                color: cfa.$cfa-faint-ink;
+            &.secondary {
+                background: rgba(255, 255, 255, 0.58);
+                color: var(--turq-ink);
+            }
+
+            &.ghost {
+                background: rgba(255, 255, 255, 0.36);
+                color: var(--ink);
+            }
+
+            &.small {
+                border-radius: 15px;
+                padding: 12px 13px;
+                box-shadow:
+                    inset 0 1px 0 rgba(255, 255, 255, 0.72),
+                    0 10px 28px rgba(5, 59, 69, 0.08);
+                font-size: 14px;
+            }
+        }
+
+        &__metric-row {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        &__metric {
+            min-width: 0;
+            border: 1px solid rgba(255, 255, 255, 0.62);
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.46);
+            padding: 14px;
+
+            strong {
+                display: block;
+                color: #0b2f38;
+                font-family: var(--cfa-font-heading);
+                font-size: 28px;
+                line-height: 1;
+            }
+
+            span {
+                display: block;
+                margin-top: 4px;
+                color: var(--muted);
+                font-size: 13px;
+                font-weight: 700;
+            }
+        }
+
+        &__score-card {
+            display: grid;
+            align-content: start;
+            gap: 14px;
+            min-width: 0;
+            border-radius: 30px;
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.8), rgba(228, 246, 245, 0.48));
+            padding: 24px;
+            text-align: left;
+        }
+
+        &__score-intro {
+            margin-top: 7px;
+        }
+
+        &__score-stack {
+            display: grid;
+            gap: 11px;
+            min-width: 0;
+        }
+
+        &__score-mini {
+            display: grid;
+            gap: 5px;
+            min-width: 0;
+            border: 1px solid rgba(255, 255, 255, 0.66);
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.48);
+            padding: 14px;
+
+            b {
+                color: #0b2f38;
+                font-family: var(--cfa-font-heading);
+                font-size: clamp(24px, 3.2vw, 36px);
+                line-height: 1;
+                letter-spacing: -0.03em;
+                white-space: nowrap;
+            }
+
+            strong {
+                color: #0b2f38;
+                font-size: 15px;
+                overflow-wrap: anywhere;
+            }
+
+            small,
+            span {
+                display: block;
+                color: var(--muted);
+                font-size: 13px;
+                font-weight: 700;
+                overflow-wrap: anywhere;
+            }
+
+            &.abstain b {
+                color: var(--amber);
+                font-family: var(--cfa-font-body);
+                font-size: 15px;
+                letter-spacing: 0;
+            }
+        }
+
+        &__score-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            min-width: 0;
+        }
+
+        &__score-sub {
+            opacity: 0.82;
+        }
+
+        &__confidence {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            min-width: 0;
+        }
+
+        &__chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 0;
+            border: 1px solid rgba(255, 255, 255, 0.62);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.46);
+            color: var(--muted);
+            padding: 8px 11px;
+            font-size: 13px;
+            font-weight: 800;
+            overflow-wrap: anywhere;
+
+            &.turq {
+                background: rgba(20, 184, 177, 0.12);
+                color: var(--turq-ink);
+            }
+
+            &.warn {
+                background: rgba(183, 121, 31, 0.12);
+                color: var(--amber);
+            }
+        }
+
+        &__score-note {
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 700;
+            overflow-wrap: anywhere;
+        }
+
+        &__grid {
+            display: grid;
+            gap: 20px;
+            min-width: 0;
+            margin-top: 23px;
+        }
+
+        &__console-grid {
+            grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+            align-items: start;
+        }
+
+        &__glass-card,
+        &__next-panel {
+            border-radius: 28px;
+            padding: 23px;
+        }
+
+        &__card-title {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 15px;
+            min-width: 0;
+            margin-bottom: 15px;
+
+            > div {
+                min-width: 0;
+            }
+        }
+
+        &__status-pill {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 999px;
+            background: rgba(20, 184, 177, 0.12);
+            color: var(--turq-ink);
+            padding: 7px 10px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 800;
+            line-height: 1.2;
+        }
+
+        &__risk-list {
+            display: grid;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        &__risk {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            align-items: center;
+            gap: 15px;
+            min-width: 0;
+            border: 1px solid rgba(255, 255, 255, 0.62);
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.44);
+            padding: 15px;
+
+            strong {
+                display: block;
+                color: #0b2f38;
+                overflow-wrap: anywhere;
+            }
+
+            small {
+                display: block;
+                margin-top: 3px;
+                color: var(--muted);
+                font-size: 15px;
+                overflow-wrap: anywhere;
+            }
+        }
+
+        &__risk-score {
+            border-radius: 999px;
+            padding: 7px 9px;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-size: 13px;
+            font-weight: 700;
+            white-space: nowrap;
+
+            &.high {
+                background: rgba(180, 35, 24, 0.1);
+                color: var(--red);
+            }
+
+            &.med {
+                background: rgba(183, 121, 31, 0.12);
+                color: var(--amber);
+            }
+
+            &.keep {
+                background: rgba(21, 128, 61, 0.1);
+                color: var(--green);
+            }
+        }
+
+        &__coverage-copy,
+        &__table-hint {
+            margin-bottom: 13px;
+            color: var(--muted);
+            font-size: 14px;
+            overflow-wrap: anywhere;
+        }
+
+        &__topic-list {
+            display: grid;
+            gap: 9px;
+            min-width: 0;
+        }
+
+        &__topic {
+            display: grid;
+            grid-template-columns: minmax(135px, 0.82fr) minmax(64px, 0.34fr) minmax(92px, 0.42fr) minmax(0, 1fr) auto;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+            border: 1px solid rgba(255, 255, 255, 0.62);
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.42);
+            padding: 12px;
+
+            &.header {
+                background: rgba(228, 246, 245, 0.38);
+                color: var(--turq-ink);
+                font-size: 12px;
+                font-weight: 800;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+            }
+        }
+
+        &__topic-name {
+            min-width: 0;
+
+            strong {
+                display: block;
+                color: #0b2f38;
+                font-size: 16px;
+                overflow-wrap: anywhere;
+            }
+
+            span {
+                display: block;
+                margin-top: 1px;
+                color: var(--muted);
+                font-size: 13px;
+                font-weight: 700;
+            }
+        }
+
+        &__topic-stat,
+        &__pct {
+            color: var(--muted);
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        &__pct {
+            color: #0b2f38;
+            font-size: 14px;
+
+            &.is-warn {
+                color: var(--amber);
+            }
+
+            &.is-muted {
+                color: var(--faint);
+            }
+        }
+
+        &__bar {
+            min-width: 0;
+            height: 10px;
+            overflow: hidden;
+            border-radius: 999px;
+            background: rgba(233, 237, 241, 0.74);
+            box-shadow: inset 0 1px 2px rgba(5, 59, 69, 0.08);
+
+            i {
+                display: block;
+                height: 100%;
+                border-radius: 999px;
+                background: linear-gradient(90deg, #7edbd6, #0e9c97);
+
+                &.warn {
+                    background: linear-gradient(90deg, #f7d997, #b7791f);
+                }
+
+                &.danger {
+                    background: linear-gradient(90deg, #f7b4ac, #b42318);
+                }
+            }
+        }
+
+        &__next-panel {
+            margin-top: 23px;
+            background:
+                linear-gradient(145deg, rgba(255, 255, 255, 0.76), rgba(228, 246, 245, 0.48)),
+                radial-gradient(circle at 90% 12%, rgba(20, 184, 177, 0.18), transparent 20rem);
+        }
+
+        &__retention-watch {
+            display: grid;
+            grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
+            gap: 14px;
+            min-width: 0;
+            margin-top: 18px;
+        }
+
+        &__retention-summary,
+        &__forget-list {
+            min-width: 0;
+            border: 1px solid rgba(255, 255, 255, 0.66);
+            border-radius: 22px;
+            background: rgba(255, 255, 255, 0.46);
+            padding: 17px;
+        }
+
+        &__retention-summary {
+            strong {
+                display: block;
+                color: #0b2f38;
+                font-family: var(--cfa-font-heading);
+                font-size: clamp(26px, 4vw, 42px);
+                line-height: 1;
+                letter-spacing: -0.03em;
+            }
+
+            span {
+                display: block;
+                margin-top: 7px;
+                color: var(--muted);
+                font-size: 14px;
+                font-weight: 700;
+                overflow-wrap: anywhere;
+            }
+        }
+
+        &__forget-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        &__forget-item {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.42);
+            padding: 11px 12px;
+
+            b {
+                display: block;
+                color: #0b2f38;
+                font-size: 15px;
+                overflow-wrap: anywhere;
+            }
+
+            span {
+                display: block;
+                margin-top: 1px;
+                color: var(--muted);
+                font-size: 13px;
+                font-weight: 700;
+                overflow-wrap: anywhere;
+            }
+
+            em {
+                border-radius: 999px;
+                background: rgba(183, 121, 31, 0.12);
+                color: var(--amber);
+                padding: 6px 8px;
+                font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+                font-size: 12px;
+                font-style: normal;
+                font-weight: 700;
+                white-space: nowrap;
+            }
+        }
+
+        &__action-plan {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 13px;
+            min-width: 0;
+            margin-top: 17px;
+        }
+
+        &__action {
+            min-width: 0;
+            border: 1px solid rgba(255, 255, 255, 0.66);
+            border-radius: 21px;
+            background: rgba(255, 255, 255, 0.48);
+            padding: 16px;
+
+            b {
+                display: block;
+                color: #0b2f38;
+                font-family: var(--cfa-font-heading);
+                font-size: 20px;
+                line-height: 1.16;
+                overflow-wrap: anywhere;
+            }
+
+            span {
+                display: block;
+                margin-top: 7px;
+                color: var(--muted);
+                font-size: 14px;
+                overflow-wrap: anywhere;
+            }
+
+            .cfa-readiness__time {
+                display: inline-flex;
+                border-radius: 999px;
+                background: rgba(20, 184, 177, 0.12);
+                color: var(--turq-ink);
+                padding: 6px 9px;
+                font-size: 12px;
+                font-weight: 800;
+            }
+        }
+
+        &__next-actions {
+            margin-top: 18px;
+        }
+
+        &__footer-note {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            flex-wrap: wrap;
+            min-width: 0;
+            margin-top: 22px;
+            border: 1px solid rgba(255, 255, 255, 0.56);
+            border-radius: 22px;
+            background: rgba(255, 255, 255, 0.34);
+            padding: 18px;
+
+            p {
+                min-width: 0;
+                color: var(--muted);
+                font-size: 15px;
+                overflow-wrap: anywhere;
+            }
+        }
+    }
+
+    @media (max-width: 980px) {
+        .cfa-readiness {
+            &__hero-grid,
+            &__console-grid,
+            &__metric-row,
+            &__action-plan,
+            &__retention-watch {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            &__tabs {
+                margin-left: 0;
+            }
+        }
+    }
+
+    @media (max-width: 720px) {
+        .cfa-readiness {
+            font-size: 17px;
+
+            &__page {
+                padding: 22px 14px 70px;
+            }
+
+            &__hero {
+                border-radius: 30px;
+                padding: 24px;
+
+                &::after {
+                    border-radius: 29px;
+                }
+            }
+
+            &__appbar {
+                top: 10px;
+                border-radius: 22px;
+            }
+
+            &__sync-chip {
+                white-space: normal;
+            }
+
+            &__tabs button {
+                padding: 9px 12px;
+                font-size: 15px;
+            }
+
+            &__topic,
+            &__risk,
+            &__forget-item {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            &__topic.header {
+                display: none;
+            }
+
+            &__risk-score {
+                justify-self: start;
             }
         }
     }
