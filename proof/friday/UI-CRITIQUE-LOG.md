@@ -1004,3 +1004,29 @@ faithful reviewer-body reconstruction over the real stock reviewer CSS): BEFORE 
 bare-white void with bright-green/red/grey traffic-light diff blocks; AFTER the
 card sits on the CFA page tint with the diff shown in calm CFA pass/fail/neutral
 washes — one cohesive CFA study surface.
+
+---
+
+## Pass 4 — D-P4-15: statistics screen (`GraphsPage.svelte`) was pure stock Anki
+
+**Surface:** the Statistics report (opened via the Stats action / `stats.py`
+`load_sveltekit_page("graphs")`). This is stock Anki's biggest reporting
+surface, and it was the largest remaining **100%-stock-Anki SvelteKit page** —
+a bare `--canvas` body void, stock `TitledContainer` card titles (default sans,
+`--border` rules), and a stock `--canvas`/`--border` sticky range selector with
+blue system radios. For a CFA exam-prep product, "how am I tracking" is a core
+view, so a stock-Anki stats page reads as "Anki with a CFA tab."
+
+| # | Severity | Element | Issue | Fix |
+|---|----------|---------|-------|-----|
+| D-P4-15 | MAJOR (design-system consistency / product feel — the core progress surface) | The statistics screen (`GraphsPage.svelte`, `graphs` SvelteKit route) | No CFA identity: bare page canvas, stock card titles, stock blue range-selector radios/borders — the biggest un-themed stock-Anki surface left. | **FIXED (iter 38)** — themed `GraphsPage.svelte` to the CFA design system (mirroring the D-P4-11 congrats pattern): imports `$lib/cfa/theme.scss` + the brand `Eyebrow`, wraps the content in `.cfa-graphs.cfa-app` (CFA **page tint**), adds an `ankiCFA · Level II · Study statistics` eyebrow, and via **scoped** `:global` retones the graph card titles to **serif navy** on CFA hairline edges, the sticky range strip to the CFA **surface** tone with a CFA border, and the range radios/spinner to the **warm accent**. Presentation-only — the d3 charts, data query, `WithGraphData`, and `browserSearch` bridge are untouched; all retones are scoped under `.cfa-graphs` so shared `TitledContainer`/`InputBox` users elsewhere are never restyled, and the dark theme keeps its own tokens (card retone is `.container.light` only). |
+
+**Verification:** `ts/routes/graphs/graphs.test.ts` — 3 source-parse tests
+(theme + eyebrow + `cfa-app` wrapper present; CFA tokens used, scoped under
+`.cfa-graphs`, no bare global `TitledContainer` override; charts/query/bridge
+behaviour preserved), green alongside `congrats.test.ts`. `npx svelte-check`
+passes 0 errors / 0 warnings across 1302 files. **Before/after evidence**
+(`proof/graphs-chrome/graphs-chrome.{html,png}`): BEFORE a bare-white body with
+stock sans card titles and blue system radios; AFTER the CFA page tint, a green
+brand eyebrow, serif-navy card titles on CFA hairlines, and a CFA-toned range
+strip with warm-accent radios — one cohesive CFA statistics surface.
