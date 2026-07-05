@@ -173,7 +173,7 @@ SetCfaExamDate RPC.
         font-size: cfa.$cfa-fs-body;
         color: cfa.$cfa-ink;
         background: cfa.$cfa-bg;
-        border: 1px solid cfa.$cfa-line;
+        border: 1px solid cfa.$cfa-control-border; // AA non-text (WCAG 1.4.11)
         border-radius: cfa.$cfa-radius-block; // 4px, matches the site input
         padding: cfa.space(2) cfa.space(3); // 8px 12px
         line-height: cfa.$cfa-lh-snug;

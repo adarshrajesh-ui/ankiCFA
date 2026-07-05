@@ -201,7 +201,7 @@ pass/fail/warn semantic triad preserved.
             text-align: left;
             cursor: pointer;
             background: cfa.$cfa-bg;
-            border: 1px solid cfa.$cfa-line;
+            border: 1px solid cfa.$cfa-control-border; // AA non-text (WCAG 1.4.11)
             border-radius: cfa.$cfa-radius-block;
             color: cfa.$cfa-ink;
             transition:
@@ -254,7 +254,7 @@ pass/fail/warn semantic triad preserved.
             font-size: cfa.$cfa-fs-meta;
             font-weight: cfa.$cfa-weight-semibold;
             border-radius: cfa.$cfa-radius-pill;
-            border: 1px solid cfa.$cfa-line;
+            border: 1px solid cfa.$cfa-control-border; // AA non-text (WCAG 1.4.11)
             background: cfa.$cfa-bg;
             color: cfa.$cfa-muted;
 

@@ -325,6 +325,21 @@ mobile screen/state) and `proof/friday/UI-CRITIQUE-LOG.md` created.
   green; both populated e2e specs 2/2. Before/after +
   `03-contrast-audit-proof.png` under `desktop-ui/pass-3{,-before}/` +
   `contrast-audit.txt`.
+- **D-P3-2 (MAJOR, accessibility) FIXED (iter 45)** — the ruthless lens extended
+  the *measured* method to **WCAG 2.1 SC 1.4.11 Non-text Contrast** (the boundary
+  that makes a control perceivable, not just text). Finding: the secondary Study
+  CTAs, footer chips and the Deadline date input have a **white fill on the
+  near-white page** and draw their only edge with the decorative hairline
+  `$cfa-line` (#e7e9ec) — **1.22:1 on white / 1.17 / 1.12** vs the **3:1** a
+  control boundary needs, so they **float invisibly**. Parity-safe fix: a new
+  web-only **`$cfa-control-border` (#7e8896)** clears 3:1 as an edge on all three
+  backgrounds (**3.59 / 3.47 / 3.31**) while staying lighter than `$cfa-muted`;
+  repointed the 3 interactive controls, decorative hairlines untouched.
+  `ts/lib/cfa/contrast.test.ts` **16 → 21 vitest (green)** with a 1.4.11 audit
+  block + regression guard; full CFA vitest **33/33**;
+  `check:svelte`/`typescript`/`eslint` green. Device-observable before/after
+  (same populated seed, stash-isolated) + `03-nontext-contrast-proof.png` under
+  `desktop-ui/pass-3-nontext{,-before}/` + `nontext-contrast.txt`.
 
 **Pass 3 mobile — started (iter 44): scientific WCAG AA contrast audit.**
 - **M-P3-1 (MAJOR, accessibility) FIXED** — the ruthless mobile pass opened with

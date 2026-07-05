@@ -41,7 +41,16 @@ $cfa-faint: #939597; // [PARITY] DECORATIVE ONLY (disabled bg / scrollbar / rule
 // AA-compliant text ramp ink > muted > faint-ink. Web-only (not parity-gated;
 // desktop uses `faint` as a disabled-button bg, never as text).
 $cfa-faint-ink: #68707d;
-$cfa-line: #e7e9ec; // [PARITY] hairline borders (--bb-content-border-color)
+$cfa-line: #e7e9ec; // [PARITY] DECORATIVE hairline (card edges / table rules / dividers)
+// AA-safe boundary for INTERACTIVE controls (Pass 3 non-text-contrast audit,
+// WCAG 1.4.11). `$cfa-line` (#e7e9ec) is only ~1.24:1 on white / ~1.21:1 on the
+// page tint — far below the 3:1 a control's boundary needs to be perceivable, so
+// a button or text input whose ONLY edge is the hairline reads as invisible
+// (white-on-near-white). This navy-tinted mid grey clears 3:1 on white/page
+// (~3.60 / ~3.52) as a control edge while staying far lighter than `$cfa-muted`
+// (6.85) so it never competes with text. Web-only (not parity-gated; decorative
+// hairlines correctly stay `$cfa-line`, which 1.4.11 exempts).
+$cfa-control-border: #7e8896;
 $cfa-surface: #f3f6f8; // [PARITY] panels / table stripes (cool section band)
 $cfa-bg: #ffffff; // [PARITY] card / content background
 $cfa-page: #fafbfd; // page tint behind cards (--bb-body-background-color)
@@ -78,6 +87,7 @@ $cfa-colors: (
     "faint": $cfa-faint,
     "faint-ink": $cfa-faint-ink,
     "line": $cfa-line,
+    "control-border": $cfa-control-border,
     "surface": $cfa-surface,
     "bg": $cfa-bg,
     "page": $cfa-page,

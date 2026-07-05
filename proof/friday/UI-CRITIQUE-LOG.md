@@ -504,6 +504,28 @@ check:eslint` all green; the two populated e2e specs still 2/2. **Honesty:** the
 GPT-4o vision critic is still unavailable (no `OPENAI_API_KEY`); the ratios are
 *computed*, which is stronger than a vision opinion for this class of defect.
 
+### D-P3-2 — Interactive control boundaries fail WCAG 1.4.11 (non-text contrast)
+
+The text audit (D-P3-1) checked text-on-background; the ruthless lens then went
+to the *other* half of accessible contrast — the boundary that makes an
+interactive control **perceivable**.
+
+| # | Severity | Element | Issue | Fix |
+|---|----------|---------|-------|-----|
+| D-P3-2 | MAJOR (accessibility) | secondary Study CTAs (`.cfa-home__cta`), footer chips (`.cfa-home__chip`), Deadline date input (`.cfa-deadline__date-input`) | These controls have a **white fill on the near-white page** and draw their only boundary with the DECORATIVE hairline `$cfa-line` (#e7e9ec) — measured **1.22:1 on white / 1.17:1 on page / 1.12:1 on surface**, far below the **3:1** WCAG 2.1 SC **1.4.11** requires for the boundary of an active UI component. The four secondary Study tiles and the two footer chips therefore **float invisibly** (white-on-near-white); a low-vision user can't tell they're tappable. (The primary CTA is exempt — accent-soft fill + accent border. Card edges / table rules / dividers are pure decoration, which 1.4.11 exempts, so they keep the hairline.) | **FIXED (iter 45)** — parity-safe (add a token, never change the parity-gated `$cfa-line` value). New web-only **`$cfa-control-border` (#7e8896)**, a navy-tinted mid grey that clears **3:1 as a control edge on all three backgrounds (3.59 / 3.47 / 3.31)** while staying far lighter than `$cfa-muted` (6.85) so it reads as an edge, never text. Repointed the 3 interactive-control borders; every decorative hairline stays `$cfa-line`. |
+
+**Verification:** `ts/lib/cfa/contrast.test.ts` extended **16 → 21 vitest tests
+(green)** — a new "control-boundary contrast audit (WCAG 2.1 SC 1.4.11)" block:
+DOCUMENTS why `$cfa-line` fails as a control edge (<3:1), asserts the new
+`$cfa-control-border` clears 3:1 on white+page, asserts it stays lighter than
+`$cfa-muted` (an edge, never text), a FIX check (Home CTA+chip ≥2 uses + Deadline
+input) and a **regression guard** that the decorative components (Band /
+DataTable / Hero / StatCard) keep the exempt hairline. Full CFA vitest **33/33**;
+`./ninja check:svelte check:typescript check:eslint` all green. Device-observable
+before/after (same populated seed, stash-isolated) + a FAIL→PASS ratio swatch
+under `desktop-ui/pass-3-nontext{,-before}/` + `nontext-contrast.txt`. **Honesty:**
+ratios are *computed* (sRGB relative luminance), no vision model, no AI in render.
+
 ## Pass 3 — MOBILE (ruthless, pixel-level): accessibility / contrast
 
 Same ruthless lens as the desktop Pass-3 audit, applied to the CFA Android

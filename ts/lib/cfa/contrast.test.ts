@@ -55,6 +55,10 @@ function contrast(a: string, b: string): number {
 
 const AA_BODY = 4.5;
 const AA_LARGE = 3.0;
+// WCAG 2.1 SC 1.4.11 Non-text Contrast: the visual boundary of an active user
+// interface component (button / text input) must reach 3:1 against its adjacent
+// colour so the control is perceivable.
+const AA_NONTEXT = 3.0;
 
 const T = loadTokens();
 // The three light backgrounds a CFA text token can realistically sit on.
@@ -136,6 +140,79 @@ describe("CFA design-token contrast audit (WCAG 2.1 AA)", () => {
             // Match `color: cfa.$cfa-faint;` but NOT `...$cfa-faint-ink;`.
             const bad = /(?<!-)\bcolor:\s*cfa\.\$cfa-faint\s*;/.test(src);
             expect(bad, `${f} colours text with the decorative $cfa-faint`).toBe(false);
+        }
+    });
+});
+
+// -----------------------------------------------------------------------------
+// Pass 3 (ruthless) finding #2 — WCAG 2.1 SC 1.4.11 Non-text Contrast. The text
+// audit above only checked text-on-background; a premium product also owes every
+// user a PERCEIVABLE control boundary. The decorative hairline `$cfa-line`
+// (#e7e9ec) is only ~1.24:1 on white, so an interactive control (secondary CTA,
+// footer chip, date input) whose ONLY edge is the hairline is effectively
+// invisible (white fill on the near-white page). A new AA-safe
+// `$cfa-control-border` clears the 3:1 boundary bar; decorative card edges / table
+// rules / dividers correctly keep the exempt hairline.
+// -----------------------------------------------------------------------------
+describe("CFA control-boundary contrast audit (WCAG 2.1 SC 1.4.11)", () => {
+    test("DOCUMENTS why $cfa-line fails as a control boundary (< 3:1)", () => {
+        // The finding: the hairline is far below the 3:1 a control edge needs on
+        // both the white card fill and the page tint it sits against.
+        expect(contrast(T["line"], T["bg"])).toBeLessThan(AA_NONTEXT);
+        expect(contrast(T["line"], T["page"])).toBeLessThan(AA_NONTEXT);
+    });
+
+    test("the new control-border token clears 3:1 on white and the page tint", () => {
+        expect(T["control-border"]).toBeDefined();
+        expect(
+            contrast(T["control-border"], T["bg"]),
+            `control-border on bg = ${contrast(T["control-border"], T["bg"]).toFixed(2)}:1`,
+        ).toBeGreaterThanOrEqual(AA_NONTEXT);
+        expect(
+            contrast(T["control-border"], T["page"]),
+            `control-border on page = ${contrast(T["control-border"], T["page"]).toFixed(2)}:1`,
+        ).toBeGreaterThanOrEqual(AA_NONTEXT);
+    });
+
+    test("control-border stays lighter than muted (an edge, never text)", () => {
+        // It must be perceivable as a boundary but not so dark it reads as text /
+        // competes with the muted secondary-text token.
+        expect(contrast(T["control-border"], T["bg"])).toBeLessThan(
+            contrast(T["muted"], T["bg"]),
+        );
+    });
+
+    test("FIX: every interactive control uses the AA-safe control edge", () => {
+        // The three controls whose only boundary is a border must draw it with
+        // control-border, not the decorative hairline.
+        const cta = readFileSync(join(here, "pages/CfaHomePage.svelte"), "utf8");
+        const deadline = readFileSync(join(here, "pages/CfaDeadlinePage.svelte"), "utf8");
+        // Home: the secondary CTA + the footer chip (two controls).
+        const homeEdges = cta.match(/border:\s*1px solid cfa\.\$cfa-control-border\b/g) ?? [];
+        expect(homeEdges.length, "Home CTA + chip both use control-border").toBeGreaterThanOrEqual(
+            2,
+        );
+        // Deadline: the date input.
+        expect(/border:\s*1px solid cfa\.\$cfa-control-border\b/.test(deadline)).toBe(true);
+    });
+
+    test("REGRESSION GUARD: decorative components keep the exempt hairline", () => {
+        // 1.4.11 exempts pure decoration — card edges, table rules and dividers
+        // must NOT be darkened to the control edge (that would make the calm
+        // finance-education surface heavy). They keep $cfa-line and never adopt
+        // control-border.
+        const decorative = [
+            "Band.svelte",
+            "DataTable.svelte",
+            "Hero.svelte",
+            "StatCard.svelte",
+        ];
+        for (const f of decorative) {
+            const src = readFileSync(join(here, f), "utf8");
+            expect(
+                /cfa\.\$cfa-control-border\b/.test(src),
+                `${f} must keep the decorative $cfa-line, not the control edge`,
+            ).toBe(false);
         }
     });
 });

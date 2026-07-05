@@ -1,0 +1,76 @@
+Phase B — Pass 3 (ruthless) — DESKTOP finding #2
+WCAG 2.1 SC 1.4.11 Non-text Contrast: interactive control boundaries
+====================================================================
+
+Iteration 45. The Pass-3 text-contrast audit (iter 43) only checked text on
+backgrounds. This finding extends the SAME scientific method (ratios computed
+from the token hex values, no by-eye guessing) to NON-TEXT contrast — the
+boundary that makes an interactive control perceivable.
+
+FINDING (D-P3-2, MAJOR accessibility)
+-------------------------------------
+The CFA web design system draws the boundary of its interactive controls with
+the DECORATIVE hairline token $cfa-line (#e7e9ec):
+  - ts/lib/cfa/pages/CfaHomePage.svelte  .cfa-home__cta   (secondary Study CTAs)
+  - ts/lib/cfa/pages/CfaHomePage.svelte  .cfa-home__chip  (AI / Browse-decks pills)
+  - ts/lib/cfa/pages/CfaDeadlinePage.svelte .cfa-deadline__date-input (date field)
+
+Each control has a WHITE fill (#ffffff) on the near-white page tint (#fafbfd),
+so the hairline border is the ONLY thing that says "this is a control". But the
+hairline measures only:
+  $cfa-line #e7e9ec  vs white  #ffffff : 1.22:1   (FAIL — needs >=3:1)
+  $cfa-line #e7e9ec  vs page   #fafbfd : 1.17:1   (FAIL)
+  $cfa-line #e7e9ec  vs surface#f3f6f8 : 1.12:1   (FAIL)
+WCAG 2.1 SC 1.4.11 requires the visual boundary of an active user interface
+component to reach 3:1. At 1.2:1 the four secondary Study tiles and the two
+footer chips effectively FLOAT — white-on-near-white — so a low-vision user
+cannot tell they are tappable. (The primary CTA is exempt: it has an
+accent-soft fill + accent border. Card edges, table rules and dividers are pure
+decoration, which 1.4.11 explicitly exempts, so they keep the hairline.)
+
+FIX (parity-safe — the iter-26/43 pattern: add a token, never change a
+parity-gated value)
+-------------------------------------------------------------------------------
+New web-only token in ts/lib/cfa/_tokens.scss:
+  $cfa-control-border: #7e8896;  // navy-tinted mid grey
+Measured as a control edge:
+  #7e8896 vs white  #ffffff : 3.59:1   (PASS)
+  #7e8896 vs page   #fafbfd : 3.47:1   (PASS)
+  #7e8896 vs surface#f3f6f8 : 3.31:1   (PASS)
+and far lighter than $cfa-muted (#4d5c6d, 6.85:1 on white) so it reads as an
+EDGE, never as text. Repointed the three interactive-control borders above to
+$cfa-control-border; $cfa-line (parity-gated, byte-identical to cfa_style.py)
+stays on every decorative hairline.
+
+VERIFICATION
+------------
+ts/lib/cfa/contrast.test.ts — extended from 16 to 21 vitest tests. New block
+"CFA control-boundary contrast audit (WCAG 2.1 SC 1.4.11)":
+  - DOCUMENTS why $cfa-line fails as a control boundary (< 3:1 on white + page)
+  - the new control-border token clears 3:1 on white and the page tint
+  - control-border stays lighter than muted (an edge, never text)
+  - FIX: every interactive control uses the AA-safe control edge (Home CTA+chip
+    >=2 uses; Deadline date input 1 use)
+  - REGRESSION GUARD: decorative components (Band/DataTable/Hero/StatCard) must
+    keep the exempt hairline and never adopt control-border
+Run: cd ts && ../out/extracted/node/bin/yarn vitest run lib/cfa/contrast.test.ts
+  -> 21 passed
+Full CFA vitest (lib/cfa): 33 passed (contrast 21 + deadline 7 + readiness 5).
+Gates: ./ninja check:svelte check:typescript check:eslint -> all green
+       (0 errors, 0 warnings, 1293 files).
+
+EVIDENCE (before = pre-fix hairline; after = AA control edge; same populated
+seed, differ ONLY by this fix via stash->rebuild->capture->pop->rebuild)
+-------------------------------------------------------------------------------
+  pass-3-nontext-before/01-cfa-home-populated.png   (tiles + chips float)
+  pass-3-nontext-before/02-cfa-readiness-populated.png
+  pass-3-nontext/01-cfa-home-populated.png          (tiles + chips now edged)
+  pass-3-nontext/02-cfa-readiness-populated.png
+  pass-3-nontext/03-nontext-contrast-proof.png      (FAIL->PASS ratio table)
+
+HONESTY
+-------
+The GPT-4o vision critic is still unavailable (no OPENAI_API_KEY). The ratios
+are COMPUTED from the sRGB relative-luminance formula, which is a stronger,
+drift-proof gate than a vision opinion for this class of defect. No AI was used
+in the render (scores are pure local compute).
