@@ -483,7 +483,40 @@
 
   function renderAiGrade(resp) {
     var box = root.querySelector("#cfa-ai");
-    if (!box || !resp || resp.source !== "ai") return; // only show when AI actually graded
+    if (!box || !resp) return;
+    box.classList.remove("is-off", "is-warn");
+    if (resp.source !== "ai") {
+      // Attribute the grade honestly: "ai_off" (or no error) → deterministic;
+      // any other error → an AI call was attempted and failed.
+      var err = (resp.error || "").toString();
+      if (err === "ai_off" || !err) {
+        box.classList.add("is-off");
+        box.innerHTML =
+          '<div class="cfa-ai-head"><span class="cfa-badge cfa-ai-badge is-off">Deterministic</span>' +
+            "AI grading is off — showing the offline (deterministic) grade</div>" +
+          '<div class="cfa-ai-explain">The grade above is computed offline by the rule-based grader. ' +
+            "Turn on AI grading in Settings for a semantic, paraphrase-tolerant grade that cites the governing Standard.</div>";
+        box.hidden = false;
+        return;
+      }
+      var reasons = {
+        no_api_key: "no OpenAI API key configured",
+        cost_cap_exceeded: "AI cost cap reached",
+        unparseable_response: "unexpected AI response",
+        llm_client_unavailable: "AI module unavailable",
+        empty_completion: "empty AI response",
+        proxy_unreachable: "could not reach the AI proxy"
+      };
+      box.classList.add("is-warn");
+      box.innerHTML =
+        '<div class="cfa-ai-head"><span class="cfa-badge cfa-ai-badge is-warn">AI failed</span>' +
+          "⚠ AI grading failed — showing the deterministic grade</div>" +
+        '<div class="cfa-ai-explain">Reason: ' +
+          esc(reasons[err] || err.replace(/_/g, " ")) +
+          ". The grade above is the exact offline (deterministic) grade.</div>";
+      box.hidden = false;
+      return;
+    }
     var spansHtml = "";
     var ps = resp.per_span || [];
     for (var i = 0; i < ps.length; i++) {

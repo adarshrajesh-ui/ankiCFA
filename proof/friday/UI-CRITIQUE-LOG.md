@@ -782,3 +782,27 @@ loads the **shipped** `_HINT_JS` verbatim, driven in a real browser:
 typing into the back (drop `.empty`) → hint **vanishes**; `configure(0,1,false)`
 (AI off) → hint **vanishes**; and the **reverse** (back filled, front empty) →
 hint appears **in the front field**.
+
+### D-P4-7 — Ethics AI grade is silently un-attributed when AI is off / inconsistent across the two cards (honesty / provenance / objective-fidelity audit)
+
+Pass 4 turns to the ethics reviewer — the other headline AI feature. The
+objective is explicit about provenance: the grade must "**say ai failed if that
+call failed, or if the case turned off then say deterministic**." Both ethics
+card templates violated it, in two different ways.
+
+| ID | Severity | Where | Finding | Fix |
+|----|----------|-------|---------|-----|
+| D-P4-7 | MAJOR (honesty / provenance / objective fidelity) | `cfa/ethics_pairs/templates/front.html` + `passage_front.html` — `renderAiGrade()` | The reveal shows an "AI feedback" block **only when the LLM actually graded** (`source === "ai"`). Every other path was mis-handled: (a) when AI grading is **toggled OFF** (`error === "ai_off"`) `front.html` stayed **silent** — a user could not tell whether the shown grade came from the LLM or the offline rule-based grader (the objective's required "say deterministic" was absent); (b) `passage_front.html` was worse — it returned silently on **both** the off-state **and** a genuine AI failure, so a failed AI call looked identical to a successful one; (c) `front.html`'s Android proxy path **swallowed a failed fetch** (`.catch(function(){})`), so a proxy outage on phone showed no "AI failed" cue at all. Two sibling cards, two different silent behaviours — inconsistent, and neither met the objective's honest-attribution bar. | **FIXED (iter 15)** — `renderAiGrade()` in **both** templates now renders three explicit, visually-distinct states: (1) `source === "ai"` → the navy "AI feedback" block (unchanged); (2) `error === "ai_off"` (or no error) → a calm **muted "Deterministic"** badge + "AI grading is off — showing the offline (deterministic) grade" on a neutral `is-off` surface; (3) any other error → a **warn "AI failed"** badge + "⚠ AI grading failed — showing the deterministic grade. Reason: …" on a warn `is-warn` wash. `front.html`'s Android `.catch` now reports `proxy_unreachable` instead of swallowing it. New `style.css` `.cfa-ai.is-off` / `.cfa-ai.is-warn` (+ badge + night-mode) variants make the three states unmistakable. Presentation-only — the deterministic grade, the byte-mirrored JS graders, scores and the abstain rule are all unchanged. |
+
+**Verification:** `cfa/ethics_pairs/tests/test_ai_provenance.py` (**5 stdlib
+tests, green**, in `just cfa-test`) source-parses BOTH templates + `style.css`:
+each template says "Deterministic" on `ai_off`, says "AI failed" (naming
+`no_api_key` / `unparseable_response` / `llm_client_unavailable`) on a real
+failure, the two old silent-return guards are **gone**, the Android `.catch`
+reports `proxy_unreachable` (no bare swallow), and the CSS carries distinct
+`is-off` / `is-warn` (+ night-mode) provenance styles. Full ethics suite
+**126 passed, 3 skipped**. **Device-observable evidence:**
+`proof/ethics-provenance/provenance.{html,png}` renders each of the three
+`renderAiGrade` branches **verbatim** against the REAL `style.css` — a navy
+"AI FEEDBACK" box, a muted "DETERMINISTIC" (AI-off) box, and a warm "AI FAILED"
+warn box, all three visually distinct.

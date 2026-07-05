@@ -1,0 +1,59 @@
+<!doctype html>
+<!-- Device-observable proof of the Phase-B ethics AI-grade PROVENANCE fix.
+     Each #cfa-ai box below is filled by the EXACT renderAiGrade() branch from
+     the shipped templates (front.html / passage_front.html), so all three
+     honest states render against the REAL style.css. -->
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body { max-width: 720px; margin: 24px auto; padding: 0 16px; }
+    h2 { font-family: var(--cfa-font-serif, serif); color: var(--cfa-ink); margin: 28px 0 6px; }
+    .lbl { color: var(--cfa-muted); font-size: .85rem; margin-bottom: 4px; }
+  </style>
+</head>
+<body>
+  <h1 style="color:#122B46">Ethics AI-grade provenance — all three honest states</h1>
+
+  <h2>1 · AI graded (source === "ai")</h2>
+  <div class="lbl">the LLM ran — semantic grade + named Standard</div>
+  <div class="cfa-ai" id="s1"></div>
+
+  <h2>2 · AI OFF → deterministic (error === "ai_off")</h2>
+  <div class="lbl">the toggle is off — the grade is explicitly attributed to the offline grader</div>
+  <div class="cfa-ai is-off" id="s2"></div>
+
+  <h2>3 · AI failed (any other error)</h2>
+  <div class="lbl">an AI call was attempted and failed — say so, with the reason</div>
+  <div class="cfa-ai is-warn" id="s3"></div>
+
+  <script>
+  function esc(s){return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+
+  // (1) verbatim from renderAiGrade's AI-graded branch
+  document.getElementById("s1").innerHTML =
+    '<div class="cfa-ai-head"><span class="cfa-badge cfa-ai-badge">AI feedback</span>' +
+      "Graded by AI · Standard II(A) Material Nonpublic Information · confidence 88%</div>" +
+    '<div class="cfa-ai-grade">Semantic grade: <b>Partial</b></div>' +
+    '<div class="cfa-ai-explain">You correctly flagged the tip-off but missed that she also traded ahead of clients.</div>' +
+    '<div class="cfa-ai-coach">Name the exact prohibited act next time.</div>';
+
+  // (2) verbatim from the new ai_off branch
+  document.getElementById("s2").innerHTML =
+    '<div class="cfa-ai-head"><span class="cfa-badge cfa-ai-badge is-off">Deterministic</span>' +
+      "AI grading is off — showing the offline (deterministic) grade</div>" +
+    '<div class="cfa-ai-explain">The grade above is computed offline by the rule-based grader. ' +
+      "Turn on AI grading in Settings for a semantic, paraphrase-tolerant grade that cites the governing Standard.</div>";
+
+  // (3) verbatim from the new failure branch
+  var reasons = { no_api_key: "no OpenAI API key configured" };
+  var err = "no_api_key";
+  document.getElementById("s3").innerHTML =
+    '<div class="cfa-ai-head"><span class="cfa-badge cfa-ai-badge is-warn">AI failed</span>' +
+      "⚠ AI grading failed — showing the deterministic grade</div>" +
+    '<div class="cfa-ai-explain">Reason: ' + esc(reasons[err] || err.replace(/_/g," ")) +
+      ". The grade above is the exact offline (deterministic) grade.</div>";
+  </script>
+</body>
+</html>

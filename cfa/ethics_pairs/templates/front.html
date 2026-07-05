@@ -558,8 +558,9 @@
           method: "POST",
           headers: { "Content-Type": "application/json", "Authorization": "Bearer cfa-ai-proxy" },
           body: JSON.stringify(payload)
-        }).then(function (r) { return r.json(); }).then(function (resp) { renderAiGrade(resp); }).catch(function () {});
-      } catch (e) { /* proxy down: deterministic reveal stands */ }
+        }).then(function (r) { return r.json(); }).then(function (resp) { renderAiGrade(resp); })
+          .catch(function () { renderAiGrade({ source: "fallback", error: "proxy_unreachable" }); });
+      } catch (e) { renderAiGrade({ source: "fallback", error: "proxy_unreachable" }); }
       return;
     }
     try {
@@ -570,26 +571,39 @@
   function renderAiGrade(resp) {
     var box = root.querySelector("#cfa-ai");
     if (!box || !resp) return;
+    box.classList.remove("is-off", "is-warn");
     if (resp.source !== "ai") {
-      // AI was ON but the call fell back to the deterministic grade — say so,
-      // with the reason. Stay silent only when AI is intentionally OFF ("ai_off").
+      // The grade is ALWAYS attributed honestly (objective: "say ai failed if
+      // that call failed, or if the case turned off then say deterministic").
+      // "ai_off" is the intentional toggle-off state; any other error is a
+      // failure of an AI call that WAS attempted.
       var err = (resp.error || "").toString();
-      if (err && err !== "ai_off") {
-        var reasons = {
-          no_api_key: "no OpenAI API key configured",
-          cost_cap_exceeded: "AI cost cap reached",
-          unparseable_response: "unexpected AI response",
-          llm_client_unavailable: "AI module unavailable",
-          empty_completion: "empty AI response"
-        };
+      if (err === "ai_off" || !err) {
+        box.classList.add("is-off");
         box.innerHTML =
-          '<div class="cfa-ai-head"><span class="cfa-badge cfa-ai-badge">AI</span>' +
-            "⚠ AI unavailable — showing the deterministic grade</div>" +
-          '<div class="cfa-ai-explain">Reason: ' +
-            esc(reasons[err] || err.replace(/_/g, " ")) +
-            ". The grade above is the exact offline (deterministic) grade.</div>";
+          '<div class="cfa-ai-head"><span class="cfa-badge cfa-ai-badge is-off">Deterministic</span>' +
+            "AI grading is off — showing the offline (deterministic) grade</div>" +
+          '<div class="cfa-ai-explain">The grade above is computed offline by the rule-based grader. ' +
+            "Turn on AI grading in Settings for a semantic, paraphrase-tolerant grade that cites the governing Standard.</div>";
         box.hidden = false;
+        return;
       }
+      var reasons = {
+        no_api_key: "no OpenAI API key configured",
+        cost_cap_exceeded: "AI cost cap reached",
+        unparseable_response: "unexpected AI response",
+        llm_client_unavailable: "AI module unavailable",
+        empty_completion: "empty AI response",
+        proxy_unreachable: "could not reach the AI proxy"
+      };
+      box.classList.add("is-warn");
+      box.innerHTML =
+        '<div class="cfa-ai-head"><span class="cfa-badge cfa-ai-badge is-warn">AI failed</span>' +
+          "⚠ AI grading failed — showing the deterministic grade</div>" +
+        '<div class="cfa-ai-explain">Reason: ' +
+          esc(reasons[err] || err.replace(/_/g, " ")) +
+          ". The grade above is the exact offline (deterministic) grade.</div>";
+      box.hidden = false;
       return;
     }
     // Upgrade the persisted payload's provenance so W5 records the AI source + named Standard.
