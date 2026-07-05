@@ -1030,3 +1030,27 @@ passes 0 errors / 0 warnings across 1302 files. **Before/after evidence**
 stock sans card titles and blue system radios; AFTER the CFA page tint, a green
 brand eyebrow, serif-navy card titles on CFA hairlines, and a CFA-toned range
 strip with warm-accent radios — one cohesive CFA statistics surface.
+
+---
+
+## Pass 4 — D-P4-16: themed statistics page was reachable only from the menu bar
+
+**Surface:** CFA top-bar navigation (`toolbar.py` `_centerLinks`) + the study
+statistics screen (`GraphsPage.svelte`). D-P4-15 themed the graphs page to the
+CFA design system, but it was still opened ONLY via a modal `NewDeckStats`
+QDialog from Anki's menu bar — the CFA top-bar nav (Home / Study / Ethics /
+Concept Map / Readiness) had NO Progress/Stats entry. For a CFA exam-prep
+product, "how am I tracking" is a core, first-class view, so a themed report a
+user can only find by hunting through the menu bar reads as "Anki with a CFA
+tab" — the exact clunk iter 6 killed for Readiness (modal → native state).
+
+| # | Severity | Element | Issue | Fix |
+|---|----------|---------|-------|-----|
+| D-P4-16 | MAJOR (discoverability / product feel — a core progress surface had no place in the product nav) | CFA top-bar nav; the themed graphs page | The statistics screen was reachable only from the menu-bar `Statistics` action (a modal dialog); the CFA nav had no Progress entry, so the core "how am I tracking" view was undiscoverable from the product shell. | **FIXED (iter 39)** — added a native `cfaProgress` main-window state (`qt/aqt/cfa_progress.py`, mirroring `CfaReadiness`) that loads the themed `graphs` page into the MAIN webview, plus a **"Progress" top-bar tab** (`toolbar.py`) that `moveToState("cfaProgress")` and lights up the active-tab pill. The graphs page is self-contained (its own `RangeBox` scope/day-range + search), so it needs no dialog chrome; the page's `browserSearch:` bridge (click a bar → open Browser) is honoured by the state's `_link_handler`, matching the dialog. The menu-bar `Statistics` entry (which adds the deck chooser + Save-PDF) is untouched. |
+
+**Verification:** `qt/tests/test_cfa_progress.py` — 4 tests (state exists +
+dispatched + set up in `main.py`; toolbar exposes the `Progress` tab, active-tab
+map, and native-state handler; the controller loads the `graphs` page; the
+`browserSearch:` bridge opens the Browser filtered to the clicked cards).
+`test_cfa_active_tab.py` map assertion updated to include `cfaProgress`. Full
+`cfa-desktop-shell` suite green (73 passed); `ruff check` clean.

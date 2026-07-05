@@ -34,12 +34,13 @@ def _toolbar(state: str):
     return tb, evals
 
 
-def test_state_tab_mapping_covers_the_three_native_states() -> None:
+def test_state_tab_mapping_covers_the_native_cfa_states() -> None:
     m = toolbar.Toolbar._CFA_STATE_TABS
     assert m == {
         "cfaHome": "cfa_home",
         "cfaConceptMap": "cfa_concept_map",
         "cfaReadiness": "cfa_readiness",
+        "cfaProgress": "cfa_progress",
     }
 
 

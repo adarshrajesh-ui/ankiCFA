@@ -1,0 +1,113 @@
+<!doctype html>
+<!--
+  D-P4-16 proof: Card Info screen (reviewer "More -> Card Info" / Browser
+  sidebar), BEFORE (stock Anki) vs AFTER (CFA design system). Faithful
+  reconstruction of the CardInfo.svelte DOM (stats-table + revlog columns) with
+  the exact shipped CFA token hex values applied. Presentation-only — the same
+  data renders in both panels.
+-->
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  /* CFA design tokens (verbatim from ts/lib/cfa/_tokens.scss) */
+  :root {
+    --cfa-page: #fafbfd;
+    --cfa-ink: #122b46;
+    --cfa-line: #e7e9ec;
+    --cfa-accent: #da5c01;
+    --cfa-fail: #b91c1c;
+    --cfa-muted: #4d5c6d;
+    --cfa-mm-green: #007e56;
+    --font-body: "IBM Plex Sans", -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    --font-heading: "Source Serif 4", Georgia, "Times New Roman", serif;
+  }
+  body { margin: 0; font-family: var(--font-body); background: #eceff3; padding: 24px; }
+  .row { display: flex; gap: 24px; align-items: flex-start; }
+  .panel { flex: 1; border-radius: 6px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+  .cap { font: 600 13px var(--font-body); text-transform: uppercase; letter-spacing: .08em; color: #64748b; margin: 0 0 8px 4px; }
+
+  /* ---------- BEFORE: stock Anki ---------- */
+  .before { background: #fff; padding: 20px 24px; }
+  .before .stats-table { width: 100%; border-collapse: collapse; }
+  .before .stats-table th { text-align: start; font-weight: 700; padding: 3px 0; }
+  .before .stats-table td { padding: 3px 0; }
+  .before .revlog { margin-top: 20px; display: flex; justify-content: space-between; max-width: 40em; }
+  .before .col-head { font-weight: 700; }
+  .before .learn { color: #00a; }     /* --state-new (stock blue) */
+  .before .review { color: #0a0; }    /* --state-review (stock green) */
+  .before .relearn { color: #a00; }   /* --state-learn (stock red) */
+
+  /* ---------- AFTER: CFA design system ---------- */
+  .after { min-height: 100%; background: var(--cfa-page); padding: 20px 24px; }
+  .after .eyebrow {
+    display: inline-block; font: 600 12px var(--font-body);
+    text-transform: uppercase; letter-spacing: .1em; color: var(--cfa-mm-green);
+    margin-bottom: 12px;
+  }
+  .after .stats-table { width: 100%; border-collapse: collapse; }
+  .after .stats-table th {
+    text-align: start; font-family: var(--font-heading); font-weight: 600;
+    color: var(--cfa-ink); padding: 4px 0;
+  }
+  .after .stats-table td { color: var(--cfa-ink); padding: 4px 0; }
+  .after .stats-table tr { border-bottom: 1px solid var(--cfa-line); }
+  .after .revlog { margin-top: 20px; display: flex; justify-content: space-between; max-width: 40em; }
+  .after .col-head { font-family: var(--font-heading); color: var(--cfa-ink); font-weight: 600; }
+  .after .learn { color: var(--cfa-accent); }   /* revlog-learn -> accent */
+  .after .review { color: var(--cfa-ink); }      /* revlog-review -> ink */
+  .after .relearn { color: var(--cfa-fail); }    /* revlog-relearn -> fail-red */
+</style>
+</head>
+<body>
+<div class="row">
+  <div style="flex:1">
+    <p class="cap">Before — stock Anki</p>
+    <div class="panel before">
+      <table class="stats-table"><tbody>
+        <tr><th>Added</th><td>2026-02-14</td></tr>
+        <tr><th>First Review</th><td>2026-02-15</td></tr>
+        <tr><th>Latest Review</th><td>2026-07-02</td></tr>
+        <tr><th>Due</th><td>2026-07-19</td></tr>
+        <tr><th>Interval</th><td>17 days</td></tr>
+        <tr><th>Ease</th><td>250%</td></tr>
+        <tr><th>Reviews</th><td>9</td></tr>
+        <tr><th>Lapses</th><td>1</td></tr>
+        <tr><th>Note Type</th><td>CFA Knowledge</td></tr>
+        <tr><th>Deck</th><td>CFA Level II::Equity</td></tr>
+      </tbody></table>
+      <div class="revlog">
+        <div><div class="col-head">Date</div><div>2026-07-02</div><div>2026-06-20</div><div>2026-06-01</div></div>
+        <div><div class="col-head">Type</div><div class="review">Review</div><div class="learn">Learn</div><div class="relearn">Relearn</div></div>
+        <div><div class="col-head">Rating</div><div>Good</div><div>Good</div><div>Again</div></div>
+        <div><div class="col-head">Interval</div><div>17d</div><div>4d</div><div>10m</div></div>
+      </div>
+    </div>
+  </div>
+  <div style="flex:1">
+    <p class="cap">After — CFA design system</p>
+    <div class="panel after">
+      <span class="eyebrow">ankiCFA · Level II · Card details</span>
+      <table class="stats-table"><tbody>
+        <tr><th>Added</th><td>2026-02-14</td></tr>
+        <tr><th>First Review</th><td>2026-02-15</td></tr>
+        <tr><th>Latest Review</th><td>2026-07-02</td></tr>
+        <tr><th>Due</th><td>2026-07-19</td></tr>
+        <tr><th>Interval</th><td>17 days</td></tr>
+        <tr><th>Ease</th><td>250%</td></tr>
+        <tr><th>Reviews</th><td>9</td></tr>
+        <tr><th>Lapses</th><td>1</td></tr>
+        <tr><th>Note Type</th><td>CFA Knowledge</td></tr>
+        <tr><th>Deck</th><td>CFA Level II::Equity</td></tr>
+      </tbody></table>
+      <div class="revlog">
+        <div><div class="col-head">Date</div><div>2026-07-02</div><div>2026-06-20</div><div>2026-06-01</div></div>
+        <div><div class="col-head">Type</div><div class="review">Review</div><div class="learn">Learn</div><div class="relearn">Relearn</div></div>
+        <div><div class="col-head">Rating</div><div>Good</div><div>Good</div><div>Again</div></div>
+        <div><div class="col-head">Interval</div><div>17d</div><div>4d</div><div>10m</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

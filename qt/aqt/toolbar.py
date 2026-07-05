@@ -318,6 +318,7 @@ class Toolbar:
         "cfaHome": "cfa_home",
         "cfaConceptMap": "cfa_concept_map",
         "cfaReadiness": "cfa_readiness",
+        "cfaProgress": "cfa_progress",
     }
 
     def _update_active_cfa_tab(self) -> None:
@@ -393,9 +394,11 @@ class Toolbar:
 
     def _centerLinks(self) -> str:
         # CFA fork: the top bar reads as a CFA product — Home / Study / Ethics /
-        # Readiness — with Sync kept last (its id="sync"/id="sync-spinner" are
-        # load-bearing). The Anki-centric actions (Add, Browse, Stats) remain
-        # available from the menu bar.
+        # Concept Map / Readiness / Progress — with Sync kept last (its
+        # id="sync"/id="sync-spinner" are load-bearing). The Anki-centric actions
+        # (Add, Browse) remain available from the menu bar; Progress opens the
+        # themed statistics page natively (the menu-bar Statistics entry, which
+        # adds the deck chooser + Save-PDF, is still there too).
         links = [
             self.create_link(
                 "cfa_home",
@@ -431,6 +434,13 @@ class Toolbar:
                 self._cfaReadinessLinkHandler,
                 tip="Exam Readiness report",
                 id="cfa_readiness",
+            ),
+            self.create_link(
+                "cfa_progress",
+                "Progress",
+                self._cfaProgressLinkHandler,
+                tip="Study statistics — reviews, retention, forecast",
+                id="cfa_progress",
             ),
         ]
 
@@ -520,6 +530,9 @@ class Toolbar:
 
     def _cfaReadinessLinkHandler(self) -> None:
         self.mw.moveToState("cfaReadiness")
+
+    def _cfaProgressLinkHandler(self) -> None:
+        self.mw.moveToState("cfaProgress")
 
     def _create_account_link(self) -> str:
         # One context-aware sync-account control (Connect / Log out) built from

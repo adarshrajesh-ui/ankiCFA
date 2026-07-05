@@ -87,6 +87,7 @@ MainWindowState = Literal[
     "cfaHome",
     "cfaConceptMap",
     "cfaReadiness",
+    "cfaProgress",
     "deckBrowser",
     "overview",
     "review",
@@ -250,6 +251,7 @@ class AnkiQt(QMainWindow):
         self.setupCfaHome()
         self.setupCfaConceptMap()
         self.setupCfaReadiness()
+        self.setupCfaProgress()
         self.setupDeckBrowser()
         self.setupOverview()
         self.setupReviewer()
@@ -817,6 +819,17 @@ class AnkiQt(QMainWindow):
             traceback.print_exc()
             self.moveToState("cfaHome")
 
+    def _cfaProgressState(self, oldState: MainWindowState) -> None:
+        # CFA fork: the native in-window study-statistics report (defensive — a
+        # failure must not blank-screen; fall back to the CFA Home dashboard).
+        # The themed graphs page was previously reachable only from Anki's menu
+        # bar; it is now a first-class main-window state like Home / Readiness.
+        try:
+            self.cfaProgress.show()
+        except Exception:
+            traceback.print_exc()
+            self.moveToState("cfaHome")
+
     def _deckBrowserState(self, oldState: MainWindowState) -> None:
         self.deckBrowser.show()
 
@@ -1122,6 +1135,11 @@ title="{}" {}>{}</button>""".format(
         from aqt.cfa_readiness import CfaReadiness
 
         self.cfaReadiness = CfaReadiness(self)
+
+    def setupCfaProgress(self) -> None:
+        from aqt.cfa_progress import CfaProgress
+
+        self.cfaProgress = CfaProgress(self)
 
     def setupDeckBrowser(self) -> None:
         from aqt.deckbrowser import DeckBrowser
