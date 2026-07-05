@@ -26,6 +26,10 @@ class DeckBrowser:
     pass
 
 
+class Overview:
+    pass
+
+
 def test_toolbar_gets_cfa_skin() -> None:
     wc = SimpleNamespace(head="", body="<div class='header'></div>")
     cfa_chrome.on_webview_will_set_content(wc, TopToolbar())
@@ -64,6 +68,32 @@ def test_deckbrowser_keeps_learn_review_count_semantics() -> None:
     # The learned Anki count colours (Learn=red / Review=green) are NOT
     # recoloured — only the stock-blue New count is retoned (matches M5-2/M6-1).
     css = cfa_chrome._deckbrowser_css()
+    assert ".learn-count" not in css
+    assert ".review-count" not in css
+
+
+def test_overview_gets_cfa_skin_and_eyebrow() -> None:
+    # The deck study-intro (Overview) shipped as pure stock Anki; the CFA skin
+    # must retone it (page tint, serif title, navy "Study Now" CTA) and prepend
+    # a brand eyebrow above the deck title.
+    body = "<center><h3>CFA::Ethics</h3></center>"
+    wc = SimpleNamespace(head="", body=body)
+    cfa_chrome.on_webview_will_set_content(wc, Overview())
+    assert "cfa-chrome-overview" in wc.head
+    # brand eyebrow is prepended above the (centred) deck title
+    assert "cfa-overview-eyebrow" in wc.body
+    assert wc.body.index("cfa-overview-eyebrow") < wc.body.index("<center")
+
+
+def test_overview_retones_stock_blue_study_cta_and_count() -> None:
+    # The single primary CTA ("Study Now" / #study) and the "New" count were
+    # stock Anki blue; the CFA skin must retone both to brand navy while leaving
+    # the learned Learn=red / Review=green count semantics untouched.
+    css = cfa_chrome._overview_css()
+    navy = cfa_style.TOKENS["ink"]
+    primary = cfa_style.TOKENS["primary"]
+    assert f".new-count {{ color: {navy} !important; }}" in css
+    assert f"background: {primary} !important;" in css  # #study CTA
     assert ".learn-count" not in css
     assert ".review-count" not in css
 

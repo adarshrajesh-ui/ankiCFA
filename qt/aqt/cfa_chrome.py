@@ -11,6 +11,8 @@ plain Anki:
 * the top toolbar (``TopToolbar`` webview): CFA palette + type, orange hover,
 * the deck list (``DeckBrowser`` webview): CFA page tint + type + a quiet brand
   banner, and a CFA caption via ``deck_browser_will_render_content``.
+* the deck study-intro (``Overview`` webview): CFA page tint + serif deck title
+  + a navy "Study Now" primary CTA (was stock-blue) + a brand eyebrow.
 
 Palette/type come from :data:`aqt.cfa_style.TOKENS` (parity-locked to the web
 ``_tokens.scss``), so the chrome matches the SvelteKit pages exactly. Everything
@@ -139,6 +141,52 @@ def _deckbrowser_css() -> str:
 </style>"""
 
 
+def _overview_css() -> str:
+    t = _t()
+    # The deck study-intro (Overview) is the screen you land on when you pick a
+    # deck or click Study — and it shipped as pure stock Anki: a plain sans deck
+    # title, a stock-blue "New" count, and a stock-blue primary "Study Now"
+    # button (`--button-primary-bg`). Retone it to the CFA design system so the
+    # study-intro reads as a purpose-built CFA screen, not plain Anki.
+    return f"""
+<style id="cfa-chrome-overview">
+  html, body {{
+    background: {t["primary_soft"]} !important;
+    color: {t["ink"]};
+    font-family: {t["font"]};
+  }}
+  h3 {{
+    font-family: {t["font_heading"]};
+    font-size: {t["fs_hero"]}px;
+    font-weight: 600;
+    color: {t["ink"]};
+  }}
+  .descfont, .description {{ color: {t["muted"]} !important; }}
+  a {{ color: {t["ink"]}; }}
+  a:hover {{ color: {t["accent"]}; }}
+  /* Retone the stock-blue "New" count to brand navy (parity with the deck-list
+     D8-1 fix); the learned Learn=red / Review=green count semantics are left
+     untouched. */
+  .new-count {{ color: {t["ink"]} !important; }}
+  /* The single primary CTA on this screen — "Study Now" — was stock Anki blue
+     (`--button-primary-bg`). Retone it to the brand navy pill so the study-intro
+     matches the rest of the CFA product, mirroring the mobile reviewer
+     "Show answer" navy decision (M8-1). */
+  #study {{
+    background: {t["primary"]} !important;
+    color: {t["bg"]} !important;
+    border: none;
+    border-radius: 100px;
+    padding: 10px 28px;
+    font-weight: 600;
+    font-family: {t["font"]};
+  }}
+  #study:hover {{
+    background: {t["primary_hover"]} !important;
+  }}
+</style>"""
+
+
 def _deckbrowser_banner() -> str:
     return (
         '<div class="cfa-deck-banner">'
@@ -148,14 +196,30 @@ def _deckbrowser_banner() -> str:
     )
 
 
+def _overview_eyebrow() -> str:
+    # A quiet centred brand eyebrow above the deck title, so the study-intro
+    # reads unmistakably as an ankiCFA screen (the deck name is the hero below).
+    t = _t()
+    return (
+        '<div class="cfa-overview-eyebrow" style="text-align:center;'
+        "font-weight:700;letter-spacing:.12em;text-transform:uppercase;"
+        f'margin-top:18px;font-size:{t["fs_eyebrow"]}px;color:{t["accent"]}">'
+        "ankiCFA · Level II · Study session</div>"
+    )
+
+
 def on_webview_will_set_content(web_content: Any, context: object | None) -> None:
-    # Fires for every stdHtml webview; only re-skin the toolbar + deck list.
+    # Fires for every stdHtml webview; only re-skin the toolbar + deck list +
+    # the deck study-intro (Overview).
     name = type(context).__name__
     if name == "TopToolbar":
         web_content.head += _toolbar_css()
     elif name == "DeckBrowser":
         web_content.head += _deckbrowser_css()
         web_content.body = _deckbrowser_banner() + web_content.body
+    elif name == "Overview":
+        web_content.head += _overview_css()
+        web_content.body = _overview_eyebrow() + web_content.body
 
 
 def on_deck_browser_will_render_content(deck_browser: Any, content: Any) -> None:

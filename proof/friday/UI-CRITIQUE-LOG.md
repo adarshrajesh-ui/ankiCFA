@@ -821,3 +821,30 @@ the objective's "say deterministic when off" rule was violated on the phone.
 | D-P4-8 | MAJOR (honesty / provenance / parity) | `cfa/ethics_pairs/templates/front.html` (Android branch) + AnkiDroid reviewer | The card's `requestAiGrade` Android branch called `fetch(.../cfa/grade)` regardless of the synced `cfa_ai_enabled`/`cfa_ai_grading_enabled` toggle — the phone had no way to read col.conf from JS, so "AI off" never reached the card. | **FIXED (iter 19)** — AnkiDroid's reviewer (`AbstractFlashcardViewer.updateCard`) now prepends `window.CFA_AI_GRADING_ENABLED` from col.conf via a pure `CfaCardInject.withAiToggle`; `front.html` checks `=== false` **before** the fetch and renders the honest "Deterministic" (`error:"ai_off"`) state with **no network**. `undefined => on`, so older builds/desktop are unaffected. |
 
 **Verification:** desktop `test_ai_provenance.py::test_mobile_grade_honours_the_synced_ai_toggle` green (full ethics suite **130 passed**); mobile `CfaCardInjectTest` (3) + `CfaAiClientTest` (16) green, main sourceset compiles. **Device-observable** (`AnkiDroid/proof/ethics-ai-toggle/gate-proof.{html,png}`, shipped gate driven in a real browser): `toggle=OFF → fetchCalls=0` + Deterministic box shown; `toggle=ON → fetchCalls=1`; `toggle=unset → fetchCalls=1` (back-compat).
+
+### D-P4-9 — Deck study-intro (Overview) shipped as un-themed stock Anki (design-system consistency / "no un-themed stock-Anki screens" audit)
+
+Pass 4 turns from the CFA-native surfaces (Concept Map, Readiness, editor,
+ethics) to the shared **flow** surfaces. Auditing the app as a user who clicks a
+deck or "Study" and lands on the deck study-intro: the CFA chrome hook
+(`cfa_chrome.on_webview_will_set_content`) only re-skinned the top toolbar and
+the deck list — the **Overview** webview between the deck list and the Reviewer
+was never touched, so it rendered as pure stock Anki.
+
+| ID | Severity | Where | Finding | Fix |
+|----|----------|-------|---------|-----|
+| D-P4-9 | MAJOR (design-system consistency / product feel) | `qt/aqt/cfa_chrome.py` `on_webview_will_set_content` — the `Overview` stdHtml webview (`qt/aqt/overview.py`, `css/overview.css`) | The deck study-intro — the screen you land on every time you pick a deck or click **Study**, right before the Reviewer — shipped **100% stock Anki**: a plain sans-serif deck `<h3>`, a stock-**blue** "New" count (`.new-count` → `--state-new` #3b82f6, the exact same leak fixed on the deck list in D8-1), and the single primary CTA — the **"Study Now"** button (`#study` → `--button-primary-bg`, stock Anki blue) — with zero CFA identity on a white `--canvas` page. Between the navy CFA deck list and (on mobile) the navy Reviewer, this middle screen read as a jarring plain-Anki interruption — the objective's explicit "no visibly un-themed stock-Anki screens remain" clunk. | **FIXED (iter 20)** — added an `Overview` branch to `on_webview_will_set_content`: `_overview_css()` tints the page to the CFA `primary_soft`, sets the deck `<h3>` to the brand **serif** heading face in navy, retones the stock-blue **"New" count to brand navy** (parity with D8-1; Learn=red / Review=green count semantics left untouched), and restyles the **"Study Now"** CTA as a **brand-navy pill** with white text (mirroring the mobile reviewer "Show answer" navy decision, M8-1) — so this is the single primary action, unmistakably CFA. `_overview_eyebrow()` prepends a quiet centred accent **"ankiCFA · Level II · Study session"** eyebrow above the deck title. Additive presentation only via a public `gui_hooks` — no stock render code rewritten; the counts, scheduling, and "Study Now" wiring are unchanged. |
+
+**Verification:** `qt/tests/test_cfa_chrome.py` **7 → 9 tests, green**
+(`just cfa-chrome-test`): new guards that the `Overview` context gets the
+`cfa-chrome-overview` style + the brand eyebrow prepended above the (centred)
+deck title, that `_overview_css()` retones the `#study` CTA to brand navy and
+the "New" count to navy, and that the learned Learn/Review count colours are NOT
+touched. **Before/after evidence** (`proof/overview/overview-{before,after}.{html,png}`,
+`just cfa-capture-overview`, screenshot via chrome-devtools-axi over the REAL
+compiled `overview.css` so the stock-blue leaks + the exact `#study`/count
+cascade are faithfully present): BEFORE a white page with a plain-sans title, a
+**stock-blue "20" New count** and a **stock-blue "Study Now"** button; AFTER a
+CFA-tinted page with an accent eyebrow, a **serif navy** deck title, a **navy**
+New count (Learn=red / Review=green preserved), and a **navy pill "Study Now"**
+CTA — one cohesive CFA study-intro.

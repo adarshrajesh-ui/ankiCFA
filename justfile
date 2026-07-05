@@ -302,6 +302,12 @@ cfa-capture-deck-browser out="proof/friday/gnhf-speedrun/desktop-ui/pass-2/d8-de
     {{ ninja }} qt
     QT_QPA_PLATFORM=offscreen PYTHONPATH="out/pylib:pylib:qt:out/qt" {{ py }} tools/cfa/render_deck_browser.py {{ out }}
 
+# Phase B desktop Pass 4: render the CFA-skinned deck study-intro (Overview) to
+# a standalone HTML for capture. Pass --stock for the stock-Anki "before".
+cfa-capture-overview out="proof/overview/overview-after.html":
+    {{ ninja }} qt
+    QT_QPA_PLATFORM=offscreen PYTHONPATH="out/pylib:pylib:qt:out/qt" {{ py }} tools/cfa/render_overview.py {{ out }}
+
 # Phase B desktop Pass 2: render the desktop CFA menu (D11 window chrome) to a
 # PNG (offscreen grab) for before/after capture — grouped labelled sections.
 cfa-capture-cfa-menu out="proof/friday/gnhf-speedrun/desktop-ui/pass-2/d11-cfa-menu.png":
