@@ -603,3 +603,39 @@ dumps + the (unchanged) screen under `AnkiDroid:
 proof/gnhf-speedrun/mobile-ui/pass-3/` (`a11y-tree-readiness-{before,after}.xml`,
 `05-readiness-a11y-after.png`, `a11y-audit.txt`). Green: CFA unit tests,
 `ktlintCheck`, `lintVitalFullRelease`, `installFullDebug`.
+
+### M-P3-3 — Exam-date box is a false affordance (interaction / touch-target audit)
+
+The ruthless lens escalates again — from what a control *says* (M-P3-2) to
+whether a control that *looks* interactive actually *is*. The Exam Config screen
+was audited as a returning learner reaching to set their date.
+
+| ID | Severity | Where | Finding | Fix |
+|----|----------|-------|---------|-----|
+| M-P3-3 | MAJOR (usability / accessibility) | `CfaExamConfigActivity` / `activity_cfa_exam_config.xml` — the exam-date box `cfa_config_date_value` | The date box is styled as a **filled input** (surface bg, 14dp padding, 18sp navy) so it reads as a tappable date field — but it was an **inert `TextView`**: no click handler, no role, empty `content-desc`. The ONLY control that opened the picker was a **separate secondary "Pick date" button** below it. So the obvious target did nothing and the user had to hunt for a second control; a TalkBack user heard only static text. **Nielsen #2 (match system↔real world) / #6 (recognition > recall); Material date-input convention; WCAG 2.1 SC 4.1.2 (Name, Role, Value) & 2.5.5 (Target Size).** | **FIXED (iter 48)** — the box IS the control now: `clickable`+`focusable`, `minHeight=48dp` (Material/WCAG 2.5.5 touch target), a `?attr/selectableItemBackground` ripple foreground, a trailing navy-tinted `calendar_single_day` affordance; tapping it opens the `MaterialDatePicker`. The redundant "Pick date" button (and its orphaned string) removed → exactly one date affordance. New pure `examDateFieldContentDescription()` gives TalkBack a coherent control label + action. Interaction/presentation only — `CfaExamConfig` persistence + countdown untouched. |
+
+**Verification:** `CfaAccessibilityTest.kt` **7 → 11 tests, green** (3 pure
+`examDateFieldContentDescription` cases + a source/layout regression guard that
+asserts the box is clickable/focusable/48dp/ripple, the "Pick date" button id is
+gone from both files, and the activity wires the click + the a11y label).
+**Device-observable** on `emulator-5554`, stash-isolated real debug builds:
+BEFORE the box is `clickable=false` with an empty `content-desc` and a "Pick
+date" button is present (`pass-3-before/05-exam-config-inert-field-before.png`,
+`exam-config-a11y-before.xml`); AFTER the box is `clickable=true` with
+`content-desc="Exam date, not set. Double-tap to choose your exam date."`, no
+"Pick date" button, and **tapping it opens the picker** ("July 2026" / Cancel /
+OK) — `pass-3/05-exam-config-tappable-field-after.png`,
+`06-exam-config-tap-opens-picker-after.png`, `exam-config-a11y-after.xml`,
+`affordance-audit.txt`. Green: CFA unit tests, `ktlintCheck`,
+`lintVitalFullRelease`, `installFullDebug`.
+
+---
+
+**Pass 3 COMPLETE — both apps.** Desktop has **3** ruthless findings (D-P3-1 text
+contrast, D-P3-2 non-text/control-boundary contrast, D-P3-3 use-of-colour/CVD),
+mobile has **3** (M-P3-1 accent-as-text contrast, M-P3-2 screen-reader grouping,
+M-P3-3 false-affordance/touch-target) — all MAJOR, all FIXED, each backed by a
+measured/scientific method (computed contrast ratios, CVD ΔE simulation,
+accessibility-tree dumps, source/layout guards) with committed passing tests and
+genuine before/after evidence. **No BLOCKER or unresolved MAJOR remains in any
+of the three escalating passes on either app.**

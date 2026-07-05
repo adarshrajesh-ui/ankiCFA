@@ -32,7 +32,7 @@ Legend: TODO / WIP / DONE (evidence path) / BLOCKED (root cause).
 |------|---------|--------|-----|
 | 1 (critical) | DONE (CFA web 5 MAJOR + 4 MINOR fixed; Qt chrome → Pass 2) | DONE (all 7 MAJORs fixed) | `UI-CRITIQUE-LOG.md` Pass 1 |
 | 2 (harsher) | DONE (D7 Connect/Logout — named must-fix — FIXED; D9 populated render; D3 Deadline; D4 Ethics reviewer gold-phrase ladder FIXED; D6 AI Settings dialog redesigned FIXED; D8 deck-browser stock-blue leak FIXED; D11 CFA menu grouped into labelled sections FIXED — every D1–D11 surface captured+critiqued) | DONE (M6-1 DeckPicker stock-blue leak FIXED; M7-1 Readiness abstain triple-repeat FIXED; M4-2 Exam-Config context line + live countdown FIXED; M8-1 Reviewer "Show answer" CTA stock-blue→navy FIXED — every mobile surface captured+critiqued) | `UI-CRITIQUE-LOG.md` Pass 2 |
-| 3 (ruthless) | WIP (D-P3-1 text contrast + D-P3-2 non-text contrast + D-P3-3 use-of-color/CVD — all FIXED; 26+10 vitest + e2e guards) | WIP (M-P3-1 WCAG AA contrast → accent-ink/on-navy, 10-test guard; M-P3-2 screen-reader grouping — Readiness cards/rows fragment for TalkBack → coherent content-desc, 7-test guard + uiautomator before/after; both FIXED) | `UI-CRITIQUE-LOG.md` Pass 3 |
+| 3 (ruthless) | DONE (D-P3-1 text contrast + D-P3-2 non-text contrast + D-P3-3 use-of-color/CVD — all FIXED; 26+10 vitest + e2e guards) | DONE (M-P3-1 WCAG AA contrast → accent-ink/on-navy, 10-test guard; M-P3-2 screen-reader grouping — Readiness cards/rows fragment for TalkBack → coherent content-desc; M-P3-3 false-affordance/touch-target — inert exam-date box → tappable 48dp control opening the picker, redundant "Pick date" button removed, 11-test guard + device-observable before/after; all FIXED) | `UI-CRITIQUE-LOG.md` Pass 3 |
 
 Phase B kicked off (iter 25). `proof/friday/UI-INVENTORY.md` (every desktop +
 mobile screen/state) and `proof/friday/UI-CRITIQUE-LOG.md` created.
@@ -385,6 +385,23 @@ mobile screen/state) and `proof/friday/UI-CRITIQUE-LOG.md` created.
   + `contrast-audit.txt`. Green: CFA unit tests, `lintVitalFullRelease`,
   `ktlintCheck`, `installFullDebug`. Committed on `gnhf/speedrun-mobile`
   (`ff9a2632b5`).
+- **M-P3-2 (iter 47):** screen-reader grouping — the Exam Readiness score cards
+  and per-topic rows fragmented into disconnected TalkBack nodes; fixed with
+  coherent `contentDescription`s + focus grouping (WCAG 1.3.1/4.1.2), 7-test
+  guard + `uiautomator` before/after dumps.
+- **M-P3-3 (iter 48) — Pass 3 mobile COMPLETE:** the Exam Config **date box was
+  a false affordance** — styled as a filled input but inert, with the only
+  picker trigger on a separate "Pick date" button. Made the box the tappable
+  control (clickable/focusable, 48dp Material/WCAG-2.5.5 touch target, ripple,
+  calendar affordance, coherent TalkBack label via a new pure
+  `examDateFieldContentDescription`) and **removed the redundant button**.
+  `CfaAccessibilityTest` **7→11** (3 pure + a layout/source regression guard);
+  device-observable before (`clickable=false`, empty content-desc, button
+  present) → after (`clickable=true`, coherent content-desc, no button, **tap
+  opens the picker**) under `mobile-ui/pass-3{,-before}/` + `affordance-audit.txt`.
+  Green: CFA unit tests, `ktlintCheck`, `lintVitalFullRelease`, `installFullDebug`.
+  **Both apps now have 3 ruthless Pass-3 findings, all MAJOR, all FIXED with
+  passing tests + genuine before/after evidence → Phase B Pass 3 COMPLETE.**
 
 Named must-fix: desktop Readiness renders with data (**functional gate DONE** +
 **populated real-range render DONE, iter 32**); **Connect/Logout redesigned
