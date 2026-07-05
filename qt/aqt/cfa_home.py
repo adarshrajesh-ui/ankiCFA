@@ -68,10 +68,6 @@ class CfaHome:
             mw.moveToState("deckBrowser")
         elif url == "cfa:ai":
             open_ai_settings(mw)
-        elif url == "cfa:sync":
-            from aqt.cfa_sync_connect import connect_cfa_sync
-
-            connect_cfa_sync(mw)
         elif url.lower().startswith("http"):
             openLink(url)
         return False

@@ -15,7 +15,6 @@ import threading
 import traceback
 from collections.abc import Callable
 from dataclasses import dataclass
-from datetime import datetime
 from errno import EPROTOTYPE
 from http import HTTPStatus
 from pathlib import Path
@@ -956,59 +955,7 @@ def _cfa_home_payload(col: Collection) -> dict[str, Any]:
     # Home surface only reports the master state; per-feature toggles live in AI
     # settings. Without an API key, features still degrade deterministically.
     payload["aiEnabled"] = bool(col.get_config("cfa_ai_enabled", True))
-    payload["sync"] = _cfa_sync_status_payload()
     return payload
-
-
-def _format_cfa_sync_time(epoch: int | None) -> str:
-    if not epoch:
-        return "Not synced from this desktop yet"
-    try:
-        return datetime.fromtimestamp(int(epoch)).strftime("%b %d, %I:%M %p")
-    except Exception:
-        return "Last sync time unavailable"
-
-
-def _cfa_sync_status_payload() -> dict[str, str | bool]:
-    """Presentation-only sync status for the CFA Home chrome.
-
-    Reads the same profile/account values the toolbar and Preferences use. It
-    does not query or modify the sync engine.
-    """
-    try:
-        mw = aqt.mw
-        logged_in = mw.pm.sync_auth() is not None
-        account = mw.pm.profile.get("syncUser") if mw.pm.profile else None
-        endpoint = mw.pm.sync_endpoint()
-        last_sync_at = (
-            mw.pm.profile.get("cfaLastSyncAt") if mw.pm.profile is not None else None
-        )
-        syncing = mw.media_syncer.is_syncing()
-    except Exception:
-        logged_in = False
-        account = None
-        endpoint = ""
-        last_sync_at = None
-        syncing = False
-
-    if not logged_in:
-        return {
-            "connected": False,
-            "account": "Not connected",
-            "status": "Offline until connected",
-            "lastSynced": "Never synced",
-            "detail": "Use Connect & Sync to link desktop and phone CFA progress.",
-            "actionLabel": "Connect & Sync",
-        }
-
-    return {
-        "connected": True,
-        "account": account or "Sync account connected",
-        "status": "Syncing now" if syncing else "Connected",
-        "lastSynced": _format_cfa_sync_time(last_sync_at),
-        "detail": endpoint or "AnkiWeb sync endpoint",
-        "actionLabel": "Sync now",
-    }
 
 
 def get_cfa_home_view() -> bytes:
