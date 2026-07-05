@@ -1,0 +1,92 @@
+# Copyright: Ankitects Pty Ltd and contributors
+# License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
+
+"""Exam Readiness is a native in-window state, not a bolted-on modal dialog.
+
+Previously the top-bar "Readiness" tab opened ``ExamReadinessDialog(...).exec()``
+— a modal QDialog — while Home / Study / Concept Map were first-class
+main-window states, so Readiness read as a stock-Anki popup. It is now the
+``cfaReadiness`` main-window state: the top-bar tab and the menu-bar entry both
+open the SAME native screen, and the CFA top bar is redrawn so Home is always
+one click away. Fails on stock Anki.
+"""
+
+from __future__ import annotations
+
+import os
+from pathlib import Path
+from types import SimpleNamespace
+
+os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+
+from aqt import cfa_readiness
+
+_REPO = Path(__file__).resolve().parents[2]
+
+
+def test_readiness_is_a_main_window_state() -> None:
+    src = (_REPO / "qt" / "aqt" / "main.py").read_text(encoding="utf-8")
+    # the state exists in the literal, is dispatched, and is set up
+    assert '"cfaReadiness"' in src
+    assert "_cfaReadinessState" in src
+    assert "def setupCfaReadiness" in src
+    assert "self.setupCfaReadiness()" in src
+
+
+def test_show_exam_readiness_routes_to_native_state() -> None:
+    # aqt.cfa.show_exam_readiness now moves to the native state rather than
+    # exec()-ing a modal dialog, so every caller (menu, Home, Concept Map) is
+    # consistent with the top-bar tab.
+    src = (_REPO / "qt" / "aqt" / "cfa.py").read_text(encoding="utf-8")
+    start = src.index("def show_exam_readiness")
+    end = src.index("\ndef ", start + 1)
+    body = src[start:end]
+    assert 'moveToState("cfaReadiness")' in body
+    assert ".exec()" not in body
+
+
+def test_toolbar_readiness_tab_moves_to_native_state() -> None:
+    src = (_REPO / "qt" / "aqt" / "toolbar.py").read_text(encoding="utf-8")
+    start = src.index("def _cfaReadinessLinkHandler")
+    end = src.index("\n    def ", start + 1)
+    body = src[start:end]
+    assert 'moveToState("cfaReadiness")' in body
+
+
+def test_controller_loads_the_readiness_page_for_current_deck() -> None:
+    loaded: list[str] = []
+    web = SimpleNamespace(
+        set_bridge_command=lambda *a: None,
+        load_sveltekit_page=lambda page: loaded.append(page),
+        setFocus=lambda: None,
+    )
+    mw = SimpleNamespace(
+        web=web,
+        toolbar=SimpleNamespace(redraw=lambda: None),
+        col=SimpleNamespace(decks=SimpleNamespace(get_current_id=lambda: 42)),
+    )
+    ctrl = cfa_readiness.CfaReadiness(mw)  # type: ignore[arg-type]
+    ctrl.show()
+    assert loaded == ["cfa-readiness/42"]
+
+
+def test_link_handler_delegates_to_cfa_entry_points(monkeypatch) -> None:
+    from aqt import cfa
+
+    calls: list[str] = []
+    monkeypatch.setattr(cfa, "study_by_exam_priority", lambda mw: calls.append("priority"))
+    monkeypatch.setattr(cfa, "study_ethics_pairs", lambda mw: calls.append("ethics"))
+    monkeypatch.setattr(cfa, "show_deadline", lambda mw: calls.append("deadline"))
+
+    moved: list[str] = []
+    mw = SimpleNamespace(web=object(), moveToState=lambda s: moved.append(s))
+    ctrl = cfa_readiness.CfaReadiness(mw)  # type: ignore[arg-type]
+
+    for cmd in ("cfa:priority", "cfa:ethics", "cfa:deadline"):
+        ctrl._link_handler(cmd)
+    ctrl._link_handler("cfa:conceptmap")
+    ctrl._link_handler("cfa:home")
+    ctrl._link_handler("cfa:decks")
+
+    assert calls == ["priority", "ethics", "deadline"]
+    assert moved == ["cfaConceptMap", "cfaHome", "deckBrowser"]

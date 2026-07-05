@@ -218,8 +218,11 @@ def _connect_cfa_sync(mw: AnkiQt) -> None:
 def show_exam_readiness(mw: AnkiQt) -> None:
     if not mw.col:
         return
-    deck_id = mw.col.decks.get_current_id()
-    ExamReadinessDialog(mw, deck_id).exec()
+    # CFA fork: Exam Readiness is now a first-class main-window state (like Home /
+    # Study / Concept Map) rather than a modal QDialog, so the top-bar "Readiness"
+    # tab and the menu-bar "Exam Readiness…" entry both open the SAME native
+    # in-window screen. ``ExamReadinessDialog`` remains as a defensive fallback.
+    mw.moveToState("cfaReadiness")
 
 
 # =============================================================================

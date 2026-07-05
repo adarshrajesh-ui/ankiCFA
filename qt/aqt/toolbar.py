@@ -470,9 +470,7 @@ class Toolbar:
         aqt.cfa.study_ethics_pairs(self.mw)
 
     def _cfaReadinessLinkHandler(self) -> None:
-        import aqt.cfa
-
-        aqt.cfa.show_exam_readiness(self.mw)
+        self.mw.moveToState("cfaReadiness")
 
     def _create_account_link(self) -> str:
         # One context-aware sync-account control (Connect / Log out) built from
