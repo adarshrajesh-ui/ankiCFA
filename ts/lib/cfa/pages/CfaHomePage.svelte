@@ -102,6 +102,43 @@ pass/fail/warn semantic triad preserved.
             </div>
         </section>
 
+        <section class="cfa-home__block">
+            <Eyebrow tone="muted">Settings & sync</Eyebrow>
+            <div class="cfa-home__sync-card" class:is-connected={data.sync.connected}>
+                <div>
+                    <div class="cfa-home__sync-status">{data.sync.status}</div>
+                    <div class="cfa-home__sync-detail">{data.sync.detail}</div>
+                </div>
+                <dl class="cfa-home__sync-meta">
+                    <div>
+                        <dt>Account</dt>
+                        <dd>{data.sync.account}</dd>
+                    </div>
+                    <div>
+                        <dt>Last synced</dt>
+                        <dd>{data.sync.lastSyncedLabel}</dd>
+                    </div>
+                    <div>
+                        <dt>Server</dt>
+                        <dd>{data.sync.endpoint}</dd>
+                    </div>
+                </dl>
+                <div class="cfa-home__sync-actions">
+                    <button type="button" class="cfa-home__cta is-primary" on:click={() => go("cfa:sync")}>
+                        <span class="cfa-home__cta-label">{data.sync.actionLabel}</span>
+                        <span class="cfa-home__cta-sub">Set up this device or run sync now</span>
+                    </button>
+                    <button
+                        type="button"
+                        class="cfa-home__chip"
+                        on:click={() => go("cfa:sync-settings")}
+                    >
+                        Sync settings
+                    </button>
+                </div>
+            </div>
+        </section>
+
         <div class="cfa-home__foot">
             <button
                 type="button"
@@ -235,6 +272,72 @@ pass/fail/warn semantic triad preserved.
             font-size: cfa.$cfa-fs-meta;
             line-height: cfa.$cfa-lh-snug;
             color: cfa.$cfa-muted;
+        }
+
+        &__sync-card {
+            display: flex;
+            flex-direction: column;
+            gap: cfa.space(4);
+            padding: cfa.space(5);
+            background: cfa.$cfa-bg;
+            border: 1px solid cfa.$cfa-control-border;
+            border-left: 4px solid cfa.$cfa-muted;
+            border-radius: cfa.$cfa-radius-block;
+
+            &.is-connected {
+                border-left-color: cfa.$cfa-pass;
+            }
+        }
+
+        &__sync-status {
+            font-weight: cfa.$cfa-weight-semibold;
+            color: cfa.$cfa-ink;
+        }
+
+        &__sync-detail {
+            margin-top: cfa.space(1);
+            font-size: cfa.$cfa-fs-meta;
+            line-height: cfa.$cfa-lh-snug;
+            color: cfa.$cfa-muted;
+        }
+
+        &__sync-meta {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: cfa.space(3);
+            margin: 0;
+
+            div,
+            dt,
+            dd {
+                margin: 0;
+            }
+
+            dt {
+                font-size: cfa.$cfa-fs-eyebrow;
+                font-weight: cfa.$cfa-weight-semibold;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+                color: cfa.$cfa-faint-ink;
+            }
+
+            dd {
+                margin-top: cfa.space(1);
+                font-size: cfa.$cfa-fs-meta;
+                overflow-wrap: anywhere;
+                color: cfa.$cfa-ink;
+            }
+        }
+
+        &__sync-actions {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: cfa.space(3);
+
+            .cfa-home__cta {
+                flex: 1 1 220px;
+            }
         }
 
         &__foot {

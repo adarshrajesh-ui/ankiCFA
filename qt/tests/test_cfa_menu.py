@@ -42,9 +42,9 @@ def _command_actions(menu) -> list:
     return [a for a in menu.actions() if not a.isSeparator()]
 
 
-def test_cfa_menu_has_eight_actions() -> None:
+def test_cfa_menu_has_seven_actions() -> None:
     _mw, menu = _make_menu()
-    assert len(_command_actions(menu)) == 8
+    assert len(_command_actions(menu)) == 7
 
 
 def test_cfa_menu_action_labels() -> None:
@@ -57,8 +57,7 @@ def test_cfa_menu_action_labels() -> None:
         "Study by Exam Priority",
         "Peak-on-Exam-Day (Deadline)…",
         "AI Settings…",
-        "Connect to CFA Sync server",
-        "Log out of Sync…",
+        "Settings & Sync…",
     ]
 
 
@@ -90,37 +89,39 @@ def test_cfa_menu_sections_order_commands_correctly() -> None:
     assert all(section for section, _ in order)
 
 
-def test_cfa_menu_has_logout_entry_and_handler() -> None:
+def test_cfa_menu_has_settings_sync_entry_and_logout_handler() -> None:
     from aqt import cfa as cfa_mod
 
     _mw, menu = _make_menu()
     labels = [a.text() for a in menu.actions()]
-    assert "Log out of Sync…" in labels
+    assert "Settings & Sync…" in labels
+    assert "Log out of Sync…" not in labels
     assert callable(cfa_mod.logout_of_sync)
 
 
-def test_toolbar_exposes_logout_link() -> None:
-    # The always-visible top bar carries a "Log out" entry right after Sync,
-    # wired to the shared public logout handler.
+def test_toolbar_exposes_sync_settings_link() -> None:
+    # The public logout handler still exists, but the always-visible top bar now
+    # opens the native status/settings dialog instead of showing logout chrome.
     from aqt import cfa as cfa_mod
     from aqt.toolbar import Toolbar
 
-    assert callable(getattr(Toolbar, "_cfaLogoutLinkHandler", None))
+    assert callable(getattr(Toolbar, "_cfaSyncSettingsLinkHandler", None))
     assert callable(cfa_mod.logout_of_sync)
 
 
 def test_toolbar_and_menu_expose_connect_sync() -> None:
-    # One-click "Connect" (top bar) + "Connect to CFA Sync server" (menu) both
-    # route to the shared one-click connector.
+    # One-click connect still exists, but the visible chrome is now the native
+    # Settings & Sync entry so setup/status/logout are one CFA flow.
     from aqt.cfa_sync_connect import connect_cfa_sync
     from aqt.toolbar import Toolbar
 
     assert callable(getattr(Toolbar, "_cfaConnectLinkHandler", None))
+    assert callable(getattr(Toolbar, "_cfaSyncSettingsLinkHandler", None))
     assert callable(connect_cfa_sync)
 
     _mw, menu = _make_menu()
     labels = [a.text() for a in menu.actions()]
-    assert "Connect to CFA Sync server" in labels
+    assert "Settings & Sync…" in labels
 
 
 def test_connect_cfa_sync_configures_and_syncs(monkeypatch) -> None:

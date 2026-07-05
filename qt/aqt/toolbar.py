@@ -446,12 +446,10 @@ class Toolbar:
 
         links.append(self._create_sync_link())
 
-        # CFA fork: a single context-aware sync-account control right after Sync
-        # — "Connect" when logged out, "Log out" when logged in. This replaces
-        # the old always-visible Connect + Log out pair (three sync links in a
-        # row, each shown regardless of state) with one control that reflects
-        # the real login state, so account management never requires a trip
-        # through Preferences > Syncing.
+        # CFA fork: a single context-aware sync/account control right after Sync
+        # — "Connect & Sync" when logged out, "Sync settings" when logged in.
+        # Logout lives inside that native status dialog, so the top chrome reads
+        # as one clear CFA sync action instead of an always-visible exit button.
         links.append(self._create_account_link())
 
         gui_hooks.top_toolbar_did_init_links(links, self)
@@ -548,14 +546,15 @@ class Toolbar:
         except Exception:
             pass
         spec = account_link_spec(logged_in, account)
-        handler = (
-            self._cfaLogoutLinkHandler
-            if spec["cmd"] == "cfa_logout"
-            else self._cfaConnectLinkHandler
-        )
+        handler = self._cfaSyncSettingsLinkHandler
         return self.create_link(
             spec["cmd"], spec["label"], handler, tip=spec["tip"], id=spec["id"]
         )
+
+    def _cfaSyncSettingsLinkHandler(self) -> None:
+        from aqt.cfa_sync_connect import open_sync_settings
+
+        open_sync_settings(self.mw)
 
     def _cfaConnectLinkHandler(self) -> None:
         from aqt.cfa_sync_connect import connect_cfa_sync

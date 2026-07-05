@@ -79,8 +79,8 @@ def test_account_link_spec_logged_out_is_connect() -> None:
     from aqt.cfa_sync_connect import account_link_spec
 
     spec = account_link_spec(False)
-    assert spec["cmd"] == "cfa_connect"
-    assert spec["label"] == "Connect"
+    assert spec["cmd"] == "cfa_sync_settings"
+    assert spec["label"] == "Connect & Sync"
     assert spec["id"] == "cfa_account"
 
 
@@ -88,10 +88,10 @@ def test_account_link_spec_logged_in_is_logout_naming_account() -> None:
     from aqt.cfa_sync_connect import account_link_spec
 
     spec = account_link_spec(True, "cfa")
-    assert spec["cmd"] == "cfa_logout"
-    assert spec["label"] == "Log out"
+    assert spec["cmd"] == "cfa_sync_settings"
+    assert spec["label"] == "Sync settings"
     assert spec["id"] == "cfa_account"
-    # the tip names the signed-in account so it's clear WHICH login logs out
+    # the tip names the signed-in account so it's clear WHICH login is managed
     assert "cfa" in spec["tip"]
 
 
@@ -99,7 +99,7 @@ def test_account_link_spec_logged_in_without_name_is_safe() -> None:
     from aqt.cfa_sync_connect import account_link_spec
 
     spec = account_link_spec(True, None)
-    assert spec["cmd"] == "cfa_logout"
+    assert spec["cmd"] == "cfa_sync_settings"
     assert "your sync account" in spec["tip"]
 
 
@@ -114,26 +114,26 @@ def _toolbar_with_auth(logged_in: bool, user: str | None) -> Toolbar:
 
 
 def test_create_account_link_flips_with_login_state() -> None:
-    # logged out -> the single control is Connect, wired to the connect handler
+    # logged out -> the single control is Connect & Sync, wired to settings/status
     out = _toolbar_with_auth(False, None)
     html = out._create_account_link()
-    assert "pycmd('cfa_connect')" in html
+    assert "pycmd('cfa_sync_settings')" in html
     assert 'id="cfa_account"' in html
-    assert ">Connect</a>" in html
-    assert out.link_handlers["cfa_connect"] == out._cfaConnectLinkHandler
+    assert ">Connect & Sync</a>" in html
+    assert out.link_handlers["cfa_sync_settings"] == out._cfaSyncSettingsLinkHandler
 
-    # logged in -> the SAME control is Log out, wired to the logout handler
+    # logged in -> the SAME control opens status/settings; logout lives inside.
     inn = _toolbar_with_auth(True, "cfa")
     html2 = inn._create_account_link()
-    assert "pycmd('cfa_logout')" in html2
+    assert "pycmd('cfa_sync_settings')" in html2
     assert 'id="cfa_account"' in html2
-    assert ">Log out</a>" in html2
-    assert inn.link_handlers["cfa_logout"] == inn._cfaLogoutLinkHandler
+    assert ">Sync settings</a>" in html2
+    assert inn.link_handlers["cfa_sync_settings"] == inn._cfaSyncSettingsLinkHandler
 
 
 def test_center_links_builds_single_account_control() -> None:
     # The old clunky pair of always-visible create_link("cfa_connect") +
-    # create_link("cfa_logout") is gone; exactly one _create_account_link() is
+    # create_link("cfa_logout") is gone; exactly one settings/status chip is
     # appended after Sync.
     body = _center_links_src()
     assert "_create_account_link()" in body

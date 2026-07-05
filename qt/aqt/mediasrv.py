@@ -941,8 +941,10 @@ def _cfa_scope_name(col: Collection, deck_id: int) -> str:
 def _cfa_home_payload(col: Collection) -> dict[str, Any]:
     """The CFA Home dashboard payload: the SAME three honest scores + Bayesian
     hero the Exam Readiness page shows (parity by reuse), plus the exam
-    countdown and the master AI-toggle state for the dashboard chrome."""
+    countdown, sync status and the master AI-toggle state for the dashboard
+    chrome."""
     from anki import cfa
+    from aqt.cfa_sync_connect import sync_status_payload
 
     # Whole-collection scoring (deck_id=0) so ethics-pair reviews and every other
     # CFA deck impact the Home scores + concept map, matching the phone.
@@ -955,6 +957,7 @@ def _cfa_home_payload(col: Collection) -> dict[str, Any]:
     # Home surface only reports the master state; per-feature toggles live in AI
     # settings. Without an API key, features still degrade deterministically.
     payload["aiEnabled"] = bool(col.get_config("cfa_ai_enabled", True))
+    payload["sync"] = sync_status_payload(getattr(aqt, "mw", None))
     return payload
 
 
