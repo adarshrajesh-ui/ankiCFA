@@ -1,6 +1,8 @@
 // Copyright: Ankitects Pty Ltd and contributors
 // License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
 
+use std::collections::HashMap;
+
 use itertools::Itertools;
 use serde::Deserialize;
 use serde::Serialize;
@@ -160,8 +162,15 @@ impl Collection {
     /// If the provided objects are not modified locally, the USN inside
     /// the individual objects is used.
     pub(in crate::sync) fn apply_chunk(&mut self, chunk: Chunk, pending_usn: Usn) -> Result<()> {
+        let incoming_latest_reviews = latest_reviews_by_card(&chunk.revlog);
+        let local_latest_reviews = self.latest_reviews_for_cards(&chunk.cards)?;
         self.merge_revlog(chunk.revlog)?;
-        self.merge_cards(chunk.cards, pending_usn)?;
+        self.merge_cards(
+            chunk.cards,
+            pending_usn,
+            &incoming_latest_reviews,
+            &local_latest_reviews,
+        )?;
         self.merge_notes(chunk.notes, pending_usn)
     }
 
@@ -172,20 +181,45 @@ impl Collection {
         Ok(())
     }
 
-    fn merge_cards(&self, entries: Vec<CardEntry>, pending_usn: Usn) -> Result<()> {
+    fn merge_cards(
+        &self,
+        entries: Vec<CardEntry>,
+        pending_usn: Usn,
+        incoming_latest_reviews: &HashMap<CardId, RevlogId>,
+        local_latest_reviews: &HashMap<CardId, RevlogId>,
+    ) -> Result<()> {
         for entry in entries {
-            self.add_or_update_card_if_newer(entry, pending_usn)?;
+            self.add_or_update_card_if_newer(
+                entry,
+                pending_usn,
+                incoming_latest_reviews,
+                local_latest_reviews,
+            )?;
         }
         Ok(())
     }
 
-    fn add_or_update_card_if_newer(&self, entry: CardEntry, pending_usn: Usn) -> Result<()> {
+    fn add_or_update_card_if_newer(
+        &self,
+        entry: CardEntry,
+        pending_usn: Usn,
+        incoming_latest_reviews: &HashMap<CardId, RevlogId>,
+        local_latest_reviews: &HashMap<CardId, RevlogId>,
+    ) -> Result<()> {
         let proceed = if let Some(existing_card) = self.storage.get_card(entry.id)? {
-            // If the same card was reviewed offline on both sides within the
-            // same second, both card rows can have identical mtimes. Accept the
-            // incoming row on ties so normal sync converges instead of each side
-            // keeping its own scheduler state. Revlog rows are merged separately.
-            !existing_card.usn.is_pending_sync(pending_usn) || existing_card.mtime <= entry.mtime
+            if !existing_card.usn.is_pending_sync(pending_usn) {
+                true
+            } else if existing_card.mtime != entry.mtime {
+                existing_card.mtime < entry.mtime
+            } else {
+                // Card mtimes have one-second precision. When both devices review
+                // the same card offline in that second, use revlog millisecond IDs
+                // as the scheduler-state tie-breaker while still merging all rows.
+                incoming_review_wins(
+                    incoming_latest_reviews.get(&entry.id),
+                    local_latest_reviews.get(&entry.id),
+                )
+            }
         } else {
             true
         };
@@ -194,6 +228,25 @@ impl Collection {
             self.storage.add_or_update_card(&card)?;
         }
         Ok(())
+    }
+
+    fn latest_reviews_for_cards(&self, entries: &[CardEntry]) -> Result<HashMap<CardId, RevlogId>> {
+        let mut out = HashMap::new();
+        for entry in entries {
+            if let Some(id) = self.latest_review_for_card(entry.id)? {
+                out.insert(entry.id, id);
+            }
+        }
+        Ok(out)
+    }
+
+    fn latest_review_for_card(&self, cid: CardId) -> Result<Option<RevlogId>> {
+        self.storage
+            .db
+            .query_row("select max(id) from revlog where cid = ?", [cid], |row| {
+                row.get(0)
+            })
+            .map_err(Into::into)
     }
 
     fn merge_notes(&mut self, entries: Vec<NoteEntry>, pending_usn: Usn) -> Result<()> {
@@ -309,6 +362,28 @@ impl Collection {
             .collect::<Result<_>>()?;
 
         Ok(chunk)
+    }
+}
+
+fn latest_reviews_by_card(entries: &[RevlogEntry]) -> HashMap<CardId, RevlogId> {
+    let mut out: HashMap<CardId, RevlogId> = HashMap::new();
+    for entry in entries {
+        out.entry(entry.cid)
+            .and_modify(|id| *id = (*id).max(entry.id))
+            .or_insert(entry.id);
+    }
+    out
+}
+
+fn incoming_review_wins(
+    incoming_latest_review: Option<&RevlogId>,
+    local_latest_review: Option<&RevlogId>,
+) -> bool {
+    match (incoming_latest_review, local_latest_review) {
+        (Some(incoming), Some(local)) => incoming >= local,
+        (Some(_), None) => true,
+        (None, Some(_)) => false,
+        (None, None) => true,
     }
 }
 

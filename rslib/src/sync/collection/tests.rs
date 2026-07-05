@@ -296,7 +296,20 @@ async fn cfa_phone_desktop_offline_reviews_roundtrip() -> Result<()> {
     with_active_server(|client| async move {
         let ctx = SyncTestContext::new(client);
         let mut desktop = ctx.col1();
-        let cid = add_cfa_ethics_review_card(&mut desktop)?;
+        let ethics_cid = add_cfa_review_card(
+            &mut desktop,
+            "CFA::Ethics",
+            "los::ethics::sync",
+            "ethics prompt",
+            "ethics answer",
+        )?;
+        let quant_cid = add_cfa_review_card(
+            &mut desktop,
+            "CFA Level II",
+            "los::quant::sync",
+            "quant prompt",
+            "quant answer",
+        )?;
 
         let out = ctx.normal_sync(&mut desktop).await;
         assert!(matches!(
@@ -318,36 +331,47 @@ async fn cfa_phone_desktop_offline_reviews_roundtrip() -> Result<()> {
 
         let mut desktop = ctx.col1();
         let mut phone = ctx.col2();
+        assert_deck_exists(&mut phone, "CFA::Ethics")?;
+        assert_deck_exists(&mut phone, "CFA Level II")?;
         assert!(
-            phone.storage.get_card(cid)?.is_some(),
+            phone.storage.get_card(ethics_cid)?.is_some(),
             "phone received ethics card"
+        );
+        assert!(
+            phone.storage.get_card(quant_cid)?.is_some(),
+            "phone received CFA deck card"
         );
 
         let base_ms = TimestampMillis::now().0 - 60_000;
         let tied_mtime = TimestampSecs::now().0;
-        record_offline_review(&mut desktop, cid, base_ms, 11, 3)?;
-        record_offline_review(&mut phone, cid, base_ms + 1, 21, 1)?;
-        force_card_mtime(&mut desktop, cid, tied_mtime)?;
-        force_card_mtime(&mut phone, cid, tied_mtime)?;
+        record_offline_review(&mut desktop, quant_cid, base_ms, 7, 3)?;
+        record_offline_review(&mut desktop, ethics_cid, base_ms + 10, 11, 3)?;
+        record_offline_review(&mut phone, ethics_cid, base_ms + 11, 21, 1)?;
+        force_card_mtime(&mut desktop, ethics_cid, tied_mtime)?;
+        force_card_mtime(&mut phone, ethics_cid, tied_mtime)?;
 
         // Documented same-card offline merge behavior:
         // * revlog rows are append-only and both device reviews survive exactly once;
-        // * the scheduler/card row uses newer mtime, with exact mtime ties resolved
-        //   toward the side already accepted by the server, so all clients converge.
+        // * the scheduler/card row uses newer mtime, with exact mtime ties resolved by
+        //   the latest revlog millisecond id, so the more recent review wins.
         let out = ctx.normal_sync(&mut desktop).await;
         assert_eq!(out.required, SyncActionRequired::NoChanges);
         let out = ctx.normal_sync(&mut phone).await;
         assert_eq!(out.required, SyncActionRequired::NoChanges);
-        assert_card_interval(&mut phone, cid, 11)?;
-        assert_revlog_ids(&phone, cid, &[base_ms, base_ms + 1])?;
+        assert_card_interval(&mut phone, quant_cid, 7)?;
+        assert_card_interval(&mut phone, ethics_cid, 21)?;
+        assert_revlog_ids(&phone, quant_cid, &[base_ms])?;
+        assert_revlog_ids(&phone, ethics_cid, &[base_ms + 10, base_ms + 11])?;
 
         let out = ctx.normal_sync(&mut desktop).await;
         assert_eq!(out.required, SyncActionRequired::NoChanges);
-        assert_card_interval(&mut desktop, cid, 11)?;
-        assert_revlog_ids(&desktop, cid, &[base_ms, base_ms + 1])?;
+        assert_card_interval(&mut desktop, quant_cid, 7)?;
+        assert_card_interval(&mut desktop, ethics_cid, 21)?;
+        assert_revlog_ids(&desktop, quant_cid, &[base_ms])?;
+        assert_revlog_ids(&desktop, ethics_cid, &[base_ms + 10, base_ms + 11])?;
 
-        assert_synced_cfa_scores_include_ethics_review(&mut desktop)?;
-        assert_synced_cfa_scores_include_ethics_review(&mut phone)?;
+        assert_synced_cfa_scores_include_roundtripped_reviews(&mut desktop)?;
+        assert_synced_cfa_scores_include_roundtripped_reviews(&mut phone)?;
 
         Ok(())
     })
@@ -610,15 +634,21 @@ fn col1_setup(col: &mut Collection) {
     col.add_note(&mut note, DeckId(1)).unwrap();
 }
 
-fn add_cfa_ethics_review_card(col: &mut Collection) -> Result<CardId> {
-    let mut deck = col.get_or_create_normal_deck("CFA::Ethics")?;
+fn add_cfa_review_card(
+    col: &mut Collection,
+    deck_name: &str,
+    tag: &str,
+    front: &str,
+    back: &str,
+) -> Result<CardId> {
+    let mut deck = col.get_or_create_normal_deck(deck_name)?;
     col.add_or_update_deck(&mut deck)?;
 
     let nt = col.get_notetype_by_name("Basic")?.unwrap();
     let mut note = nt.new_note();
-    note.set_field(0, "ethics prompt")?;
-    note.set_field(1, "ethics answer")?;
-    note.tags.push("los::ethics::sync".into());
+    note.set_field(0, front)?;
+    note.set_field(1, back)?;
+    note.tags.push(tag.into());
     col.add_note(&mut note, deck.id)?;
 
     let cid = col.search_cards(note.id, SortMode::NoOrder)?[0];
@@ -637,6 +667,14 @@ fn add_cfa_ethics_review_card(col: &mut Collection) -> Result<CardId> {
         Ok(())
     })?;
     Ok(cid)
+}
+
+fn assert_deck_exists(col: &mut Collection, name: &str) -> Result<()> {
+    assert!(
+        col.get_deck_id(name)?.is_some(),
+        "synced deck missing: {name}"
+    );
+    Ok(())
 }
 
 fn record_offline_review(
@@ -704,35 +742,63 @@ fn assert_revlog_ids(col: &Collection, cid: CardId, expected: &[i64]) -> Result<
     Ok(())
 }
 
-fn assert_synced_cfa_scores_include_ethics_review(col: &mut Collection) -> Result<()> {
+fn assert_synced_cfa_scores_include_roundtripped_reviews(col: &mut Collection) -> Result<()> {
     let scores = col.compute_cfa_scores(scheduler_pb::ComputeCfaScoresRequest {
         deck_id: 0,
         whole_collection: true,
         now: 0,
     })?;
     let memory = scores.memory.unwrap();
-    let ethics_memory = memory
-        .topics
-        .iter()
-        .find(|topic| topic.topic == "los::ethics")
-        .unwrap();
+    let ethics_memory = cfa_memory_topic(&memory, "los::ethics");
     assert_eq!(
         ethics_memory.graded_reviews, 1,
         "same-card same-day offline reviews count once for CFA memory"
     );
+    let quant_memory = cfa_memory_topic(&memory, "los::quant");
+    assert_eq!(quant_memory.graded_reviews, 1);
+    assert_eq!(memory.graded_reviews, 2);
+
+    let readiness = scores.readiness.unwrap();
+    assert_eq!(readiness.coverage_pct, memory.coverage_pct);
+    assert!(
+        readiness.coverage_pct > 0.0,
+        "synced reviews feed Readiness evidence even while give-up rules abstain"
+    );
 
     let bayesian = scores.bayesian.unwrap();
-    let ethics_bayesian = bayesian
-        .topics
-        .iter()
-        .find(|topic| topic.topic == "los::ethics")
-        .unwrap();
+    let ethics_bayesian = cfa_bayesian_topic(&bayesian, "los::ethics");
     assert!(
         ethics_bayesian.covered,
         "ethics feeds concept-map topic data"
     );
-    assert_eq!(bayesian.first_exposures, 1);
+    assert!(
+        cfa_bayesian_topic(&bayesian, "los::quant").covered,
+        "CFA deck reviews feed concept-map topic data"
+    );
+    assert_eq!(bayesian.first_exposures, 2);
     Ok(())
+}
+
+fn cfa_memory_topic<'a>(
+    memory: &'a scheduler_pb::CfaMemoryScore,
+    topic: &str,
+) -> &'a scheduler_pb::CfaTopicScore {
+    memory
+        .topics
+        .iter()
+        .find(|candidate| candidate.topic == topic)
+        .unwrap()
+}
+
+fn cfa_bayesian_topic<'a>(
+    bayesian: &'a scheduler_pb::CfaBayesianReadiness,
+    topic: &str,
+) -> &'a scheduler_pb::CfaTopicPosterior {
+    bayesian
+        .topics
+        .iter()
+        .find(|candidate| candidate.topic == topic)
+        .unwrap()
 }
 
 async fn upload_download(ctx: &SyncTestContext) -> Result<()> {
