@@ -752,3 +752,33 @@ selection handlers verbatim and is driven in a real browser —
 `selId` goes `null → topic:ethics` (click pins) `→ null` (click same node again,
 toggle unpins), and a separate node pins then **Escape** returns it to `null`
 (`unpin-fix-pinned.png` / `unpin-fix-unpinned.png`).
+
+### D-P4-6 — Desktop "tab-to-fill" has no visible affordance inviting the Tab press (discoverability / feature-parity-with-objective audit)
+
+Pass 4 turns from the Concept Map to the card **editor** — the home of the
+headline "tab-to-fill the back" AI feature. The objective states it precisely:
+"when the front has content, **an affordance invites the user to press Tab** to
+auto-generate the back."
+
+| ID | Severity | Where | Finding | Fix |
+|----|----------|-------|---------|-----|
+| D-P4-6 | MAJOR (discoverability / objective fidelity) | `qt/aqt/cfa_tab_fill.py` — the desktop card editor | `Tab` **was** already bound (a capture-phase `keydown` → `pycmd(cfaTabFill)`, `_TAB_JS`), and there was an "AI Fill" button + `Ctrl+Alt+F` shortcut — but **nothing in the UI told the user Tab does anything**. The button tooltip named only `Ctrl+Alt+F`; the module docstring even wrongly claimed "we leave `Tab` doing its normal job." So the feature was a hidden Easter egg: a user either never discovered it, or was *surprised* when Tab silently drafted a back they meant to type. The objective's required in-context invitation ("an affordance invites the user to press Tab") was **absent**. | **FIXED (iter 14)** — a live, **contextual in-field affordance**: whenever AI is on and exactly one of front/back is filled (mirroring `fill_note`'s bidirectional rule), a subtle hint "✦ Press `Tab` to generate this with AI" renders **inside the empty field**, right where the generated text will land. It keys off the editor's own live `.rich-text-editable.empty` class (light DOM — no shadow-root traversal), so it appears/vanishes **in real time** as the user types and disappears the instant the field gains content or AI is switched off (`_HINT_JS` + a `MutationObserver`; field indices + AI state pushed from Python on `editor_did_load_note` via a new `should_invite` pure rule). On-palette: warm CFA accent `#da5c01` sparkle, muted `#4d5c6d` text, a body-font (never monospace) key-cap. `aria-hidden` since the button tooltip already announces the same phrase. The button tooltip now also names `Tab` first. The stale docstring was corrected. AI-off safe: the hint never appears and nothing calls out. |
+
+**Verification:** `qt/tests/test_cfa_tab_fill.py` **32 → 40 tests, green**
+(`just cfa-tab-fill-test`): new guards on `should_invite` (invite only when
+exactly one side filled; never when AI off; blank-ish front counts as empty),
+the `_HINT_JS` (keys off `.rich-text-editable`/`empty`/`data-index`, renders the
+Tab invitation, uses a `MutationObserver`, is `aria-hidden`, stays on the CFA
+palette with no monospace), `_on_editor_init` injecting the hint scaffolding,
+`_configure_hint` pushing `configure(front,back,aiOn)` (with the AI-on/off and
+single-field-note cases), and `register()` wiring `editor_did_load_note`. Also
+made the pre-existing `..._ai_off_leaves_note_untouched` test tolerant of a
+working local `.env` key (iter 2). **Device-observable evidence:**
+`proof/tab-fill/affordance.html` reconstructs the real editor DOM
+(`.fields > .field-container[data-index] > … > .rich-text-editable.empty`) and
+loads the **shipped** `_HINT_JS` verbatim, driven in a real browser:
+`configure(0,1,true)` → the hint appears **in the back field**
+("✦ Press Tab to generate this with AI", `aria-hidden=true`, `affordance-on.png`);
+typing into the back (drop `.empty`) → hint **vanishes**; `configure(0,1,false)`
+(AI off) → hint **vanishes**; and the **reverse** (back filled, front empty) →
+hint appears **in the front field**.

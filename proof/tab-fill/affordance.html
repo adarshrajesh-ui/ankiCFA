@@ -1,0 +1,31 @@
+<!doctype html><html><head><meta charset="utf-8">
+<style>
+ body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;background:#fafbfd;margin:0;padding:24px;color:#122b46}
+ .fields{display:flex;flex-direction:column;gap:14px;max-width:640px}
+ .field-label{font-size:12px;font-weight:600;color:#4d5c6d;margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em}
+ .field-container{background:#fff;border:1px solid #e3e7ee;border-radius:8px;padding:10px 12px}
+ .editor-field .rich-text-relative{min-height:44px}
+ .rich-text-input{padding:6px}
+ .rich-text-editable{min-height:40px;outline:none;font-size:15px}
+ .rich-text-editable.empty::after{content:"";}
+ h1{font-size:16px;margin:0 0 16px}
+ .meta{color:#4d5c6d;font-size:13px;margin:10px 0 20px}
+</style></head><body>
+<h1>Desktop editor — contextual "Press Tab to generate with AI" affordance (D-P4-6)</h1>
+<div class="meta" id="meta">state: initialising…</div>
+<div class="fields">
+  <div class="field-container" data-index="0">
+    <div class="field-label">Front</div>
+    <div class="editor-field"><div class="rich-text-input"><div class="rich-text-relative">
+      <div class="rich-text-editable" contenteditable="true">What does CFA Standard III(B) Fair Dealing require?</div>
+    </div></div></div>
+  </div>
+  <div class="field-container" data-index="1">
+    <div class="field-label">Back</div>
+    <div class="editor-field"><div class="rich-text-input"><div class="rich-text-relative">
+      <div class="rich-text-editable empty" contenteditable="true"></div>
+    </div></div></div>
+  </div>
+</div>
+<script>(function(){if(window.__cfaTabFill)return;var HID='cfa-tabfill-hint',st={front:null,back:null,aiOn:false},sched=false;function fc(i){return (i===null||i===undefined)?null:document.querySelector('.fields .field-container[data-index="'+i+'"]');}function empt(c){if(!c)return null;var e=c.querySelector('.rich-text-editable');return e?e.classList.contains('empty'):null;}function side(){if(!st.aiOn)return null;var fe=empt(fc(st.front)),be=empt(fc(st.back));if(fe===null||be===null)return null;if(!fe&&be)return st.back;if(fe&&!be)return st.front;return null;}function rm(){var h=document.getElementById(HID);if(h&&h.parentNode)h.parentNode.removeChild(h);}function mk(){var h=document.createElement('div');h.id=HID;h.className='cfa-tabfill-hint';h.setAttribute('aria-hidden','true');h.innerHTML='<span class="cfa-tabfill-spark">\u2726</span> Press <kbd>Tab</kbd> to generate this with AI';return h;}function render(){var idx=side();if(idx===null){rm();return;}var c=fc(idx),host=c&&(c.querySelector('.rich-text-relative')||c.querySelector('.editor-field')||c);if(!host){rm();return;}var h=document.getElementById(HID)||mk();try{if(getComputedStyle(host).position==='static')host.style.position='relative';}catch(_){}if(h.parentNode!==host)host.appendChild(h);}function sch(){if(sched)return;sched=true;setTimeout(function(){sched=false;render();},0);}var obs=new MutationObserver(sch);function obsv(){var f=document.querySelector('.fields');if(f)obs.observe(f,{subtree:true,childList:true,attributes:true,attributeFilter:['class']});}if(!document.getElementById('cfa-tabfill-style')){var s=document.createElement('style');s.id='cfa-tabfill-style';s.textContent='.cfa-tabfill-hint{position:absolute;left:8px;bottom:6px;pointer-events:none;font-size:12px;line-height:1;color:#4d5c6d;display:flex;align-items:center;gap:5px;opacity:.92;z-index:5}.cfa-tabfill-hint .cfa-tabfill-spark{color:#da5c01;font-size:13px}.cfa-tabfill-hint kbd{font:inherit;border:1px solid var(--border,#d5d9e0);border-radius:4px;padding:0 5px;background:var(--canvas-elevated,#f1f3f7);color:#122b46}';document.head.appendChild(s);}window.__cfaTabFill={configure:function(f,b,ai){st.front=(f===null||f===undefined)?null:Number(f);st.back=(b===null||b===undefined)?null:Number(b);st.aiOn=!!ai;obsv();sch();}};obsv();})();</script>
+</body></html>

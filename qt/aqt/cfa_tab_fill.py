@@ -3,28 +3,32 @@
 
 """F3 — AI "tab-to-fill" card backs in the desktop editor.
 
-When the front of a note has content and the back is empty, a visible editor
-button (and the ``Ctrl+Alt+F`` shortcut) drafts the back with the LLM, inserts
-it into the back field, and tags the note ``ai-generated`` so the provenance is
-always recorded.
+When exactly one of a note's front / back has content and the other is empty, a
+contextual **affordance appears inside the empty field** ("✦ Press Tab to
+generate this with AI") inviting the user to press ``Tab``; pressing ``Tab``
+(or the ``Ctrl+Alt+F`` shortcut, or the always-visible "AI Fill" button) drafts
+the empty side with the LLM, inserts it, and tags the note ``ai-generated`` so
+the provenance is always recorded.
 
 Design rules (from the project objective):
 
 * **AI OFF must be safe.** With no ``OPENAI_API_KEY`` the button renders
-  *disabled* with an explanatory tooltip and never calls out. Availability is
-  decided by :func:`cfa.ai.llm_client.ai_enabled` (key presence only, no call).
+  *disabled* with an explanatory tooltip, the Tab affordance never appears, and
+  nothing calls out. Availability is decided by
+  :func:`cfa.ai.llm_client.ai_enabled` (key presence only, no call).
 * **Never destroy work.** A non-empty back is only overwritten after the user
   confirms; an empty front is refused with a tooltip.
 * **Additive + testable.** All the real logic lives in pure functions
-  (:func:`draft_back`, :func:`fill_note_back`) that take an injected completion
-  function and a plain note-like object, so they unit-test without a live
-  editor, webview, or network. The editor wiring is a thin adapter.
+  (:func:`draft_back`, :func:`fill_note_back`, :func:`should_invite`) that take
+  an injected completion function and a plain note-like object, so they unit-test
+  without a live editor, webview, or network. The editor wiring is a thin adapter.
 
-Shortcut note (documented tradeoff): the objective calls this "tab-to-fill",
-but binding the raw ``Tab`` key in the rich-text editor would hijack field
-navigation — a real regression. We therefore bind a dedicated ``Ctrl+Alt+F``
-shortcut plus the always-visible button, and leave ``Tab`` doing its normal
-job. Same one-keystroke "fill the back" intent, no lost navigation.
+Tab-key note: the objective calls this "tab-to-fill", so ``Tab`` IS bound (a
+capture-phase ``keydown`` listener fires the fill, see ``_TAB_JS``). We do NOT
+``preventDefault``, so ``Tab`` still navigates fields normally; the Python
+handler no-ops unless exactly one of front/back is filled, so firing on every
+Tab is safe. The contextual in-field hint (``_HINT_JS``) is what makes the
+gesture discoverable rather than a hidden Easter egg.
 """
 
 from __future__ import annotations
@@ -456,10 +460,100 @@ _TAB_JS = (
 )
 
 
+# --- contextual Tab affordance (editor JS) ----------------------------------
+
+# The objective requires that "an affordance invites the user to press Tab" —
+# the Tab binding above is invisible on its own. This installs a live,
+# contextual hint that appears INSIDE the empty field (front or back) exactly
+# when the other side is filled and AI is on, so the user is invited to press
+# Tab right where the generated text will land. It reads emptiness from the
+# editor's own live `.rich-text-editable.empty` class (light DOM — no shadow
+# traversal), so it tracks typing in real time and vanishes the moment the field
+# gains content or AI is off. Purely presentational; it never calls out.
+_HINT_ID = "cfa-tabfill-hint"
+
+_HINT_JS = (
+    "(function(){if(window.__cfaTabFill)return;"
+    "var HID='" + _HINT_ID + "',st={front:null,back:null,aiOn:false},sched=false;"
+    "function fc(i){return (i===null||i===undefined)?null:"
+    "document.querySelector('.fields .field-container[data-index=\"'+i+'\"]');}"
+    "function empt(c){if(!c)return null;var e=c.querySelector('.rich-text-editable');"
+    "return e?e.classList.contains('empty'):null;}"
+    "function side(){if(!st.aiOn)return null;var fe=empt(fc(st.front)),be=empt(fc(st.back));"
+    "if(fe===null||be===null)return null;if(!fe&&be)return st.back;if(fe&&!be)return st.front;return null;}"
+    "function rm(){var h=document.getElementById(HID);if(h&&h.parentNode)h.parentNode.removeChild(h);}"
+    "function mk(){var h=document.createElement('div');h.id=HID;h.className='cfa-tabfill-hint';"
+    "h.setAttribute('aria-hidden','true');"
+    "h.innerHTML='<span class=\"cfa-tabfill-spark\">\\u2726</span> Press <kbd>Tab</kbd> to generate this with AI';"
+    "return h;}"
+    "function render(){var idx=side();if(idx===null){rm();return;}"
+    "var c=fc(idx),host=c&&(c.querySelector('.rich-text-relative')||c.querySelector('.editor-field')||c);"
+    "if(!host){rm();return;}var h=document.getElementById(HID)||mk();"
+    "try{if(getComputedStyle(host).position==='static')host.style.position='relative';}catch(_){}"
+    "if(h.parentNode!==host)host.appendChild(h);}"
+    "function sch(){if(sched)return;sched=true;setTimeout(function(){sched=false;render();},0);}"
+    "var obs=new MutationObserver(sch);"
+    "function obsv(){var f=document.querySelector('.fields');"
+    "if(f)obs.observe(f,{subtree:true,childList:true,attributes:true,attributeFilter:['class']});}"
+    "if(!document.getElementById('cfa-tabfill-style')){var s=document.createElement('style');"
+    "s.id='cfa-tabfill-style';s.textContent='.cfa-tabfill-hint{position:absolute;left:8px;bottom:6px;"
+    "pointer-events:none;font-size:12px;line-height:1;color:#4d5c6d;display:flex;align-items:center;"
+    "gap:5px;opacity:.92;z-index:5}.cfa-tabfill-hint .cfa-tabfill-spark{color:#da5c01;font-size:13px}"
+    ".cfa-tabfill-hint kbd{font:inherit;border:1px solid var(--border,#d5d9e0);border-radius:4px;"
+    "padding:0 5px;background:var(--canvas-elevated,#f1f3f7);color:#122b46}';"
+    "document.head.appendChild(s);}"
+    "window.__cfaTabFill={configure:function(f,b,ai){st.front=(f===null||f===undefined)?null:Number(f);"
+    "st.back=(b===null||b===undefined)?null:Number(b);st.aiOn=!!ai;obsv();sch();}};obsv();})();"
+)
+
+
+def should_invite(front_html: str, back_html: str, ai_enabled: bool) -> Optional[str]:
+    """Which side to invite a Tab-fill on: ``"front"``, ``"back"``, or ``None``.
+
+    Pure mirror of the in-field affordance's JS logic and of :func:`fill_note`'s
+    bidirectional rule: the hint appears in the EMPTY side only when AI is on and
+    exactly one of front/back is filled. Both-filled or both-empty → no invite.
+    """
+    if not ai_enabled:
+        return None
+    front_empty = _is_blank(front_html)
+    back_empty = _is_blank(back_html)
+    if not front_empty and back_empty:
+        return "back"
+    if front_empty and not back_empty:
+        return "front"
+    return None
+
+
+def _configure_hint(editor: Any) -> None:
+    """gui_hooks.editor_did_load_note: tell the webview which fields are the
+    front/back and whether AI is on, so the contextual Tab hint can render."""
+    note = getattr(editor, "note", None)
+    if note is None:
+        return
+    try:
+        front_idx, back_idx = find_field_indices(note)
+    except Exception:  # pragma: no cover - defensive
+        return
+    ai_on = _ai_enabled() and front_idx != back_idx
+    front_js = "null" if front_idx == back_idx else str(front_idx)
+    back_js = "null" if front_idx == back_idx else str(back_idx)
+    js = (
+        "window.__cfaTabFill&&window.__cfaTabFill.configure("
+        f"{front_js},{back_js},{'true' if ai_on else 'false'});"
+    )
+    try:
+        editor.web.eval(js)
+    except Exception:  # pragma: no cover - defensive; never break note load
+        pass
+
+
 def _on_editor_init(editor: Any) -> None:
-    """gui_hooks.editor_did_init: install the Tab-key trigger in the webview."""
+    """gui_hooks.editor_did_init: install the Tab-key trigger + contextual hint
+    scaffolding in the webview."""
     try:
         editor.web.eval(_TAB_JS)
+        editor.web.eval(_HINT_JS)
     except Exception:  # pragma: no cover - defensive; never break editor init
         pass
 
@@ -489,7 +583,7 @@ def _button_html(enabled: bool) -> str:
     if enabled:
         return (
             f'<button tabindex=-1 class="anki-addon-button linkb" type="button" '
-            f'title="Generate the empty side with AI ({FILL_SHORTCUT})" '
+            f'title="Press Tab (or {FILL_SHORTCUT}) to generate the empty side with AI" '
             f'data-command="{FILL_CMD}">{_BUTTON_LABEL}</button>'
         )
     tip = "AI is off — set OPENAI_API_KEY to enable"
@@ -508,7 +602,7 @@ def _on_init_buttons(buttons: list, editor: Any) -> None:
             icon=None,
             cmd=FILL_CMD,
             func=_fill_back_action,
-            tip=f"Generate the empty side with AI ({FILL_SHORTCUT})",
+            tip=f"Press Tab (or {FILL_SHORTCUT}) to generate the empty side with AI",
             label=_BUTTON_LABEL,
             keys=FILL_SHORTCUT,
         )
@@ -529,6 +623,7 @@ def register() -> None:
 
     gui_hooks.editor_did_init_buttons.append(_on_init_buttons)
     gui_hooks.editor_did_init.append(_on_editor_init)
+    gui_hooks.editor_did_load_note.append(_configure_hint)
     _REGISTERED = True
 
 
@@ -542,4 +637,5 @@ __all__ = [
     "fill_note_back",
     "find_field_indices",
     "register",
+    "should_invite",
 ]
