@@ -408,6 +408,14 @@ cfa-tab-fill-test:
     {{ ninja }} pylib
     QT_QPA_PLATFORM=offscreen PYTHONPATH="out/pylib:pylib:qt:out/qt:." {{ py }} -m pytest qt/tests/test_cfa_tab_fill.py -q
 
+# Concept Map: the SINGLE batched AI explanation call — pure batched-prompt +
+# robust-JSON-parse + abstain wording (mocked client, no network), plus the
+# desktop pycmd bridge (AI-off returns instantly; AI-on degrades safely). If an
+# OPENAI_API_KEY is set the bridge test also exercises one real batched call.
+cfa-conceptmap-ai-test:
+    PYTHONPATH="." {{ py }} -m pytest cfa/ai/tests/test_mapexplain.py -q
+    QT_QPA_PLATFORM=offscreen PYTHONPATH="out/pylib:pylib:qt:out/qt:." {{ py }} -m pytest qt/tests/test_cfa_concept_map_ai.py -q
+
 # Feature 5: boot straight into a freshly-seeded CFA collection (own profile base under /tmp)
 cfa *args:
     ANKI_BASE="${ANKI_BASE:-/tmp/gnhf-cfa-seed/ankibase}" {{ run_script }} {{ args }}

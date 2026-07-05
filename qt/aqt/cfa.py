@@ -142,6 +142,17 @@ def setup_menu(mw: AnkiQt) -> None:
     except Exception:
         pass
 
+    # Concept Map: register the SINGLE batched AI-explanation bridge (pycmd).
+    # Safe to call unconditionally — with the master AI toggle off it returns the
+    # AI-off marker immediately (no network) and the map keeps its templated
+    # explanations, and registration never raises.
+    try:
+        from aqt.cfa_concept_map_ai import register as _register_map_ai
+
+        _register_map_ai()
+    except Exception:
+        pass
+
 
 def logout_of_sync(mw: AnkiQt) -> None:
     """Log out of the sync account (AnkiWeb or self-hosted).

@@ -14,6 +14,10 @@ what it returns and wires hover (name + %) / click (pin the plain-English why).
 The batched-AI wording, when AI is on, warms these same templated strings.
 -->
 <script lang="ts">
+    import { onMount } from "svelte";
+
+    import { bridgeCommand, bridgeCommandsAvailable } from "@tslib/bridgecommand";
+
     import { Eyebrow, PageHeading } from "$lib/cfa";
     import type { CfaHomePayload } from "$lib/cfa";
 
@@ -36,6 +40,54 @@ The batched-AI wording, when AI is on, warms these same templated strings.
 
     let hotId: string | null = null;
     let selId: string | null = null;
+
+    // --- batched AI explanation (one call on load) ---------------------------
+    // The map draws instantly from the templated (deterministic) explanations;
+    // when AI is on we ALSO fire ONE batched call for casual per-node wording and
+    // merge whatever comes back over the templates, honestly flagging provenance.
+    type AiResp = {
+        ok: boolean;
+        aiOn: boolean;
+        explanations: Record<string, string>;
+        error: string | null;
+    };
+    let aiExpl: Record<string, string> = {};
+    // off = AI toggled off · loading = batched call in flight · ai = at least one
+    // node came back · failed = call ran but yielded nothing usable.
+    let aiStatus: "off" | "loading" | "ai" | "failed" = data.aiEnabled ? "loading" : "off";
+
+    onMount(() => {
+        if (!data.aiEnabled || !bridgeCommandsAvailable()) {
+            aiStatus = data.aiEnabled ? "failed" : "off";
+            return;
+        }
+        const nodes = map.nodes.map((n) => ({
+            id: n.id,
+            full: n.full,
+            kind: n.kind,
+            pct: n.pct,
+            band: n.band,
+            parent: n.parent,
+        }));
+        bridgeCommand<string>(
+            "cfaExplainMap:" + JSON.stringify({ nodes }),
+            (raw) => {
+                try {
+                    const resp = JSON.parse(raw) as AiResp;
+                    if (!resp.aiOn) {
+                        aiStatus = "off";
+                        return;
+                    }
+                    aiExpl = resp.explanations ?? {};
+                    aiStatus = resp.ok && Object.keys(aiExpl).length > 0
+                        ? "ai"
+                        : "failed";
+                } catch {
+                    aiStatus = "failed";
+                }
+            },
+        );
+    });
 
     // The node currently driving the side panel: the pinned selection wins,
     // otherwise the hovered node, otherwise the centre (a calm default).
@@ -94,11 +146,23 @@ The batched-AI wording, when AI is on, warms these same templated strings.
         }
     }
 
-    // AI provenance line: the map's explanations are the templated (AI-off)
-    // fallback until the batched AI call is wired; be honest about which is live.
-    $: aiTag = data.aiEnabled
-        ? "Explanations are templated from your performance data; batched AI wording warms them when the tab opens."
-        : "AI is off — these explanations are the deterministic templated fallback, built from your performance data.";
+    // The explanation shown for the active node: the batched-AI wording when it
+    // came back for THIS node, otherwise the deterministic templated fallback.
+    $: activeExpl = aiExpl[active.id] ?? templatedExplanation(active);
+    $: activeIsAi = aiExpl[active.id] !== undefined;
+
+    // AI provenance line — always honest about what's actually on screen:
+    // an explicit AI-off / AI-failed / AI-generated state, never a vague promise.
+    $: aiTag =
+        aiStatus === "off"
+            ? "AI is off — these explanations are the deterministic templated fallback, built from your performance data."
+            : aiStatus === "loading"
+              ? "Generating plain-English explanations with AI (one batched call)…"
+              : aiStatus === "failed"
+                ? "AI explanation failed — showing the deterministic templated fallback, built from your performance data."
+                : activeIsAi
+                  ? "AI-generated from your performance data, in one batched call when the tab opened."
+                  : "AI is on, but this node fell back to its deterministic templated explanation.";
 </script>
 
 <div class="cfa-app cfa-map">
@@ -230,7 +294,7 @@ The batched-AI wording, when AI is on, warms these same templated strings.
                     <i style="width: {active.pct ?? 0}%"></i>
                 </div>
                 <p class="cfa-map__expl" class:is-placeholder={active.pct === null && selId === null}>
-                    {templatedExplanation(active)}
+                    {activeExpl}
                 </p>
                 {#if selId !== null}
                     <div class="cfa-map__drill">
