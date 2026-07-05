@@ -214,3 +214,24 @@ test("drillFor: centre suggests the dimmest heavy sections; topics get a drill",
     const t = map.nodes.find((n) => n.kind === "topic")!;
     expect(drillFor(t)).toMatch(/Fixed Income near-miss drill/);
 });
+
+// --- Phase B regression guard (D-P4-1) ----------------------------------
+// The side-panel mastery gauge must NOT fake a 0% fill for an abstaining
+// node (pct === null) — that conflates "no evidence yet" with a genuine 0%
+// score and breaks the give-up rule. Lock the fix in the Svelte source so a
+// revert to `width: {active.pct ?? 0}%` is caught.
+test("D-P4-1: panel gauge distinguishes abstain from a genuine 0%", () => {
+    const fs = require("node:fs") as typeof import("node:fs");
+    const path = require("node:path") as typeof import("node:path");
+    const src = fs.readFileSync(
+        path.join(__dirname, "CfaConceptMapPage.svelte"),
+        "utf8",
+    );
+    // The abstain-conflating fallback must be gone…
+    expect(src).not.toContain("active.pct ?? 0}%");
+    // …the fill is only drawn when there IS a measured pct…
+    expect(src).toMatch(/#if active\.pct !== null/);
+    // …and the abstaining track gets its own honest treatment.
+    expect(src).toMatch(/is-nodata=\{active\.pct === null\}/);
+    expect(src).toMatch(/&\.is-nodata\s*\{/);
+});

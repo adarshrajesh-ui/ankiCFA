@@ -290,8 +290,25 @@ The batched-AI wording, when AI is on, warms these same templated strings.
                     {pctText(active)}{active.pct !== null ? ` · ${masteryLabel(active.mastery)}` : ""}
                 </div>
                 <div class="cfa-map__pmeta">{metaFor(active)}</div>
-                <div class="cfa-map__gauge">
-                    <i style="width: {active.pct ?? 0}%"></i>
+                <!-- Mastery gauge. When the node is abstaining (no evidence
+                yet) we do NOT draw a 0%-width fill — that would read as a real
+                "you scored zero", conflating no-data with true-0% and breaking
+                the give-up rule. Instead the track shows an "awaiting evidence"
+                hatch, honestly distinct from both empty-0% and a partial fill. -->
+                <div
+                    class="cfa-map__gauge"
+                    class:is-nodata={active.pct === null}
+                    role="progressbar"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                    aria-valuenow={active.pct ?? undefined}
+                    aria-valuetext={active.pct === null
+                        ? "No data yet — awaiting evidence"
+                        : `${active.pct}% mastered`}
+                >
+                    {#if active.pct !== null}
+                        <i style="width: {active.pct}%"></i>
+                    {/if}
                 </div>
                 <p class="cfa-map__expl" class:is-placeholder={active.pct === null && selId === null}>
                     {activeExpl}
@@ -448,6 +465,19 @@ The batched-AI wording, when AI is on, warms these same templated strings.
                 height: 100%;
                 background: linear-gradient(90deg, $turq, $turq-deep);
                 transition: width 0.35s ease;
+            }
+
+            // Abstaining node: a neutral diagonal hatch reads as "awaiting
+            // evidence / not applicable", never as a measured 0% fill.
+            &.is-nodata {
+                background: repeating-linear-gradient(
+                    -45deg,
+                    $empty,
+                    $empty 4px,
+                    cfa.$cfa-bg 4px,
+                    cfa.$cfa-bg 8px
+                );
+                border: 1px solid cfa.$cfa-line;
             }
         }
         &__expl {

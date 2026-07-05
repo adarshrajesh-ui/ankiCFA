@@ -639,3 +639,28 @@ measured/scientific method (computed contrast ratios, CVD ΔE simulation,
 accessibility-tree dumps, source/layout guards) with committed passing tests and
 genuine before/after evidence. **No BLOCKER or unresolved MAJOR remains in any
 of the three escalating passes on either app.**
+
+---
+
+## Pass 4 — critique of the post-Pass-3 surfaces (Concept Map, native Readiness)
+
+The Concept Map tab (desktop + mobile) and the native desktop Exam-Readiness
+state were built **after** "Pass 3 COMPLETE" was declared, so they had never
+faced a critique pass. Pass 4 opens on the newest desktop surface and holds it
+to the same give-up/abstain honesty bar as the rest of the app.
+
+### D-P4-1 — Concept-Map side panel fakes a 0% score for an abstaining node (honesty / give-up-rule audit)
+
+| ID | Severity | Where | Finding | Fix |
+|----|----------|-------|---------|-----|
+| D-P4-1 | MAJOR (honesty / abstain rule) | `CfaConceptMapPage.svelte` — the side-panel mastery gauge (`.cfa-map__gauge`) | The node map itself honours the give-up rule (an abstaining node with no evidence stays **gray**, `EMPTY_FILL`), but the **side panel contradicted it**: the gauge rendered `width: {active.pct ?? 0}%`, so selecting an abstaining node (`pct === null`, e.g. Fixed Income / Derivatives before any review) drew a **flat empty bar identical to a genuine 0% score**. A user reading the panel could not tell "not enough evidence yet" apart from "you scored zero" — the exact fake-confidence the objective's give-up/abstain rule forbids. | **FIXED (iter 7)** — the fill `<i>` is now drawn **only when `active.pct !== null`**; an abstaining node instead gets an `is-nodata` track: a neutral diagonal **"awaiting evidence" hatch** (`repeating-linear-gradient`), honestly distinct from both a flat empty-0% and a partial turquoise fill. The gauge also gained proper `role="progressbar"` + `aria-valuetext` ("No data yet — awaiting evidence" vs "N% mastered") so screen readers get the same distinction. Presentation only — the engine, scores, and node fills are unchanged. |
+
+**Verification:** `ts/lib/cfa/pages/conceptmap.test.ts` **22 → 23 tests, green**
+(new `D-P4-1` source-parsing regression guard: the `active.pct ?? 0}%` fallback
+is gone, the fill is gated behind `#if active.pct !== null`, and the
+`is-nodata` track + style exist). `just cfa-conceptmap-test` green;
+`npx svelte-check` 0 errors. **Before/after evidence:**
+`proof/concept-map/panel-gauge-abstain-fix.{html,png}` — BEFORE an abstaining
+node and a true-0% node render as identical flat empty bars; AFTER the
+abstaining node shows the neutral hatch while the true-0% node stays a flat
+empty bar, making the two states unmistakably distinct.

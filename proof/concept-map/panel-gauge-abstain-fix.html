@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Concept Map — panel gauge abstain fix (D-P4-1)</title>
+<style>
+  :root{
+    --ink:#122b46; --muted:#4d5c6d; --faint:#68707d; --line:#e7e9ec;
+    --bg:#ffffff; --page:#fafbfd; --empty:#e9edf1;
+    --turq:#14b8b1; --turq-deep:#0e9c97;
+    font-family:'IBM Plex Sans',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  }
+  body{margin:0;background:var(--page);color:var(--ink);padding:28px;}
+  h1{font-size:20px;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:13px;margin:0 0 22px;}
+  .row{display:flex;gap:20px;flex-wrap:wrap;}
+  .panel{width:320px;background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:18px;}
+  .tag{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);}
+  .ptitle{font-size:19px;font-weight:600;margin:6px 0 2px;}
+  .ppct{font-size:13px;font-weight:600;color:var(--turq-deep);}
+  .ppct.nodata{color:var(--faint);}
+  .pmeta{font-size:12px;color:var(--faint);margin-top:2px;}
+
+  /* exact CSS from CfaConceptMapPage.svelte .cfa-map__gauge */
+  .gauge{height:10px;border-radius:100px;background:var(--empty);overflow:hidden;margin:14px 0 4px;}
+  .gauge > i{display:block;height:100%;background:linear-gradient(90deg,var(--turq),var(--turq-deep));}
+  .gauge.is-nodata{
+    background:repeating-linear-gradient(-45deg,var(--empty),var(--empty) 4px,var(--bg) 4px,var(--bg) 8px);
+    border:1px solid var(--line);
+  }
+  .caption{font-size:12px;color:var(--faint);margin-top:6px;}
+  .before .gauge.nodata-before{}            /* before = flat empty, indistinguishable from 0% */
+  .badge{display:inline-block;font-size:10px;font-weight:700;border-radius:100px;padding:2px 8px;margin-bottom:10px;}
+  .badge.bad{background:#fef2f2;color:#b91c1c;}
+  .badge.good{background:#f0fdf4;color:#15803d;}
+</style>
+</head>
+<body>
+  <h1>Concept Map side-panel gauge — abstain honesty fix</h1>
+  <p class="sub">Finding D-P4-1: an abstaining node (no evidence yet) rendered a 0%-width bar visually identical to a real 0% score, faking confidence the give-up rule forbids.</p>
+
+  <div class="before">
+    <span class="badge bad">BEFORE</span>
+    <div class="row">
+      <div class="panel">
+        <div class="tag">Test section · Fixed Income</div>
+        <div class="ptitle">Fixed Income</div>
+        <div class="ppct nodata">No data yet</div>
+        <div class="pmeta">Exam weight 10–15% of your grade</div>
+        <div class="gauge"><i style="width:0%"></i></div>
+        <div class="caption">Abstaining → renders as a flat empty bar…</div>
+      </div>
+      <div class="panel">
+        <div class="tag">Test section · Derivatives</div>
+        <div class="ptitle">Derivatives</div>
+        <div class="ppct">0% mastered · needs work</div>
+        <div class="pmeta">Exam weight 5–10% of your grade</div>
+        <div class="gauge"><i style="width:0%"></i></div>
+        <div class="caption">…which is IDENTICAL to a genuine 0% score. Conflated.</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="height:28px"></div>
+
+  <div class="after">
+    <span class="badge good">AFTER</span>
+    <div class="row">
+      <div class="panel">
+        <div class="tag">Test section · Fixed Income</div>
+        <div class="ptitle">Fixed Income</div>
+        <div class="ppct nodata">No data yet</div>
+        <div class="pmeta">Exam weight 10–15% of your grade</div>
+        <div class="gauge is-nodata"></div>
+        <div class="caption">Abstaining → neutral "awaiting evidence" hatch, no fill drawn.</div>
+      </div>
+      <div class="panel">
+        <div class="tag">Test section · Derivatives</div>
+        <div class="ptitle">Derivatives</div>
+        <div class="ppct">0% mastered · needs work</div>
+        <div class="pmeta">Exam weight 5–10% of your grade</div>
+        <div class="gauge"><i style="width:0%"></i></div>
+        <div class="caption">Genuine 0% → flat empty bar. Now unmistakably distinct.</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
