@@ -427,6 +427,7 @@ def is_sveltekit_page(path: str) -> bool:
         "cfa-readiness",
         "cfa-deadline",
         "cfa-home",
+        "cfa-concept-map",
     ]
 
 
@@ -1102,6 +1103,18 @@ def _check_dynamic_request_permissions():
         # no API token), so its read-only score payload is whitelisted here —
         # exactly like congratsInfo.
         "/_anki/getCfaHomeView",
+        # CFA fork: Exam Readiness and Concept Map are also first-class
+        # main-window states loaded into the same no-token MAIN webview. They
+        # read a read-only score payload (Readiness via getCfaExamReadiness; the
+        # Concept Map reuses getCfaHomeView above), so whitelist Readiness here
+        # too instead of granting the shared webview blanket API access.
+        "/_anki/getCfaExamReadiness",
+        # CFA fork: Progress is a first-class main-window tab that opens the
+        # themed statistics/graphs page in the same no-token webview. The stock
+        # graphs route needs these read-only RPCs; whitelist them here.
+        "/_anki/getGraphPreferences",
+        "/_anki/graphs",
+        "/_anki/setGraphPreferences",
     ):
         pass
     else:

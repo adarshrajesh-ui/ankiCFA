@@ -79,6 +79,26 @@ def test_home_endpoint_registered_and_served() -> None:
     assert '"/_anki/getCfaHomeView"' in src
 
 
+def test_cfa_shell_routes_and_whitelist_registered() -> None:
+    # Concept Map is a first-class main-window tab: its SvelteKit route must be
+    # served (otherwise /cfa-concept-map 404s), and it reuses getCfaHomeView so
+    # no extra whitelist entry is needed for it.
+    assert mediasrv.is_sveltekit_page("cfa-concept-map") is True
+    assert mediasrv.is_sveltekit_page("cfa-concept-map/x") is True
+
+    # Readiness and Progress render into the same no-token MAIN webview, so their
+    # read-only RPCs must be whitelisted or the pages 403 ("Unexpected API
+    # access"). Guard the exact endpoints here.
+    src = (_REPO / "qt" / "aqt" / "mediasrv.py").read_text(encoding="utf-8")
+    for endpoint in (
+        '"/_anki/getCfaExamReadiness"',
+        '"/_anki/getGraphPreferences"',
+        '"/_anki/graphs"',
+        '"/_anki/setGraphPreferences"',
+    ):
+        assert endpoint in src, f"missing whitelist entry {endpoint}"
+
+
 def test_cfa_home_webview_kind_has_api_access() -> None:
     assert AnkiWebViewKind.CFA_HOME.value == "cfa home"
     wv_src = (_REPO / "qt" / "aqt" / "webview.py").read_text(encoding="utf-8")
