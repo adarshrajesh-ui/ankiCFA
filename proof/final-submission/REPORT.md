@@ -63,4 +63,5 @@ PDF generation:
 
 - Desktop DMG is pending release workflow/local wrapper decision and build output.
 - Android release APK is pending Gradle build, signing verification, install, launch, and screenshot proof.
+- Targeted desktop `just cfa-desktop-shell-test cfa-chrome-test cfa-graphs-test cfa-conceptmap-test` failed during the shared web build before test assertions: the `congrats` bundle hit missing `.woff2` loader errors from `ts/lib/cfa/theme.scss`. Treat as a desktop verification blocker to resolve or route around with narrower recipes before final sign-off.
 - Final statement is pending the last visual pass across screenshots.
