@@ -874,3 +874,32 @@ REAL compiled `toolbar-bottom.css` + `reviewer-bottom.css` so the stock button
 cascade is faithfully present): BEFORE a row of native gray OS buttons; AFTER
 rounded CFA chips with a red-bordered "Again", a filled-navy "Good" (default),
 and a navy-pill "Show Answer" — one cohesive CFA study surface.
+
+### D-P4-11 — Session-complete ("Congratulations — finished") screen shipped as un-themed stock Anki (design-system consistency / "no un-themed stock-Anki screens" audit)
+
+Pass 4 continues along the study **flow** past the Reviewer. After a learner
+answers the last due card, the very next screen — the **reward moment** they see
+at the *end of every completed study session* — is the congrats/"finished"
+screen (`ts/routes/congrats/CongratsPage.svelte`, loaded by
+`overview.py:load_sveltekit_page("congrats")`). Unlike the deck list, Overview
+and reviewer bar (all re-skinned via the `cfa_chrome` stdHtml hook), this is a
+**SvelteKit page** the chrome hook never reaches, so it had never been captured
+or critiqued — and it shipped 100% stock Anki.
+
+| # | Severity | Element | Issue | Fix |
+|---|----------|---------|-------|-----|
+| D-P4-11 | MAJOR (design-system consistency / product feel — end-of-session reward surface) | `ts/routes/congrats/CongratsPage.svelte` — the whole page | The session-complete screen rendered as **plain stock Anki**: a bare sans-serif `<h1>` ("Congratulations! You have finished this deck for now."), stock-**blue** `--fg-link` links ("unbury them" / "custom study"), and a `--border`-grey deck-description box on the bare `--canvas` — zero CFA identity on the screen that closes out every study session. Between the navy CFA Reviewer/answer-bar and the CFA Home the learner returns to, this end-of-flow screen read as a jarring plain-Anki interruption — the objective's explicit "no visibly un-themed stock-Anki screens remain" clunk, on a *high-frequency* surface. | **FIXED (iter 22)** — themed the page to the CFA design system: imports `$lib/cfa/theme.scss` (brand fonts + `:root` tokens) and wraps the content in `.cfa-app`; adds the brand **`<Eyebrow>` "ankiCFA · Level II · Session complete"** (AA-safe MM-green) over the heading; the `<h1>` is now the **brand serif in navy** (`$cfa-font-heading` / `$cfa-ink`); links are the warm **accent** (`$cfa-accent`, hover `$cfa-accent-hover`) instead of stock blue; and the whole block sits in a **calm CFA card** (hairline `$cfa-line`, 4px radius) with the deck-description in a `$cfa-surface` sub-card. Presentation-only — the scheduling logic (`congratsInfo` refresh, `buildNextLearnMsg`, review/new-limit messages) and the `bridgeLink("unbury")` / `bridgeLink("customStudy")` wiring are all untouched. |
+
+**Verification:** new `ts/routes/congrats/congrats.test.ts` (**3 vitest tests,
+green**, `just cfa-congrats-test`): asserts the theme + Eyebrow imports and the
+brand eyebrow copy, that the stock `var(--fg-link)` / `border: 1px solid
+var(--border)` hooks are **gone** and replaced by the CFA token module + serif
+heading + accent links + CFA hairline, and a preservation guard that the
+scheduling logic + both bridge links + `deckDescription` are untouched.
+`npx svelte-check` **0 errors / 0 warnings** (1300 files); `eslint` clean on both
+new files. **Before/after evidence** (`proof/congrats/congrats-{before,after}.{html,png}`,
+screenshot via chrome-devtools-axi over the REAL `_tokens.scss` values so the
+shipped styling is faithfully rendered): BEFORE a plain sans `<h1>`, stock-blue
+links and a grey `--border` box on white; AFTER a green brand eyebrow, a serif
+navy heading, warm-accent links, and a calm CFA card — one cohesive CFA
+session-complete screen.

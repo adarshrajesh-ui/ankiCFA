@@ -1,0 +1,72 @@
+<!doctype html>
+<!-- AFTER: the CFA-themed congrats screen. Reconstructs the shipped
+     CongratsPage.svelte markup (brand Eyebrow + serif navy h1 + accent links +
+     CFA card) using the REAL _tokens.scss values (parity-locked to
+     cfa_style.py), so this is a faithful render of the shipped styling. -->
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  /* CFA tokens — copied verbatim from ts/lib/cfa/_tokens.scss */
+  :root {
+    --cfa-ink: #122b46;
+    --cfa-muted: #4d5c6d;
+    --cfa-line: #e7e9ec;
+    --cfa-surface: #f3f6f8;
+    --cfa-bg: #ffffff;
+    --cfa-page: #fafbfd;
+    --cfa-accent: #da5c01;
+    --cfa-accent-hover: #c45301;
+    --cfa-mm-green: #007e56;
+    --cfa-font-body: "IBM Plex Sans", -apple-system, "Segoe UI", Roboto, sans-serif;
+    --cfa-font-heading: "Source Serif 4", Georgia, "Times New Roman", serif;
+  }
+  html, body {
+    margin: 0; background: var(--cfa-page); color: var(--cfa-ink);
+    font-family: var(--cfa-font-body);
+  }
+  .wrap { display: flex; justify-content: center; padding: 24px; }
+  .congrats {
+    margin-top: 48px; max-width: 34em; padding: 32px;
+    border: 1px solid var(--cfa-line); border-radius: 4px;
+    background: var(--cfa-bg); color: var(--cfa-muted);
+    font-size: 16px; line-height: 1.5;
+  }
+  .cfa-eyebrow {
+    display: inline-block; margin: 0 0 4px;
+    font-size: 12px; font-weight: 600; line-height: 1.35;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--cfa-mm-green);
+  }
+  .congrats h1 {
+    margin: 8px 0 16px; font-family: var(--cfa-font-heading);
+    font-size: 28px; font-weight: 600; line-height: 1.2;
+    color: var(--cfa-ink);
+  }
+  .congrats p { margin: 0 0 12px; }
+  .congrats a { color: var(--cfa-accent); font-weight: 600; text-decoration: none; }
+  .congrats a:hover { color: var(--cfa-accent-hover); text-decoration: underline; }
+  .description {
+    margin-top: 16px; border: 1px solid var(--cfa-line); border-radius: 4px;
+    background: var(--cfa-surface); padding: 16px; color: var(--cfa-muted);
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="congrats cfa-app">
+    <span class="cfa-eyebrow">ankiCFA · Level II · Session complete</span>
+    <h1>Congratulations! You have finished this deck for now.</h1>
+    <p>The next learning card will be ready in 12 minutes. There is 1 learning card due later today.</p>
+    <p>Today's review limit has been reached, but there are still cards
+       waiting to be reviewed. For optimum memory, consider increasing the
+       daily limit in the options.</p>
+    <p>One or more cards were buried, and will be shown tomorrow. You can
+       <a href="#">unbury them</a> if you wish to see them immediately.</p>
+    <p>To study outside of the regular schedule, you can use the
+       <a href="#">custom study</a> feature.</p>
+    <div class="description">Ethics &amp; Professional Standards — Level II. Reviews the CFA Institute Code and Standards with minimal-pairs drills.</div>
+  </div>
+</div>
+</body>
+</html>

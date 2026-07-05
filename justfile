@@ -130,6 +130,11 @@ cfa-scores-test:
 cfa-conceptmap-test:
     {{ yarn }} vitest:once lib/cfa/pages/conceptmap
 
+# Study-flow: the end-of-session "Congratulations — finished" screen themed to
+# the CFA design system (brand eyebrow + serif navy heading + accent links).
+cfa-congrats-test:
+    {{ yarn }} vitest:once routes/congrats/congrats
+
 # A10: crash + offline robustness — kill mid-review ~20x -> zero corruption
 # (backend integrity check), plus offline + AI-off still returns a score.
 cfa-crash-test:

@@ -11,6 +11,13 @@ License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
     import Col from "$lib/components/Col.svelte";
     import Container from "$lib/components/Container.svelte";
 
+    // CFA design system: the study-session "you're done" screen is a flow
+    // surface the learner sees at the end of every session — theme it to the
+    // CFA product (brand eyebrow + serif navy heading + accent links) so it
+    // reads as a purpose-built CFA session-complete screen, not stock Anki.
+    import "$lib/cfa/theme.scss";
+    import Eyebrow from "$lib/cfa/Eyebrow.svelte";
+
     import { buildNextLearnMsg } from "./lib";
     import { onMount } from "svelte";
 
@@ -45,7 +52,8 @@ License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
 
 <Container --gutter-block="1rem" --gutter-inline="2px" breakpoint="sm">
     <Col --col-justify="center">
-        <div class="congrats">
+        <div class="congrats cfa-app">
+            <Eyebrow tone="green">ankiCFA · Level II · Session complete</Eyebrow>
             <h1>{congrats}</h1>
 
             <p>{nextLearnMsg}</p>
@@ -82,19 +90,54 @@ License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
 </Container>
 
 <style lang="scss">
+    @use "../../lib/cfa/tokens" as cfa;
+
+    // Themed to the CFA design system: a calm, premium "session complete" card
+    // (brand serif heading in navy, warm-accent links, CFA muted body) so this
+    // end-of-session flow surface no longer reads as stock Anki.
     .congrats {
-        margin-top: 2em;
-        max-width: 30em;
-        font-size: var(--font-size);
+        margin-top: cfa.space(9);
+        max-width: 34em;
+        padding: cfa.space(7);
+        border: 1px solid cfa.$cfa-line;
+        border-radius: cfa.$cfa-radius-block;
+        background: cfa.$cfa-bg;
+        color: cfa.$cfa-muted;
+        font-family: cfa.$cfa-font-body;
+        font-size: cfa.$cfa-fs-body;
+        line-height: cfa.$cfa-lh-body;
+
+        h1 {
+            margin: cfa.space(2) 0 cfa.space(4);
+            font-family: cfa.$cfa-font-heading;
+            font-size: cfa.$cfa-fs-title;
+            font-weight: cfa.$cfa-weight-semibold;
+            line-height: cfa.$cfa-lh-heading;
+            color: cfa.$cfa-ink;
+        }
+
+        p {
+            margin: 0 0 cfa.space(3);
+        }
 
         :global(a) {
-            color: var(--fg-link);
+            color: cfa.$cfa-accent;
+            font-weight: cfa.$cfa-weight-semibold;
             text-decoration: none;
+
+            &:hover {
+                color: cfa.$cfa-accent-hover;
+                text-decoration: underline;
+            }
         }
     }
 
     .description {
-        border: 1px solid var(--border);
-        padding: 1em;
+        margin-top: cfa.space(4);
+        border: 1px solid cfa.$cfa-line;
+        border-radius: cfa.$cfa-radius-block;
+        background: cfa.$cfa-surface;
+        padding: cfa.space(4);
+        color: cfa.$cfa-muted;
     }
 </style>

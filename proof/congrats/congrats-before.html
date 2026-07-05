@@ -1,0 +1,43 @@
+<!doctype html>
+<!-- BEFORE: the stock-Anki congrats screen (plain h1, --fg-link links, --border
+     description box on the bare canvas). Reconstructs the pre-fix
+     CongratsPage.svelte markup + its stock style block verbatim. -->
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  :root {
+    --fg-link: #2563eb;      /* stock Anki link blue */
+    --border: #d0d0d0;       /* stock Anki border grey */
+    --font-size: 15px;
+    --canvas: #ffffff;
+  }
+  html, body {
+    margin: 0; background: var(--canvas); color: #1a1a1a;
+    font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  .wrap { display: flex; justify-content: center; padding: 24px; }
+  .congrats {
+    margin-top: 2em; max-width: 30em; font-size: var(--font-size);
+  }
+  .congrats a { color: var(--fg-link); text-decoration: none; }
+  .description { border: 1px solid var(--border); padding: 1em; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="congrats">
+    <h1>Congratulations! You have finished this deck for now.</h1>
+    <p>The next learning card will be ready in 12 minutes. There is 1 learning card due later today.</p>
+    <p>Today's review limit has been reached, but there are still cards
+       waiting to be reviewed. For optimum memory, consider increasing the
+       daily limit in the options.</p>
+    <p>One or more cards were buried, and will be shown tomorrow. You can
+       <a href="#">unbury them</a> if you wish to see them immediately.</p>
+    <p>To study outside of the regular schedule, you can use the
+       <a href="#">custom study</a> feature.</p>
+    <div class="description">Ethics &amp; Professional Standards — Level II. Reviews the CFA Institute Code and Standards with minimal-pairs drills.</div>
+  </div>
+</div>
+</body>
+</html>
