@@ -687,3 +687,24 @@ renders the REAL `cfa_chrome._toolbar_css()` over the actual nav ids with
 Readiness marked exactly as `_eval_active_cfa_tab` would — the screenshot shows
 "Readiness" as a filled orange pill while Home / Study / Ethics / Concept Map
 stay muted navy links.
+
+### D-P4-3 — Desktop Concept Map is missing the on-node hover tooltip (spec-fidelity / cross-platform-parity audit)
+
+Pass 4 continues on the Concept Map, this time auditing it against the approved
+interactive spec (`.lavish/concept-map-spec.html`) AND its own mobile twin,
+since the objective demands the map be "identical on phone and desktop."
+
+| ID | Severity | Where | Finding | Fix |
+|----|----------|-------|---------|-----|
+| D-P4-3 | MAJOR (spec fidelity / parity / discoverability) | `CfaConceptMapPage.svelte` — the map SVG | The approved spec (`showTip`) AND the shipped mobile asset (`concept_map.html`) both draw an **on-node hover tooltip** — a navy chip showing the node's **name + "% mastered"** right at the cursor. The desktop component had **no tooltip**: hovering a node only updated the **far-away side panel**. This is worst for the 20 **unlabelled subsection nodes** (only the 10 sections + CFA carry persistent labels), so a user hovering a subsection saw its name nowhere near their eyes — they had to look away to the panel to learn which node they were even on. The objective explicitly requires "**Hover a node → its name + how full it is (%)**"; the spec provides it co-located; desktop violated both spec fidelity and phone/desktop parity. | **FIXED (iter 10)** — added the spec/mobile tooltip verbatim: a `computeTip(node)` geometry helper (prefer-above, drop-below-if-clipping, `name.length*8.6+26` width) driven reactively by **hover/focus (`hotId`), never by a pinned selection** — exactly the spec's `enter`/`leave` semantics. It renders a navy `#122B46` chip with a white 15px name and a bright-turquoise `#4CE0D8` "% mastered" line, honouring the give-up rule (an abstaining node reads **"no data yet"**, never a fake 0%). The `<g>` is `aria-hidden` because the node's own `aria-label` already announces the same phrase (no double read). Also works on keyboard focus (a bonus over the spec). Pure presentation — the engine, scores, node fills and side panel are unchanged. |
+
+**Verification:** `ts/lib/cfa/pages/conceptmap.test.ts` **23 → 24 tests, green**
+(new `D-P4-3` source guard: the tooltip is driven by `hotId` not a pinned
+select, emits both a name and a "% mastered"/"no data yet" line, and the group
+is `aria-hidden`). `just cfa-conceptmap-test` green; `npx svelte-check` 0
+errors/0 warnings. **Rendered evidence:** `proof/concept-map/hover-tooltip.{html,png}`
+overlays the tooltip — computed with the SHIPPED `computeTip` formula — onto the
+REAL engine SVG for two nodes: an unlabelled subsection reads **"Credit / 63%
+mastered"** and an abstaining subsection honestly reads **"Real Estate / no data
+yet"**, both positioned above the disc without clipping — byte-for-byte the
+navy-chip / turquoise-% treatment the mobile asset and the approved spec show.

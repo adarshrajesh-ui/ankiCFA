@@ -94,6 +94,41 @@ The batched-AI wording, when AI is on, warms these same templated strings.
     $: activeId = selId ?? hotId ?? map.center.id;
     $: active = map.nodes.find((n) => n.id === activeId) ?? map.center;
 
+    // On-node hover tooltip (name + % mastered), matching the approved spec's
+    // `showTip` and the mobile asset — so hovering a node (especially an
+    // UNLABELLED subsection) shows its name + fill RIGHT THERE, not only in the
+    // far-away side panel. Driven by hover/focus (hotId), never by a pinned
+    // selection, exactly like the spec. Honours the give-up rule ("no data
+    // yet"). aria-hidden: the node's own aria-label already announces this.
+    interface TipGeom {
+        name: string;
+        pct: string;
+        x: number;
+        nameY: number;
+        pctY: number;
+        bgX: number;
+        bgY: number;
+        w: number;
+    }
+    function computeTip(n: ConceptNode): TipGeom {
+        // Prefer above the disc; drop below if it would clip the top edge.
+        const above = n.y - n.r - 42 > 6;
+        const ty = above ? n.y - n.r - 8 : n.y + n.r + 42;
+        const w = Math.max(n.name.length * 8.6, 96) + 26;
+        return {
+            name: n.name,
+            pct: n.pct === null ? "no data yet" : `${n.pct}% mastered`,
+            x: n.x,
+            nameY: ty - 16,
+            pctY: ty + 7,
+            bgX: n.x - w / 2,
+            bgY: ty - 35,
+            w,
+        };
+    }
+    $: tipNode = hotId !== null ? map.nodes.find((n) => n.id === hotId) ?? null : null;
+    $: tip = tipNode ? computeTip(tipNode) : null;
+
     function pctText(n: ConceptNode): string {
         return n.pct === null ? "No data yet" : `${n.pct}% mastered`;
     }
@@ -270,6 +305,32 @@ The batched-AI wording, when AI is on, warms these same templated strings.
                             {/if}
                         </g>
                     {/each}
+
+                    <!-- Hover tooltip: name + % right at the node (spec parity;
+                    the only name cue for the unlabelled subsection nodes). -->
+                    {#if tip}
+                        <g class="cfa-tip" pointer-events="none" aria-hidden="true">
+                            <rect
+                                class="cfa-tip__bg"
+                                x={tip.bgX}
+                                y={tip.bgY}
+                                width={tip.w}
+                                height="48"
+                                rx="8"
+                                ry="8"
+                            />
+                            <text
+                                class="cfa-tip__name"
+                                x={tip.x}
+                                y={tip.nameY}
+                                text-anchor="middle">{tip.name}</text>
+                            <text
+                                class="cfa-tip__pct"
+                                x={tip.x}
+                                y={tip.pctY}
+                                text-anchor="middle">{tip.pct}</text>
+                        </g>
+                    {/if}
                 </svg>
 
                 <div class="cfa-map__legend">
@@ -548,5 +609,26 @@ The batched-AI wording, when AI is on, warms these same templated strings.
         font-weight: cfa.$cfa-weight-semibold;
         fill: #ffffff;
         letter-spacing: 0.04em;
+    }
+
+    // On-node hover tooltip — the navy chip / white name / turquoise % from the
+    // approved spec (and mobile). It fades with hover so the map stays calm at
+    // rest; the panel remains the durable, pinned detail surface.
+    .cfa-tip {
+        &__bg {
+            fill: #122b46; // CFA navy chrome (matches the spec tooltip)
+        }
+        &__name {
+            fill: #ffffff;
+            font-family: cfa.$cfa-font-body;
+            font-size: 15px;
+            font-weight: cfa.$cfa-weight-semibold;
+        }
+        &__pct {
+            fill: #4ce0d8; // bright mastery turquoise, per the spec
+            font-family: cfa.$cfa-font-body;
+            font-size: 13px;
+            font-weight: 700;
+        }
     }
 </style>

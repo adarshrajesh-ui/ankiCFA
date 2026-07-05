@@ -235,3 +235,27 @@ test("D-P4-1: panel gauge distinguishes abstain from a genuine 0%", () => {
     expect(src).toMatch(/is-nodata=\{active\.pct === null\}/);
     expect(src).toMatch(/&\.is-nodata\s*\{/);
 });
+
+// --- Phase B regression guard (D-P4-3) ----------------------------------
+// The desktop map must carry the same on-node HOVER TOOLTIP the approved spec
+// and the mobile asset have: hovering a node shows its name + "% mastered"
+// right at the node (the only name cue for the unlabelled subsection nodes),
+// honouring the give-up rule ("no data yet"). Lock it in the source so the
+// tooltip can't silently regress back to panel-only.
+test("D-P4-3: hover tooltip renders name + % at the node (spec parity)", () => {
+    const fs = require("node:fs") as typeof import("node:fs");
+    const path = require("node:path") as typeof import("node:path");
+    const src = fs.readFileSync(
+        path.join(__dirname, "CfaConceptMapPage.svelte"),
+        "utf8",
+    );
+    // The tooltip is driven by hover/focus (hotId), never by a pinned select…
+    expect(src).toMatch(/tipNode = hotId !== null/);
+    // …it emits both the name and a "% mastered"/"no data yet" line…
+    expect(src).toContain("cfa-tip__name");
+    expect(src).toContain("cfa-tip__pct");
+    expect(src).toContain("% mastered");
+    expect(src).toContain("no data yet");
+    // …and the tooltip group is aria-hidden (the node aria-label already speaks).
+    expect(src).toMatch(/class="cfa-tip"[\s\S]*?aria-hidden="true"/);
+});
