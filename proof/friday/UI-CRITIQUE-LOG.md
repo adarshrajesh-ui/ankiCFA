@@ -1110,3 +1110,31 @@ the config-selector / option-section / addon-api behaviour preserved), wired as
 blue focus ring, blue link and light-blue selected row; AFTER a CFA navy Save
 button, warm-accent focus ring + link, accent-soft selected row, a brand eyebrow,
 and a serif-navy section title — one cohesive CFA settings surface.
+
+---
+
+## Pass 4 — D-P4-19: Change-notetype dialog was a 100%-stock-Anki surface
+
+**Surface:** the Change-notetype dialog (`ChangeNotetypePage.svelte`), opened from
+Browse → Notes → Change Notetype. This is where a CFA candidate remaps an
+imported deck onto the branded **CFA Knowledge** notetype (iter 29) — a real part
+of the setup flow. Every reviewer/overview/editor/graphs/card-info/deck-options
+chrome was re-skinned across iters 20–21/36–40, but this dialog was still pure
+stock Anki: a **stock-blue Save button**, **blue focus rings**, **blue links**,
+and a **light-blue selected notetype row** — so a setup screen read as "Anki with
+a CFA tab."
+
+| # | Severity | Element | Issue | Fix |
+|---|----------|---------|-------|-----|
+| D-P4-19 | MAJOR (design-system consistency / product feel — a notetype-setup surface) | Change-notetype (`ChangeNotetypePage.svelte`) — Save button, focus, links, selected row, section titles | No CFA identity: stock `--button-primary-bg`/`--border-focus`/`--fg-link`/`--selected-bg` blue throughout. | **FIXED (iter 41)** — wrapped the page in `.cfa-changenote.cfa-app` with a brand `ankiCFA · Level II · Change notetype` **Eyebrow**, and **overrode the stock-blue design-token CSS vars in-scope** (`--button-primary-bg`/gradient → CFA **navy**; `--border-focus`/`--fg-link` → warm **accent**; `--selected-bg` → **accent-soft**) so every descendant control — Save button, focus rings, links, selected notetype row — adopts CFA colours at once, plus a light CFA **page tint** and serif-navy **Fields**/**Templates** titles. Presentation-only: the `NotetypeSelector`, both `Mapper`s, the sticky headers, and the cloze fallback are untouched. Scoped under `.cfa-changenote.is-light` (gated `!$pageTheme.isDark`) so the dark theme keeps its own tokens and no other `TitledContainer` user is restyled. |
+
+**Verification:** `ts/routes/change-notetype/change-notetype-theme.test.ts` — 3
+source-parse tests (theme + eyebrow + `cfa-app` wrapper + `is-light` gate present;
+the four stock-blue vars overridden to CFA tokens scoped under
+`.cfa-changenote.is-light`; the selector / mappers / sticky-headers / cloze
+fallback preserved), wired as `just cfa-change-notetype-theme-test`, green.
+`npx svelte-check` passes 0 errors / 0 warnings across 1304 files. **Before/after
+evidence** (`proof/change-notetype/change-notetype-theme.{html,png}`): BEFORE a
+blue Save button, blue focus ring, blue link and light-blue selected row; AFTER a
+CFA navy Save button, warm-accent focus ring + link, accent-soft selected row, a
+brand eyebrow, and serif-navy section titles — one cohesive CFA setup surface.

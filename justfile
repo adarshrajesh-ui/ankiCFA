@@ -151,6 +151,12 @@ cfa-card-info-test:
 cfa-deck-options-theme-test:
     {{ yarn }} vitest:once routes/deck-options/deck-options-theme
 
+# Change-notetype dialog (Browse -> Notes -> Change Notetype) themed to the CFA
+# design system by overriding the stock-blue interactive tokens to CFA
+# navy/accent, scoped + light-mode gated.
+cfa-change-notetype-theme-test:
+    {{ yarn }} vitest:once routes/change-notetype/change-notetype-theme
+
 # A10: crash + offline robustness — kill mid-review ~20x -> zero corruption
 # (backend integrity check), plus offline + AI-off still returns a score.
 cfa-crash-test:
