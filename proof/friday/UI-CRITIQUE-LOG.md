@@ -806,3 +806,18 @@ reports `proxy_unreachable` (no bare swallow), and the CSS carries distinct
 `renderAiGrade` branches **verbatim** against the REAL `style.css` — a navy
 "AI FEEDBACK" box, a muted "DETERMINISTIC" (AI-off) box, and a warm "AI FAILED"
 warn box, all three visually distinct.
+
+### D-P4-8 — Phone ethics card ignored the synced AI-grading toggle (honesty / provenance / cross-platform parity)
+
+Pass 4 continues on the ethics reviewer, this time cross-platform. Iter 15/D-P4-7
+made the grade say "Deterministic" when AI is off — but only on **desktop** (the
+pycmd bridge is toggle-gated). The **phone** path in `front.html` fetched the AI
+proxy **unconditionally on Android**, so with AI switched off the desktop said
+*Deterministic* while the phone still called the LLM and rendered *AI feedback* —
+the objective's "say deterministic when off" rule was violated on the phone.
+
+| ID | Severity | Where | Finding | Fix |
+|----|----------|-------|---------|-----|
+| D-P4-8 | MAJOR (honesty / provenance / parity) | `cfa/ethics_pairs/templates/front.html` (Android branch) + AnkiDroid reviewer | The card's `requestAiGrade` Android branch called `fetch(.../cfa/grade)` regardless of the synced `cfa_ai_enabled`/`cfa_ai_grading_enabled` toggle — the phone had no way to read col.conf from JS, so "AI off" never reached the card. | **FIXED (iter 19)** — AnkiDroid's reviewer (`AbstractFlashcardViewer.updateCard`) now prepends `window.CFA_AI_GRADING_ENABLED` from col.conf via a pure `CfaCardInject.withAiToggle`; `front.html` checks `=== false` **before** the fetch and renders the honest "Deterministic" (`error:"ai_off"`) state with **no network**. `undefined => on`, so older builds/desktop are unaffected. |
+
+**Verification:** desktop `test_ai_provenance.py::test_mobile_grade_honours_the_synced_ai_toggle` green (full ethics suite **130 passed**); mobile `CfaCardInjectTest` (3) + `CfaAiClientTest` (16) green, main sourceset compiles. **Device-observable** (`AnkiDroid/proof/ethics-ai-toggle/gate-proof.{html,png}`, shipped gate driven in a real browser): `toggle=OFF → fetchCalls=0` + Deterministic box shown; `toggle=ON → fetchCalls=1`; `toggle=unset → fetchCalls=1` (back-compat).

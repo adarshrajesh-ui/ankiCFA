@@ -553,6 +553,17 @@
     // by the app's network-security config). Either path renders the SAME rich AI
     // feedback; on any failure the deterministic reveal stands.
     if (/android/i.test(navigator.userAgent || "")) {
+      // Honour the SYNCED AI-grading toggle on the phone. AnkiDroid injects
+      // window.CFA_AI_GRADING_ENABLED from col.conf (cfa_ai_enabled &&
+      // cfa_ai_grading_enabled — the same keys the desktop writes and sync
+      // carries). When it is explicitly false we must NOT hit the proxy: show
+      // the honest "Deterministic" state, exactly like the desktop pycmd bridge
+      // which returns error="ai_off" for the same toggle. (undefined => on,
+      // preserving older builds that don't inject the flag.)
+      if (window.CFA_AI_GRADING_ENABLED === false) {
+        renderAiGrade({ source: "fallback", error: "ai_off" });
+        return;
+      }
       try {
         fetch("http://10.0.2.2:27702/cfa/grade", {
           method: "POST",

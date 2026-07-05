@@ -84,6 +84,24 @@ def test_mobile_fetch_failure_is_reported_not_swallowed():
     assert ".catch(function () {});" not in front
 
 
+def test_mobile_grade_honours_the_synced_ai_toggle():
+    """On the phone the ethics card must NOT hit the AI proxy when the synced
+    AI-grading toggle is off — it shows the honest "Deterministic" state, exactly
+    like the desktop pycmd bridge (error="ai_off"). AnkiDroid injects
+    ``window.CFA_AI_GRADING_ENABLED`` from col.conf; an explicit ``false`` skips
+    the fetch. (undefined => on, so older builds keep working.)"""
+    front = _read(FRONT)
+    # the toggle gate exists, guards the Android fetch, and is checked strictly
+    assert "window.CFA_AI_GRADING_ENABLED === false" in front
+    # when off it renders the deterministic (ai_off) state, not a proxy call
+    assert 'renderAiGrade({ source: "fallback", error: "ai_off" });' in front
+    # the gate sits INSIDE the android branch, BEFORE the proxy fetch
+    android_at = front.index('/android/i.test')
+    gate_at = front.index("window.CFA_AI_GRADING_ENABLED === false")
+    fetch_at = front.index("http://10.0.2.2:27702/cfa/grade")
+    assert android_at < gate_at < fetch_at
+
+
 def test_css_has_distinct_off_and_warn_provenance_styles():
     """The off-state reads calm/muted; the failure reads as a warn wash — the
     two are visually distinct from each other and from the AI-graded box."""
