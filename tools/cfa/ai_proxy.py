@@ -11,8 +11,9 @@ returns the AI draft / grade WITH provenance. A shared bearer token — NOT the
 OpenAI key — gates access.
 
 Endpoints (Authorization: Bearer <token>; JSON bodies):
-  POST /cfa/tabfill  {front, notetype?}            -> {ok, text, source, model, error}
-  POST /cfa/grade    {passage, answerVerdict, ...}  -> ai_grading.grade_semantic result
+  POST /cfa/tabfill    {front, notetype?}            -> {ok, text, source, model, error}
+  POST /cfa/grade      {passage, answerVerdict, ...}  -> ai_grading.grade_semantic result
+  POST /cfa/mapexplain {nodes:[{id,full,kind,pct,...}]} -> {ok, source, explanations, model, error}
   GET  /cfa/health                                  -> {ok, keyPresent, model}
 
 The OpenAI key is NEVER returned or logged. With no key (or on any failure) every
@@ -99,6 +100,28 @@ def grade(payload: dict[str, Any], *, complete_fn=None) -> dict[str, Any]:
     )
 
 
+def mapexplain(payload: dict[str, Any], *, complete_fn=None) -> dict[str, Any]:
+    """Concept Map — the SINGLE batched node-explanation via the shared pure engine.
+
+    ``payload`` is ``{"nodes": [{id, full, kind, pct, band, parent}, ...]}`` — the
+    same node list the desktop pycmd bridge (``cfa_concept_map_ai``) sends. Returns
+    ``{ok, source, explanations, model, error}`` where ``explanations`` is an
+    ``{id: text}`` dict. On AI-off / no key / any failure ``ok`` is False,
+    ``explanations`` is empty and ``source`` is "fallback", so the phone's map keeps
+    its deterministic templated wording. Never raises (``explain_map`` is no-raise)."""
+    from cfa.ai.mapexplain import explain_map
+
+    result = explain_map(payload.get("nodes"), complete_fn=complete_fn)
+    ok = bool(result.get("ok"))
+    return {
+        "ok": ok,
+        "source": "ai" if ok else "fallback",
+        "explanations": result.get("explanations") or {},
+        "model": result.get("model"),
+        "error": result.get("error"),
+    }
+
+
 class Handler(BaseHTTPRequestHandler):
     server_version = "cfa-ai-proxy/1.0"
 
@@ -150,6 +173,8 @@ class Handler(BaseHTTPRequestHandler):
                     str(payload.get("notetype", ""))))
             if route == "/cfa/grade":
                 return self._send(200, grade(payload))
+            if route == "/cfa/mapexplain":
+                return self._send(200, mapexplain(payload))
         except Exception as exc:  # pragma: no cover - endpoints are no-raise
             return self._send(200, {"ok": False, "source": "fallback",
                                     "error": f"proxy_error:{type(exc).__name__}"})
