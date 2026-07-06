@@ -21,6 +21,50 @@ function stripTrailingPunctuation(text: string): string {
     return text.trim().replace(/[.]+$/, "");
 }
 
+/**
+ * Human-readable CFA topic-area names, keyed by the bare `los::<slug>` slug.
+ * Mirrors `topic_display_name` in `pylib/anki/cfa.py` so the frontend can act as
+ * a defensive safety net: even if a raw `los::` tag slips through in a backend
+ * reason string, the skipped-topics list still renders readable area names.
+ */
+const TOPIC_DISPLAY_NAMES: Record<string, string> = {
+    ethics: "Ethics & Professional Standards",
+    quant: "Quantitative Methods",
+    econ: "Economics",
+    fra: "Financial Reporting & Analysis",
+    corp: "Corporate Issuers",
+    equity: "Equity Investments",
+    "fixed-income": "Fixed Income",
+    fixed_income: "Fixed Income",
+    fi: "Fixed Income",
+    derivatives: "Derivatives",
+    altinv: "Alternative Investments",
+    portmgmt: "Portfolio Management",
+};
+
+/**
+ * Map a single topic token to a readable CFA area name: strip an optional
+ * `los::` prefix, keep the segment before any further `::`, lowercase it, then
+ * look it up. Unknown slugs fall back to a title-cased form (split on `_`/`-`)
+ * so a newly-authored topic is still readable. An already-human name round-trips
+ * unchanged. Returns the original token when there is nothing left to map.
+ */
+function topicDisplayName(token: string): string {
+    const trimmed = token.trim();
+    const bare = trimmed.startsWith("los::") ? trimmed.slice("los::".length) : trimmed;
+    const slug = bare.split("::", 1)[0].trim().toLowerCase();
+    if (!slug) {
+        return trimmed;
+    }
+    if (slug in TOPIC_DISPLAY_NAMES) {
+        return TOPIC_DISPLAY_NAMES[slug];
+    }
+    const words = slug.replace(/[_-]+/g, " ").split(/\s+/).filter(Boolean);
+    return words.length
+        ? words.map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join(" ")
+        : trimmed;
+}
+
 function cleanRawReason(reason: string): string {
     const trimmed = stripTrailingPunctuation(reason);
     if (!trimmed) {
@@ -31,7 +75,12 @@ function cleanRawReason(reason: string): string {
     }
     const skipped = trimmed.match(/high-weight topic\(s\) skipped, no score:\s*(.+)$/i);
     if (skipped?.[1]) {
-        return `No score: high-weight topics skipped: ${skipped[1]}`;
+        const names = skipped[1]
+            .split(",")
+            .map((token) => topicDisplayName(token))
+            .filter((name) => name.length > 0)
+            .join(", ");
+        return `No score: high-weight topics skipped: ${names}`;
     }
     return trimmed
         .replace(/^not enough data to estimate readiness:\s*/i, "Not enough data: ")

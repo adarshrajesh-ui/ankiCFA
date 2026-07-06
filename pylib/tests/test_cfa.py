@@ -297,7 +297,10 @@ def test_memory_score_abstains_when_high_weight_topic_skipped():
     score = cfa.memory_score(col, deck_id=deck)
     assert score.abstain
     assert "high-weight topic" in score.reason
-    assert "los::b" in score.reason
+    # The reason names the readable topic-area display name, never the raw
+    # ``los::`` join-key tag (which used to leak into user-facing text).
+    assert cfa.topic_display_name("los::b") in score.reason
+    assert "los::" not in score.reason
     col.close()
 
 
@@ -418,3 +421,60 @@ def test_topic_display_name_maps_canonical_slugs_and_falls_back():
     assert cfa.topic_display_name("los::my_new-topic") == "My New Topic"
     # A bare (prefix-less) slug is handled too.
     assert cfa.topic_display_name("derivatives") == "Derivatives"
+
+
+# --- Per-concept due/new counts (Concept Map "Cards Due") --------------------
+
+
+def test_topic_card_counts_due_new_and_child_tags():
+    # Real per-concept queue depth: a concept rolls up its own ``los::`` tag AND
+    # any child tag, splits due vs new (Anki ``is:due`` excludes new), and never
+    # leaks between sibling concepts.
+    col = getEmptyCol()
+    nt = col.models.by_name("Basic")
+    deck = col.decks.id("CFA")
+    # Ethics: 2 cards on the exact tag + 1 on a child tag will be made DUE; one
+    # exact-tag and one child-tag card stay NEW.
+    e_due = [_add_card(col, deck, nt, f"e-due-{i}", ["los::ethics"]) for i in range(2)]
+    _add_card(col, deck, nt, "e-new", ["los::ethics"])  # stays NEW
+    child_due = _add_card(col, deck, nt, "e-child-due", ["los::ethics::gips"])
+    _add_card(col, deck, nt, "e-child-new", ["los::ethics::gips"])  # stays NEW
+    # Quant: an independent concept that must NOT count toward ethics.
+    q_due = _add_card(col, deck, nt, "q-due", ["los::quant"])
+    _add_card(col, deck, nt, "q-new", ["los::quant"])  # stays NEW
+    col.sched.set_due_date([*e_due, child_due, q_due], "0")  # -> review, due today
+
+    counts = cfa.topic_card_counts(col, ["los::ethics", "los::quant", "los::econ"])
+    # Ethics rolls up its own tag (2 due, 1 new) AND the child tag (1 due, 1 new).
+    assert counts["los::ethics"] == {"due": 3, "new": 2}
+    # Quant is independent — no cross-concept leakage in either direction.
+    assert counts["los::quant"] == {"due": 1, "new": 1}
+    # A concept with no cards at all is an honest 0/0, never absent from the map.
+    assert counts["los::econ"] == {"due": 0, "new": 0}
+    col.close()
+
+
+def test_topic_card_counts_deck_scope_vs_whole_collection():
+    # Scope mirrors the readiness scores: no/zero deck id counts the WHOLE
+    # collection; a real deck id scopes to that deck AND its subdecks.
+    col = getEmptyCol()
+    nt = col.models.by_name("Basic")
+    main = col.decks.id("CFA Level II")
+    sub = col.decks.id("CFA Level II::FRA")  # subdeck of the main deck
+    other = col.decks.id("Other")  # unrelated sibling deck
+    in_main = _add_card(col, main, nt, "m", ["los::ethics"])
+    in_sub = _add_card(col, sub, nt, "s", ["los::ethics"])
+    in_other = _add_card(col, other, nt, "o", ["los::ethics"])
+    col.sched.set_due_date([in_main, in_sub, in_other], "0")
+
+    # Whole collection (deck_id=None): every ethics card, wherever it lives.
+    whole = cfa.topic_card_counts(col, ["los::ethics"])
+    assert whole["los::ethics"]["due"] == 3
+
+    # Scoped to the main deck: includes its subdeck (FRA) but NOT "Other".
+    scoped = cfa.topic_card_counts(col, ["los::ethics"], deck_id=main)
+    assert scoped["los::ethics"]["due"] == 2
+
+    # deck_id=0 is whole-collection (same convention the score payload uses).
+    assert cfa.topic_card_counts(col, ["los::ethics"], deck_id=0) == whole
+    col.close()

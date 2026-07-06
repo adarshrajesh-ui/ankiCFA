@@ -72,6 +72,8 @@ class CfaHome:
             mw.moveToState("deckBrowser")
         elif url == "cfa:ai":
             open_ai_settings(mw)
+        elif url.startswith("cfa:ai-toggle:"):
+            set_ai_master_from_home(mw, url.rsplit(":", 1)[-1] in ("1", "true", "on"))
         elif url == "cfa:sync":
             trigger_cfa_sync(mw)
         elif url == "cfa:sync-settings":
@@ -95,6 +97,29 @@ def open_ai_settings(mw: AnkiQt) -> None:
     from aqt.cfa_ai_settings import open_ai_settings as _open
 
     _open(mw)
+
+
+def set_ai_master_from_home(mw: AnkiQt, enabled: bool) -> None:
+    """Persist the small Home AI/no-AI toggle.
+
+    Turning AI on also re-enables semantic grading, so Home's "AI On" cannot
+    hide a stale per-feature-off state that would keep ethics deterministic.
+    """
+    from aqt.cfa_ai_settings import get_ai_toggles, set_ai_toggles
+
+    cur = get_ai_toggles(mw.col)
+    set_ai_toggles(
+        mw.col,
+        master=enabled,
+        grading=True if enabled else cur["grading"],
+        tabfill=True if enabled else cur["tabfill"],
+    )
+    tooltip(
+        "AI semantic grading enabled."
+        if enabled
+        else "AI disabled; deterministic grading only.",
+        parent=mw,
+    )
 
 
 def open_sync_settings(mw: AnkiQt) -> None:

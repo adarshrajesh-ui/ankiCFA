@@ -99,7 +99,7 @@ export function syncChipLabel(data: ExamReadinessPayload): string {
 export function readinessLead(data: ExamReadinessPayload): string {
     if (data.heroMode === "bayesian_call" && data.heroBayesian) {
         const scoreRange = bandValue(data.readiness);
-        return `Pass call: ${data.heroBayesian.call.toLowerCase()}, ${scoreRange} projected readiness range. Based on stored reviews, first exposures, graded answers, and topic coverage; when evidence is thin, Readiness withholds the call.`;
+        return `Pass call: ${data.heroBayesian.call.toLowerCase()}, ${scoreRange} estimated exam accuracy as a 95% confidence interval. Based on stored reviews, first exposures, graded answers, and topic coverage; the range narrows as you answer more questions, and Readiness withholds the call when evidence is thin.`;
     }
     if (data.heroAbstain) {
         const reason = formatHeroAbstainReason(data.heroAbstain.reason, data.caption);

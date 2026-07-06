@@ -157,7 +157,8 @@ test("Exam Readiness renders real ranges + a lit coverage map", async ({ page })
     await expect(table).toBeVisible();
     await expect(page.locator(".cfa-readiness__table-hint")).toHaveCount(0);
     await expect(table.getByText("Fixed Income", { exact: true })).toBeVisible();
-    await expect(table.locator('.cfa-readiness__topic-stat[data-label="Weight"]').getByText("12%").first()).toBeVisible();
+    await expect(table.locator(".cfa-readiness__topic-stat[data-label=\"Weight\"]").getByText("12%").first())
+        .toBeVisible();
 
     await page.screenshot({
         path: path.join(OUT, "02-cfa-readiness-populated.png"),

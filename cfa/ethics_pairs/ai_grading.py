@@ -39,13 +39,28 @@ from typing import Optional
 
 from ethics_scoring import (
     PassageAttempt,
+    find_gold_indices,
     find_gold_spans,
     grade_passage_attempt,
     span_cap,
+    span_tier,
     tokenize,
 )
 
 GRADES = ("correct", "somewhat", "partial", "wrong")
+
+# Assessment tiers for an INDIVIDUAL learner highlight (the ``per_learner_span`` critique). These
+# describe what the learner ACTUALLY selected so feedback is targeted at each thing they highlighted:
+#   - "decisive"   : this is the right, focused evidence.
+#   - "excessive"  : right region but too broad (the decisive words are buried in a much wider grab).
+#   - "partial"    : captures some of a required span / some decisive words, but not the whole thing.
+#   - "irrelevant" : does not help the ethical/unethical case (the wrong piece).
+# The model chooses the tier per highlight; the deterministic AI-off path derives it from word overlap.
+LEARNER_SPAN_ASSESSMENTS = ("decisive", "excessive", "partial", "irrelevant")
+
+# A highlight that fully covers a gold span but carries more than this many EXTRA (non-decisive) words
+# reads as "excessive"; a small boundary margin around the decisive evidence still reads as "decisive".
+_FOCUS_SLACK = 3
 
 _SYSTEM_PROMPT = (
     "You are a CFA Institute Code and Standards tutor grading AND coaching one "
@@ -87,6 +102,27 @@ _SYSTEM_PROMPT = (
     "highlight was off, say what stronger evidence to point to.\n"
     "- Tell them the exact evidence that should have been highlighted.\n"
     "- The study tip must be concrete and specific to THIS Standard/skill.\n\n"
+    "PER-HIGHLIGHT CRITIQUE — the MOST IMPORTANT part. The feedback must be "
+    "TARGETED AT WHAT THE LEARNER ACTUALLY HIGHLIGHTED:\n"
+    "- Address EACH learner highlight individually, in order, QUOTING the "
+    "learner's OWN words. The learner may make SEVERAL highlights (several "
+    "phrases, several lines) — critique every one, and support multiple.\n"
+    "- Classify each highlight as exactly one of: 'decisive' (this IS the right, "
+    "focused evidence), 'excessive' (right region but TOO BROAD — they grabbed "
+    "much more than the small decisive piece), 'partial' (captures some of a "
+    "required span or some of the decisive words, but not the whole thing), or "
+    "'irrelevant' (does NOT help the ethical/unethical case — the wrong piece).\n"
+    "- When a highlight is not the best evidence, say WHY: they highlighted too "
+    "much when a small piece would do, highlighted the wrong piece, or missed one "
+    "of the required spans.\n"
+    "- Partial-credit nuance to apply: capturing the decisive words INSIDE a "
+    "larger highlight is 'excessive' (right idea, over-selected) and usually makes "
+    "the overall highlight_grade 'somewhat'; capturing 2 of 3 decisive words is "
+    "'partial' and the grade is 'somewhat'/'partial'; missing a required span or "
+    "highlighting the wrong piece is 'partial'/'wrong'.\n"
+    "- The deterministic per-highlight and per-gold-span word-coverage numbers in "
+    "the user message are GUIDANCE to ground these calls — YOU still decide each "
+    "grade; do not just echo them.\n\n"
     "Reply with ONLY a JSON object, no prose, no code fence:\n"
     '{"verdict_correct": <true|false>, '
     '"highlight_grade": "correct|somewhat|partial|wrong", '
@@ -99,6 +135,10 @@ _SYSTEM_PROMPT = (
     '"coaching": "<personal feedback that references the learner\'s own '
     "verdict + highlighted words and the Standard; this is the payoff for AI grading>\", "
     '"study_tip": "<one concrete next step for this Standard/skill>", '
+    '"per_learner_span": [{"quote": "<the learner\'s OWN highlighted words>", '
+    '"assessment": "decisive|excessive|partial|irrelevant", '
+    '"note": "<why THIS highlight is or is not the best evidence — too broad, '
+    'wrong piece, or missing part of a required span>"}], '
     '"spans": [{"phrase": "<gold phrase>", "matched": <true|false>, '
     '"note": "<why THIS phrase is (or is not) the decisive evidence>"}]}'
 )
@@ -157,6 +197,244 @@ def _selection_summary(passage: str, selection_indices: Optional[Sequence[int]])
     selected = len(set(int(i) for i in (selection_indices or [])))
     ratio = (selected / total) if total else 0.0
     return {"selected": selected, "total": total, "ratio": ratio}
+
+
+def _highlight_indices(passage: str, highlight: dict) -> set:
+    """Resolve ONE learner highlight to its passage token indices.
+
+    Uses the supplied ``lo``/``hi`` token bounds when present; otherwise locates the highlight text
+    inside the passage with the shared tokenizer (mirrors how the card resolves a highlight).
+    """
+    lo = highlight.get("lo")
+    hi = highlight.get("hi")
+    if lo is not None and hi is not None:
+        try:
+            lo_i, hi_i = int(lo), int(hi)
+            if hi_i >= lo_i:
+                return set(range(lo_i, hi_i + 1))
+        except (TypeError, ValueError):
+            pass
+    return set(find_gold_indices(passage, str(highlight.get("text", ""))))
+
+
+def _coverage(
+    passage: str, gold_spans: Sequence[dict], highlights: Sequence[dict]
+) -> tuple[list[dict], list[dict]]:
+    """Deterministic per-gold-span AND per-learner-highlight word coverage (prompt GUIDANCE).
+
+    Returns ``(gold_coverage, highlight_coverage)``:
+
+    * ``gold_coverage`` — per authored gold span: how many of its decisive words the learner captured
+      (``captured_words`` of ``decisive_words``) plus the tolerant ``tier`` (full/near/none), e.g.
+      "captured 2 of 3 decisive words".
+    * ``highlight_coverage`` — per learner highlight: its ``width`` in words, how many are ``decisive``
+      (overlap a gold span) vs ``extra``, which gold spans it ``touches`` / ``fully_covers``, e.g.
+      "3 decisive words inside a 6-word highlight".
+
+    Reuses ``ethics_scoring.span_tier`` for the per-span tiers, keeping the numbers consistent with the
+    deterministic AI-off grader.
+    """
+    phrases = [g.get("phrase", "") for g in gold_spans]
+    gold_runs = find_gold_spans(passage, phrases)
+    gold_sets = [set(run) for run in gold_runs]
+    all_gold: set[int] = set()
+    for gs in gold_sets:
+        all_gold |= gs
+
+    hl_indices = [_highlight_indices(passage, h) for h in highlights]
+    selection: set[int] = set()
+    for idxs in hl_indices:
+        selection |= idxs
+
+    gold_coverage: list[dict] = []
+    for i, gs in enumerate(gold_sets):
+        gold_coverage.append(
+            {
+                "phrase": phrases[i],
+                "rationale": (
+                    gold_spans[i].get("rationale", "") if i < len(gold_spans) else ""
+                ),
+                "decisive_words": len(gs),
+                "captured_words": len(gs & selection),
+                "tier": span_tier(selection, gold_runs[i]),
+            }
+        )
+
+    highlight_coverage: list[dict] = []
+    for h, idxs in zip(highlights, hl_indices):
+        touches: list[int] = []
+        fully: list[int] = []
+        for i, gs in enumerate(gold_sets):
+            if gs and (idxs & gs):
+                touches.append(i)
+                if gs.issubset(idxs):
+                    fully.append(i)
+        decisive = len(idxs & all_gold)
+        highlight_coverage.append(
+            {
+                "text": str(h.get("text", "")),
+                "width": len(idxs),
+                "decisive_words": decisive,
+                "extra_words": len(idxs) - decisive,
+                "touches": touches,
+                "fully_covers": fully,
+            }
+        )
+    return gold_coverage, highlight_coverage
+
+
+def _tier_word(tier: str) -> str:
+    return {"full": "fully captured", "near": "partially captured", "none": "missed"}.get(
+        tier, tier
+    )
+
+
+def _coverage_guidance(
+    gold_coverage: Sequence[dict], highlight_coverage: Sequence[dict]
+) -> str:
+    """Render the deterministic coverage numbers as prompt GUIDANCE lines (the model still grades)."""
+    lines = [
+        "PER-HIGHLIGHT COVERAGE (deterministic word overlap — GUIDANCE only; "
+        "YOU decide each grade):"
+    ]
+    if highlight_coverage:
+        for i, hc in enumerate(highlight_coverage):
+            if hc["width"] == 0:
+                where = " (could not be located in the passage)"
+            elif not hc["touches"]:
+                where = " (overlaps NO gold span — likely irrelevant)"
+            elif hc["fully_covers"]:
+                where = " (fully covers gold span " + ", ".join(
+                    str(t + 1) for t in hc["fully_covers"]
+                ) + ")"
+            else:
+                where = " (overlaps gold span " + ", ".join(
+                    str(t + 1) for t in hc["touches"]
+                ) + " but not fully)"
+            lines.append(
+                f'  {i + 1}. "{hc["text"]}": {hc["decisive_words"]} decisive words '
+                f'inside a {hc["width"]}-word highlight{where}.'
+            )
+    else:
+        lines.append("  (the learner highlighted nothing)")
+    lines.append("")
+    lines.append("PER-GOLD-SPAN COVERAGE (deterministic — GUIDANCE only):")
+    if gold_coverage:
+        for i, gc in enumerate(gold_coverage):
+            lines.append(
+                f'  {i + 1}. "{gc["phrase"]}": learner captured '
+                f'{gc["captured_words"]} of {gc["decisive_words"]} decisive words '
+                f'({_tier_word(gc["tier"])}).'
+            )
+    else:
+        lines.append("  (no gold spans supplied)")
+    return "\n".join(lines)
+
+
+def _derive_per_learner_span(highlight_coverage: Sequence[dict]) -> list[dict]:
+    """Deterministic per-highlight assessment: the AI-off critique and the AI-path fallback shape.
+
+    One row per learner highlight so ``per_learner_span`` is always stable-shaped, keyed to what the
+    learner actually highlighted.
+    """
+    out: list[dict] = []
+    for hc in highlight_coverage:
+        width = int(hc.get("width", 0))
+        decisive = int(hc.get("decisive_words", 0))
+        extra = int(hc.get("extra_words", max(0, width - decisive)))
+        fully = list(hc.get("fully_covers", []))
+        if width == 0:
+            assessment = "irrelevant"
+            note = "This highlight could not be located in the passage."
+        elif decisive == 0:
+            assessment = "irrelevant"
+            note = (
+                "None of these words are decisive evidence — this highlight does "
+                "not help prove the case."
+            )
+        elif fully:
+            if extra <= _FOCUS_SLACK:
+                assessment = "decisive"
+                note = "Focused on the decisive evidence."
+            else:
+                assessment = "excessive"
+                note = (
+                    f"Contains the decisive evidence but is {extra} words too broad "
+                    "— a smaller highlight would do."
+                )
+        else:
+            assessment = "partial"
+            note = (
+                f"Overlaps the evidence ({decisive} of {width} highlighted words are "
+                "decisive) but does not capture a whole required span."
+            )
+        out.append(
+            {
+                "quote": hc.get("text", ""),
+                "assessment": assessment,
+                "note": note,
+                "decisive_words": decisive,
+                "highlight_words": width,
+            }
+        )
+    return out
+
+
+def _clean_assessment(value: object, default: str) -> str:
+    if isinstance(value, str):
+        cleaned = value.strip().lower().replace("-", "_").replace(" ", "_")
+        synonyms = {
+            "overbroad": "excessive",
+            "too_broad": "excessive",
+            "broad": "excessive",
+            "over_selected": "excessive",
+            "off_target": "irrelevant",
+            "off": "irrelevant",
+            "wrong": "irrelevant",
+            "wrong_piece": "irrelevant",
+            "somewhat": "partial",
+            "partially_right": "partial",
+            "partial_credit": "partial",
+            "correct": "decisive",
+            "precise": "decisive",
+        }
+        cleaned = synonyms.get(cleaned, cleaned)
+        if cleaned in LEARNER_SPAN_ASSESSMENTS:
+            return cleaned
+    return default
+
+
+def _parse_per_learner_span(
+    raw: object, derived: Sequence[dict]
+) -> list[dict]:
+    """Parse the model's per-highlight critique, aligned by order to the learner's highlights.
+
+    Falls back to the deterministic ``derived`` row when the model omits or malforms an entry, so
+    every learner highlight always yields one stable-shaped row.
+    """
+    raw_list = raw if isinstance(raw, list) else []
+    rows: list[dict] = []
+    n = max(len(derived), len(raw_list))
+    for i in range(n):
+        base = dict(derived[i]) if i < len(derived) else {}
+        item = raw_list[i] if i < len(raw_list) and isinstance(raw_list[i], dict) else {}
+        quote = str(
+            item.get("quote")
+            or item.get("phrase")
+            or item.get("text")
+            or base.get("quote", "")
+        ).strip()
+        assessment = _clean_assessment(
+            item.get("assessment"), base.get("assessment", "partial")
+        )
+        note = str(item.get("note", "")).strip() or base.get("note", "")
+        row: dict[str, object] = {"quote": quote, "assessment": assessment, "note": note}
+        if "decisive_words" in base:
+            row["decisive_words"] = base["decisive_words"]
+        if "highlight_words" in base:
+            row["highlight_words"] = base["highlight_words"]
+        rows.append(row)
+    return rows
 
 
 def _fallback_precision(
@@ -224,6 +502,8 @@ def _build_user_prompt(
         if str(standard).strip()
         else "GOVERNING STANDARD SUPPLIED BY CARD: (not supplied; infer it)\n"
     )
+    gold_coverage, highlight_coverage = _coverage(passage, gold_spans, highlights)
+    guidance = _coverage_guidance(gold_coverage, highlight_coverage)
     return (
         f"PASSAGE:\n{passage}\n\n"
         f"{standard_line}"
@@ -232,7 +512,11 @@ def _build_user_prompt(
         f"GOLD EVIDENCE SPANS:\n{gold_lines}\n\n"
         f"LEARNER'S HIGHLIGHTED PHRASES:\n{learner_lines}\n"
         f"{coverage_line}\n"
-        "Grade now. Reply with ONLY the JSON object."
+        f"{guidance}\n\n"
+        "Now critique EACH learner highlight above individually (fill "
+        "per_learner_span): quote the learner's own words and mark it decisive, "
+        "excessive, partial, or irrelevant with a reason. Then grade. Reply with "
+        "ONLY the JSON object."
     )
 
 
@@ -330,9 +614,10 @@ def grade_fallback(
     precision = _fallback_precision(
         passage, res["highlight"], gold_spans, selection_indices
     )
+    highlights = _normalise_learner_highlights(learner_spans, learner_highlights)
     highlighted = [
         str(h.get("text", "")).strip()
-        for h in _normalise_learner_highlights(learner_spans, learner_highlights)
+        for h in highlights
         if str(h.get("text", "")).strip()
     ]
     intent = (
@@ -341,6 +626,9 @@ def grade_fallback(
         if highlighted
         else "No evidence highlight was captured."
     )
+    # Deterministic per-highlight critique so the shape matches the AI path even AI-off/on fallback.
+    _, highlight_coverage = _coverage(passage, gold_spans, highlights)
+    per_learner_span = _derive_per_learner_span(highlight_coverage)
     return {
         "ok": False,
         "source": "fallback",
@@ -355,6 +643,7 @@ def grade_fallback(
         "needed_evidence": phrases,
         "confidence": None,
         "per_span": per_span,
+        "per_learner_span": per_learner_span,
         "error": error,
         "model": None,
         "item_id": item_id,
@@ -484,6 +773,18 @@ def grade_semantic(
             )
     else:
         per_span = [{"phrase": p, "matched": False, "note": ""} for p in phrases]
+    if grade in ("correct", "somewhat"):
+        # By definition these grades mean every gold span was semantically
+        # matched; don't let an omitted/malformed `spans` array make the UI show
+        # "Correct" while marking each evidence span as missed.
+        per_span = [
+            {
+                "phrase": row["phrase"],
+                "matched": True,
+                "note": row["note"] or gold_spans[i].get("rationale", ""),
+            }
+            for i, row in enumerate(per_span)
+        ]
 
     explanation = str(parsed.get("explanation", "")).strip() or "Graded by AI."
     coaching = str(parsed.get("coaching", "")).strip()
@@ -508,6 +809,14 @@ def grade_semantic(
         confidence = float(parsed.get("confidence"))
     except (TypeError, ValueError):
         confidence = None
+    # Per-highlight critique — the payoff of the rework. Parse the model's per_learner_span (targeted
+    # at what the learner actually highlighted) and pass it through ADDITIVELY, deriving a deterministic
+    # row wherever the model omits or malforms one so the array is always keyed to the learner's spans.
+    highlights = _normalise_learner_highlights(learner_spans, learner_highlights)
+    _, highlight_coverage = _coverage(passage, gold_spans, highlights)
+    per_learner_span = _parse_per_learner_span(
+        parsed.get("per_learner_span"), _derive_per_learner_span(highlight_coverage)
+    )
     return {
         "ok": True,
         "source": "ai",
@@ -522,6 +831,7 @@ def grade_semantic(
         "needed_evidence": needed_evidence,
         "confidence": confidence,
         "per_span": per_span,
+        "per_learner_span": per_learner_span,
         "error": None,
         "model": result.get("model"),
         "item_id": item_id,

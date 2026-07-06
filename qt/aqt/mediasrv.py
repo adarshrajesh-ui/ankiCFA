@@ -726,11 +726,13 @@ _CFA_READINESS_FOOTER = (
     "band (per-topic Beta posterior on first-exposure correctness) that starts "
     "wide and narrows as reviews accrue — no give-up wall. Recall uses FSRS R, "
     "falling back to an SM-2 forgetting curve so a number appears from the first "
-    "review. Below it, the three give-up-gated scores: Memory (exam-weighted "
-    "per-topic FSRS retrievability), Performance (Wilson interval on "
-    "first-exposure accuracy) and Readiness (fused P(pass)). The pass/fail call "
-    "is NOT validated against real exam data. No AI — pure spaced-repetition "
-    "stats."
+    "review. Below it: Memory (exam-weighted per-topic FSRS retrievability) and "
+    "Performance (Wilson interval on first-exposure accuracy) are give-up-gated "
+    "and read “No score” until there is enough evidence, while Readiness is a "
+    "95% confidence interval for estimated exam accuracy that is always shown — "
+    "the whole 0–100% range with no data, narrowing as you answer more "
+    "questions. The pass/fail call is NOT validated against real exam data. "
+    "No AI — pure spaced-repetition stats."
 )
 
 _CFA_DEADLINE_FOOTER = (
@@ -777,6 +779,13 @@ def _cfa_exam_readiness_payload(col: Collection, deck_id: int) -> dict[str, Any]
     ready = cfa.readiness_score(col, deck_id=scope)
     deck_name = _cfa_scope_name(col, deck_id)
 
+    # Real per-concept due/new counts for the Concept Map (keyed by the raw
+    # ``los::`` join tag), scoped exactly like the scores above. Computed once so
+    # the per-topic comprehension is a cheap dict lookup.
+    topic_counts = cfa.topic_card_counts(
+        col, [t.topic for t in score.topics], deck_id=scope
+    )
+
     # Hero: the Bayesian pass/fail call, but ABSTAIN when either Memory or
     # Performance gives up — identical gate to the desktop dialog
     # (score.abstain || perf.abstain).
@@ -796,7 +805,11 @@ def _cfa_exam_readiness_payload(col: Collection, deck_id: int) -> dict[str, Any]
             perf,
         ),
         "readiness": {
-            **_cfa_score_band("Readiness", "P(pass); wide range, uncalibrated", ready),
+            **_cfa_score_band(
+                "Readiness",
+                "95% confidence interval for estimated exam accuracy",
+                ready,
+            ),
             "label": ready.label,
         },
         "caption": {
@@ -819,6 +832,9 @@ def _cfa_exam_readiness_payload(col: Collection, deck_id: int) -> dict[str, Any]
                     {"low": t.r_low, "high": t.r_high} if t.avg_r is not None else None
                 ),
                 "covered": t.covered,
+                # Real per-concept queue depth for the Concept Map (0 when none).
+                "dueCount": topic_counts.get(t.topic, {}).get("due", 0),
+                "newCount": topic_counts.get(t.topic, {}).get("new", 0),
             }
             for t in sorted(score.topics, key=lambda x: -x.weight)
         ],

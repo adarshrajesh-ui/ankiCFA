@@ -24,6 +24,7 @@ License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
         recommendedSessions,
         shortTopicName,
         syncChipLabel,
+        syncSummary,
     } from "./home";
 
     /** The full CFA Home payload (scores, topics, exam countdown, AI and sync state). */
@@ -42,6 +43,7 @@ License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
     $: lead = commandCenterLead(data);
     $: metricChips = homeMetricChips(data);
     $: syncLabel = syncChipLabel(data);
+    $: syncLine = syncSummary(data);
     $: risks = buildPriorityRisks(data.topics);
     $: sessions = recommendedSessions(risks, data.topics);
     $: map = buildConceptMap(data.topics);
@@ -51,6 +53,7 @@ License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
     let selectedMapId: string | null = null;
     let mapState = { x: 0, y: 0, scale: 1 };
     let pinchStart: PinchStart | null = null;
+    let aiEnabled = data.aiEnabled;
 
     $: activeMapId = selectedMapId ?? hotMapId ?? nearestMapId;
     $: activeNode = map.nodes.find((n) => n.id === activeMapId) ?? map.center;
@@ -59,6 +62,11 @@ License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
 
     function go(cmd: string): void {
         bridgeCommand(cmd);
+    }
+
+    function toggleAi(): void {
+        aiEnabled = !aiEnabled;
+        bridgeCommand(`cfa:ai-toggle:${aiEnabled ? "1" : "0"}`);
     }
 
     function clamp(value: number, min: number, max: number): number {
@@ -109,7 +117,8 @@ License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
                 ? `inherits ${node.parent} section evidence`
                 : "dependency graph pending";
         if (selected) {
-            return `Open the existing priority queue for this area. Exact per-concept due counts require a backend concept queue.`;
+            const newPart = node.newCount > 0 ? ` · ${integer(node.newCount)} new` : "";
+            return `${integer(node.dueCount)} cards due${newPart}. Open priority study to work this area.`;
         }
         return `Priority: ${mapPriority(node)} · ${mapEvidence(node)} · ${dependency}.`;
     }
@@ -261,11 +270,38 @@ License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
                 {#each metricChips as chip}
                     <span class="cfa-home__meta-chip">{chip}</span>
                 {/each}
+                <button
+                    type="button"
+                    class="cfa-home__ai-toggle"
+                    class:is-on={aiEnabled}
+                    aria-pressed={aiEnabled}
+                    on:click={toggleAi}
+                >
+                    <span>{aiEnabled ? "AI On" : "No AI"}</span>
+                    <small>
+                        {aiEnabled ? "Semantic grading enabled" : "Deterministic only"}
+                    </small>
+                </button>
             </div>
             <div class="cfa-home__countdown" data-tone={countdown.tone}>
                 <b>{countdown.headline}</b>
                 <span>{countdown.sub}</span>
             </div>
+            <button
+                type="button"
+                class="cfa-home__sync-status"
+                data-tone={data.sync.tone}
+                aria-label="{data.sync.status}: {syncLine} — {data.sync.actionLabel}"
+                title={syncLine}
+                on:click={() => go("cfa:sync")}
+            >
+                <span class="cfa-home__sync-dot" aria-hidden="true"></span>
+                <span class="cfa-home__sync-text">
+                    <b>{data.sync.status}</b>
+                    <small>{syncLine}</small>
+                </span>
+                <span class="cfa-home__sync-action">{data.sync.actionLabel}</span>
+            </button>
         </section>
 
         <section class="cfa-home__grid cfa-home__grid--main">
@@ -713,6 +749,40 @@ License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
             color: var(--muted);
         }
 
+        &__ai-toggle {
+            display: inline-grid;
+            gap: 1px;
+            cursor: pointer;
+            border: 1px solid rgba(180, 35, 24, 0.3);
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 15px;
+            padding: 9px 14px;
+            color: var(--red);
+            text-align: left;
+
+            span {
+                font-size: 15px;
+                font-weight: 800;
+            }
+
+            small {
+                color: var(--muted);
+                font-size: 12px;
+                font-weight: 700;
+            }
+
+            &.is-on {
+                border-color: rgba(20, 184, 177, 0.42);
+                background: rgba(228, 246, 245, 0.72);
+                color: var(--turq-ink);
+            }
+
+            &:focus-visible {
+                outline: 3px solid rgba(20, 184, 177, 0.36);
+                outline-offset: 2px;
+            }
+        }
+
         &__countdown {
             display: inline-flex;
             gap: 8px;
@@ -733,6 +803,72 @@ License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
             &[data-tone="warn"] b {
                 color: #8a4a00;
             }
+        }
+
+        &__sync-status {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            width: 100%;
+            margin-top: 12px;
+            cursor: pointer;
+            text-align: left;
+            border: 1px solid rgba(255, 255, 255, 0.62);
+            background: rgba(255, 255, 255, 0.42);
+            border-radius: 16px;
+            padding: 12px 15px;
+
+            &:hover {
+                border-color: rgba(20, 184, 177, 0.38);
+                transform: translateY(-1px);
+            }
+
+            &:focus-visible {
+                outline: 3px solid rgba(20, 184, 177, 0.36);
+                outline-offset: 2px;
+            }
+        }
+
+        &__sync-dot {
+            width: 10px;
+            height: 10px;
+            flex: 0 0 auto;
+            border-radius: 999px;
+            background: var(--faint);
+
+            .cfa-home__sync-status[data-tone="pass"] & {
+                background: var(--green);
+            }
+
+            .cfa-home__sync-status[data-tone="warn"] & {
+                background: #c2790a;
+            }
+        }
+
+        &__sync-text {
+            display: grid;
+            gap: 2px;
+            min-width: 0;
+            flex: 1 1 auto;
+
+            b {
+                font-size: 15px;
+                color: var(--turq-ink);
+            }
+
+            small {
+                font-size: 14px;
+                color: var(--muted);
+                overflow-wrap: anywhere;
+            }
+        }
+
+        &__sync-action {
+            flex: 0 0 auto;
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--turq-ink);
+            white-space: nowrap;
         }
 
         &__grid {
@@ -1013,6 +1149,15 @@ License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
 
             &__countdown {
                 justify-content: flex-start;
+            }
+
+            &__sync-status {
+                flex-wrap: wrap;
+                border-radius: 16px;
+            }
+
+            &__sync-action {
+                margin-left: 22px;
             }
 
             &__grid {

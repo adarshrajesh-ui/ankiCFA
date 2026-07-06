@@ -13,7 +13,7 @@
 //! There is **no AI here** — it is pure spaced-repetition statistics:
 //!   * Memory     — exam-weighted FSRS retrievability, reported as a range.
 //!   * Performance — first-exposure accuracy as a Wilson 95% interval.
-//!   * Readiness   — a coarse, deliberately-wide logistic P(pass).
+//!   * Readiness   — a Wilson 95% CI on estimated exam accuracy (always shown).
 //!   * Bayesian    — the readiness "hero" band that never abstains.
 //!
 //! One deliberate improvement over `cfa.py`: graded reviews are counted **at
@@ -70,12 +70,10 @@ const MIN_FIRST_EXPOSURES: u32 = 30;
 // Anki ease scale: 1=Again (incorrect); >=2 counts as a successful recall.
 const CORRECT_EASE: i64 = 2;
 
-// Readiness (logistic P(pass)).
+// Shared readiness caveat + the rough minimum-passing-score proxy used by the
+// Bayesian pass/fail call (NOT the official CFA MPS).
 const READINESS_LABEL: &str = "not validated against real exam data";
 const MPS: f64 = 0.65;
-const READINESS_K: f64 = 8.0;
-const GUESS_RATE: f64 = 1.0 / 3.0;
-const READINESS_MARGIN: f64 = 0.15;
 
 // Bayesian readiness.
 const PRIOR_A: f64 = 1.0;
@@ -152,10 +150,6 @@ fn wilson(successes: u32, n: u32, z: f64) -> (f64, f64, f64) {
     (phat, (center - margin).max(0.0), (center + margin).min(1.0))
 }
 
-fn pass_prob(accuracy: f64) -> f64 {
-    1.0 / (1.0 + (-READINESS_K * (accuracy - MPS)).exp())
-}
-
 /// Standard-normal CDF via `libm::erf` (matches Python's C `math.erf`).
 fn norm_cdf(x: f64) -> f64 {
     0.5 * (1.0 + libm::erf(x / 2.0_f64.sqrt()))
@@ -221,6 +215,56 @@ fn readiness_topic_prefixes(weights: &HashMap<String, f64>) -> Vec<String> {
     }
 }
 
+/// Human-readable CFA topic-area name for a `los::<slug>` tag prefix (mirrors
+/// `cfa.topic_display_name` + `TOPIC_DISPLAY_NAMES`). Strips the `los::`
+/// prefix, takes the first `::` segment, maps known slugs, else title-cases the
+/// slug (splitting on `_`/`-`). Presentation only — the raw tag stays the join
+/// key.
+fn topic_display_name(topic: &str) -> String {
+    let slug = topic.strip_prefix(TOPIC_PREFIX).unwrap_or(topic);
+    let slug = slug.split("::").next().unwrap_or(slug);
+    let mapped = match slug {
+        "ethics" => "Ethics & Professional Standards",
+        "quant" => "Quantitative Methods",
+        "econ" => "Economics",
+        "fra" => "Financial Reporting & Analysis",
+        "corp" => "Corporate Issuers",
+        "equity" => "Equity Investments",
+        "fixed_income" | "fixed-income" | "fi" => "Fixed Income",
+        "derivatives" => "Derivatives",
+        "altinv" => "Alternative Investments",
+        "portmgmt" => "Portfolio Management",
+        _ => "",
+    };
+    if !mapped.is_empty() {
+        return mapped.to_string();
+    }
+    let words: Vec<String> = slug
+        .split(['_', '-'])
+        .filter(|w| !w.is_empty())
+        .map(title_case_word)
+        .collect();
+    if words.is_empty() {
+        topic.to_string()
+    } else {
+        words.join(" ")
+    }
+}
+
+/// Mirror of Python's `str.capitalize()` for a single word: first character
+/// upper-cased, the rest lower-cased.
+fn title_case_word(word: &str) -> String {
+    let mut chars = word.chars();
+    match chars.next() {
+        None => String::new(),
+        Some(first) => {
+            let mut out: String = first.to_uppercase().collect();
+            out.extend(chars.flat_map(char::to_lowercase));
+            out
+        }
+    }
+}
+
 fn iso_local_seconds(secs: i64) -> String {
     Local
         .timestamp_opt(secs, 0)
@@ -278,7 +322,6 @@ impl Collection {
             now,
         )?;
         let performance = self.cfa_performance_score(&deck_filter, now)?;
-        let readiness = cfa_readiness_score(&memory, &performance, now);
         let bayesian = self.cfa_bayesian_readiness(
             &deck_filter,
             &topic_prefixes,
@@ -287,6 +330,7 @@ impl Collection {
             next_day_at,
             now,
         )?;
+        let readiness = cfa_readiness_score(&memory, &performance, &bayesian, now);
 
         Ok(pb::ComputeCfaScoresResponse {
             memory: Some(memory),
@@ -722,7 +766,7 @@ fn memory_giveup_reason(
         let mut skipped: Vec<String> = topics
             .iter()
             .filter(|t| t.weight >= threshold && t.weight > 0.0 && !t.covered)
-            .map(|t| t.topic.clone())
+            .map(|t| topic_display_name(&t.topic))
             .collect();
         skipped.sort();
         if !skipped.is_empty() {
@@ -735,53 +779,35 @@ fn memory_giveup_reason(
     None
 }
 
-/// Combine memory + performance + coverage into a wide, uncalibrated P(pass)
-/// (mirrors `cfa.readiness_score`).
+/// Readiness as a Wilson 95% CI on estimated exam accuracy (mirrors
+/// `cfa._py_readiness_score`). The point estimate is the coverage-aware
+/// Bayesian exam-accuracy number (`bayes.accuracy`, ~0.5 under the uniform
+/// prior); the interval is a Wilson score interval sized by the number of
+/// graded questions answered (`n = perf.first_exposures`,
+/// `k = round(point * n)`), so it spans ~0–100% with no data and tightens as
+/// evidence accrues. Never abstains, and the interval always contains the
+/// point. `round` is round-half-to-even (`round_ties_even`) to match Python's
+/// `round`, so both engines agree bit-for-bit.
 fn cfa_readiness_score(
     mem: &pb::CfaMemoryScore,
     perf: &pb::CfaPerformanceScore,
+    bayes: &pb::CfaBayesianReadiness,
     now: i64,
 ) -> pb::CfaReadinessScore {
     let computed_at = iso_local_seconds(now);
 
-    if mem.abstain || perf.abstain {
-        let mut why = Vec::new();
-        if mem.abstain {
-            why.push(format!("memory ({})", mem.reason));
-        }
-        if perf.abstain {
-            why.push(format!("performance ({})", perf.reason));
-        }
-        return pb::CfaReadinessScore {
-            abstain: true,
-            reason: format!("not enough data to estimate readiness: {}", why.join("; ")),
-            point: None,
-            range_low: None,
-            range_high: None,
-            label: READINESS_LABEL.to_string(),
-            memory_point: mem.point,
-            performance_point: perf.point,
-            coverage_pct: mem.coverage_pct,
-            computed_at,
-        };
-    }
-
-    let cov = mem.coverage_pct;
-    let acc = |m: f64, p: f64| cov * (0.5 * m + 0.5 * p) + (1.0 - cov) * GUESS_RATE;
-
-    let (mp, pl, ph) = (
-        mem.point.unwrap(),
-        mem.range_low.unwrap(),
-        mem.range_high.unwrap(),
-    );
-    let (pp, ppl, pph) = (
-        perf.point.unwrap(),
-        perf.range_low.unwrap(),
-        perf.range_high.unwrap(),
-    );
-    let point = pass_prob(acc(mp, pp));
-    let low = (pass_prob(acc(pl, ppl)) - READINESS_MARGIN).max(0.0);
-    let high = (pass_prob(acc(ph, pph)) + READINESS_MARGIN).min(1.0);
+    let point = bayes.accuracy;
+    let n = perf.first_exposures;
+    let (low, high) = if n == 0 {
+        (0.0, 1.0)
+    } else {
+        let k = (point * n as f64).round_ties_even() as u32;
+        let (_, lo, hi) = wilson(k, n, WILSON_Z);
+        (lo, hi)
+    };
+    // Always contain the point, and stay within [0, 1].
+    let low = clamp01(low.min(point));
+    let high = clamp01(high.max(point));
 
     pb::CfaReadinessScore {
         abstain: false,
@@ -792,7 +818,7 @@ fn cfa_readiness_score(
         label: READINESS_LABEL.to_string(),
         memory_point: mem.point,
         performance_point: perf.point,
-        coverage_pct: cov,
+        coverage_pct: mem.coverage_pct,
         computed_at,
     }
 }
@@ -860,14 +886,28 @@ mod tests {
     }
 
     #[test]
-    fn abstains_on_empty_collection_but_bayesian_still_answers() {
+    fn empty_collection_gated_scores_abstain_but_readiness_and_bayesian_answer() {
         let mut col = Collection::new();
         let out = scores(&mut col);
         let mem = out.memory.unwrap();
         assert!(mem.abstain, "no reviews -> memory abstains");
         assert!(mem.reason.contains("graded reviews"));
         assert!(out.performance.unwrap().abstain, "no first exposures");
-        assert!(out.readiness.unwrap().abstain, "readiness abstains too");
+
+        // Readiness NEVER abstains: with no questions answered it shows the
+        // whole 0–100% Wilson CI centred on the ~0.5 prior accuracy.
+        let rd = out.readiness.unwrap();
+        assert!(!rd.abstain, "readiness is always shown");
+        assert!(rd.reason.is_empty());
+        let (point, low, high) = (
+            rd.point.unwrap(),
+            rd.range_low.unwrap(),
+            rd.range_high.unwrap(),
+        );
+        assert!(low <= point && point <= high, "CI contains the point");
+        assert_eq!((low, high), (0.0, 1.0), "no data -> the whole 0–100% range");
+        assert_eq!(rd.label, READINESS_LABEL);
+
         // The Bayesian hero never abstains: with no evidence it sits at the
         // uniform prior (accuracy 0.5) and a wide band. The exact width depends
         // on the topic count — the aggregate mean averages N independent
@@ -923,7 +963,11 @@ mod tests {
         let rd = out.readiness.unwrap();
         assert!(!rd.abstain);
         assert_eq!(rd.label, READINESS_LABEL);
-        assert!(rd.point.unwrap() > 0.0 && rd.point.unwrap() < 1.0);
+        let rd_point = rd.point.unwrap();
+        assert!(rd_point > 0.0 && rd_point < 1.0);
+        // The Wilson CI always brackets the point and stays within [0, 1].
+        assert!(rd.range_low.unwrap() <= rd_point && rd_point <= rd.range_high.unwrap());
+        assert!(rd.range_low.unwrap() >= 0.0 && rd.range_high.unwrap() <= 1.0);
 
         let bay = out.bayesian.unwrap();
         assert_eq!(bay.first_exposures, n_reviews);

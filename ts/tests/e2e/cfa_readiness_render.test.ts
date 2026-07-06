@@ -183,7 +183,8 @@ test("Exam Readiness renders three scores + the full per-topic coverage map", as
         await expect(table.getByText(topic, { exact: true })).toBeVisible();
     }
     // Real exam-weight values are presented as percentages (12% for heavy areas).
-    await expect(table.locator('.cfa-readiness__topic-stat[data-label="Weight"]').getByText("12%").first()).toBeVisible();
+    await expect(table.locator(".cfa-readiness__topic-stat[data-label=\"Weight\"]").getByText("12%").first())
+        .toBeVisible();
 
     await page.screenshot({
         path: path.join(OUT, "02-cfa-readiness.png"),

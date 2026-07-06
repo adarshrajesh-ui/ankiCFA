@@ -230,6 +230,39 @@ test("buildConceptMap: subsections inherit the section estimate and are flagged"
     }
 });
 
+test("buildConceptMap: carries per-concept due/new counts (topic, subs inherit, centre sums)", () => {
+    const rows = [
+        topic({ topic: "Equity Investments", weight: 0.125, dueCount: 7, newCount: 3 }),
+        topic({ topic: "Fixed Income", weight: 0.125, dueCount: 4, newCount: 0 }),
+    ];
+    const map = buildConceptMap(rows);
+
+    const equity = map.nodes.find((n) => n.kind === "topic" && n.name === "Equity Investments")!;
+    expect(equity.dueCount).toBe(7);
+    expect(equity.newCount).toBe(3);
+
+    // Subsections inherit their parent section's queue depth (like mastery).
+    const equitySubs = map.nodes.filter((n) => n.kind === "sub" && n.parent === "Equity Investments");
+    expect(equitySubs).toHaveLength(2);
+    for (const s of equitySubs) {
+        expect(s.dueCount).toBe(7);
+        expect(s.newCount).toBe(3);
+    }
+
+    // The centre CFA node is the SUM across every topic.
+    expect(map.center.dueCount).toBe(11);
+    expect(map.center.newCount).toBe(3);
+});
+
+test("buildConceptMap: due/new counts default to 0 when the row omits them", () => {
+    const map = buildConceptMap([topic({ topic: "Derivatives", weight: 0.075 })]);
+    const node = map.nodes.find((n) => n.kind === "topic")!;
+    expect(node.dueCount).toBe(0);
+    expect(node.newCount).toBe(0);
+    expect(map.center.dueCount).toBe(0);
+    expect(map.center.newCount).toBe(0);
+});
+
 test("buildConceptMap: layout is deterministic (stable mental map)", () => {
     const a = buildConceptMap(tenTopics());
     const b = buildConceptMap(tenTopics());

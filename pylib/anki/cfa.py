@@ -143,6 +143,48 @@ def readiness_topic_prefixes(weights: dict[str, float]) -> list[str]:
     return sorted(weights.keys()) if weights else list(CANONICAL_TOPICS)
 
 
+def topic_card_counts(
+    col: anki.collection.Collection,
+    topics: list[str],
+    deck_id: Optional[DeckId | int] = None,
+) -> dict[str, dict[str, int]]:
+    """Per-concept DUE and NEW card counts, keyed by the raw ``los::`` tag.
+
+    For each concept key ``K`` (e.g. ``los::ethics``) this counts the cards
+    whose tag is ``K`` itself OR a descendant ``K::*``:
+
+      * ``"due"`` — cards matching ``(tag:K OR tag:K::*) is:due`` (Anki's
+        ``is:due`` semantics: review + learning cards due now; NEW is excluded).
+      * ``"new"`` — cards matching ``(tag:K OR tag:K::*) is:new``. A secondary
+        figure so an all-new concept reads as "N new" rather than a bare "0 due".
+
+    Scope mirrors how the readiness scores are scoped: a falsy ``deck_id``
+    (``None`` or ``0``) counts the WHOLE collection (no deck term); a real deck
+    id additionally scopes to that deck AND its subdecks via ``deck:"<name>"``.
+    Read-only and cheap — it only runs the existing search engine and never
+    mutates the collection. Returns ``{topic_key: {"due": int, "new": int}}``.
+    """
+    deck_term = ""
+    if deck_id:
+        from anki import cfa_deadline
+
+        deck_name = col.decks.name(DeckId(int(deck_id)))
+        deck_term = f'deck:"{cfa_deadline._escape_deck_name(deck_name)}" '
+
+    counts: dict[str, dict[str, int]] = {}
+    for topic in topics:
+        # A concept's cards are its own tag OR any child tag (``K::sub``). The
+        # explicit OR mirrors the shared count spec (the Android worker builds
+        # the same query); ``find_cards`` de-duplicates, so the two clauses
+        # never double-count a card carrying both.
+        tag_clause = f"(tag:{topic} OR tag:{topic}::*)"
+        counts[topic] = {
+            "due": len(col.find_cards(f"{deck_term}{tag_clause} is:due")),
+            "new": len(col.find_cards(f"{deck_term}{tag_clause} is:new")),
+        }
+    return counts
+
+
 # =============================================================================
 # Exam configuration (persisted in the collection config -> syncs natively)
 # =============================================================================
@@ -520,12 +562,13 @@ def _giveup_reason(
             f"{coverage_pct * 100:.0f}% topic coverage (need "
             f"{MIN_TOPIC_COVERAGE * 100:.0f}%)"
         )
-    # A skipped high-weight topic invalidates the whole score.
+    # A skipped high-weight topic invalidates the whole score. Show readable
+    # topic-area names, not the raw ``los::`` join-key tags.
     if weights:
         positive = [w for w in weights.values() if w > 0]
         threshold = statistics.fmean(positive) if positive else 0.0
         skipped = sorted(
-            t.topic
+            topic_display_name(t.topic)
             for t in topics
             if t.weight >= threshold and t.weight > 0 and not t.covered
         )
@@ -746,29 +789,21 @@ def _py_performance_score(
 
 
 # =============================================================================
-# Honest readiness score — P(pass), deliberately wide, uncalibrated
+# Honest readiness score — a Wilson 95% CI on estimated exam accuracy
 # =============================================================================
 #
-# Readiness fuses memory (what you retain) and performance (how you do on fresh
-# questions) into a coarse P(pass). Uncovered syllabus is treated as guessing on
-# a 3-choice item. The band is widened well beyond the statistical intervals and
-# carries a standing caveat because it has never been checked against a real
-# CFA result — see READINESS_LABEL.
+# Readiness is a real Wilson 95% confidence interval on estimated exam accuracy
+# (the 0–100% accuracy scale) and is ALWAYS shown — it never abstains. The point
+# estimate is the coverage-aware Bayesian exam-accuracy number (which starts at
+# ~50% under the uniform prior); the interval is sized by how many questions
+# have been answered (first exposures), so it spans ~0–100% with no data and
+# tightens as evidence accrues. The standing "not validated against real exam
+# data" caveat (READINESS_LABEL) still applies.
 
 READINESS_LABEL = "not validated against real exam data"
 # Rough fraction-correct needed to pass; NOT the official minimum passing score.
+# Retained because the Bayesian pass/fail call is computed against it.
 _MPS = 0.65
-# Logistic steepness mapping estimated exam accuracy -> P(pass).
-_READINESS_K = 8.0
-# Guess rate on an unstudied 3-choice item.
-_GUESS_RATE = 1.0 / 3.0
-# Extra ± band added on top of the propagated statistical interval to reflect
-# model uncertainty (this is a heuristic, not a calibrated model).
-_READINESS_MARGIN = 0.15
-
-
-def _pass_prob(accuracy: float) -> float:
-    return 1.0 / (1.0 + math.exp(-_READINESS_K * (accuracy - _MPS)))
 
 
 @dataclass
@@ -799,51 +834,32 @@ def _py_readiness_score(
 ) -> ReadinessScore:
     """Pure-Python reference for the readiness score (see :func:`_py_memory_score`).
 
-    Combine memory + performance + coverage into a wide, uncalibrated P(pass).
-    Abstains (give-up rule) whenever either input score abstains — a readiness
-    number is only as trustworthy as the two scores beneath it."""
+    Readiness is a Wilson 95% confidence interval on estimated exam accuracy,
+    always shown (never abstains). The point estimate is the coverage-aware
+    Bayesian exam-accuracy number; the interval is a Wilson score interval sized
+    by the number of questions answered (``n = first_exposures``,
+    ``k = round(point * n)``), so it spans ~0–100% with no data and tightens as
+    graded questions accrue. The interval always contains the point."""
     now_ts = now_ts if now_ts is not None else int(time.time())
     computed_at = datetime.fromtimestamp(now_ts).isoformat(timespec="seconds")
 
     mem = _py_memory_score(col, deck_id=deck_id, now_ts=now_ts)
     perf = _py_performance_score(col, deck_id=deck_id, now_ts=now_ts)
+    bayes = _py_bayesian_readiness(col, deck_id=deck_id, now_ts=now_ts)
 
-    if mem.abstain or perf.abstain:
-        why = []
-        if mem.abstain:
-            why.append(f"memory ({mem.reason})")
-        if perf.abstain:
-            why.append(f"performance ({perf.reason})")
-        return ReadinessScore(
-            abstain=True,
-            reason="not enough data to estimate readiness: " + "; ".join(why),
-            point=None,
-            range_low=None,
-            range_high=None,
-            label=READINESS_LABEL,
-            memory_point=mem.point,
-            performance_point=perf.point,
-            coverage_pct=mem.coverage_pct,
-            computed_at=computed_at,
-        )
-
-    cov = mem.coverage_pct
-
-    def _acc(m: float, p: float) -> float:
-        # Blend recall and fresh-question accuracy over covered syllabus; the
-        # uncovered fraction contributes a guess.
-        return cov * (0.5 * m + 0.5 * p) + (1.0 - cov) * _GUESS_RATE
-
-    assert mem.point is not None and perf.point is not None
-    assert mem.range_low is not None and perf.range_low is not None
-    assert mem.range_high is not None and perf.range_high is not None
-    acc_point = _acc(mem.point, perf.point)
-    acc_low = _acc(mem.range_low, perf.range_low)
-    acc_high = _acc(mem.range_high, perf.range_high)
-
-    point = _pass_prob(acc_point)
-    low = max(0.0, _pass_prob(acc_low) - _READINESS_MARGIN)
-    high = min(1.0, _pass_prob(acc_high) + _READINESS_MARGIN)
+    # Point = coverage-aware Bayesian exam-accuracy estimate (already in [0, 1],
+    # ~0.5 under the uniform prior). Interval = Wilson 95% CI sized by the number
+    # of graded questions answered; with none, the whole [0, 1] range.
+    point = bayes.accuracy
+    n = perf.first_exposures
+    if n == 0:
+        low, high = 0.0, 1.0
+    else:
+        k = round(point * n)
+        _, low, high = _wilson(k, n)
+    # Always contain the point, and stay within [0, 1].
+    low = max(0.0, min(1.0, min(low, point)))
+    high = max(0.0, min(1.0, max(high, point)))
 
     return ReadinessScore(
         abstain=False,
@@ -854,7 +870,7 @@ def _py_readiness_score(
         label=READINESS_LABEL,
         memory_point=mem.point,
         performance_point=perf.point,
-        coverage_pct=cov,
+        coverage_pct=mem.coverage_pct,
         computed_at=computed_at,
     )
 

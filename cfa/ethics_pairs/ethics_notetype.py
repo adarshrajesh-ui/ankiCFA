@@ -62,6 +62,40 @@ def load_templates() -> tuple[str, str, str]:
     return _read("front.html"), _read("back.html"), _read("style.css")
 
 
+def _refresh_existing(col, existing, front: str, back: str, css: str):
+    """Refresh presentation (css/qfmt/afmt) of an existing notetype in place.
+
+    Additively adds any fields missing from an older install (e.g.
+    DecisivePhrase/DecisivePhraseCase). Adding fields is non-destructive: existing notes simply get
+    the new fields empty until re-imported. Returns the persisted (re-read) notetype dict.
+    """
+    present = {f["name"] for f in existing["flds"]}
+    for name in FIELDS:
+        if name not in present:
+            col.models.add_field(existing, col.models.new_field(name))
+    existing["css"] = css
+    if existing["tmpls"]:
+        existing["tmpls"][0]["qfmt"] = front
+        existing["tmpls"][0]["afmt"] = back
+    col.models.update_dict(existing)
+    return col.models.by_name(NOTETYPE_NAME)
+
+
+def refresh_notetype_if_exists(col):
+    """Refresh the baked templates/CSS of an EXISTING ethics notetype in place.
+
+    Unlike :func:`ensure_notetype`, this NEVER creates the notetype: it is a no-op (returns ``None``)
+    when the notetype does not yet exist. That is deliberate — the desktop startup refresh must not
+    seed an empty notetype/deck on a fresh profile before the normal seed path runs; it only pushes
+    the current on-disk template fixes onto collections that already have the ethics deck.
+    """
+    existing = col.models.by_name(NOTETYPE_NAME)
+    if existing is None:
+        return None
+    front, back, css = load_templates()
+    return _refresh_existing(col, existing, front, back, css)
+
+
 def ensure_notetype(col):
     """Create the note type if missing, or refresh its templates/CSS if it already exists.
 
@@ -71,19 +105,7 @@ def ensure_notetype(col):
     front, back, css = load_templates()
     existing = col.models.by_name(NOTETYPE_NAME)
     if existing is not None:
-        # Refresh presentation in place and additively add any fields missing from an older install
-        # (e.g. DecisivePhrase/DecisivePhraseCase). Adding fields is non-destructive: existing notes
-        # simply get the new fields empty until re-imported.
-        present = {f["name"] for f in existing["flds"]}
-        for name in FIELDS:
-            if name not in present:
-                col.models.add_field(existing, col.models.new_field(name))
-        existing["css"] = css
-        if existing["tmpls"]:
-            existing["tmpls"][0]["qfmt"] = front
-            existing["tmpls"][0]["afmt"] = back
-        col.models.update_dict(existing)
-        return col.models.by_name(NOTETYPE_NAME)
+        return _refresh_existing(col, existing, front, back, css)
 
     nt = col.models.new(NOTETYPE_NAME)
     for name in FIELDS:

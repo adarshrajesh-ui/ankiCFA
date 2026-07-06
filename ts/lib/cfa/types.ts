@@ -32,7 +32,13 @@ export interface ScoreBand {
     rangeHigh: number | null;
 }
 
-/** The readiness band additionally carries a human-readable verdict label. */
+/**
+ * The readiness band additionally carries a human-readable verdict label. Its
+ * `rangeLow`/`rangeHigh` are a Wilson 95% confidence interval for estimated
+ * exam accuracy (≈0–100% at zero questions answered, tightening as more are
+ * answered), so — unlike the other bands — readiness never abstains and always
+ * shows a numeric range.
+ */
 export type ReadinessBand = ScoreBand & { label: string };
 
 /**
@@ -78,6 +84,15 @@ export interface TopicRow {
     gradedReviews: number;
     recallRange: RecallRange | null;
     covered: boolean;
+    /**
+     * Cards due now for this concept — its `los::` tag OR any child tag — using
+     * Anki's `is:due` semantics (review + learning due now; excludes new). The
+     * backend always sends it; optional here so older/synthetic payloads default
+     * to 0.
+     */
+    dueCount?: number;
+    /** Never-studied (new) cards for this concept; secondary to `dueCount`. */
+    newCount?: number;
 }
 
 /** Full payload for the Exam Readiness page. */
@@ -118,6 +133,12 @@ export interface CfaHomePayload extends ExamReadinessPayload {
         lastSyncedLabel: string;
         endpoint: string;
         detail: string;
+        /**
+         * Plain post-sync result naming the account + endpoint, e.g. "Synced as
+         * <account> (AnkiWeb)" or "Already up to date …" for a no-op sync — so an
+         * account mismatch or a sync that did nothing is obvious to the user.
+         */
+        resultLabel: string;
         actionLabel: string;
     };
 }

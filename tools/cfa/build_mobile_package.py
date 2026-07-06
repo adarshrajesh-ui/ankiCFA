@@ -96,6 +96,7 @@ def build_package(col_path: str, apkg_path: str) -> dict:
                     "phone-friendly-cfa-study-card-template",
                     "minimal-pair-ethics-touch-highlighting",
                     "deterministic-ethics-grading",
+                    "server-side-ethics-semantic-feedback",
                     "named-source-footers",
                     "content-type-tags",
                 ],

@@ -65,6 +65,27 @@ def test_both_templates_say_ai_failed_on_a_real_failure():
             assert reason in src, (path, reason)
 
 
+def test_both_templates_render_the_per_highlight_critique():
+    """Both templates render the per-highlight critique (``per_learner_span``) in the AI block —
+    one verdict per phrase the learner ACTUALLY highlighted (decisive / too-broad / partial /
+    off-target), quoting their own words. This is the payoff of the AI-grading rework and is
+    additive to the existing per-gold-span list, provenance badges, and needed-evidence block."""
+    for path in _GRADING_TEMPLATES:
+        src = _read(path)
+        # the render reads the new field and builds a dedicated block, escaping each string
+        assert "resp.per_learner_span" in src, path
+        assert "cfa-ai-perhighlight" in src, path
+        assert "cfa-pls-" in src, path
+        assert "Your highlights, one by one" in src, path
+        # the four targeted assessments the learner sees, keyed off resp.per_learner_span[i].assessment
+        for label in ("Decisive", "Too broad", "Partial", "Off-target"):
+            assert label in src, (path, label)
+        # the learner's own words are quoted (esc()) and the critique is additive — the existing
+        # per-gold-span list (per_span) still renders too
+        assert "esc(pQuote)" in src, path
+        assert "resp.per_span" in src, path
+
+
 def test_old_silent_off_state_is_gone():
     """The two silent-on-off patterns must not come back."""
     front = _read(FRONT)
@@ -73,6 +94,19 @@ def test_old_silent_off_state_is_gone():
     passage = _read(PASSAGE_FRONT)
     # old passage_front.html guard that suppressed BOTH off + failure
     assert '!resp || resp.source !== "ai") return' not in passage
+
+
+def test_desktop_pycmd_json_string_is_parsed_before_rendering():
+    """Desktop pycmd returns a JSON string; the templates must parse it before
+    reading ``resp.source`` or the real AI result is silently treated as
+    deterministic/off."""
+    for path in _GRADING_TEMPLATES:
+        src = _read(path)
+        parse_at = src.index("return JSON.parse(resp);")
+        source_at = src.index('if (resp.source !== "ai")')
+        assert 'function normaliseAiGradeResponse(resp)' in src, path
+        assert 'typeof resp === "string"' in src, path
+        assert parse_at < source_at, path
 
 
 def test_mobile_fetch_failure_is_reported_not_swallowed():
@@ -96,24 +130,39 @@ def test_mobile_grade_honours_the_synced_ai_toggle():
         assert "window.CFA_AI_GRADING_ENABLED === false" in src, path
         # when off it renders the deterministic (ai_off) state, not a proxy call
         assert 'renderAiGrade({ source: "fallback", error: "ai_off" });' in src, path
-        # the gate sits INSIDE the android branch, BEFORE the proxy fetch
-        android_at = src.index('/android/i.test')
+        # the gate is checked before any platform branch or proxy fetch
         gate_at = src.index("window.CFA_AI_GRADING_ENABLED === false")
         fetch_at = src.index('fetch(proxyUrl + "/cfa/grade"')
-        assert android_at < gate_at < fetch_at
+        assert gate_at < fetch_at
 
 
 def test_mobile_grade_uses_injected_proxy_config_without_pycmd_gate():
     """Android grading must use configured proxy URL/token before pycmd guard."""
     for path in _GRADING_TEMPLATES:
         src = _read(path)
-        android_at = src.index('/android/i.test')
-        fetch_at = src.index('fetch(proxyUrl + "/cfa/grade"')
-        pycmd_guard_at = src.index('if (typeof pycmd === "undefined") return;')
-        assert android_at < fetch_at < pycmd_guard_at
-        assert 'window.CFA_AI_PROXY_URL || "http://10.0.2.2:27702"' in src, path
+        android_at = src.index('if (/android/i.test(navigator.userAgent || ""))')
+        android_proxy_at = src.index('tryProxyGrade(payload, renderAiGrade')
+        pycmd_guard_at = src.index('if (typeof pycmd === "undefined")')
+        assert android_at < android_proxy_at < pycmd_guard_at
+        assert 'window.CFA_AI_PROXY_URL || defaultProxyUrl()' in src, path
+        assert '"http://10.0.2.2:27702"' in src, path
         assert 'window.CFA_AI_PROXY_TOKEN || "cfa-ai-proxy"' in src, path
         assert '"Authorization": "Bearer " + proxyToken' in src, path
+
+
+def test_desktop_grade_retries_running_local_proxy_after_bridge_fallback():
+    """Desktop pycmd can lack OPENAI_API_KEY even when the standalone proxy is
+    healthy. A non-AI bridge response must retry localhost before rendering the
+    deterministic fallback."""
+    for path in _GRADING_TEMPLATES:
+        src = _read(path)
+        assert '"http://127.0.0.1:27702"' in src, path
+        assert "function shouldRetryProxy(resp)" in src, path
+        assert "tryProxyGrade(payload, renderAiGrade" in src, path
+        bridge_at = src.index('pycmd("cfaGradeEthics:"')
+        retry_at = src.index("shouldRetryProxy(resp)")
+        proxy_at = src.index("tryProxyGrade(payload, renderAiGrade", retry_at)
+        assert bridge_at < retry_at < proxy_at
 
 
 def test_css_has_distinct_off_and_warn_provenance_styles():

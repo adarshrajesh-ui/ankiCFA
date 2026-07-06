@@ -494,35 +494,76 @@
       learnerHighlights: learnerHighlights(),
       selectionIndices: effSel
     };
+    if (window.CFA_AI_GRADING_ENABLED === false) {
+      renderAiGrade({ source: "fallback", error: "ai_off" });
+      return;
+    }
     if (/android/i.test(navigator.userAgent || "")) {
-      if (window.CFA_AI_GRADING_ENABLED === false) {
-        renderAiGrade({ source: "fallback", error: "ai_off" });
-        return;
-      }
-      try {
-        var proxyUrl = (window.CFA_AI_PROXY_URL || "http://10.0.2.2:27702").replace(/\/+$/, "");
-        var proxyToken = window.CFA_AI_PROXY_TOKEN || "cfa-ai-proxy";
-        fetch(proxyUrl + "/cfa/grade", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "Authorization": "Bearer " + proxyToken },
-          body: JSON.stringify(payload)
-        }).then(function (r) { if (!r.ok) throw new Error("http_" + r.status); return r.json(); }).then(function (resp) {
-          renderAiGrade(resp);
-        }).catch(function () { renderAiGrade({ source: "fallback", error: "proxy_unreachable" }); });
-      } catch (e) { renderAiGrade({ source: "fallback", error: "proxy_unreachable" }); }
+      tryProxyGrade(payload, renderAiGrade, function (resp) { renderAiGrade(resp); });
       return;
     }
     if (typeof pycmd === "undefined") return;
     try {
       pycmd("cfaGradeEthics:" + JSON.stringify(payload), function (resp) {
-        renderAiGrade(resp);
+        resp = normaliseAiGradeResponse(resp);
+        if (shouldRetryProxy(resp)) {
+          tryProxyGrade(payload, renderAiGrade, function (proxyResp) { renderAiGrade(proxyResp || resp); });
+        } else {
+          renderAiGrade(resp);
+        }
       });
-    } catch (e) { /* AI-off / no bridge: deterministic reveal stands */ }
+    } catch (e) {
+      tryProxyGrade(payload, renderAiGrade, function (resp) { renderAiGrade(resp); });
+    }
+  }
+
+  function defaultProxyUrl() {
+    return /android/i.test(navigator.userAgent || "")
+      ? "http://10.0.2.2:27702"
+      : "http://127.0.0.1:27702";
+  }
+
+  function tryProxyGrade(payload, onDone, onFail) {
+    if (typeof fetch === "undefined") {
+      if (onFail) onFail({ source: "fallback", error: "proxy_unreachable" });
+      return;
+    }
+    try {
+      var proxyUrl = (window.CFA_AI_PROXY_URL || defaultProxyUrl()).replace(/\/+$/, "");
+      var proxyToken = window.CFA_AI_PROXY_TOKEN || "cfa-ai-proxy";
+      fetch(proxyUrl + "/cfa/grade", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + proxyToken },
+        body: JSON.stringify(payload)
+      }).then(function (r) { if (!r.ok) throw new Error("http_" + r.status); return r.json(); })
+        .then(function (resp) { onDone(resp); })
+        .catch(function () { if (onFail) onFail({ source: "fallback", error: "proxy_unreachable" }); });
+    } catch (e) {
+      if (onFail) onFail({ source: "fallback", error: "proxy_unreachable" });
+    }
+  }
+
+  function shouldRetryProxy(resp) {
+    if (!resp || resp.source === "ai") return false;
+    var err = (resp.error || "").toString();
+    return err !== "" && err !== "ai_off";
+  }
+
+  function normaliseAiGradeResponse(resp) {
+    if (typeof resp === "string") {
+      try {
+        return JSON.parse(resp);
+      } catch (e) {
+        return { source: "fallback", error: "unparseable_bridge_response" };
+      }
+    }
+    return resp;
   }
 
   function renderAiGrade(resp) {
     var box = root.querySelector("#cfa-ai");
     if (!box || !resp) return;
+    resp = normaliseAiGradeResponse(resp);
     box.classList.remove("is-off", "is-warn");
     if (resp.source !== "ai") {
       // Attribute the grade honestly: "ai_off" (or no error) → deterministic;
@@ -571,7 +612,8 @@
         studyTip: resp.study_tip || "",
         learnerIntent: resp.learner_intent || "",
         evidencePrecision: resp.evidence_precision || "",
-        neededEvidence: resp.needed_evidence || []
+        neededEvidence: resp.needed_evidence || [],
+        perLearnerSpan: resp.per_learner_span || []
       };
       try { localStorage.setItem("cfaEthics:pending", JSON.stringify(pendingGrade)); } catch (e) {}
     }
@@ -582,6 +624,20 @@
       spansHtml += '<li><span class="' + (m ? "found" : "missed") + '">' + (m ? "✓" : "✗") +
         '</span> <span class="cfa-span-quote">' + esc(ps[i].phrase) + "</span>" +
         (ps[i].note ? " — " + esc(ps[i].note) : "") + "</li>";
+    }
+    // Per-highlight critique: the payoff of the AI rework — one verdict per phrase the learner
+    // ACTUALLY highlighted (decisive / too-broad / partial / off-target), quoting their own words.
+    var plsHtml = "";
+    var pls = resp.per_learner_span || [];
+    var plsLabels = { decisive: "Decisive", excessive: "Too broad", partial: "Partial", irrelevant: "Off-target" };
+    for (var pli = 0; pli < pls.length; pli++) {
+      var pAssess = (pls[pli].assessment || "").toString();
+      var pQuote = pls[pli].quote || pls[pli].text || "";
+      var pNote = pls[pli].note || "";
+      var pLabel = plsLabels[pAssess] || (pAssess ? pAssess.charAt(0).toUpperCase() + pAssess.slice(1) : "Highlight");
+      plsHtml += '<li><span class="cfa-pls-tag cfa-pls-' + esc(pAssess) + '">' + esc(pLabel) + "</span> " +
+        '<span class="cfa-span-quote">' + esc(pQuote) + "</span>" +
+        (pNote ? " — " + esc(pNote) : "") + "</li>";
     }
     var g = (resp.grade || "").toString();
     var standard = resp.standard || srcText("standard");
@@ -601,6 +657,7 @@
       (precision ? '<div class="cfa-ai-precision"><b>Evidence precision:</b> ' + esc(precision) + "</div>" : "") +
       '<div class="cfa-ai-explain">' + esc(resp.explanation || "") + "</div>" +
       (resp.coaching ? '<div class="cfa-ai-coach">' + esc(resp.coaching) + "</div>" : "") +
+      (plsHtml ? '<div class="cfa-ai-perhighlight"><b>Your highlights, one by one:</b><ul class="cfa-span-detail cfa-ai-pls">' + plsHtml + "</ul></div>" : "") +
       (neededHtml ? '<div class="cfa-ai-needed"><b>Needed evidence:</b><ul>' + neededHtml + "</ul></div>" : "") +
       (resp.study_tip ? '<div class="cfa-ai-tip"><b>Study tip:</b> ' + esc(resp.study_tip) + "</div>" : "") +
       (spansHtml ? '<ul class="cfa-span-detail cfa-ai-spans">' + spansHtml + "</ul>" : "");

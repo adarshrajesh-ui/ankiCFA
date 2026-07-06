@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# Copyright: Ankitects Pty Ltd and contributors
+# License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
+
 """Render the CFA-skinned deck study-intro (Overview) to a standalone HTML.
 
 Phase-B Pass-4 desktop. The Overview is the screen you land on when you pick a

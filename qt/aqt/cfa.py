@@ -120,6 +120,18 @@ def setup_menu(mw: AnkiQt) -> None:
     except Exception:
         pass
 
+    # Auto-refresh the baked ethics notetype templates (qfmt/afmt/css) from the
+    # current on-disk templates on every collection load, so on-disk template
+    # fixes reach EXISTING collections (their card template is baked into the
+    # notetype at seed/import time and never updated afterward). Only refreshes
+    # notetypes that already exist — never force-creates on a fresh profile
+    # (that would seed empty content before the normal seed path runs). Guarded
+    # so a refresh hiccup never blocks startup.
+    try:
+        _register_ethics_template_refresh()
+    except Exception:
+        pass
+
     # W5/sync: persist ethics attempt detail into card.custom_data (syncs).
     try:
         from aqt.cfa_ethics_sync import register as _register_ethics_sync
@@ -137,6 +149,16 @@ def setup_menu(mw: AnkiQt) -> None:
     except Exception:
         pass
 
+    # Sync endpoint healing: clear a stale loopback dev sync URL on every
+    # collection load so desktop always targets AnkiWeb — including the
+    # auto-sync-on-open that fires before any manual Sync click. Idempotent.
+    try:
+        from aqt.cfa_sync_connect import register_endpoint_healing
+
+        register_endpoint_healing(mw)
+    except Exception:
+        pass
+
     # F3: register the editor "AI Back" tab-to-fill button + shortcut. Safe to
     # call unconditionally — with AI off the button renders disabled with a
     # tooltip, and registration never raises.
@@ -146,6 +168,83 @@ def setup_menu(mw: AnkiQt) -> None:
         _register_tab_fill()
     except Exception:
         pass
+
+
+# =============================================================================
+# Ethics notetype template auto-refresh (desktop startup unblock)
+#
+# The ethics card templates (qfmt/afmt/css) are baked into the collection's
+# notetype at seed/import time and are NOT refreshed afterward, so an on-disk
+# template fix never reaches a collection that already has the ethics deck until
+# it is re-seeded/imported. On every collection load we refresh both ethics
+# notetypes IN PLACE from the current on-disk templates — but only when they
+# already exist, so a fresh profile is still seeded by the normal first-launch
+# path (``aqt.cfa_seed``). Force-creating here would bake empty content before
+# the seeder runs, so we deliberately never create.
+# =============================================================================
+
+_ETHICS_REFRESH_REGISTERED = False
+
+
+def _ethics_pairs_dir() -> str:
+    """Absolute path to the ``cfa/ethics_pairs`` sources.
+
+    Mirrors ``aqt.cfa_ethics_ai``: qt/aqt/cfa.py -> qt/aqt -> qt -> repo root,
+    then ``cfa/ethics_pairs``.
+    """
+    import os
+
+    here = os.path.dirname(os.path.abspath(__file__))
+    repo_root = os.path.dirname(os.path.dirname(here))
+    return os.path.join(repo_root, "cfa", "ethics_pairs")
+
+
+def refresh_ethics_templates(col) -> None:
+    """Refresh the baked ethics notetype templates (qfmt/afmt/css) from disk.
+
+    Refreshes BOTH ethics notetypes (minimal-pair + one-passage) in place, but
+    only when they already exist — this NEVER force-creates them (a fresh profile
+    is seeded by ``aqt.cfa_seed`` instead, so we must not bake empty content
+    first). Fully guarded: a refresh hiccup must never block opening the profile,
+    and nothing beyond the notetype presentation (never notes/decks/scheduling)
+    is touched. Idempotent and duplication-free.
+    """
+    if col is None:
+        return
+    import os
+    import sys
+
+    ethics_dir = _ethics_pairs_dir()
+    if os.path.isdir(ethics_dir) and ethics_dir not in sys.path:
+        sys.path.insert(0, ethics_dir)
+    try:
+        import ethics_notetype  # type: ignore[import-not-found]
+
+        ethics_notetype.refresh_notetype_if_exists(col)
+    except Exception as exc:  # pragma: no cover - defensive; never block launch
+        print(f"CFA ethics notetype refresh skipped: {exc}", file=sys.stderr)
+    try:
+        import passages  # type: ignore[import-not-found]
+
+        passages.refresh_notetype_if_exists(col)
+    except Exception as exc:  # pragma: no cover - defensive; never block launch
+        print(f"CFA ethics passages notetype refresh skipped: {exc}", file=sys.stderr)
+
+
+def _register_ethics_template_refresh() -> None:
+    """Refresh baked ethics notetypes from disk on every collection load (once).
+
+    Hooks ``collection_did_load`` so the refresh runs with the live collection
+    right after it opens (before the first-launch seeder), keeping the
+    registration itself collection-free and idempotent.
+    """
+    global _ETHICS_REFRESH_REGISTERED
+    if _ETHICS_REFRESH_REGISTERED:
+        return
+    from aqt import gui_hooks
+
+    gui_hooks.collection_did_load.append(refresh_ethics_templates)
+    _ETHICS_REFRESH_REGISTERED = True
 
 
 def logout_of_sync(mw: AnkiQt) -> None:

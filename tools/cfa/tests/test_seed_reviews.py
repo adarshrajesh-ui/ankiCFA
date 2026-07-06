@@ -89,13 +89,19 @@ def test_constants_clear_thresholds():
 
 @needs_backend
 def test_fresh_deck_abstains_before_seeding(seeded_col):
-    """The honesty baseline: a zero-review CFA deck abstains on all 3 scores."""
+    """The honesty baseline: a zero-review CFA deck abstains on the two
+    give-up-gated scores (memory, performance). Readiness no longer abstains — it
+    is always shown as a Wilson 95% CI — so with no questions answered it reports
+    the whole 0–100% range instead of withholding a number."""
     from anki import cfa
 
     did = seeded_col.decks.id_for_name("CFA Level II")
     assert cfa.memory_score(seeded_col, deck_id=did).abstain
     assert cfa.performance_score(seeded_col, deck_id=did).abstain
-    assert cfa.readiness_score(seeded_col, deck_id=did).abstain
+    rdy = cfa.readiness_score(seeded_col, deck_id=did)
+    assert not rdy.abstain
+    assert rdy.point is not None
+    assert rdy.range_low == 0.0 and rdy.range_high == 1.0
 
 
 @needs_backend
