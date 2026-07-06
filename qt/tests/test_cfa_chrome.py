@@ -232,7 +232,7 @@ def test_reviewer_frames_card_area_as_cfa_review_surface() -> None:
     # void. The reviewer body now provides the liquid-glass page and leaves the
     # actual card shell to CFA-branded notes / the Basic wrapper.
     css = cfa_chrome._reviewer_css()
-    assert 'content: "ankiCFA · Review mode";' in css
+    assert 'content: "EthosPrep · Review mode";' in css
     assert "body:not(.nightMode)::before" in css
     assert "body:not(.nightMode) #qa" in css
     assert "width: min(1040px, calc(100vw - 48px));" in css
@@ -280,13 +280,13 @@ def test_basic_cards_in_cfa_decks_are_wrapped_for_review(monkeypatch) -> None:
     )
 
     assert "cfa-basic-review-card cfa-basic-review-card--question" in html
-    assert "ankiCFA · Level II · Question" in html
+    assert "EthosPrep · Level II · Question" in html
     assert "Fama-French" in html
 
 
 def test_basic_cards_in_cfa_study_topic_decks_are_wrapped(monkeypatch) -> None:
     # The Study page can surface CFA topic decks whose names do not literally
-    # contain "CFA". Those Basic cards still need the ankiCFA review frame.
+    # contain "CFA". Those Basic cards still need the EthosPrep review frame.
     decks = SimpleNamespace(
         name_if_exists=lambda deck_id: "Equity Investments",
         name=lambda deck_id: "Equity Investments",
@@ -314,7 +314,7 @@ def test_basic_cards_in_cfa_study_topic_decks_are_wrapped(monkeypatch) -> None:
 
 def test_basic_cards_launched_from_cfa_study_are_wrapped(monkeypatch) -> None:
     # If Study falls back to an ordinary user deck, the live Study -> reviewer
-    # route still marks that review session as an ankiCFA study surface.
+    # route still marks that review session as an EthosPrep study surface.
     decks = SimpleNamespace(
         name_if_exists=lambda deck_id: "Default",
         name=lambda deck_id: "Default",
@@ -344,7 +344,7 @@ def test_unbranded_cfa_knowledge_cards_launched_from_study_are_wrapped(
 ) -> None:
     # Existing seeded profiles may already have CFA Knowledge notes whose
     # templates predate the branded .cfa-card markup. The live Study route should
-    # still frame their rendered card body as an ankiCFA review surface.
+    # still frame their rendered card body as an EthosPrep review surface.
     decks = SimpleNamespace(
         name_if_exists=lambda deck_id: "CFA Level II",
         name=lambda deck_id: "CFA Level II",

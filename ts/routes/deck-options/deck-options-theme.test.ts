@@ -27,7 +27,7 @@ test("D-P4-18: deck-options adopts the CFA design system", () => {
     expect(src).toContain("import \"$lib/cfa/theme.scss\";");
     expect(src).toContain("import Eyebrow from \"$lib/cfa/Eyebrow.svelte\";");
     // …a brand eyebrow introduces the settings surface…
-    expect(src).toMatch(/<Eyebrow[^>]*>[^<]*ankiCFA · Level II · Study settings/);
+    expect(src).toMatch(/<Eyebrow[^>]*>[^<]*EthosPrep · Level II · Study settings/);
     // …and the content opts into the CFA page base, light-mode gated.
     expect(src).toMatch(/class="cfa-deckopts cfa-app"/);
     expect(src).toContain("class:is-light={!$pageTheme.isDark}");

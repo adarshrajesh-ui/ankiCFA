@@ -164,6 +164,27 @@ export function syncChipLabel(data: CfaHomePayload): string {
     return data.sync.lastSyncedAt ? `Synced ${data.sync.lastSyncedLabel}` : "Sync ready";
 }
 
+/**
+ * The plain post-sync result line for the Home hero: names the active account +
+ * endpoint and whether the last sync changed anything, so "I don't think it did
+ * anything" and an account mismatch both become verifiable. Falls back to a
+ * derived line if the backend hasn't supplied `resultLabel`.
+ */
+export function syncSummary(data: CfaHomePayload): string {
+    const s = data.sync;
+    if (s.resultLabel) {
+        return s.resultLabel;
+    }
+    if (!s.connected) {
+        return "Connect this device to sync your CFA progress across devices.";
+    }
+    const who = s.account && s.account !== "Not connected" ? s.account : "your sync account";
+    if (!s.lastSyncedAt) {
+        return `Signed in as ${who} (${s.endpoint}). Sync now to update this device.`;
+    }
+    return `Synced as ${who} (${s.endpoint}).`;
+}
+
 export function commandCenterLead(data: CfaHomePayload): string {
     if (data.heroMode === "bayesian_call" && data.heroBayesian) {
         return `Current call: ${data.heroBayesian.call} (p=${

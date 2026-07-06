@@ -1,3 +1,6 @@
+# Copyright: Ankitects Pty Ltd and contributors
+# License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
+
 """A11: the MODEL-*.md score-mapping docs must not drift from the code.
 
 Stdlib only (no anki import / no build): parse the numeric constants out of the
@@ -66,15 +69,13 @@ def test_performance_doc_matches_constants() -> None:
 
 def test_readiness_doc_matches_constants() -> None:
     text = _doc("MODEL-READINESS.md")
+    # Readiness is now a Wilson 95% CI on estimated exam accuracy (always shown);
+    # the old logistic/±0.15-margin constants are gone. The doc must state the
+    # CI shape (mirroring the performance doc's Wilson wording).
+    assert "Wilson" in text and "95" in text
+    # The rough minimum-passing-standard proxy backing the pass/fail call is kept.
     assert _const("_MPS") == "0.65"
     assert "0.65" in text
-    assert _const("_READINESS_K") == "8.0"
-    assert "8.0" in text
-    assert _const("_READINESS_MARGIN") == "0.15"
-    assert "0.15" in text
-    # Guess rate on a 3-choice item = 1/3.
-    assert _const("_GUESS_RATE") == "1.0 / 3.0"
-    assert "1/3" in text or "3-choice" in text
     # Standing honesty caveat must be quoted verbatim.
     label = _const("READINESS_LABEL").strip('"')
     assert label == "not validated against real exam data"

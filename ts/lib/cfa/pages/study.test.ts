@@ -39,6 +39,7 @@ function payload(over: Partial<CfaStudyPayload> = {}): CfaStudyPayload {
             lastSyncedLabel: "14:32",
             endpoint: "AnkiWeb",
             detail: "Ready",
+            resultLabel: "Synced as learner@example.com (AnkiWeb).",
             actionLabel: "Sync now",
         },
         totals: { activeDecks: 3, dueToday: 42, newQueued: 10 },

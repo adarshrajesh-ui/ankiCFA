@@ -78,7 +78,7 @@ License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
 
 <div class="cfa-deckopts cfa-app" class:is-light={!$pageTheme.isDark}>
     <div class="cfa-deckopts-head">
-        <Eyebrow>ankiCFA · Level II · Study settings</Eyebrow>
+        <Eyebrow>EthosPrep · Level II · Study settings</Eyebrow>
     </div>
 
     <ConfigSelector {state} on:presetchange={onPresetChange} />

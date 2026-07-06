@@ -32,7 +32,7 @@ test("D-P4-15: graphs screen adopts the CFA design system", () => {
     expect(src).toContain("import \"$lib/cfa/theme.scss\";");
     expect(src).toContain("import Eyebrow from \"$lib/cfa/Eyebrow.svelte\";");
     // …a brand eyebrow + command-center hero introduce the statistics surface…
-    expect(src).toMatch(/<Eyebrow[^>]*>[^<]*ankiCFA · Level II · Study statistics/);
+    expect(src).toMatch(/<Eyebrow[^>]*>[^<]*EthosPrep · Level II · Study statistics/);
     expect(src).toContain("Progress Command Center");
     expect(src).toContain("Click any chart segment to drill into");
     // …and the content opts into the CFA page base.

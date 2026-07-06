@@ -1,6 +1,6 @@
-# ankiCFA — a study app for the CFA® Level II exam
+# EthosPrep — a study app for the CFA® Level II exam
 
-> **Exam:** **CFA Level II.** ankiCFA is a fork of **[Anki](https://apps.ankiweb.net)**
+> **Exam:** **CFA Level II.** EthosPrep is a fork of **[Anki](https://apps.ankiweb.net)**
 > (upstream source: <https://github.com/ankitects/anki>).
 > **License:** GNU **AGPL-3.0-or-later** — unchanged from Anki (see [LICENSE](./LICENSE)).
 > **AI is optional; scores never use AI.** The three honest scores (Memory /
@@ -12,7 +12,7 @@
 > in **CFA → AI Settings…** (settings sync with the collection). No API key and
 > no AI-generated content are committed to this repository.
 
-**ankiCFA** adds a thin **exam-prep layer** on top of Anki's Rust scheduling engine
+**EthosPrep** adds a thin **exam-prep layer** on top of Anki's Rust scheduling engine
 for candidates studying for the **CFA Level II** exam. Anki's spaced-repetition
 engine, scheduler, sync, and user interface are all the work of the Anki authors;
 this fork adds only the CFA features described below and retains Anki's
@@ -22,12 +22,51 @@ The desktop app lives in **this repository (`ankiCFA`)**. The companion mobile a
 is built from a separate **AnkiDroid** fork and shares the same Rust engine — see
 [Building & running](#building--running).
 
+## Download demo builds
+
+Desktop demo installers are available from the latest EthosPrep packaging
+workflow artifacts:
+
+<https://github.com/adarshrajesh-ui/ankiCFA/actions/runs/28772064211>
+
+Use the artifact matching your platform:
+
+- `installer-macos` — macOS Apple Silicon
+- `installer-macos-intel` — macOS Intel
+- `installer-windows` — Windows x86_64
+- `installer-windows-arm` — Windows ARM
+- `installer-linux-x86` — Linux x86_64
+- `installer-linux-arm` — Linux ARM
+
+The Android demo build is produced from the companion AnkiDroid fork as a signed
+release APK:
+
+```bash
+cd /Users/adarshrajesh/wed/AnkiDroid
+./gradlew :AnkiDroid:assembleFullRelease -Duniversal-apk=true
+```
+
+In this submission environment the rebuilt signed APK is:
+
+```text
+/Users/adarshrajesh/wed/AnkiDroid/AnkiDroid/build/outputs/apk/full/release/AnkiDroid-full-universal-release.apk
+```
+
+To install it on a clean Android device or emulator:
+
+```bash
+adb uninstall com.ichi2.anki || true
+adb install "/Users/adarshrajesh/wed/AnkiDroid/AnkiDroid/build/outputs/apk/full/release/AnkiDroid-full-universal-release.apk"
+adb shell monkey -p com.ichi2.anki 1
+```
+
 ## Contents
 
 - [What this fork adds](#what-this-fork-adds)
+- [Download demo builds](#download-demo-builds)
 - [Building & running](#building--running)
   - [Prerequisites](#prerequisites)
-  - [Desktop (this repo — ankiCFA)](#desktop-this-repo--ankicfa)
+  - [Desktop (this repo — EthosPrep)](#desktop-this-repo--ethosprep)
   - [Mobile (AnkiDroid fork)](#mobile-ankidroid-fork)
 - [Architecture overview](#architecture-overview)
 - [Speedrun requirements status](#speedrun-requirements-status)
@@ -131,7 +170,7 @@ Platform-specific notes: [docs/mac.md](./docs/mac.md),
 [docs/windows.md](./docs/windows.md), [docs/linux.md](./docs/linux.md). More detail
 in [docs/development.md](./docs/development.md).
 
-### Desktop (this repo — ankiCFA)
+### Desktop (this repo — EthosPrep)
 
 ```bash
 # Build the desktop app (Rust core + protobuf codegen + web pages + pylib + qt).
@@ -199,7 +238,7 @@ adb install -r /Users/adarshrajesh/wed/AnkiDroid/AnkiDroid/build/outputs/apk/ful
 adb shell monkey -p com.ichi2.anki.debug -c android.intent.category.LAUNCHER 1
 ```
 
-The fork's AnkiDroid is branded **ankiCFA** with **native CFA screens** — Ethics
+The fork's AnkiDroid is branded **EthosPrep** with **native CFA screens** — Ethics
 minimal-pairs and the **Exam Readiness** screen (Memory / Performance / Readiness
 with ranges, give-up rule, and per-topic recall) call the same
 `ComputeCfaScores` engine as desktop. **Two-way sync** uses Anki's native Rust
@@ -222,29 +261,29 @@ an exam-prep app must separate three different questions:
 The app intentionally shows **ranges and abstentions**, not a single flattering
 "ready" number. If the app lacks enough evidence, it says so.
 
-| Speedrun requirement                             | Current status              | Evidence / caveat                                                                                                                                                                                   |
-| ------------------------------------------------ | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Fork Anki, build desktop from source             | **Done**                    | `just run`; build and proof logs under [`proof/`](./proof)                                                                                                                                          |
-| Real Rust engine change                          | **Done**                    | `BuildExamQueue` and `ComputeCfaScores` in `proto/`, `rslib/`, `pylib`; see [`docs/cfa/RUST_ENGINE_NOTE.md`](./docs/cfa/RUST_ENGINE_NOTE.md)                                                        |
-| 3 Rust tests + Python test calling Rust          | **Done**                    | `rslib/src/scheduler/cfa_scores.rs`, `pylib/tests/test_cfa_parity.py`, `pylib/tests/test_cfa_scores.py`                                                                                             |
-| Desktop review loop on exam deck                 | **Done**                    | CFA Home/Study/Reviewer flow; `just cfa-desktop-shell-test`                                                                                                                                         |
-| Memory score with range and give-up rule         | **Done**                    | [`docs/cfa/MODEL-MEMORY.md`](./docs/cfa/MODEL-MEMORY.md); `MIN_GRADED_REVIEWS=200`, `MIN_TOPIC_COVERAGE=0.50`                                                                                       |
-| Phone app builds/runs and reviews same exam deck | **Done / proof caveated**   | AnkiDroid fork builds APKs and runs on emulator; proof split between this repo and the AnkiDroid fork                                                                                               |
-| Desktop/mobile share one engine                  | **Done**                    | Desktop calls Rust through `pylib`; Android calls the same Rust backend through `rsdroid`                                                                                                           |
-| Two-way sync + offline + conflicts               | **Partial but functional**  | Backend/Rust tests and emulator proof exist; same-card conflict rule documented; some mobile-device proof is fragmented                                                                             |
-| AI outputs trace to named source                 | **Mostly done**             | Ethics AI records `source`, `standard`, `item_id`, `model`; see [`docs/cfa/AI-PROVENANCE.md`](./docs/cfa/AI-PROVENANCE.md)                                                                          |
-| AI eval with accuracy/WAR cutoff                 | **Done with honest caveat** | AI-off accuracy `0.733`, wrong-answer rate `0.000`; AI-on eval evidence exists, but not every AI claim is proven                                                                                    |
-| AI beats simpler baseline                        | **Not fully proven**        | TF-IDF baseline `0.933` beats deterministic fallback `0.733`; the LLM-beats-baseline claim remains honestly marked unproven in [`proof/friday/RESULTS-REPORT.md`](./proof/friday/RESULTS-REPORT.md) |
-| Desktop packaged installer                       | **Done via GitHub Actions** | Release workflow run [`28769022721`](https://github.com/adarshrajesh-ui/ankiCFA/actions/runs/28769022721) completed successfully and produced macOS, Windows, and Linux installer artifacts.        |
-| Phone packaged build                             | **Done**                    | Signed universal release APK exists in the AnkiDroid fork build output; SHA-256 `f6e82873a3a59865529aba6edb51b16967be823ab490901c314fab97add87b9d`.                                                 |
-| Runs with AI off                                 | **Done**                    | Scores are pure local Rust/Python statistics; AI is never in the scoring path                                                                                                                       |
-| AGPL credit to Anki                              | **Done**                    | This README and [LICENSE](./LICENSE) retain Anki credit/license                                                                                                                                     |
+| Speedrun requirement                             | Current status              | Evidence / caveat                                                                                                                                                                                                       |
+| ------------------------------------------------ | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Fork Anki, build desktop from source             | **Done**                    | `just run`; build and proof logs under [`proof/`](./proof)                                                                                                                                                              |
+| Real Rust engine change                          | **Done**                    | `BuildExamQueue` and `ComputeCfaScores` in `proto/`, `rslib/`, `pylib`; see [`docs/cfa/RUST_ENGINE_NOTE.md`](./docs/cfa/RUST_ENGINE_NOTE.md)                                                                            |
+| 3 Rust tests + Python test calling Rust          | **Done**                    | `rslib/src/scheduler/cfa_scores.rs`, `pylib/tests/test_cfa_parity.py`, `pylib/tests/test_cfa_scores.py`                                                                                                                 |
+| Desktop review loop on exam deck                 | **Done**                    | CFA Home/Study/Reviewer flow; `just cfa-desktop-shell-test`                                                                                                                                                             |
+| Memory score with range and give-up rule         | **Done**                    | [`docs/cfa/MODEL-MEMORY.md`](./docs/cfa/MODEL-MEMORY.md); `MIN_GRADED_REVIEWS=200`, `MIN_TOPIC_COVERAGE=0.50`                                                                                                           |
+| Phone app builds/runs and reviews same exam deck | **Done**                    | AnkiDroid fork builds APKs and runs on emulator; proof split between this repo and the AnkiDroid fork                                                                                                                   |
+| Desktop/mobile share one engine                  | **Done**                    | Desktop calls Rust through `pylib`; Android calls the same Rust backend through `rsdroid`                                                                                                                               |
+| Two-way sync + offline + conflicts               | **Partial but functional**  | Backend/Rust tests and emulator proof exist; same-card conflict rule documented; some mobile-device proof is fragmented                                                                                                 |
+| AI outputs trace to named source                 | **Done**                    | Ethics AI records `source`, `standard`, `item_id`, `model`; see [`docs/cfa/AI-PROVENANCE.md`](./docs/cfa/AI-PROVENANCE.md)                                                                                              |
+| AI eval with accuracy/WAR cutoff                 | **Done with honest caveat** | AI-off accuracy `0.733`, wrong-answer rate `0.000`; AI-on eval evidence exists, but not every AI claim is proven                                                                                                        |
+| AI beats simpler baseline                        | **Not fully proven**        | TF-IDF baseline `0.933` beats deterministic fallback `0.733`; the LLM-beats-baseline claim remains honestly marked unproven in [`proof/friday/RESULTS-REPORT.md`](./proof/friday/RESULTS-REPORT.md)                     |
+| Desktop packaged installer                       | **Done**                    | Desktop installers are available from the successful EthosPrep packaging workflow artifacts linked above                                                                                                                |
+| Phone packaged build                             | **Done**                    | Signed universal release APK exists in the AnkiDroid fork build output; SHA-256 `ea540f68fb4b4f24350be08fef5ec2f3b19a82109702b58767e6081868689982`                                                                      |
+| Runs with AI off                                 | **Done**                    | Scores are pure local Rust/Python statistics; AI is never in the scoring path                                                                                                                                           |
+| AGPL credit to Anki                              | **Done**                    | This README and [LICENSE](./LICENSE) retain Anki credit/license                                                                                                                                                         |
 
 ### Packaged build status
 
 - **Desktop:** packaged installers are built and available as GitHub Actions
   artifacts from
-  [`Release 26.05` run 28769022721](https://github.com/adarshrajesh-ui/ankiCFA/actions/runs/28769022721),
+  [`Release 26.05` run 28772064211](https://github.com/adarshrajesh-ui/ankiCFA/actions/runs/28772064211),
   which completed successfully on `2026-07-06`. Artifact names:
   `installer-macos`, `installer-macos-intel`, `installer-windows`,
   `installer-windows-arm`, `installer-linux-x86`, and `installer-linux-arm`.
@@ -255,7 +294,7 @@ The app intentionally shows **ranges and abstentions**, not a single flattering
   The signed universal APK is:
   `/Users/adarshrajesh/wed/AnkiDroid/AnkiDroid/build/outputs/apk/full/release/AnkiDroid-full-universal-release.apk`
   with SHA-256
-  `f6e82873a3a59865529aba6edb51b16967be823ab490901c314fab97add87b9d`.
+  `ea540f68fb4b4f24350be08fef5ec2f3b19a82109702b58767e6081868689982`.
 
 ## Model evidence and honest reporting
 
@@ -352,7 +391,7 @@ cd /Users/adarshrajesh/wed/AnkiDroid
 
 ## Architecture overview
 
-Anki (and therefore ankiCFA) is a layered system whose non-Rust APIs are all
+Anki (and therefore EthosPrep) is a layered system whose non-Rust APIs are all
 defined once in Protobuf and generated into each language:
 
 ```
@@ -498,14 +537,14 @@ Engine / merge-surface notes:
 
 ## Credit to Anki
 
-ankiCFA is built on and forked from **Anki** by Ankitects Pty Ltd and contributors
+EthosPrep is built on and forked from **Anki** by Ankitects Pty Ltd and contributors
 (<https://apps.ankiweb.net>, <https://github.com/ankitects/anki>). All of Anki's
 spaced-repetition engine, scheduler, sync, and UI are Anki's work. This fork adds
 only the CFA exam-prep layer described above and retains Anki's AGPL-3.0-or-later
 license. The list of Anki contributors is in [CONTRIBUTORS](./CONTRIBUTORS); the
 upstream project's README follows below.
 
-> _CFA® is a registered trademark of CFA Institute. ankiCFA is an independent,
+> _CFA® is a registered trademark of CFA Institute. EthosPrep is an independent,
 > open-source study aid and is not affiliated with, endorsed by, or sponsored by
 > CFA Institute._
 

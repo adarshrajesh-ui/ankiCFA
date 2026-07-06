@@ -151,12 +151,69 @@ def load_passages(path: str = DEFAULT_PASSAGES) -> list[dict]:
 # --------------------------------------------------------------------------- Anki import
 
 
-def ensure_notetype(col):
-    """Create/return the one-passage note type. Fields carry the passage + JSON-encoded answer key."""
+def _load_templates() -> tuple[str, str, str]:
+    """Return (front_html, back_html, css) for the one-passage note type from disk.
+
+    ``css`` is ``""`` when ``style.css`` is absent, mirroring the original create path which only
+    set ``css`` when the file existed.
+    """
+    front_path = os.path.join(HERE, "templates", "passage_front.html")
+    back_path = os.path.join(HERE, "templates", "passage_back.html")
+    style_path = os.path.join(HERE, "templates", "style.css")
+    with open(front_path, encoding="utf-8") as f:
+        front = f.read()
+    with open(back_path, encoding="utf-8") as f:
+        back = f.read()
+    css = ""
+    if os.path.exists(style_path):
+        with open(style_path, encoding="utf-8") as f:
+            css = f.read()
+    return front, back, css
+
+
+def _refresh_existing(mm, existing, front: str, back: str, css: str):
+    """Refresh the presentation (qfmt/afmt/css) of an existing note type in place.
+
+    Only rewrites ``css`` when the on-disk style is non-empty so a missing ``style.css`` never wipes
+    the baked stylesheet. Returns the persisted (re-read) note type dict.
+    """
+    if existing["tmpls"]:
+        existing["tmpls"][0]["qfmt"] = front
+        existing["tmpls"][0]["afmt"] = back
+    if css:
+        existing["css"] = css
+    mm.update_dict(existing)
+    return mm.by_name(NOTETYPE_NAME)
+
+
+def refresh_notetype_if_exists(col):
+    """Refresh the baked templates/CSS of an EXISTING one-passage note type in place.
+
+    Companion to the minimal-pair ``ethics_notetype.refresh_notetype_if_exists``: it NEVER creates
+    the note type (returns ``None`` when it does not yet exist), so the desktop startup refresh only
+    pushes current on-disk template fixes onto collections that already have the passages deck and
+    never seeds empty content on a fresh profile before the normal seed path runs.
+    """
     mm = col.models
     existing = mm.by_name(NOTETYPE_NAME)
+    if not existing:
+        return None
+    front, back, css = _load_templates()
+    return _refresh_existing(mm, existing, front, back, css)
+
+
+def ensure_notetype(col):
+    """Create the one-passage note type, or refresh its templates/CSS if it already exists.
+
+    Fields carry the passage + JSON-encoded answer key. Re-running is safe: an existing note type has
+    its baked ``qfmt``/``afmt``/``css`` refreshed from disk (so on-disk template fixes land on
+    collections that already imported the deck) without duplicating notes or fields.
+    """
+    mm = col.models
+    existing = mm.by_name(NOTETYPE_NAME)
+    front, back, css = _load_templates()
     if existing:
-        return existing
+        return _refresh_existing(mm, existing, front, back, css)
     m = mm.new(NOTETYPE_NAME)
     for field in (
         "ItemId",
@@ -169,17 +226,11 @@ def ensure_notetype(col):
     ):
         mm.add_field(m, mm.new_field(field))
     tmpl = mm.new_template("One-Passage Highlight")
-    front_path = os.path.join(HERE, "templates", "passage_front.html")
-    back_path = os.path.join(HERE, "templates", "passage_back.html")
-    style_path = os.path.join(HERE, "templates", "style.css")
-    with open(front_path, encoding="utf-8") as f:
-        tmpl["qfmt"] = f.read()
-    with open(back_path, encoding="utf-8") as f:
-        tmpl["afmt"] = f.read()
+    tmpl["qfmt"] = front
+    tmpl["afmt"] = back
     mm.add_template(m, tmpl)
-    if os.path.exists(style_path):
-        with open(style_path, encoding="utf-8") as f:
-            m["css"] = f.read()
+    if css:
+        m["css"] = css
     mm.add(m)
     return mm.by_name(NOTETYPE_NAME)
 

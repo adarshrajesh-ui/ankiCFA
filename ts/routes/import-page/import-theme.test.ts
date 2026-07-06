@@ -29,7 +29,7 @@ test("D-P4-20: the import shell adopts the CFA design system", () => {
     expect(src).toContain("import \"$lib/cfa/theme.scss\";");
     expect(src).toContain("import Eyebrow from \"$lib/cfa/Eyebrow.svelte\";");
     // …a brand eyebrow introduces the surface…
-    expect(src).toMatch(/<Eyebrow[^>]*>[^<]*ankiCFA · Level II · Import/);
+    expect(src).toMatch(/<Eyebrow[^>]*>[^<]*EthosPrep · Level II · Import/);
     // …and the whole shell opts into the CFA page base, light-mode gated so
     // every branch (options / progress / results / error) is wrapped.
     expect(src).toMatch(/class="cfa-import cfa-app"/);

@@ -9,8 +9,9 @@ Each score is a RANGE with an enforced give-up rule — never a bare number:
                 weighted-mean-by-topic-weight fix).
 * Performance — P(correct on a new question), a Wilson interval on
                 first-exposure accuracy.
-* Readiness   — P(pass), a deliberately wide, uncalibrated band carrying the
-                standing "not validated against real exam data" label.
+* Readiness   — a Wilson 95% CI on estimated exam accuracy, ALWAYS shown (never
+                abstains): ~0–100% with no data, tightening as questions accrue.
+                Carries the standing "not validated against real exam data" label.
 
 Pure-function tests pin the maths; collection-backed tests pin the three output
 shapes end-to-end.
@@ -55,12 +56,6 @@ def test_wilson_brackets_rate_and_narrows_with_more_data():
     for lo, p, hi in ((lo_s, p_small, hi_s), (lo_b, p_big, hi_b)):
         assert 0.0 <= lo <= p <= hi <= 1.0
     assert (hi_b - lo_b) < (hi_s - lo_s), "interval narrows with more evidence"
-
-
-def test_pass_prob_monotonic_and_half_at_mps():
-    assert abs(cfa._pass_prob(cfa._MPS) - 0.5) < 1e-9
-    assert cfa._pass_prob(0.9) > cfa._pass_prob(0.7) > cfa._pass_prob(0.5)
-    assert 0.0 < cfa._pass_prob(0.1) < cfa._pass_prob(0.99) < 1.0
 
 
 # =============================================================================
@@ -269,34 +264,75 @@ def test_performance_score_abstains_below_threshold():
 
 
 # =============================================================================
-# Readiness — P(pass), wide range, uncalibrated
+# Readiness — a Wilson 95% CI on estimated exam accuracy, always shown
 # =============================================================================
 
 
-def test_readiness_score_shape_is_wide_and_labelled():
+def test_readiness_score_shape_is_a_ci_and_labelled():
     col = getEmptyCol()
     deck = _seed_rich(col)
 
     ready = cfa.readiness_score(col, deck_id=deck)
     assert ready.label == "not validated against real exam data"
-    assert not ready.abstain, ready.reason
+    # Always shown — never abstains, empty reason.
+    assert not ready.abstain and ready.reason == ""
     assert ready.point is not None
-    # Range shape: a genuine band, never a bare number, and deliberately WIDE.
-    assert ready.range_low < ready.point < ready.range_high
+    # A genuine CI: the interval contains the point and stays in [0, 1].
+    assert ready.range_low <= ready.point <= ready.range_high
     assert 0.0 <= ready.range_low and ready.range_high <= 1.0
-    assert (ready.range_high - ready.range_low) >= 0.2, "band must be wide"
     # Transparent about what fed it.
     assert ready.memory_point is not None and ready.performance_point is not None
     col.close()
 
 
-def test_readiness_abstains_when_an_input_abstains():
+def _readiness_band(n_cards: int, correct: int) -> tuple[float, float, float]:
+    """Readiness (point, low, high) for a single exam-weighted topic seeded with
+    ``n_cards`` first exposures, ``correct`` of them correct. Fresh collection
+    each call so the two comparison points are independent."""
+    col = getEmptyCol()
+    try:
+        now = int(time.time())
+        nt = col.models.by_name("Basic")
+        deck = col.decks.id("CFA")
+        first_ease = [3] * correct + [1] * (n_cards - correct)
+        _seed_topic(
+            col,
+            deck,
+            nt,
+            "los::topica",
+            n_cards,
+            stability=100.0,
+            reviews_each=1,
+            first_ease=first_ease,
+            now=now,
+        )
+        cfa.set_exam_config(
+            col, exam_date="2026-12-01", topic_weights={"los::topica": 1.0}
+        )
+        ready = cfa.readiness_score(col, deck_id=deck)
+        assert ready.point is not None
+        return ready.point, ready.range_low, ready.range_high
+    finally:
+        col.close()
+
+
+def test_readiness_band_narrows_as_first_exposures_grow():
+    # Same ~70% accuracy, but ten times the questions: the Wilson 95% CI must
+    # narrow honestly as the number of first exposures grows (~1/sqrt(n)).
+    p_small, lo_s, hi_s = _readiness_band(30, 21)
+    p_big, lo_b, hi_b = _readiness_band(300, 210)
+    for lo, p, hi in ((lo_s, p_small, hi_s), (lo_b, p_big, hi_b)):
+        assert 0.0 <= lo <= p <= hi <= 1.0
+    assert (hi_b - lo_b) < (hi_s - lo_s), "CI narrows as first exposures grow"
+
+
+def test_readiness_never_abstains_even_when_an_input_abstains():
     col = getEmptyCol()
     now = int(time.time())
     nt = col.models.by_name("Basic")
     deck = col.decks.id("CFA")
-    # Plenty of first exposures (performance ok) but far too few graded reviews
-    # for memory -> readiness must inherit the abstention.
+    # Far too few graded reviews for memory (it abstains), yet readiness is
+    # ALWAYS shown as a Wilson CI — it never inherits the abstention any more.
     _seed_topic(
         col,
         deck,
@@ -309,9 +345,13 @@ def test_readiness_abstains_when_an_input_abstains():
         now=now,
     )
     cfa.set_exam_config(col, exam_date="2026-12-01", topic_weights={"los::topica": 1.0})
+    assert cfa.memory_score(col, deck_id=deck).abstain, "memory abstains here"
+
     ready = cfa.readiness_score(col, deck_id=deck)
-    assert ready.abstain
-    assert ready.point is None
-    assert "memory" in ready.reason
+    assert not ready.abstain
+    assert ready.reason == ""
+    assert ready.point is not None
+    assert ready.range_low <= ready.point <= ready.range_high
+    assert 0.0 <= ready.range_low and ready.range_high <= 1.0
     assert ready.label == "not validated against real exam data"
     col.close()

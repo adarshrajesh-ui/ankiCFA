@@ -180,7 +180,7 @@ test("bandSub: abstain reasons name only actually failed evidence gates", () => 
 });
 
 test("readinessLead: uses product copy without implementation-gap language", () => {
-    expect(readinessLead(payload())).toContain("66-72 projected readiness range");
+    expect(readinessLead(payload())).toContain("66-72 estimated exam accuracy as a 95% confidence interval");
     expect(readinessLead(payload())).not.toMatch(/Bayesian|backend|FSRS|no-AI|not validated|local evidence model/i);
     expect(readinessLead(payload({
         heroMode: "abstain",

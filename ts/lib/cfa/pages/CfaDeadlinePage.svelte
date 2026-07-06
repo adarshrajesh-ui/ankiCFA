@@ -278,7 +278,8 @@ SetCfaExamDate RPC.
 
     @media (max-width: 640px) {
         .cfa-deadline {
-            padding: cfa.space(4) cfa.space(3) calc(40px + env(safe-area-inset-bottom, 0px));
+            padding: cfa.space(4) cfa.space(3)
+                calc(40px + env(safe-area-inset-bottom, 0px));
         }
 
         .cfa-deadline__inner {

@@ -1,3 +1,6 @@
+# Copyright: Ankitects Pty Ltd and contributors
+# License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
+
 """Phase-0 parity proof: the Rust ComputeCfaScores RPC == pylib/anki/cfa.py.
 
 Builds a collection with day-spaced graded reviews (one review per card per

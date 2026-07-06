@@ -53,7 +53,7 @@ License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
 <Container --gutter-block="1rem" --gutter-inline="2px" breakpoint="sm">
     <Col --col-justify="center">
         <div class="congrats cfa-app">
-            <Eyebrow tone="green">ankiCFA · Level II · Session complete</Eyebrow>
+            <Eyebrow tone="green">EthosPrep · Level II · Session complete</Eyebrow>
             <h1>{congrats}</h1>
 
             <p>{nextLearnMsg}</p>

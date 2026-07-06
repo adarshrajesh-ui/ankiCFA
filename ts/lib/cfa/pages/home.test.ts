@@ -17,6 +17,7 @@ import {
     recommendedSessions,
     shortTopicName,
     syncChipLabel,
+    syncSummary,
 } from "./home";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -97,6 +98,7 @@ function payload(over: Partial<CfaHomePayload> = {}): CfaHomePayload {
             lastSyncedLabel: "14:32",
             endpoint: "AnkiWeb",
             detail: "Ready",
+            resultLabel: "Synced as learner@example.com (AnkiWeb).",
             actionLabel: "Sync now",
         },
         ...over,
@@ -136,6 +138,39 @@ test("syncChipLabel: shows connect action when no account is present", () => {
     expect(syncChipLabel(payload({ sync: { ...payload().sync, connected: false } }))).toBe("Connect & Sync");
 });
 
+test("syncSummary: surfaces the backend post-sync result naming the account", () => {
+    expect(syncSummary(payload())).toBe("Synced as learner@example.com (AnkiWeb).");
+});
+
+test("syncSummary: derives a plain line when the backend omits resultLabel", () => {
+    // Not connected -> a clear connect prompt (no account/endpoint claimed).
+    const disconnected = syncSummary(
+        payload({ sync: { ...payload().sync, connected: false, resultLabel: "" } }),
+    );
+    expect(disconnected).toContain("Connect this device");
+
+    // Connected but never synced -> names the account + endpoint, invites a sync.
+    const neverSynced = syncSummary(
+        payload({
+            sync: { ...payload().sync, resultLabel: "", lastSyncedAt: null },
+        }),
+    );
+    expect(neverSynced).toContain("learner@example.com");
+    expect(neverSynced).toContain("AnkiWeb");
+    expect(neverSynced).toContain("Sync now");
+});
+
+test("Home hero shows an account-aware sync status line", () => {
+    const src = componentSource();
+    // A dedicated, actionable sync status control that renders the plain result
+    // and the account/endpoint, and clicking it drives the sync flow.
+    expect(src).toContain("cfa-home__sync-status");
+    expect(src).toContain("syncSummary");
+    expect(src).toContain("{syncLine}");
+    expect(src).toContain("go(\"cfa:sync\")");
+    expect(src).toContain("{data.sync.status}");
+});
+
 test("HOME_NAV: keeps the reduced product nav under the brand", () => {
     expect(HOME_NAV.map((item) => item.cmd)).toStrictEqual([
         "cfa:home",
@@ -160,6 +195,14 @@ test("Home page appbar tabs are visible on desktop", () => {
     expect(src).toContain("on:navigate={(event) => go(event.detail)}");
 });
 
+test("Home page exposes a direct AI on/off toggle", () => {
+    const src = componentSource();
+    expect(src).toContain("cfa:ai-toggle:");
+    expect(src).toContain("Semantic grading enabled");
+    expect(src).toContain("Deterministic only");
+    expect(src).toContain("aria-pressed={aiEnabled}");
+});
+
 test("Home page has phone-safe liquid-glass layout rules", () => {
     const src = componentSource();
     const nav = productNavSource();
@@ -167,11 +210,25 @@ test("Home page has phone-safe liquid-glass layout rules", () => {
     expect(src).toMatch(/@media \(max-width: 620px\)\s*\{[\s\S]*?&__page\s*\{[\s\S]*?padding: 14px 12px 64px;/);
     expect(nav).toMatch(/\.cfa-product-nav__tabs\s*\{[\s\S]*?overflow-x: auto;/);
     expect(nav).toMatch(/@media \(max-width: 980px\)\s*\{[\s\S]*?\.cfa-product-nav__label\s*\{[\s\S]*?display: none;/);
-    expect(nav).toMatch(/@media \(max-width: 980px\)\s*\{[\s\S]*?\.cfa-product-nav__short-label\s*\{[\s\S]*?display: inline;/);
+    expect(nav).toMatch(
+        /@media \(max-width: 980px\)\s*\{[\s\S]*?\.cfa-product-nav__short-label\s*\{[\s\S]*?display: inline;/,
+    );
     expect(src).toMatch(/&__actions,\s*\n\s*&__meta-row\s*\{[\s\S]*?grid-template-columns: minmax\(0, 1fr\);/);
     expect(src).toMatch(/&__risk\s*\{[\s\S]*?grid-template-columns: minmax\(0, 1fr\);/);
     expect(src).toMatch(/&__map-mini\s*\{[\s\S]*?touch-action: pan-y pinch-zoom;/);
     expect(src).toMatch(/&__map-mini\s*\{[\s\S]*?min-height: clamp\(300px, 32vw, 350px\);/);
+});
+
+test("Concept Map detail shows real per-concept due counts, not a backend-queue placeholder", () => {
+    const src = componentSource();
+    // The old "requires a backend concept queue" placeholder is gone…
+    expect(src).not.toContain("backend concept queue");
+    // …replaced by the real per-concept count wired off the node's dueCount /
+    // newCount, still routing the user to the existing priority study.
+    expect(src).toContain("node.dueCount");
+    expect(src).toContain("node.newCount");
+    expect(src).toContain("cards due");
+    expect(src).toContain("Open priority study");
 });
 
 test("buildPriorityRisks: sorts heavy weak topics ahead of mastered topics", () => {

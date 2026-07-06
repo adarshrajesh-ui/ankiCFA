@@ -1,3 +1,6 @@
+# Copyright: Ankitects Pty Ltd and contributors
+# License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
+
 """A12: docs/cfa/RUST_ENGINE_NOTE.md must not drift from the Rust engine.
 
 Stdlib only (no cargo build): count the ``#[test]`` / ``#[tokio::test]``

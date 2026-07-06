@@ -26,7 +26,7 @@ License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
 <nav class="cfa-product-nav" data-active={active} aria-label={ariaLabel}>
     <div class="cfa-product-nav__in">
         <div class="cfa-product-nav__brand">
-            ankiCFA
+            EthosPrep
             <small>{subtitle}</small>
         </div>
         <div class="cfa-product-nav__tabs">

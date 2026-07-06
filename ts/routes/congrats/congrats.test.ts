@@ -27,7 +27,7 @@ test("D-P4-11: congrats screen adopts the CFA design system", () => {
     expect(src).toContain("import \"$lib/cfa/theme.scss\";");
     expect(src).toContain("import Eyebrow from \"$lib/cfa/Eyebrow.svelte\";");
     // …a brand eyebrow introduces the session-complete heading…
-    expect(src).toMatch(/<Eyebrow[^>]*>[^<]*ankiCFA · Level II · Session complete/);
+    expect(src).toMatch(/<Eyebrow[^>]*>[^<]*EthosPrep · Level II · Session complete/);
     // …and the container opts into the CFA page base.
     expect(src).toMatch(/class="congrats cfa-app"/);
 });

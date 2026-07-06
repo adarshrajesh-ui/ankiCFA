@@ -25,6 +25,7 @@ REPO = os.path.dirname(
     os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 )
 TOOLS_CFA = os.path.join(REPO, "tools", "cfa")
+ETHICS_TEMPLATES = os.path.join(REPO, "cfa", "ethics_pairs", "templates")
 
 
 def _load(name: str, path: str):
@@ -143,6 +144,7 @@ def test_reimport_roundtrip_contains_phone_feature_manifest(built_apkg, tmp_path
             "ethics": "CFA Ethics Minimal-Pair",
         }
         assert "minimal-pair-ethics-touch-highlighting" in manifest["phoneSupported"]
+        assert "server-side-ethics-semantic-feedback" in manifest["phoneSupported"]
         assert "cfa-concept-map-shell" in manifest["requiresNativeClient"]
     finally:
         col.close()
@@ -173,5 +175,50 @@ def test_bundled_ethics_is_the_multispan_flagship(built_apkg, tmp_path):
         spans = json.loads(note["GoldSpans"])
         assert spans and all("phrase" in s and "rationale" in s for s in spans)
         assert any(t == "ethics::minimal-pair" for t in note.tags)
+    finally:
+        col.close()
+
+
+def test_bundled_ethics_template_has_mobile_semantic_feedback(built_apkg, tmp_path):
+    """The imported APKG carries the current Android proxy grading template.
+
+    This is stronger than a source-only guard: it proves the exported package
+    contains the same notetype template the phone imports.
+    """
+    pytest.importorskip("anki")
+    apkg, _ = built_apkg
+    from anki.collection import Collection
+
+    dest = str(tmp_path / "dest-template.anki2")
+    col = Collection(dest)
+    try:
+        opts = col._backend.get_import_anki_package_presets()
+        col._backend.import_anki_package(package_path=apkg, options=opts)
+        model = col.models.by_name("CFA Ethics Minimal-Pair")
+        assert model is not None
+        qfmt = model["tmpls"][0]["qfmt"]
+        afmt = model["tmpls"][0]["afmt"]
+
+        with open(os.path.join(ETHICS_TEMPLATES, "front.html"), encoding="utf-8") as f:
+            current_front = f.read()
+        assert qfmt == current_front
+
+        assert "learnerHighlights: learnerHighlights()" in qfmt
+        assert "selectionIndices: effSel" in qfmt
+        assert "goldSpans: goldSpansPayload" in qfmt
+        assert "window.CFA_AI_GRADING_ENABLED === false" in qfmt
+        assert "window.CFA_AI_PROXY_URL || defaultProxyUrl()" in qfmt
+        assert '"http://10.0.2.2:27702"' in qfmt
+        assert '"http://127.0.0.1:27702"' in qfmt
+        assert 'fetch(proxyUrl + "/cfa/grade"' in qfmt
+        assert '"Authorization": "Bearer " + proxyToken' in qfmt
+        assert '"proxy_unreachable"' in qfmt
+        assert 'typeof resp === "string"' in qfmt
+        assert "return JSON.parse(resp);" in qfmt
+        # the per-highlight critique (per_learner_span) render block ships in the bundled template
+        assert "resp.per_learner_span" in qfmt
+        assert "cfa-ai-perhighlight" in qfmt
+        assert "Your highlights, one by one" in qfmt
+        assert "AI feedback" in afmt
     finally:
         col.close()

@@ -27,7 +27,7 @@ License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
 
 <div class="cfa-changenote cfa-app" class:is-light={!$pageTheme.isDark}>
     <div class="cfa-changenote-head">
-        <Eyebrow>ankiCFA · Level II · Change notetype</Eyebrow>
+        <Eyebrow>EthosPrep · Level II · Change notetype</Eyebrow>
     </div>
 
     <StickyContainer

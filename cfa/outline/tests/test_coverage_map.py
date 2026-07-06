@@ -1,3 +1,6 @@
+# Copyright: Ankitects Pty Ltd and contributors
+# License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
+
 """Tests for the A7 coverage map + the 10-topic outline (stdlib only)."""
 
 from __future__ import annotations

@@ -218,6 +218,31 @@ def test_ai_semantic_override_upgrades_partial_to_correct():
     assert all(s["matched"] for s in res["per_span"])
 
 
+def test_ai_correct_with_missing_span_flags_does_not_contradict_grade():
+    # Live models sometimes return a valid overall grade while omitting or
+    # under-filling `spans`. The UI must not show "Correct" and then mark every
+    # gold span as missed.
+    oracle = _oracle_client(
+        json.dumps(
+            {
+                "highlight_grade": "correct",
+                "explanation": "Both pieces of evidence were covered.",
+                "spans": [],
+            }
+        )
+    )
+    res = A.grade_semantic(
+        PASSAGE,
+        "unethical",
+        "unethical",
+        GOLD,
+        [g["phrase"] for g in GOLD],
+        complete_fn=oracle,
+    )
+    assert res["grade"] == "correct"
+    assert all(s["matched"] for s in res["per_span"])
+
+
 def test_ai_verdict_correctness_is_computed_not_trusted():
     # Even if the model claims verdict_correct True, a wrong verdict stays wrong.
     oracle = _oracle_client(
@@ -569,3 +594,204 @@ def test_false_accepting_llm_trips_wrong_answer_gate():
         os.environ.pop("OPENAI_API_KEY", None)
     assert rc == 1
     assert "wrong-answer rate" in buf.getvalue()
+
+
+# --- per-highlight critique (per_learner_span) ------------------------------
+#
+# The rework's core ask: feedback must be TARGETED AT WHAT THE LEARNER ACTUALLY HIGHLIGHTED. For each
+# learner highlight the grader must say whether it is decisive / excessive (too broad) / irrelevant /
+# partial, quote the learner's own words, and (via the deterministic coverage numbers) ground that
+# call. These tests lock the prompt guidance, the parse-through, and the stable AI-off derivation.
+
+# Gold span 1 = tokens 24-28 ("exact unreleased quarterly earnings figure");
+# gold span 2 = tokens 42-49 ("sells the company out of her clients' portfolios").
+_FOUR_HIGHLIGHTS = [
+    # decisive: exactly gold span 1
+    {"text": "exact unreleased quarterly earnings figure", "lo": 24, "hi": 28},
+    # excessive: gold span 1 buried in a much wider grab
+    {
+        "text": "the exact unreleased quarterly earnings figure, which is far below guidance.",
+        "lo": 23,
+        "hi": 33,
+    },
+    # irrelevant: background, overlaps no gold span
+    {"text": "spends the week assembling public filings", "lo": 4, "hi": 9},
+    # partial: only part of gold span 2
+    {"text": "sells the company", "lo": 42, "hi": 44},
+]
+
+
+def _four_highlight_selection():
+    sel = []
+    for h in _FOUR_HIGHLIGHTS:
+        sel += list(range(h["lo"], h["hi"] + 1))
+    return sel
+
+
+def test_prompt_requires_per_highlight_critique_and_word_coverage_guidance():
+    oracle = _oracle_client(json.dumps({"highlight_grade": "somewhat", "spans": []}))
+    A.grade_semantic(
+        PASSAGE,
+        "unethical",
+        "unethical",
+        GOLD,
+        [h["text"] for h in _FOUR_HIGHLIGHTS],
+        selection_indices=_four_highlight_selection(),
+        learner_highlights=_FOUR_HIGHLIGHTS,
+        complete_fn=oracle,
+    )
+    system = oracle.last["system"]
+    user = oracle.last["user"]
+    # SYSTEM: the model is required to critique each highlight with the four assessments and to add a
+    # per_learner_span array to the schema, with the partial-credit nuance spelled out.
+    assert "PER-HIGHLIGHT CRITIQUE" in system
+    assert '"per_learner_span"' in system
+    for tier in ("'decisive'", "'excessive'", "'partial'", "'irrelevant'"):
+        assert tier in system
+    assert "2 of 3 decisive words" in system  # the partial-credit nuance example
+    # USER: the deterministic word-coverage numbers are supplied as GUIDANCE, per highlight AND per gold
+    # span, in both example phrasings from the plan.
+    assert "PER-HIGHLIGHT COVERAGE" in user
+    assert "PER-GOLD-SPAN COVERAGE" in user
+    assert "5 decisive words inside a 5-word highlight" in user  # decisive
+    assert "0 decisive words inside a 6-word highlight" in user  # irrelevant
+    assert "overlaps NO gold span" in user
+    assert "captured 5 of 5 decisive words" in user  # per-gold-span coverage
+
+
+def test_per_learner_span_parsed_from_model_reply():
+    two = _FOUR_HIGHLIGHTS[1:2] + _FOUR_HIGHLIGHTS[3:4]
+    oracle = _oracle_client(
+        json.dumps(
+            {
+                "highlight_grade": "somewhat",
+                "explanation": "close",
+                "per_learner_span": [
+                    {
+                        "quote": two[0]["text"],
+                        "assessment": "too broad",  # synonym -> excessive
+                        "note": "Trim to just the earnings figure.",
+                    },
+                    {
+                        "quote": two[1]["text"],
+                        "assessment": "partial",
+                        "note": "Only the first half of the trade span.",
+                    },
+                ],
+                "spans": [],
+            }
+        )
+    )
+    res = A.grade_semantic(
+        PASSAGE,
+        "unethical",
+        "unethical",
+        GOLD,
+        [h["text"] for h in two],
+        selection_indices=list(range(23, 34)) + [42, 43, 44],
+        learner_highlights=two,
+        complete_fn=oracle,
+    )
+    pls = res["per_learner_span"]
+    assert [p["assessment"] for p in pls] == ["excessive", "partial"]
+    assert pls[0]["quote"] == two[0]["text"]
+    assert pls[0]["note"] == "Trim to just the earnings figure."
+    # deterministic coverage numbers are attached alongside the model's words.
+    assert pls[0]["decisive_words"] == 5 and pls[0]["highlight_words"] == 11
+
+
+def test_multiple_learner_highlights_each_get_a_targeted_assessment():
+    # AI-off: the deterministic derivation must still produce one critique row per highlight, in order,
+    # covering all four tiers so the feedback maps to each thing the learner highlighted.
+    res = A.grade_semantic(
+        PASSAGE,
+        "unethical",
+        "unethical",
+        GOLD,
+        [h["text"] for h in _FOUR_HIGHLIGHTS],
+        selection_indices=_four_highlight_selection(),
+        learner_highlights=_FOUR_HIGHLIGHTS,
+        complete_fn=_off_client,
+    )
+    pls = res["per_learner_span"]
+    assert len(pls) == 4
+    assert [p["assessment"] for p in pls] == [
+        "decisive",
+        "excessive",
+        "irrelevant",
+        "partial",
+    ]
+    # each row quotes the learner's OWN highlighted words
+    assert [p["quote"] for p in pls] == [h["text"] for h in _FOUR_HIGHLIGHTS]
+    # the excessive row explains WHY (too broad); the irrelevant row explains it does not help
+    assert "too broad" in pls[1]["note"]
+    assert pls[2]["decisive_words"] == 0
+
+
+def test_fallback_emits_stable_per_learner_span_shape():
+    # Even fully AI-off (and with only plain text spans, no token bounds), the fallback emits a
+    # per_learner_span so the render + persisted payload shape is stable.
+    res = A.grade_fallback(
+        PASSAGE,
+        "unethical",
+        "unethical",
+        GOLD,
+        ["exact unreleased quarterly earnings figure"],
+    )
+    assert "per_learner_span" in res
+    assert isinstance(res["per_learner_span"], list)
+    row = res["per_learner_span"][0]
+    assert row["quote"] == "exact unreleased quarterly earnings figure"
+    assert row["assessment"] == "decisive"
+    assert set(row) >= {"quote", "assessment", "note"}
+
+
+def test_ai_path_derives_per_learner_span_when_model_omits_it():
+    # A model reply with a valid grade but no per_learner_span still yields one derived row per
+    # highlight so the UI always has a per-highlight critique to render.
+    oracle = _oracle_client(json.dumps({"highlight_grade": "partial", "spans": []}))
+    res = A.grade_semantic(
+        PASSAGE,
+        "unethical",
+        "unethical",
+        GOLD,
+        ["spends the week assembling public filings"],
+        selection_indices=list(range(4, 10)),
+        learner_highlights=[
+            {"text": "spends the week assembling public filings", "lo": 4, "hi": 9}
+        ],
+        complete_fn=oracle,
+    )
+    assert res["source"] == "ai"
+    assert len(res["per_learner_span"]) == 1
+    assert res["per_learner_span"][0]["assessment"] == "irrelevant"
+
+
+def test_per_learner_span_assessment_is_sanitized():
+    # Unknown/garbage assessments from the model fall back to the deterministic call, never crash.
+    oracle = _oracle_client(
+        json.dumps(
+            {
+                "highlight_grade": "somewhat",
+                "per_learner_span": [
+                    {"quote": "exact unreleased quarterly earnings figure", "assessment": "AMAZING"}
+                ],
+                "spans": [],
+            }
+        )
+    )
+    res = A.grade_semantic(
+        PASSAGE,
+        "unethical",
+        "unethical",
+        GOLD,
+        ["exact unreleased quarterly earnings figure"],
+        selection_indices=list(range(24, 29)),
+        learner_highlights=[
+            {"text": "exact unreleased quarterly earnings figure", "lo": 24, "hi": 28}
+        ],
+        complete_fn=oracle,
+    )
+    # garbage -> the deterministic derivation ("decisive" here), which is a valid assessment
+    assert res["per_learner_span"][0]["assessment"] in A.LEARNER_SPAN_ASSESSMENTS
+    assert res["per_learner_span"][0]["assessment"] == "decisive"

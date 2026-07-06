@@ -1600,11 +1600,11 @@ title="{}" {}>{}</button>""".format(
         aqt.cfa.setup_menu(self)
 
     def window_title(self) -> str:
-        # CFA fork: brand the window as "ankiCFA - {profile}", falling back to
+        # CFA fork: brand the window as "EthosPrep - {profile}", falling back to
         # the bare brand when no profile is loaded yet.
         pm = getattr(self, "pm", None)
         name = getattr(pm, "name", None) if pm is not None else None
-        return f"ankiCFA - {name}" if name else "ankiCFA"
+        return f"EthosPrep - {name}" if name else "EthosPrep"
 
     def updateTitleBar(self) -> None:
         self.setWindowTitle(self.window_title())

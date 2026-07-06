@@ -246,6 +246,15 @@ export interface ConceptNode {
      * invent a divergent per-subsection number.
      */
     inherited: boolean;
+    /**
+     * Cards due now for this node's concept (Anki `is:due` semantics). Topics
+     * carry their own row's count; subsections INHERIT their parent section's
+     * count (consistent with `inherited` mastery); the centre CFA node is the
+     * SUM across every topic. 0 when nothing is due.
+     */
+    dueCount: number;
+    /** Never-studied (new) cards for this node's concept, same inheritance. */
+    newCount: number;
 }
 
 /** A connector line from a parent node to a child node. */
@@ -292,6 +301,8 @@ export function buildConceptMap(topics: TopicRow[], cfaMastery?: number | null):
         const ty = CY + Math.sin(a) * R1;
         const tr = topicRadius(weightPct);
         const mastery = masteryFromTopic(row);
+        const dueCount = row.dueCount ?? 0;
+        const newCount = row.newCount ?? 0;
 
         edges.push({ x1: CX, y1: CY, x2: tx, y2: ty, width: +(1.1 + weightPct * 0.12).toFixed(2) });
 
@@ -311,6 +322,8 @@ export function buildConceptMap(topics: TopicRow[], cfaMastery?: number | null):
             labelAngle: a,
             persistentLabel: true,
             inherited: false,
+            dueCount,
+            newCount,
         });
 
         for (const [subName, off] of lay.subs) {
@@ -336,11 +349,18 @@ export function buildConceptMap(topics: TopicRow[], cfaMastery?: number | null):
                 labelAngle: sa,
                 persistentLabel: false,
                 inherited: true,
+                // Inherit the parent section's queue depth, like mastery.
+                dueCount,
+                newCount,
             });
         }
     });
 
     const centerM = cfaMastery === undefined ? overallMastery(topics) : cfaMastery;
+    // The centre rolls up the whole syllabus, so its queue depth is the SUM of
+    // every topic's due/new counts.
+    const totalDue = topics.reduce((sum, t) => sum + (t.dueCount ?? 0), 0);
+    const totalNew = topics.reduce((sum, t) => sum + (t.newCount ?? 0), 0);
     const center: ConceptNode = {
         id: "cfa",
         kind: "cfa",
@@ -357,6 +377,8 @@ export function buildConceptMap(topics: TopicRow[], cfaMastery?: number | null):
         labelAngle: 0,
         persistentLabel: true,
         inherited: false,
+        dueCount: totalDue,
+        newCount: totalNew,
     };
 
     return { nodes: [...subNodes, ...topicNodes, center], edges, center };

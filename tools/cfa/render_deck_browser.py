@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# Copyright: Ankitects Pty Ltd and contributors
+# License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
+
 """Render the CFA-skinned deck browser (D8) to a standalone HTML for capture.
 
 Phase-B Pass-2 desktop. The deck list is a stock Anki ``DeckBrowser`` webview

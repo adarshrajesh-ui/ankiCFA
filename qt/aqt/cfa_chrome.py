@@ -523,7 +523,7 @@ def _reviewer_css() -> str:
     font-family: {t["font"]};
   }}
   body:not(.nightMode)::before {{
-    content: "ankiCFA · Review mode";
+    content: "EthosPrep · Review mode";
     display: block;
     box-sizing: border-box;
     width: min(1040px, calc(100vw - 48px));
@@ -720,7 +720,7 @@ def _wrap_unbranded_cfa_card(html: str, kind: str) -> str:
     return (
         f'<div class="cfa-basic-review-card cfa-basic-review-card--{modifier}">'
         '<div class="cfa-basic-review-eyebrow">'
-        f"ankiCFA · Level II · {phase}"
+        f"EthosPrep · Level II · {phase}"
         "</div>"
         f'<div class="cfa-basic-review-content">{html}</div>'
         "</div>"
@@ -744,7 +744,7 @@ def on_card_will_show(html: str, card: Any, kind: str) -> str:
 def _deckbrowser_banner() -> str:
     return (
         '<div class="cfa-deck-banner">'
-        '<div class="eyebrow">ankiCFA · Level II</div>'
+        '<div class="eyebrow">EthosPrep · Level II</div>'
         '<div class="title">Your decks</div>'
         "</div>"
     )
@@ -752,13 +752,13 @@ def _deckbrowser_banner() -> str:
 
 def _overview_eyebrow() -> str:
     # A quiet centred brand eyebrow above the deck title, so the study-intro
-    # reads unmistakably as an ankiCFA screen (the deck name is the hero below).
+    # reads unmistakably as an EthosPrep screen (the deck name is the hero below).
     t = _t()
     return (
         '<div class="cfa-overview-eyebrow" style="text-align:center;'
         "font-weight:700;letter-spacing:.12em;text-transform:uppercase;"
         f'margin-top:18px;font-size:{t["fs_eyebrow"]}px;color:{t["accent"]}">'
-        "ankiCFA · Level II · Study session</div>"
+        "EthosPrep · Level II · Study session</div>"
     )
 
 

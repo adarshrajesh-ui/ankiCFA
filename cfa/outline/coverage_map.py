@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# Copyright: Ankitects Pty Ltd and contributors
+# License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
+
 """A7 — CFA Level II coverage map (topic -> covered? -> %).
 
 Renders the ten official CFA Level II topic areas

@@ -1,3 +1,6 @@
+# Copyright: Ankitects Pty Ltd and contributors
+# License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
+
 """Render before/after proof of the CFA main-reviewer chrome (D-P4-14).
 
 Reconstructs the Anki reviewer body DOM — an unbranded Basic-style CFA card

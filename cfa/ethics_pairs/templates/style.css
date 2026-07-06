@@ -437,6 +437,36 @@
 .cfa-ai-badge.is-warn { background: var(--cfa-warn); color: #fff; }
 .nightMode .cfa-ai.is-warn { background: #3a2a12; border-color: #b45309; }
 
+/* Per-highlight critique (the AI rework payoff): one verdict per phrase the learner ACTUALLY
+   highlighted. `.cfa-ai-perhighlight` mirrors the `.cfa-ai-intent/-precision/-needed` sub-blocks
+   (same font/spacing/muted body with ink labels); `.cfa-ai-pls` is the per-highlight list (a
+   `.cfa-span-detail`); the `.cfa-pls-*` tags reuse the pass/warn/fail tri-tone already used for the
+   deterministic found/near/missed tiers so the assessment reads at a glance. Additive. */
+.cfa-ai-perhighlight {
+  font-size: .9rem;
+  line-height: 1.45;
+  margin-top: 8px;
+  color: var(--cfa-muted);
+}
+.cfa-ai-perhighlight b { color: var(--cfa-ink); }
+.cfa-ai-pls { margin-top: 6px; }
+.cfa-pls-tag {
+  display: inline-block;
+  font-family: var(--cfa-font); font-weight: 500; font-size: .66rem;
+  text-transform: uppercase; letter-spacing: .05em;
+  padding: 2px 7px; border-radius: 4px; margin-right: 6px;
+  background: var(--cfa-surface); color: var(--cfa-muted);
+}
+.cfa-pls-decisive { background: var(--cfa-pass-soft); color: var(--cfa-pass); }
+.cfa-pls-excessive { background: var(--cfa-warn-soft); color: var(--cfa-warn); }
+.cfa-pls-partial { background: var(--cfa-warn-soft); color: var(--cfa-warn); }
+.cfa-pls-irrelevant { background: var(--cfa-fail-soft); color: var(--cfa-fail); }
+.nightMode .cfa-pls-tag { background: #2c2d34; color: #b6b6bf; }
+.nightMode .cfa-pls-decisive { background: #1f5133; color: #bdf3d1; }
+.nightMode .cfa-pls-excessive { background: #6b5310; color: #ffe9b0; }
+.nightMode .cfa-pls-partial { background: #6b5310; color: #ffe9b0; }
+.nightMode .cfa-pls-irrelevant { background: #5a221d; color: #f4b3ab; }
+
 @media (max-width: 760px) {
   .cfa-cases {
     grid-template-columns: 1fr;
@@ -573,6 +603,7 @@
   .cfa-ai-intent,
   .cfa-ai-precision,
   .cfa-ai-needed,
+  .cfa-ai-perhighlight,
   .cfa-ai-tip {
     font-size: .92rem;
     line-height: 1.5;

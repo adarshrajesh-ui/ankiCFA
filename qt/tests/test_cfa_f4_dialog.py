@@ -234,3 +234,37 @@ def test_payload_topic_rows_show_human_names_not_raw_slugs() -> None:
         assert "Alternative Investments" in names
     finally:
         col.close()
+
+
+def test_payload_giveup_reason_shows_names_not_raw_slugs() -> None:
+    # los:: leak fix (reason strings) — an abstain/give-up ``reason`` must
+    # present readable CFA topic-area NAMES, never the raw ``los::<slug>``
+    # join-key tags. Build the skipped-high-weight-topic abstain (the branch that
+    # used to leak the tags): a heavily-studied low-weight topic clears the
+    # review + coverage gates while a high-weight topic is left untouched, so
+    # Memory abstains and names that skipped topic.
+    _app()
+    col = _empty_col()
+    # los::a: 10 cards x 25 distinct-day reviews = 250 graded reviews, covered.
+    deck = _seed(
+        col, "los::a", n_cards=10, reviews_each=25, frac_ok=0.9, configure=False
+    )
+    # los::fra carries the majority weight but is never studied -> skipped.
+    anki_cfa.set_exam_config(
+        col,
+        exam_date="2026-12-01",
+        topic_weights={"los::a": 0.2, "los::fra": 0.8},
+    )
+    try:
+        score = anki_cfa.memory_score(col, deck_id=deck)
+        assert score.abstain
+        assert "high-weight topic" in score.reason
+        # The readable display name is shown; the raw ``los::`` tag never leaks.
+        assert "Financial Reporting & Analysis" in score.reason
+        assert "los::" not in score.reason
+
+        payload = _cfa_exam_readiness_payload(col, int(deck))
+        assert payload["heroMode"] == "abstain"
+        assert "los::" not in payload["heroAbstain"]["reason"]
+    finally:
+        col.close()

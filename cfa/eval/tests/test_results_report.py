@@ -1,3 +1,6 @@
+# Copyright: Ankitects Pty Ltd and contributors
+# License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
+
 """A14: proof/friday/RESULTS-REPORT.md must not drift from the raw evidence.
 
 Stdlib only (no build). The consolidated report is only trustworthy if every

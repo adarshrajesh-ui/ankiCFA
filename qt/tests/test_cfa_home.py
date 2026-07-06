@@ -54,7 +54,61 @@ def test_home_payload_shape() -> None:
     assert payload["sync"]["status"] in ("Not connected", "Connected", "Syncing")
     assert "lastSyncedLabel" in payload["sync"]
     assert "actionLabel" in payload["sync"]
+    # sync-result-clarity: a plain, account-aware post-sync result rides along.
+    assert "resultLabel" in payload["sync"]
+    assert isinstance(payload["sync"]["resultLabel"], str)
+    assert payload["sync"]["resultLabel"]
     assert payload["heroMode"] in ("abstain", "bayesian_call")
+
+
+def test_home_payload_topic_rows_carry_real_due_new_counts() -> None:
+    # The Concept Map reads per-concept queue depth off each topic row, so the
+    # whole-collection Home payload must thread REAL dueCount/newCount (not a
+    # placeholder) keyed to the readable topic name, with child tags rolled up.
+    from anki import cfa
+
+    col = _empty_col()
+    try:
+        nt = col.models.by_name("Basic")
+        deck = col.decks.id("CFA Level II")
+
+        def add(front: str, tag: str) -> int:
+            note = col.new_note(nt)
+            note["Front"] = front
+            note["Back"] = "a"
+            note.tags = [tag]
+            col.add_note(note, deck)
+            return col.find_cards(f"nid:{note.id}")[0]
+
+        # Ethics: 2 due (one via a child tag that rolls up) + 1 new.
+        due_exact = add("e1", "los::ethics")
+        due_child = add("e2", "los::ethics::gips")
+        add("e3", "los::ethics")  # stays NEW
+        col.sched.set_due_date([due_exact, due_child], "0")
+
+        payload = mediasrv._cfa_home_payload(col)
+
+        ethics = next(
+            t
+            for t in payload["topics"]
+            if t["topic"] == cfa.topic_display_name("los::ethics")
+        )
+        assert ethics["dueCount"] == 2
+        assert ethics["newCount"] == 1
+
+        # Every topic row carries integer counts (0 for untouched concepts), so
+        # the map can always read a number rather than a missing key.
+        for row in payload["topics"]:
+            assert isinstance(row["dueCount"], int)
+            assert isinstance(row["newCount"], int)
+        econ = next(
+            t
+            for t in payload["topics"]
+            if t["topic"] == cfa.topic_display_name("los::econ")
+        )
+        assert econ["dueCount"] == 0 and econ["newCount"] == 0
+    finally:
+        col.close()
 
 
 def test_home_ai_flag_reflects_config() -> None:
@@ -128,6 +182,11 @@ def test_link_handler_routes_ctas_to_cfa_entry_points(monkeypatch) -> None:
     )
     monkeypatch.setattr(cfa, "show_deadline", lambda mw: calls.append("deadline"))
     monkeypatch.setattr(cfa_home, "open_ai_settings", lambda mw: calls.append("ai"))
+    monkeypatch.setattr(
+        cfa_home,
+        "set_ai_master_from_home",
+        lambda mw, enabled: calls.append(f"ai-toggle:{enabled}"),
+    )
     monkeypatch.setattr(cfa_home, "trigger_cfa_sync", lambda mw: calls.append("sync"))
     monkeypatch.setattr(
         cfa_home, "open_sync_settings", lambda mw: calls.append("sync-settings")
@@ -146,6 +205,7 @@ def test_link_handler_routes_ctas_to_cfa_entry_points(monkeypatch) -> None:
         "cfa:home",
         "cfa:deadline",
         "cfa:ai",
+        "cfa:ai-toggle:1",
         "cfa:sync",
         "cfa:sync-settings",
     ):
@@ -158,10 +218,29 @@ def test_link_handler_routes_ctas_to_cfa_entry_points(monkeypatch) -> None:
         "readiness",
         "deadline",
         "ai",
+        "ai-toggle:True",
         "sync",
         "sync-settings",
     ]
     assert moved == ["cfaConceptMap", "cfaProgress", "cfaHome", "deckBrowser"]
+
+
+def test_home_ai_toggle_turning_on_reenables_semantic_grading(monkeypatch) -> None:
+    writes: dict[str, bool] = {}
+    mw = SimpleNamespace(
+        col=SimpleNamespace(
+            get_config=lambda key, default=True: False
+            if key in ("cfa_ai_enabled", "cfa_ai_grading_enabled")
+            else default,
+            set_config=lambda key, value: writes.__setitem__(key, value),
+        )
+    )
+    monkeypatch.setattr(cfa_home, "tooltip", lambda *args, **kwargs: None)
+
+    cfa_home.set_ai_master_from_home(mw, True)  # type: ignore[arg-type]
+
+    assert writes["cfa_ai_enabled"] is True
+    assert writes["cfa_ai_grading_enabled"] is True
 
 
 def test_svelte_cfa_cta_commands_have_qt_handlers() -> None:

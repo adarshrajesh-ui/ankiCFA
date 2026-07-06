@@ -44,6 +44,12 @@ CFA_SYNC_URL = _env_or_default("CFA_SYNC_URL", "http://127.0.0.1:27701/")
 CFA_SYNC_USER = _env_or_default("CFA_SYNC_USER", "cfa")
 CFA_SYNC_PASS = _env_or_default("CFA_SYNC_PASS", "cfa-friday")
 CFA_LAST_SYNC_AT_KEY = "cfaLastSyncAt"
+# The collection modification time captured at the last completed sync, plus a
+# derived flag recording whether the collection actually changed between the two
+# most recent syncs. Together they let the Home/sync UI say "Synced as <account>"
+# vs "Already up to date" (a no-op sync) without touching Anki's sync internals.
+CFA_LAST_SYNC_MOD_KEY = "cfaLastSyncMod"
+CFA_LAST_SYNC_CHANGED_KEY = "cfaLastSyncChanged"
 SYNC_DIALOG_MIN_WIDTH = 280
 SYNC_DIALOG_DEFAULT_WIDTH = 390
 SYNC_DIALOG_DEFAULT_HEIGHT = 430
@@ -61,7 +67,9 @@ def _sync_dialog_width(mw: AnkiQt | None) -> int:
     except Exception:
         available = 0
     if available > 0:
-        width = min(width, max(SYNC_DIALOG_MIN_WIDTH, available - SYNC_DIALOG_SCREEN_MARGIN))
+        width = min(
+            width, max(SYNC_DIALOG_MIN_WIDTH, available - SYNC_DIALOG_SCREEN_MARGIN)
+        )
     return width
 
 
@@ -77,31 +85,83 @@ def _is_loopback_url(url: str | None) -> bool:
 
 
 def heal_stale_local_sync_url(mw: AnkiQt | None) -> bool:
-    """Drop a stale loopback custom sync URL so sync uses AnkiWeb / the user's server.
+    """Drop a stale loopback sync URL so sync uses AnkiWeb / the user's server.
 
-    A loopback custom URL is never a real product endpoint — it is the leftover
-    local dev server that earlier CFA builds configured. Clearing it lets
-    ``sync_endpoint()`` fall back to AnkiWeb (or whatever the user configures in
-    Preferences). Returns True if a stale URL was cleared. Never raises.
+    A loopback URL is never a real product endpoint — it is the leftover local
+    dev server that earlier CFA builds configured. It can be persisted in EITHER
+    of the two slots ``sync_endpoint()`` consults
+    (``currentSyncUrl or customSyncUrl``, see profiles.py): the user-set
+    ``customSyncUrl`` OR the ``currentSyncUrl`` the server last redirected us to.
+    A stale loopback in *either* slot makes every sync silently target a dead
+    ``127.0.0.1`` server (the "sync is dead" symptom), so we clear whichever
+    loopback slot is set and let Anki fall back to AnkiWeb (or whatever the user
+    configures in Preferences).
+
+    Crucially, a legitimate non-loopback custom/self-host endpoint is left
+    untouched. Returns True if a stale URL was cleared. Idempotent (a second
+    call is a no-op once healed) and never raises.
     """
     if mw is None:
         return False
+    healed = False
+    # Slot 1: a stale loopback *custom* server (user- or old-build-configured).
     try:
-        current = mw.pm.custom_sync_url()
+        custom = mw.pm.custom_sync_url()
     except Exception:
-        return False
-    if not _is_loopback_url(current):
-        return False
+        custom = None
+    if _is_loopback_url(custom):
+        try:
+            mw.pm.set_custom_sync_url(None)
+            healed = True
+        except Exception:
+            logger.warning(
+                "Failed clearing stale loopback custom sync URL", exc_info=True
+            )
+    # Slot 2: a stale loopback *current* endpoint the server last redirected us
+    # to. sync_endpoint() prefers this over the custom URL, so a leftover
+    # loopback here hijacks sync even after the custom slot is already clean.
     try:
-        mw.pm.set_custom_sync_url(None)
+        current = mw.pm._current_sync_url()
+    except Exception:
+        current = None
+    if _is_loopback_url(current):
+        try:
+            mw.pm.set_current_sync_url(None)
+            healed = True
+        except Exception:
+            logger.warning(
+                "Failed clearing stale loopback current sync URL", exc_info=True
+            )
+    if healed:
         logger.info("Cleared stale loopback CFA sync URL; using AnkiWeb")
-        return True
-    except Exception:
-        logger.warning("Failed clearing stale loopback CFA sync URL", exc_info=True)
-        return False
+    return healed
 
 
 _SYNC_TRACKING_REGISTERED = False
+_ENDPOINT_HEAL_REGISTERED = False
+
+
+def register_endpoint_healing(mw: AnkiQt) -> None:
+    """Heal a stale loopback sync endpoint once on every collection load.
+
+    :func:`heal_stale_local_sync_url` already runs before each *manual* sync
+    (trigger/connect), but auto-sync-on-open fires from the profile-load flow
+    without going through those wrappers. ``collection_did_load`` runs before
+    that auto-sync (see ``AnkiQt.loadProfile``), so healing here guarantees the
+    desktop targets AnkiWeb from the moment a profile opens — not just when the
+    user clicks Sync. Registration is idempotent and never raises.
+    """
+    global _ENDPOINT_HEAL_REGISTERED
+    if _ENDPOINT_HEAL_REGISTERED:
+        return
+    _ENDPOINT_HEAL_REGISTERED = True
+
+    from aqt import gui_hooks
+
+    def on_collection_load(_col: Any) -> None:
+        heal_stale_local_sync_url(mw)
+
+    gui_hooks.collection_did_load.append(on_collection_load)
 
 
 def account_link_spec(logged_in: bool, account: str | None = None) -> dict[str, str]:
@@ -174,7 +234,7 @@ def _sync_endpoint_label(endpoint: str | None) -> str:
 def sync_connection_error_message(_endpoint: str | None = None) -> str:
     """Product-safe connection error text for the normal dialog surface."""
     return (
-        "ankiCFA couldn't connect this device to sync.\n\n"
+        "EthosPrep couldn't connect this device to sync.\n\n"
         "Open Settings & Sync, confirm your account is connected, then try "
         "Connect & Sync again."
     )
@@ -201,6 +261,34 @@ def _now_iso() -> str:
     )
 
 
+def _sync_result_label(
+    *,
+    connected: bool,
+    syncing: bool,
+    account: str | None,
+    endpoint_label: str,
+    last_synced_at: str | None,
+    last_sync_changed: bool | None,
+) -> str:
+    """A plain, human post-sync result naming the account + endpoint.
+
+    Makes two things the user kept asking about obvious: (1) *which* AnkiWeb
+    account this device is synced as (so a two-login mismatch stands out) and
+    (2) whether the last sync actually did anything ("Already up to date" for a
+    no-op vs "Synced as <account>").
+    """
+    who = account or "your sync account"
+    if syncing:
+        return f"Syncing with {endpoint_label} as {who}…"
+    if not connected:
+        return "Connect this device to sync your CFA progress across devices."
+    if not last_synced_at:
+        return f"Signed in as {who} ({endpoint_label}). Sync now to update this device."
+    if last_sync_changed is False:
+        return f"Already up to date as {who} ({endpoint_label})."
+    return f"Synced as {who} ({endpoint_label})."
+
+
 def sync_status_payload(mw: AnkiQt | None) -> dict[str, Any]:
     """Small, UI-only status block shared by Home, toolbar and sync dialog."""
     profile = _profile(mw)
@@ -208,6 +296,8 @@ def sync_status_payload(mw: AnkiQt | None) -> dict[str, Any]:
     syncing = _is_syncing(mw)
     account = profile.get("syncUser") if connected else None
     last_synced_at = profile.get(CFA_LAST_SYNC_AT_KEY)
+    last_sync_changed = profile.get(CFA_LAST_SYNC_CHANGED_KEY)
+    endpoint_label = _sync_endpoint_label(_sync_endpoint(mw))
     if syncing:
         status = "Syncing"
         tone = "warn"
@@ -228,18 +318,59 @@ def sync_status_payload(mw: AnkiQt | None) -> dict[str, Any]:
         "account": account or "Not connected",
         "lastSyncedAt": last_synced_at,
         "lastSyncedLabel": _last_synced_label(last_synced_at),
-        "endpoint": (
-            _sync_endpoint_label(_sync_endpoint(mw)) if connected else "Not connected"
-        ),
+        "endpoint": endpoint_label if connected else "Not connected",
         "detail": detail,
+        "resultLabel": _sync_result_label(
+            connected=connected,
+            syncing=syncing,
+            account=account,
+            endpoint_label=endpoint_label,
+            last_synced_at=last_synced_at,
+            last_sync_changed=(
+                last_sync_changed if isinstance(last_sync_changed, bool) else None
+            ),
+        ),
         "actionLabel": "Sync now" if connected else "Connect & Sync",
     }
 
 
+def _collection_mod(mw: AnkiQt | None) -> int | None:
+    """The collection modification timestamp, or None if unavailable.
+
+    Read defensively: this is UI metadata, so a closed/absent collection must
+    never raise into the sync-finished hook.
+    """
+    try:
+        col = getattr(mw, "col", None)
+        if col is None:
+            return None
+        mod = col.mod
+    except Exception:
+        return None
+    return int(mod) if isinstance(mod, int) else None
+
+
 def mark_sync_finished(mw: AnkiQt | None) -> None:
+    """Record the sync timestamp and whether this sync actually changed data.
+
+    ``changed`` compares the collection modification time against the value
+    captured at the previous sync: equal means nothing moved in either
+    direction (a genuine no-op → "Already up to date"), different means reviews,
+    ethics attempts, config or internal state were uploaded or downloaded
+    (→ "Synced as <account>"). The very first recorded sync counts as a change.
+    """
     profile = _profile(mw)
-    if profile:
-        profile[CFA_LAST_SYNC_AT_KEY] = _now_iso()
+    if not profile:
+        return
+    current_mod = _collection_mod(mw)
+    if current_mod is None:
+        # Can't tell (no open collection); don't claim a no-op.
+        profile[CFA_LAST_SYNC_CHANGED_KEY] = True
+    else:
+        previous_mod = profile.get(CFA_LAST_SYNC_MOD_KEY)
+        profile[CFA_LAST_SYNC_CHANGED_KEY] = previous_mod != current_mod
+        profile[CFA_LAST_SYNC_MOD_KEY] = current_mod
+    profile[CFA_LAST_SYNC_AT_KEY] = _now_iso()
 
 
 # The open CFA product state -> the SvelteKit page to reload after a sync. Every
@@ -291,7 +422,7 @@ def open_sync_settings(mw: AnkiQt) -> None:
     status = sync_status_payload(mw)
     dialog = QDialog(mw)
     dialog.setObjectName("cfaSyncDialog")
-    dialog.setWindowTitle("ankiCFA - Settings & Sync")
+    dialog.setWindowTitle("EthosPrep - Settings & Sync")
     dialog_width = _sync_dialog_width(mw)
     dialog.setMinimumWidth(min(SYNC_DIALOG_MIN_WIDTH, dialog_width))
     dialog.resize(dialog_width, SYNC_DIALOG_DEFAULT_HEIGHT)
@@ -415,7 +546,7 @@ def connect_cfa_sync(mw: AnkiQt) -> None:
         showWarning(
             "Open a profile first, then sync your CFA progress.",
             parent=mw,
-            title="ankiCFA — Sync",
+            title="EthosPrep — Sync",
         )
         return
 

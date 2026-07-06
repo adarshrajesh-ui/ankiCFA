@@ -23,7 +23,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string notr="true">ankiCFA</string>
+   <string notr="true">EthosPrep</string>
   </property>
   <property name="windowIcon">
    <iconset resource="icons.qrc">
