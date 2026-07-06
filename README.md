@@ -32,6 +32,7 @@ is built from a separate **AnkiDroid** fork and shares the same Rust engine — 
 - [Architecture overview](#architecture-overview)
 - [Speedrun requirements status](#speedrun-requirements-status)
 - [Model evidence and honest reporting](#model-evidence-and-honest-reporting)
+- [Full reproduction checklist](#full-reproduction-checklist)
 - [CFA feature details](#cfa-feature-details)
 - [Due Friday deliverables (D1–D7)](#due-friday-deliverables-d1d7)
 - [Submission proof](#submission-proof)
@@ -168,7 +169,8 @@ engine is available to the mobile app without a second implementation.
 At a high level the AnkiDroid fork follows the standard AnkiDroid Android/Gradle
 build: the Rust backend is compiled for Android and packaged with the Kotlin/Java
 app into an APK. In this local submission environment, the fork lives at
-`/Users/adarshrajesh/wed/AnkiDroid`.
+`/Users/adarshrajesh/wed/AnkiDroid`; replace that path with the path to your
+AnkiDroid fork on another machine.
 
 ```bash
 cd /Users/adarshrajesh/wed/AnkiDroid
@@ -303,6 +305,44 @@ just cfa-results-test
 just cfa-model-docs-test
 ```
 
+## Full reproduction checklist
+
+Run from this repository unless a command explicitly changes into the AnkiDroid
+fork.
+
+Core desktop / shared engine:
+
+```bash
+just cfa-parity-test
+just cfa-scores-test
+just cfa-sync-test
+just cfa-sync-dedup-test
+just cfa-desktop-shell-test
+just cfa-results-test
+just cfa-model-docs-test
+just cfa-rust-note-test
+```
+
+Model, eval, reliability, and AI gates:
+
+```bash
+just cfa-eval-test
+just cfa-ablation-test
+just cfa-bench-test
+just cfa-crash-test
+just cfa-outline-test
+just cfa-ai-grade-test
+just cfa-ai-proxy-test
+```
+
+Android companion:
+
+```bash
+cd /Users/adarshrajesh/wed/AnkiDroid
+./gradlew :AnkiDroid:assembleFullDebug :AnkiDroid:testFullDebugUnitTest --tests "com.ichi2.anki.cfa.*"
+./gradlew :AnkiDroid:assembleFullRelease
+```
+
 ## Architecture overview
 
 Anki (and therefore ankiCFA) is a layered system whose non-Rust APIs are all
@@ -363,7 +403,9 @@ New fork-only files (no upstream merge surface):
 (`_backend_generated.py`, `backend.ts`, the Rust service dispatch) is generated from
 the proto — no hand edits. See
 [docs/cfa/RUST_ENGINE_NOTE.md](./docs/cfa/RUST_ENGINE_NOTE.md) for the full rationale
-and merge-difficulty analysis.
+and merge-difficulty analysis, and
+[docs/cfa/UPSTREAM_FILES.md](./docs/cfa/UPSTREAM_FILES.md) for the upstream touched
+files / future-merge surface.
 
 ## CFA feature details
 
@@ -427,10 +469,25 @@ Harness: [`tools/cfa/sync_roundtrip.py`](./tools/cfa/sync_roundtrip.py) ·
 ## Submission proof
 
 Build-gate logs, test results, performance measurements, and packaging evidence are
-under [`proof/`](./proof). **Friday acceptance bundle:**
-[`proof/friday/`](./proof/friday/) — start with
-[`ACCEPTANCE.md`](./proof/friday/ACCEPTANCE.md) and [`REPORT.md`](./proof/friday/REPORT.md).
-Engine design: [docs/cfa/RUST_ENGINE_NOTE.md](./docs/cfa/RUST_ENGINE_NOTE.md).
+under [`proof/`](./proof).
+
+Start here:
+
+- **Sunday results report:** [`proof/friday/RESULTS-REPORT.md`](./proof/friday/RESULTS-REPORT.md)
+- **Brainlift:** [`Brainlift.md`](./Brainlift.md)
+- **Final packaging log:** [`proof/final-submission/REPORT.md`](./proof/final-submission/REPORT.md)
+- **Friday acceptance bundle:** [`proof/friday/ACCEPTANCE.md`](./proof/friday/ACCEPTANCE.md) and [`proof/friday/REPORT.md`](./proof/friday/REPORT.md)
+
+Model descriptions:
+
+- **Memory model:** [`docs/cfa/MODEL-MEMORY.md`](./docs/cfa/MODEL-MEMORY.md)
+- **Performance model:** [`docs/cfa/MODEL-PERFORMANCE.md`](./docs/cfa/MODEL-PERFORMANCE.md)
+- **Readiness model:** [`docs/cfa/MODEL-READINESS.md`](./docs/cfa/MODEL-READINESS.md)
+
+Engine / merge-surface notes:
+
+- **Rust engine note:** [`docs/cfa/RUST_ENGINE_NOTE.md`](./docs/cfa/RUST_ENGINE_NOTE.md)
+- **Upstream touched files:** [`docs/cfa/UPSTREAM_FILES.md`](./docs/cfa/UPSTREAM_FILES.md)
 
 ## Credit to Anki
 
