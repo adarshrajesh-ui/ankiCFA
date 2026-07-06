@@ -30,6 +30,8 @@ is built from a separate **AnkiDroid** fork and shares the same Rust engine — 
   - [Desktop (this repo — ankiCFA)](#desktop-this-repo--ankicfa)
   - [Mobile (AnkiDroid fork)](#mobile-ankidroid-fork)
 - [Architecture overview](#architecture-overview)
+- [Speedrun requirements status](#speedrun-requirements-status)
+- [Model evidence and honest reporting](#model-evidence-and-honest-reporting)
 - [CFA feature details](#cfa-feature-details)
 - [Due Friday deliverables (D1–D7)](#due-friday-deliverables-d1d7)
 - [Submission proof](#submission-proof)
@@ -41,9 +43,9 @@ is built from a separate **AnkiDroid** fork and shares the same Rust engine — 
 Every feature below is **additive** and maps to one of the three theses in
 [Brainlift.md](./Brainlift.md): teach ethics as recall through **near-miss
 pairs**, schedule for **peak recall on the exam date** rather than indefinite
-retention, and **weight cards by topic yield**. The optional AI layer is **OFF by
-default** and every AI path has a deterministic fallback, so the app runs fully
-without an API key.
+retention, and **weight cards by topic yield**. The optional AI layer is
+key-gated and every AI path has a deterministic fallback, so the app runs fully
+without an API key and all scores remain AI-free.
 
 - **Exam queue (Rust engine).** A **read-only** backend RPC,
   `SchedulerService.BuildExamQueue`, reorders a deck's due cards by
@@ -165,9 +167,35 @@ engine is available to the mobile app without a second implementation.
 
 At a high level the AnkiDroid fork follows the standard AnkiDroid Android/Gradle
 build: the Rust backend is compiled for Android and packaged with the Kotlin/Java
-app into an APK. **Exact build commands, toolchain versions, and CFA-specific mobile
-wiring are owned and documented by the AnkiDroid fleet in that fork's own README**
-— refer to it for the authoritative mobile build steps.
+app into an APK. In this local submission environment, the fork lives at
+`/Users/adarshrajesh/wed/AnkiDroid`.
+
+```bash
+cd /Users/adarshrajesh/wed/AnkiDroid
+./gradlew :AnkiDroid:assembleFullDebug :AnkiDroid:testFullDebugUnitTest --tests "com.ichi2.anki.cfa.*"
+./gradlew :AnkiDroid:assembleFullRelease
+```
+
+Launch on an emulator/device:
+
+```bash
+export ANDROID_SDK_ROOT=/opt/homebrew/share/android-commandlinetools
+export PATH="$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/emulator:$PATH"
+
+emulator -avd ankidroid_cfa -no-snapshot -no-boot-anim &
+adb wait-for-device
+until [ "$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = "1" ]; do sleep 2; done
+
+adb install -r /Users/adarshrajesh/wed/AnkiDroid/AnkiDroid/build/outputs/apk/full/release/AnkiDroid-full-arm64-v8a-release.apk
+adb shell monkey -p com.ichi2.anki -c android.intent.category.LAUNCHER 1
+```
+
+If you are testing the debug build instead:
+
+```bash
+adb install -r /Users/adarshrajesh/wed/AnkiDroid/AnkiDroid/build/outputs/apk/full/debug/AnkiDroid-full-arm64-v8a-debug.apk
+adb shell monkey -p com.ichi2.anki.debug -c android.intent.category.LAUNCHER 1
+```
 
 The fork's AnkiDroid is branded **ankiCFA** with **native CFA screens** — Ethics
 minimal-pairs and the **Exam Readiness** screen (Memory / Performance / Readiness
@@ -179,6 +207,74 @@ double-counted reviews (`just cfa-sync-test`). **Offline review** queues locally
 and merges on reconnect (recorded in [`proof/friday/sync/`](./proof/friday/sync/)).
 [docs/cfa/PLATFORM-MATRIX.md](./docs/cfa/PLATFORM-MATRIX.md) is the authoritative
 capability matrix.
+
+## Speedrun requirements status
+
+This project targets the **CFA Level II** exam. The central product claim is that
+an exam-prep app must separate three different questions:
+
+- **Memory:** can the learner recall studied material right now?
+- **Performance:** can the learner answer new exam-style questions?
+- **Readiness:** what score/range is plausible today, and how sure is the app?
+
+The app intentionally shows **ranges and abstentions**, not a single flattering
+"ready" number. If the app lacks enough evidence, it says so.
+
+| Speedrun requirement                             | Current status              | Evidence / caveat                                                                                                                                                                                                       |
+| ------------------------------------------------ | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Fork Anki, build desktop from source             | **Done**                    | `just run`; build and proof logs under [`proof/`](./proof)                                                                                                                                                              |
+| Real Rust engine change                          | **Done**                    | `BuildExamQueue` and `ComputeCfaScores` in `proto/`, `rslib/`, `pylib`; see [`docs/cfa/RUST_ENGINE_NOTE.md`](./docs/cfa/RUST_ENGINE_NOTE.md)                                                                            |
+| 3 Rust tests + Python test calling Rust          | **Done**                    | `rslib/src/scheduler/cfa_scores.rs`, `pylib/tests/test_cfa_parity.py`, `pylib/tests/test_cfa_scores.py`                                                                                                                 |
+| Desktop review loop on exam deck                 | **Done**                    | CFA Home/Study/Reviewer flow; `just cfa-desktop-shell-test`                                                                                                                                                             |
+| Memory score with range and give-up rule         | **Done**                    | [`docs/cfa/MODEL-MEMORY.md`](./docs/cfa/MODEL-MEMORY.md); `MIN_GRADED_REVIEWS=200`, `MIN_TOPIC_COVERAGE=0.50`                                                                                                           |
+| Phone app builds/runs and reviews same exam deck | **Done / proof caveated**   | AnkiDroid fork builds APKs and runs on emulator; proof split between this repo and the AnkiDroid fork                                                                                                                   |
+| Desktop/mobile share one engine                  | **Done**                    | Desktop calls Rust through `pylib`; Android calls the same Rust backend through `rsdroid`                                                                                                                               |
+| Two-way sync + offline + conflicts               | **Partial but functional**  | Backend/Rust tests and emulator proof exist; same-card conflict rule documented; some mobile-device proof is fragmented                                                                                                 |
+| AI outputs trace to named source                 | **Mostly done**             | Ethics AI records `source`, `standard`, `item_id`, `model`; see [`docs/cfa/AI-PROVENANCE.md`](./docs/cfa/AI-PROVENANCE.md)                                                                                              |
+| AI eval with accuracy/WAR cutoff                 | **Done with honest caveat** | AI-off accuracy `0.733`, wrong-answer rate `0.000`; AI-on eval evidence exists, but not every AI claim is proven                                                                                                        |
+| AI beats simpler baseline                        | **Not fully proven**        | TF-IDF baseline `0.933` beats deterministic fallback `0.733`; the LLM-beats-baseline claim remains honestly marked unproven in [`proof/friday/RESULTS-REPORT.md`](./proof/friday/RESULTS-REPORT.md)                     |
+| Desktop packaged installer                       | **Pending**                 | Desktop runs from source; final DMG should be built only after code freeze                                                                                                                                              |
+| Phone packaged build                             | **Done**                    | Signed release APK exists in the AnkiDroid fork build output; arm64 SHA-256 is recorded in [`proof/final-submission/logs/android/release-apk-sha256.txt`](./proof/final-submission/logs/android/release-apk-sha256.txt) |
+| Runs with AI off                                 | **Done**                    | Scores are pure local Rust/Python statistics; AI is never in the scoring path                                                                                                                                           |
+| AGPL credit to Anki                              | **Done**                    | This README and [LICENSE](./LICENSE) retain Anki credit/license                                                                                                                                                         |
+
+### Packaged build status
+
+- **Desktop:** the source app runs with `just run`; the final desktop DMG is still
+  the last packaging step and should be built from the final frozen commit.
+- **Android:** release APKs exist under
+  `/Users/adarshrajesh/wed/AnkiDroid/AnkiDroid/build/outputs/apk/full/release/`.
+  The arm64 release APK is signed with the repo fallback release keystore and has
+  SHA-256
+  `33442f9df22c8f334acfcbd05471f1451ca96641accdd3b2383306da2ed990a5`.
+
+## Model evidence and honest reporting
+
+The Sunday proof deliberately uses held-out and synthetic/simulated data where real
+student longitudinal data is not available in a one-week build. Synthetic data is
+acceptable here because the goal is to prove the model code, metrics, gates, and
+honesty scaffolding are reproducible. The report labels simulated results as
+**SIMULATED** and does not present them as real CFA exam outcomes.
+
+| Evidence item          | Result                                                                                                    | Source                                                     |
+| ---------------------- | --------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| Memory calibration     | Brier `0.2024`, log loss `0.5909`, ECE `0.0784` on held-out simulated reviews                             | `proof/friday/gnhf-speedrun/L1/calibration.txt` and `.png` |
+| Performance model      | Held-out simulated exam-style accuracy `0.7217` vs baseline `0.6863`                                      | `proof/friday/gnhf-speedrun/L1/performance-eval.txt`       |
+| Score mapping          | Memory, Performance, and Readiness docs define method, range, and give-up behavior                        | `docs/cfa/MODEL-*.md`                                      |
+| Study feature ablation | CFA-priority `0.6435` > weakness-only `0.6157` > plain `0.5626` at equal study budget                     | `proof/friday/gnhf-speedrun/L1/ablation.txt`               |
+| Honest failures        | A1 AI baseline win unproven; A2 AI-off accuracy leg fails; A4 can fail on unlucky seeds; A8 null reported | `proof/friday/RESULTS-REPORT.md`                           |
+
+Re-run the main proof guards:
+
+```bash
+just cfa-parity-test
+just cfa-scores-test
+just cfa-sync-test
+just cfa-sync-dedup-test
+just cfa-desktop-shell-test
+just cfa-results-test
+just cfa-model-docs-test
+```
 
 ## Architecture overview
 
@@ -282,10 +378,11 @@ the score pipeline, cloud-hosted keys.
 
 **Eval vs baseline (side-by-side):**
 
-| Grader                     | Grade agreement | Notes                                         |
-| -------------------------- | --------------- | --------------------------------------------- |
-| Deterministic span matcher | **0.733**       | frozen preview column on the same 30 attempts |
-| LLM semantic (GPT-4o)      | **0.833**       | **PASS** at cutoff 0.80                       |
+| Grader                     | Grade agreement | Notes                                                          |
+| -------------------------- | --------------- | -------------------------------------------------------------- |
+| Deterministic span matcher | **0.733**       | frozen preview column on the same 30 attempts                  |
+| TF-IDF keyword baseline    | **0.933**       | simpler method; beats deterministic fallback                   |
+| LLM semantic (GPT-4o)      | **0.833**       | passes 0.80 eval cutoff but does **not** prove A1 baseline win |
 
 Re-run: `just cfa-ethics-eval` (AI-on gate) · `just cfa-eval` (held-out recall-model
 simulation — accuracy 0.686, AUC 0.763 on 30 held-out concepts).
