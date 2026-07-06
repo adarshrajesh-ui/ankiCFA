@@ -16,6 +16,7 @@ guard, in the same style as ``test_model_docs.py`` / ``test_rust_engine_note.py`
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[3]
@@ -100,6 +101,7 @@ def test_honesty_scaffolding_present() -> None:
 
 def test_every_phase_a_item_row_present() -> None:
     text = _report()
-    # A1..A13 each appear as a scorecard row.
+    # A1..A13 each appear as a scorecard row. Allow column-alignment padding
+    # (dprint normalises the markdown table, so e.g. "| A1  |" is canonical).
     for i in range(1, 14):
-        assert f"| A{i} |" in text, f"scorecard row for A{i} missing"
+        assert re.search(rf"\| A{i} +\|", text), f"scorecard row for A{i} missing"

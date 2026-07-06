@@ -31,7 +31,6 @@ from dataclasses import dataclass
 from typing import Iterator
 
 from anki import sync_pb2
-from anki.cards import CardId
 from anki.collection import Collection
 from anki.sync import SyncAuth
 
@@ -290,6 +289,8 @@ def merge_custom_data(
     """Merge ``payload`` into ``card.custom_data[namespace]`` and save (syncs)."""
     import json
 
+    from anki.cards import CardId
+
     card = col.get_card(CardId(card_id))
     root: dict = {}
     if card.custom_data:
@@ -324,6 +325,8 @@ def read_custom_data_namespace(
 ) -> dict | None:
     """Return ``card.custom_data[namespace]`` if present."""
     import json
+
+    from anki.cards import CardId
 
     card = col.get_card(CardId(card_id))
     if not card.custom_data:
