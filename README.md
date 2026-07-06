@@ -22,9 +22,48 @@ The desktop app lives in **this repository (`ankiCFA`)**. The companion mobile a
 is built from a separate **AnkiDroid** fork and shares the same Rust engine — see
 [Building & running](#building--running).
 
+## Download demo builds
+
+Desktop demo installers are available from the latest EthosPrep packaging
+workflow artifacts:
+
+<https://github.com/adarshrajesh-ui/ankiCFA/actions/runs/28772064211>
+
+Use the artifact matching your platform:
+
+- `installer-macos` — macOS Apple Silicon
+- `installer-macos-intel` — macOS Intel
+- `installer-windows` — Windows x86_64
+- `installer-windows-arm` — Windows ARM
+- `installer-linux-x86` — Linux x86_64
+- `installer-linux-arm` — Linux ARM
+
+The Android demo build is produced from the companion AnkiDroid fork as a signed
+release APK:
+
+```bash
+cd /Users/adarshrajesh/wed/AnkiDroid
+./gradlew :AnkiDroid:assembleFullRelease -Duniversal-apk=true
+```
+
+In this submission environment the rebuilt signed APK is:
+
+```text
+/Users/adarshrajesh/wed/AnkiDroid/AnkiDroid/build/outputs/apk/full/release/AnkiDroid-full-universal-release.apk
+```
+
+To install it on a clean Android device or emulator:
+
+```bash
+adb uninstall com.ichi2.anki || true
+adb install "/Users/adarshrajesh/wed/AnkiDroid/AnkiDroid/build/outputs/apk/full/release/AnkiDroid-full-universal-release.apk"
+adb shell monkey -p com.ichi2.anki 1
+```
+
 ## Contents
 
 - [What this fork adds](#what-this-fork-adds)
+- [Download demo builds](#download-demo-builds)
 - [Building & running](#building--running)
   - [Prerequisites](#prerequisites)
   - [Desktop (this repo — EthosPrep)](#desktop-this-repo--ethosprep)
