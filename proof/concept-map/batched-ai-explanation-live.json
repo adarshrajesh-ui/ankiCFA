@@ -1,16 +1,16 @@
 {
-  "note": "Single batched Concept Map AI call (desktop, live GPT via .env). One call, JSON id->text, abstain rule preserved for the null-mastery node.",
-  "live_call": {
-    "ok": true,
-    "model": "gpt-4o-mini",
-    "count": 4,
-    "error": null,
-    "explanations": {
-      "cfa": "You're at about 58% overall readiness for the CFA exam. This score reflects your current understanding across all sections, and focusing on areas where you're weaker will help boost this percentage.",
-      "topic:equity": "You're doing well in Equity Investments with a mastery of 71%. Since this section carries a decent weight, continuing to practice and review will help solidify your understanding even further.",
-      "topic:altinv": "You're currently abstaining in Alternative Investments, meaning we don't have enough graded reviews to assess your mastery here yet. Once you dive into this section, we can start tracking your progress.",
-      "sub:equity:FCFE / FCFF": "You've got a solid grasp of the FCFE / FCFF subsection, scoring 71%. Keep reinforcing this knowledge, as it’s important for the overall Equity Investments section."
-    }
-  },
-  "prompt_user_side": "Here are the concept-map nodes. Write one explanation per node and return the JSON id→explanation object:\n\n- id \"cfa\": Overall CFA readiness (weight-adjusted roll-up of all sections). Mastery: 58%.\n- id \"topic:equity\": Test section 'Equity Investments', exam weight 10-15%. Mastery: 71%.\n- id \"topic:altinv\": Test section 'Alternative Investments', exam weight 5-10%. Mastery: null (abstaining — not enough evidence yet).\n- id \"sub:equity:FCFE / FCFF\": Subsection 'FCFE / FCFF' of the Equity Investments section. Mastery: 71%."
+    "note": "Single batched Concept Map AI call (desktop, live GPT via .env). One call, JSON id->text, abstain rule preserved for the null-mastery node.",
+    "live_call": {
+        "ok": true,
+        "model": "gpt-4o-mini",
+        "count": 4,
+        "error": null,
+        "explanations": {
+            "cfa": "You're at about 58% overall readiness for the CFA exam. This score reflects your current understanding across all sections, and focusing on areas where you're weaker will help boost this percentage.",
+            "topic:equity": "You're doing well in Equity Investments with a mastery of 71%. Since this section carries a decent weight, continuing to practice and review will help solidify your understanding even further.",
+            "topic:altinv": "You're currently abstaining in Alternative Investments, meaning we don't have enough graded reviews to assess your mastery here yet. Once you dive into this section, we can start tracking your progress.",
+            "sub:equity:FCFE / FCFF": "You've got a solid grasp of the FCFE / FCFF subsection, scoring 71%. Keep reinforcing this knowledge, as it’s important for the overall Equity Investments section."
+        }
+    },
+    "prompt_user_side": "Here are the concept-map nodes. Write one explanation per node and return the JSON id→explanation object:\n\n- id \"cfa\": Overall CFA readiness (weight-adjusted roll-up of all sections). Mastery: 58%.\n- id \"topic:equity\": Test section 'Equity Investments', exam weight 10-15%. Mastery: 71%.\n- id \"topic:altinv\": Test section 'Alternative Investments', exam weight 5-10%. Mastery: null (abstaining — not enough evidence yet).\n- id \"sub:equity:FCFE / FCFF\": Subsection 'FCFE / FCFF' of the Equity Investments section. Mastery: 71%."
 }

@@ -108,7 +108,7 @@ cfa-menu-test:
 # Friday desktop-shell: native-CFA desktop shell tests (branding, home landing, toolbar, AI toggle)
 cfa-desktop-shell-test:
     {{ ninja }} pylib qt
-    QT_QPA_PLATFORM=offscreen PYTHONPATH="out/pylib:pylib:qt:out/qt" {{ py }} -m pytest qt/tests/test_cfa_branding.py qt/tests/test_cfa_home.py qt/tests/test_cfa_study.py qt/tests/test_cfa_menu.py qt/tests/test_cfa_toolbar.py qt/tests/test_cfa_chrome.py qt/tests/test_cfa_ai_settings.py qt/tests/test_cfa_readiness.py qt/tests/test_cfa_progress.py qt/tests/test_cfa_ethics_scoring_scope.py qt/tests/test_cfa_active_tab.py qt/tests/test_cfa_concept_map.py -q
+    QT_QPA_PLATFORM=offscreen PYTHONPATH="out/pylib:pylib:qt:out/qt" {{ py }} -m pytest qt/tests/test_cfa_branding.py qt/tests/test_cfa_home.py qt/tests/test_cfa_study.py qt/tests/test_cfa_menu.py qt/tests/test_cfa_toolbar.py qt/tests/test_cfa_chrome.py qt/tests/test_cfa_ai_settings.py qt/tests/test_cfa_readiness.py qt/tests/test_cfa_progress.py qt/tests/test_cfa_ethics_scoring_scope.py qt/tests/test_cfa_active_tab.py qt/tests/test_cfa_shell_chrome.py qt/tests/test_cfa_concept_map.py -q
 
 # F0b: visible desktop fixes — on-demand ethics preload, no dead-ends, exam-date picker, new cards in the priority queue
 cfa-f0b-test:
@@ -126,7 +126,7 @@ cfa-scores-test:
     PYTHONPATH="out/pylib:pylib" {{ py }} -m pytest pylib/tests/test_cfa_scores.py -q
 
 # Concept Map tab: the pure radial-map engine (size = exam weight, fill = mastery
-# light-gray -> turquoise, honest give-up rule, templated AI-off explanations).
+# light-gray -> turquoise, honest give-up rule, local templated explanations).
 cfa-conceptmap-test:
     {{ yarn }} vitest:once lib/cfa/pages/conceptmap
 
@@ -190,12 +190,12 @@ cfa-f5-test:
     {{ ninja }} pylib
     QT_QPA_PLATFORM=offscreen PYTHONPATH="out/pylib:pylib:qt:out/qt" {{ py }} -m pytest qt/tests/test_cfa_f5_style.py -q
 
-# Feature F7: bundle both CFA decks (Level II + Ethics Passages) into one importable .apkg for the phone (+ re-import round-trip)
+# Feature F7: bundle both CFA decks (Level II + Ethics Pairs) into one importable .apkg for the phone (+ re-import round-trip)
 cfa-f7-test:
     {{ ninja }} pylib
     {{ cfa_env }} {{ py }} -m pytest tools/cfa/tests/test_build_mobile_package.py -q
 
-# Feature F7: build the mobile CFA study .apkg (both decks). Pass apkg=/path/out.apkg (default /tmp/cfa-mobile.apkg)
+# Feature F7: build the mobile CFA study .apkg (both decks). Pass /path/out.apkg (default /tmp/cfa-mobile.apkg)
 cfa-mobile-package apkg="/tmp/cfa-mobile.apkg":
     {{ cfa_env }} {{ py }} tools/cfa/build_mobile_package.py --apkg "{{ apkg }}"
 
@@ -345,9 +345,9 @@ cfa-capture-overview out="proof/overview/overview-after.html":
 # Phase B desktop Pass 4: render the CFA-skinned reviewer answer bar (D-P4-10)
 # to a standalone HTML for capture. Pass --stock for the stock-Anki "before"
 # and --question for the Show-Answer phase.
-cfa-capture-reviewer-bottom out="proof/reviewer-bottom/reviewer-bottom-after.html":
+cfa-capture-reviewer-bottom out="proof/reviewer-bottom/reviewer-bottom-after.html" *args:
     {{ ninja }} qt
-    QT_QPA_PLATFORM=offscreen PYTHONPATH="out/pylib:pylib:qt:out/qt" {{ py }} tools/cfa/render_reviewer_bottom.py {{ out }}
+    QT_QPA_PLATFORM=offscreen PYTHONPATH="out/pylib:pylib:qt:out/qt" {{ py }} tools/cfa/render_reviewer_bottom.py {{ out }} {{ args }}
 
 # Phase B desktop Pass 4: render the CFA-skinned MAIN reviewer body (D-P4-14) —
 # page tint + retoned type-answer feedback — to before/after HTML for capture.
@@ -460,14 +460,6 @@ cfa-ethics-eval *args:
 cfa-tab-fill-test:
     {{ ninja }} pylib
     QT_QPA_PLATFORM=offscreen PYTHONPATH="out/pylib:pylib:qt:out/qt:." {{ py }} -m pytest qt/tests/test_cfa_tab_fill.py -q
-
-# Concept Map: the SINGLE batched AI explanation call — pure batched-prompt +
-# robust-JSON-parse + abstain wording (mocked client, no network), plus the
-# desktop pycmd bridge (AI-off returns instantly; AI-on degrades safely). If an
-# OPENAI_API_KEY is set the bridge test also exercises one real batched call.
-cfa-conceptmap-ai-test:
-    PYTHONPATH="." {{ py }} -m pytest cfa/ai/tests/test_mapexplain.py -q
-    QT_QPA_PLATFORM=offscreen PYTHONPATH="out/pylib:pylib:qt:out/qt:." {{ py }} -m pytest qt/tests/test_cfa_concept_map_ai.py -q
 
 # Feature 5: boot straight into a freshly-seeded CFA collection (own profile base under /tmp)
 cfa *args:

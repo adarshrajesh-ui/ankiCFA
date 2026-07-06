@@ -6,7 +6,7 @@
 
 Stands up a real local ``anki-sync-server`` (the same Rust sync engine that
 runs on-device under AnkiDroid per F6), seeds a desktop collection with the CFA
-study deck + the F1 ethics passages deck + the fork exam config, syncs, and
+study deck + the ethics minimal-pairs deck + the fork exam config, syncs, and
 then prints exactly what shows up on a FRESH "phone" collection after a full
 download — including the shared-engine exam queue built against the synced
 content. Nothing is faked: the phone side is a genuine Rust-backed Collection
@@ -16,6 +16,8 @@ Run via ``just cfa-sync`` peers; invoke directly:
 
     PYTHONPATH=out/pylib:pylib:. out/pyenv/bin/python tools/cfa/f8_persistence_proof.py
 """
+
+# pylint: disable=import-error
 
 from __future__ import annotations
 
@@ -27,13 +29,15 @@ from datetime import date
 _ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, os.path.join(_ROOT, "cfa", "ethics_pairs"))
 
-import passages as P  # noqa: E402
+import import_pairs as P  # noqa: E402
 
 from anki import cfa  # noqa: E402
 from anki import cfa_sync as cs
 from anki.collection import Collection  # noqa: E402
 
 CFA_DECK = "CFA Level II"
+ETHICS_DECK = P.nt.DECK_NAME
+ETHICS_NOTETYPE = P.nt.NOTETYPE_NAME
 EXAM_DATE = "2026-08-25"
 TOPIC_WEIGHTS = {"los::ethics": 0.20, "los::equity": 0.15, "los::fixed-income": 0.15}
 
@@ -68,7 +72,7 @@ def _seed_desktop(col: Collection) -> None:
         note["Back"] = back
         note.tags = tags
         col.add_note(note, deck_id)
-    P.import_passages(col, P.load_passages()[:5])
+    P.import_pairs(col, P.load_pairs()[:5])
     cfa.set_exam_config(col, exam_date=EXAM_DATE, topic_weights=TOPIC_WEIGHTS)
 
 
@@ -111,7 +115,7 @@ def main() -> int:
         print(f"      notes              : {phone.note_count()}")
         notetypes = sorted(nt["name"] for nt in phone.models.all())
         print(f"      note-types         : {notetypes}")
-        ethics_nids = phone.find_notes(f'note:"{P.NOTETYPE_NAME}"')
+        ethics_nids = phone.find_notes(f'note:"{ETHICS_NOTETYPE}"')
         print(f"      ethics cards       : {len(ethics_nids)}")
         cfg = cfa.get_exam_config(phone)
         print(f"      exam config        : {cfg}")
@@ -127,7 +131,7 @@ def main() -> int:
         # honest checks
         ok = (
             CFA_DECK in deck_names
-            and P.DECK_NAME in deck_names
+            and ETHICS_DECK in deck_names
             and cfg == {"exam_date": EXAM_DATE, "topic_weights": TOPIC_WEIGHTS}
             and len(ethics_nids) == 5
             and len(queue.card_ids) == 3

@@ -12,16 +12,16 @@ fails on stock ankiCFA (before this increment) and passes after.
 from __future__ import annotations
 
 import os
+import re
 import tempfile
 from pathlib import Path
 from types import SimpleNamespace
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
-from anki.collection import Collection
-
 import aqt.cfa_home as cfa_home
 import aqt.mediasrv as mediasrv
+from anki.collection import Collection
 from aqt.webview import AnkiWebViewKind
 
 _REPO = Path(__file__).resolve().parents[2]
@@ -120,8 +120,12 @@ def test_link_handler_routes_ctas_to_cfa_entry_points(monkeypatch) -> None:
 
     calls: list[str] = []
     monkeypatch.setattr(cfa, "study_ethics_pairs", lambda mw: calls.append("ethics"))
-    monkeypatch.setattr(cfa, "study_by_exam_priority", lambda mw: calls.append("priority"))
-    monkeypatch.setattr(cfa, "show_exam_readiness", lambda mw: calls.append("readiness"))
+    monkeypatch.setattr(
+        cfa, "study_by_exam_priority", lambda mw: calls.append("priority")
+    )
+    monkeypatch.setattr(
+        cfa, "show_exam_readiness", lambda mw: calls.append("readiness")
+    )
     monkeypatch.setattr(cfa, "show_deadline", lambda mw: calls.append("deadline"))
     monkeypatch.setattr(cfa_home, "open_ai_settings", lambda mw: calls.append("ai"))
     monkeypatch.setattr(cfa_home, "trigger_cfa_sync", lambda mw: calls.append("sync"))
@@ -138,6 +142,7 @@ def test_link_handler_routes_ctas_to_cfa_entry_points(monkeypatch) -> None:
         "cfa:priority",
         "cfa:readiness",
         "cfa:conceptmap",
+        "cfa:progress",
         "cfa:home",
         "cfa:deadline",
         "cfa:ai",
@@ -156,4 +161,91 @@ def test_link_handler_routes_ctas_to_cfa_entry_points(monkeypatch) -> None:
         "sync",
         "sync-settings",
     ]
-    assert moved == ["cfaConceptMap", "cfaHome", "deckBrowser"]
+    assert moved == ["cfaConceptMap", "cfaProgress", "cfaHome", "deckBrowser"]
+
+
+def test_svelte_cfa_cta_commands_have_qt_handlers() -> None:
+    ts_files = [
+        "ts/lib/cfa/productNav.ts",
+        "ts/lib/cfa/pages/home.ts",
+        "ts/lib/cfa/pages/CfaHomePage.svelte",
+        "ts/lib/cfa/pages/CfaStudyPage.svelte",
+        "ts/lib/cfa/pages/readiness.ts",
+        "ts/lib/cfa/pages/CfaReadinessPage.svelte",
+        "ts/lib/cfa/pages/CfaConceptMapPage.svelte",
+    ]
+    ts_source = "\n".join(
+        (_REPO / path).read_text(encoding="utf-8") for path in ts_files
+    )
+    cfa_commands = set(re.findall(r'(?:go\(|cmd:\s*)"(cfa:[^"]+)"', ts_source))
+
+    qt_handler_files = [
+        "qt/aqt/cfa_home.py",
+        "qt/aqt/cfa_study.py",
+        "qt/aqt/cfa_readiness.py",
+        "qt/aqt/cfa_concept_map.py",
+        "qt/aqt/cfa_progress.py",
+    ]
+    qt_source = "\n".join(
+        (_REPO / path).read_text(encoding="utf-8") for path in qt_handler_files
+    )
+    missing = sorted(cmd for cmd in cfa_commands if cmd not in qt_source)
+    assert missing == []
+
+    study_src = (_REPO / "ts/lib/cfa/pages/CfaStudyPage.svelte").read_text(
+        encoding="utf-8"
+    )
+    raw_study_commands = set(re.findall(r'go\("([^"]+)"\)', study_src))
+    deck_prefixes = set(re.findall(r'deckCmd\("([^"]+)"', study_src))
+    study_handler = (_REPO / "qt/aqt/cfa_study.py").read_text(encoding="utf-8")
+
+    assert {"create-cfa", "import"} <= raw_study_commands
+    assert 'cmd in {"create", "create-cfa"}' in study_handler
+    assert 'cmd == "import"' in study_handler
+    for prefix in deck_prefixes:
+        assert f'cmd == "{prefix}"' in study_handler
+
+
+def test_ethics_show_answer_hook_accepts_card_only(monkeypatch) -> None:
+    import aqt
+    import aqt.cfa_ethics_sync as cfa_ethics_sync
+
+    card = SimpleNamespace(id=123)
+    col = object()
+    evals: list[str] = []
+    persisted: list[tuple[object, object, dict[str, object]]] = []
+
+    class FakeWeb:
+        def evalWithCallback(self, js: str, callback) -> None:  # noqa: N802 - Anki API
+            evals.append(js)
+            callback('{"completed": true, "score": 1}')
+
+    reviewer = SimpleNamespace(web=FakeWeb(), mw=SimpleNamespace(col=col))
+    monkeypatch.setattr(aqt, "mw", SimpleNamespace(reviewer=reviewer), raising=False)
+    monkeypatch.setattr(
+        cfa_ethics_sync,
+        "persist_ethics_attempt",
+        lambda col, card, payload: persisted.append((col, card, payload)),
+    )
+
+    cfa_ethics_sync._on_show_answer(card)
+
+    assert "cfaEthics:pending" in evals[0]
+    assert persisted == [(col, card, {"completed": True, "score": 1})]
+
+
+def test_shell_state_guard_resets_stale_reviewer_bottom_web() -> None:
+    from aqt.main import AnkiQt
+
+    cleared: list[str] = []
+    mw = SimpleNamespace(
+        _BOTTOM_CHROME_OWNER_STATES=AnkiQt._BOTTOM_CHROME_OWNER_STATES,
+        bottomWeb=SimpleNamespace(
+            clear_for_shell_state=lambda: cleared.append("clear")
+        ),
+    )
+
+    AnkiQt._clearBottomChromeIfOrphaned(mw, "cfaHome")  # type: ignore[arg-type]
+    AnkiQt._clearBottomChromeIfOrphaned(mw, "review")  # type: ignore[arg-type]
+
+    assert cleared == ["clear"]

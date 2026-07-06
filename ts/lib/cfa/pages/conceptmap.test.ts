@@ -41,6 +41,39 @@ function componentSource(): string {
     return readFileSync(join(here, "CfaConceptMapPage.svelte"), "utf8");
 }
 
+function productNavSource(): string {
+    return readFileSync(join(here, "../ProductShellNav.svelte"), "utf8");
+}
+
+function sourceBlock(src: string, selector: string): string {
+    const start = src.indexOf(selector);
+    if (start === -1) {
+        throw new Error(`Missing selector ${selector}`);
+    }
+    const open = src.indexOf("{", start);
+    let depth = 0;
+    for (let i = open; i < src.length; i++) {
+        const char = src[i];
+        if (char === "{") {
+            depth++;
+        } else if (char === "}") {
+            depth--;
+            if (depth === 0) {
+                return src.slice(start, i + 1);
+            }
+        }
+    }
+    throw new Error(`Unclosed selector ${selector}`);
+}
+
+function rgbValues(fill: string): [number, number, number] {
+    const match = /^rgb\((\d+), (\d+), (\d+)\)$/.exec(fill);
+    if (!match) {
+        throw new Error(`Expected rgb() fill, got ${fill}`);
+    }
+    return [Number(match[1]), Number(match[2]), Number(match[3])];
+}
+
 // The 10 official Level II areas (weights are single points inside the bands).
 function tenTopics(): TopicRow[] {
     const names: [string, number][] = [
@@ -64,7 +97,10 @@ test("topicRadius: node size grows monotonically with exam weight", () => {
     expect(topicRadius(12.5)).toBeGreaterThan(topicRadius(7.5));
     expect(subRadius(12.5)).toBeGreaterThan(subRadius(7.5));
     // A heavy (12.5%) section is meaningfully bigger than a light (7.5%) one.
-    expect(topicRadius(12.5) - topicRadius(7.5)).toBeCloseTo(5 * 1.55, 5);
+    expect(topicRadius(12.5) - topicRadius(7.5)).toBeCloseTo(5 * 1.75, 5);
+    // Even the smallest official section should not read as a tiny flat dot.
+    expect(topicRadius(7.5)).toBeGreaterThan(36);
+    expect(subRadius(7.5)).toBeGreaterThan(19);
 });
 
 // --- FILL: light-gray → turquoise, abstain stays gray ------------------------
@@ -75,14 +111,25 @@ test("fillFor: 0% is the empty gray end, null (abstain) is also empty gray", () 
     expect(fillFor(null)).toBe(EMPTY_FILL);
 });
 
-test("fillFor: 100% is full turquoise", () => {
-    expect(fillFor(1)).toBe("rgb(20, 184, 177)"); // #14B8B1
+test("fillFor: 100% is the saturated teal end of the ramp", () => {
+    expect(fillFor(1)).toBe("rgb(3, 77, 93)");
 });
 
 test("fillFor: 50% is the visual midpoint of the ramp", () => {
-    // Halfway between #E9EDF1 and #14B8B1 on each channel.
+    // Interpolated within the multi-stop perceptual ramp.
     expect(fillFor(0.5)).toBe(fillFor(0.5)); // deterministic
-    expect(fillFor(0.5)).toBe("rgb(127, 211, 209)");
+    expect(fillFor(0.5)).toBe("rgb(177, 237, 234)");
+});
+
+test("fillFor: 70% and 85% are visually distinct mastery bands", () => {
+    expect(fillFor(0.7)).toBe("rgb(76, 211, 207)");
+    expect(fillFor(0.85)).toBe("rgb(12, 140, 148)");
+
+    const seventy = rgbValues(fillFor(0.7));
+    const eightyFive = rgbValues(fillFor(0.85));
+    expect(seventy[0] - eightyFive[0]).toBeGreaterThan(50);
+    expect(seventy[1] - eightyFive[1]).toBeGreaterThan(60);
+    expect(seventy[2] - eightyFive[2]).toBeGreaterThan(50);
 });
 
 test("fillFor: clamps out-of-range mastery", () => {
@@ -124,7 +171,7 @@ test("overallMastery: abstains (null) when NO topic has data yet", () => {
 test("masteryPct + masteryLabel: honest 'no data yet' for an abstaining node", () => {
     expect(masteryPct(null)).toBeNull();
     expect(masteryLabel(null)).toBe("no data yet");
-    expect(masteryLabel(0.8)).toBe("exam-ready");
+    expect(masteryLabel(0.8)).toBe("strong signal");
     expect(masteryLabel(0.5)).toBe("getting there");
     expect(masteryLabel(0.2)).toBe("needs work");
 });
@@ -148,6 +195,7 @@ test("buildConceptMap: centre CFA is the biggest node; subs are the smallest", (
     const maxTopicR = Math.max(...map.nodes.filter((n) => n.kind === "topic").map((n) => n.r));
     const maxSubR = Math.max(...map.nodes.filter((n) => n.kind === "sub").map((n) => n.r));
     expect(map.center.r).toBe(CFA_R);
+    expect(map.center.r).toBeGreaterThanOrEqual(70);
     expect(map.center.r).toBeGreaterThan(maxTopicR);
     expect(maxTopicR).toBeGreaterThan(maxSubR);
 });
@@ -170,7 +218,9 @@ test("buildConceptMap: an abstaining topic node stays empty-gray (give-up rule)"
 });
 
 test("buildConceptMap: subsections inherit the section estimate and are flagged", () => {
-    const map = buildConceptMap([topic({ topic: "Equity Investments", weight: 0.125, recallRange: { low: 0.7, high: 0.8 } })]);
+    const map = buildConceptMap([
+        topic({ topic: "Equity Investments", weight: 0.125, recallRange: { low: 0.7, high: 0.8 } }),
+    ]);
     const subs = map.nodes.filter((n) => n.kind === "sub");
     expect(subs.length).toBe(2);
     for (const s of subs) {
@@ -189,13 +239,15 @@ test("buildConceptMap: layout is deterministic (stable mental map)", () => {
 });
 
 test("buildConceptMap: an unknown topic is still placed without throwing", () => {
-    const map = buildConceptMap([topic({ topic: "Some Future Topic", weight: 0.1, recallRange: { low: 0.5, high: 0.5 } })]);
+    const map = buildConceptMap([
+        topic({ topic: "Some Future Topic", weight: 0.1, recallRange: { low: 0.5, high: 0.5 } }),
+    ]);
     const node = map.nodes.find((n) => n.name === "Some Future Topic")!;
     expect(Number.isFinite(node.x)).toBe(true);
     expect(Number.isFinite(node.y)).toBe(true);
 });
 
-// --- templated explanations: the AI-OFF fallback is always complete ----------
+// --- templated explanations: the local deterministic copy is always complete --
 
 test("templatedExplanation: an abstaining node explains the give-up rule, no fake %", () => {
     const map = buildConceptMap([topic({ recallRange: null })]);
@@ -206,16 +258,22 @@ test("templatedExplanation: an abstaining node explains the give-up rule, no fak
 });
 
 test("templatedExplanation: a scored node cites its percent and a next step", () => {
-    const map = buildConceptMap([topic({ topic: "Derivatives", weight: 0.075, recallRange: { low: 0.2, high: 0.26 } })]);
+    const map = buildConceptMap([
+        topic({ topic: "Derivatives", weight: 0.075, recallRange: { low: 0.2, high: 0.26 } }),
+    ]);
     const t = map.nodes.find((n) => n.kind === "topic")!;
     const text = templatedExplanation(t);
     expect(text).toMatch(/23%/); // midpoint of 20–26
     expect(text).toMatch(/Derivatives/);
 });
 
-test("templatedExplanation: the centre explains the weight-adjusted roll-up", () => {
+test("templatedExplanation: the centre explains the weighted map signal", () => {
     const map = buildConceptMap(tenTopics());
-    expect(templatedExplanation(map.center)).toMatch(/overall CFA readiness/i);
+    const text = templatedExplanation(map.center);
+    expect(map.center.full).toBe("Overall concept coverage");
+    expect(text).toMatch(/weighted topic signal/i);
+    expect(text).toMatch(/not a pass\/fail readiness call/i);
+    expect(text).not.toMatch(/overall CFA readiness|exam-ready/i);
 });
 
 test("drillFor: centre suggests the dimmest heavy sections; topics get a drill", () => {
@@ -250,12 +308,12 @@ test("D-P4-1: panel gauge distinguishes abstain from a genuine 0%", () => {
 test("D-P4-3: hover tooltip renders name + % at the node (spec parity)", () => {
     const src = componentSource();
     // The tooltip is driven by hover/focus (hotId), never by a pinned select…
-    expect(src).toMatch(/tipNode = hotId !== null/);
+    expect(src).toMatch(/tipNode\s*=\s*hotId !== null/);
     // …it emits both the name and a "% mastered"/"no data yet" line…
     expect(src).toContain("cfa-tip__name");
     expect(src).toContain("cfa-tip__pct");
     expect(src).toContain("% mastered");
-    expect(src).toContain("no data yet");
+    expect(src).toMatch(/No data yet/i);
     // …and the tooltip group is aria-hidden (the node aria-label already speaks).
     expect(src).toMatch(/class="cfa-tip"[\s\S]*?aria-hidden="true"/);
 });
@@ -272,9 +330,9 @@ test("D-P4-4: map SVG is a named group, not an a11y-pruning role=img", () => {
     // The <svg ...> attributes (up to the first '>') carry role="group",
     // never role="img", while keeping the accessible name.
     const svgOpen = src.slice(src.indexOf("<svg"), src.indexOf(">", src.indexOf("<svg")) + 1);
-    expect(svgOpen).toContain('role="group"');
-    expect(svgOpen).not.toContain('role="img"');
-    expect(svgOpen).toContain('aria-label="Interactive CFA concept mastery map"');
+    expect(svgOpen).toContain("role=\"group\"");
+    expect(svgOpen).not.toContain("role=\"img\"");
+    expect(svgOpen).toContain("aria-label=\"Interactive CFA concept mastery map\"");
     // The nodes are still focusable buttons (the reason role=img is wrong here).
     expect(src).toMatch(/role="button"\s*\n\s*tabindex="0"/);
 });
@@ -301,30 +359,176 @@ test("D-P4-5: a pinned node can always be unpinned (toggle + Escape)", () => {
 test("frozen liquid-glass surface keeps the key production selectors", () => {
     const src = componentSource();
 
-    expect(src).toContain("Exact build target · liquid glass · same on phone &amp; desktop");
-    expect(src).toContain('class="cfa-map__appbar"');
-    expect(src).toContain('class="cfa-map__hero"');
-    expect(src).toContain('class="cfa-map__stage"');
-    expect(src).toContain('class="cfa-map__mapbox"');
-    expect(src).toContain('class="cfa-map__panel"');
-    expect(src).toContain('class="cfa-map__section-card"');
+    expect(src).toContain("Concept map · topic evidence · instant explanations");
+    expect(src).not.toContain("surfaceClass=");
+    expect(src).toContain("class=\"cfa-map__hero\"");
+    expect(src).toContain("class=\"cfa-map__stage\"");
+    expect(src).toContain("class=\"cfa-map__mapbox\"");
+    expect(src).toContain("class=\"cfa-map__panel\"");
+    expect(src).toContain("class=\"cfa-node__label cfa-node__tlabel\"");
     expect(src).toContain("pearl");
-    expect(src).toContain("liquid glass");
 });
 
-test("batched explanation bridge fires once on mount and never per node tap", () => {
+test("Concept Map page uses visible reduced product nav on desktop", () => {
+    const src = componentSource();
+    const nav = productNavSource();
+
+    expect(src).toContain("ProductShellNav");
+    expect(src).toContain("active=\"conceptmap\"");
+    expect(src).not.toContain("surfaceClass=");
+    expect(src).toContain("ariaLabel=\"CFA sections\"");
+    expect(nav).toContain("class=\"cfa-product-nav\"");
+    expect(nav).toContain(".cfa-product-nav__tabs");
+    expect(src).not.toContain("Desktop shell uses the native Qt toolbar");
+    expect(src).toContain("on:navigate={(event) => go(event.detail)}");
+});
+
+test("Concept Map shell matches the Study and Readiness page rhythm", () => {
+    const src = componentSource();
+    const nav = productNavSource();
+    const pageBlock = sourceBlock(src, "&__page");
+    const heroBlock = sourceBlock(src, "&__hero");
+
+    expect(src).not.toContain("max-width: 1160px");
+    expect(pageBlock).toContain("max-width: 1440px;");
+    expect(pageBlock).toContain("padding: 35px 28px 90px;");
+    expect(nav).toContain("top: 20px;");
+    expect(nav).toContain("border-radius: 28px;");
+    expect(nav).not.toContain("max-width: 1160px");
+    expect(heroBlock).toContain("margin-top: 33px;");
+    expect(heroBlock).toContain("border-radius: 40px;");
+    expect(heroBlock).toContain("padding: 35px;");
+});
+
+test("Concept Map stage promotes the map instead of preview sizing", () => {
+    const src = componentSource();
+    const stageBlock = sourceBlock(src, "&__stage");
+    const mapboxBlock = sourceBlock(src, "&__mapbox {");
+
+    expect(stageBlock).toContain("grid-template-columns: minmax(0, 1fr) minmax(320px, 390px);");
+    expect(stageBlock).toContain("gap: 20px;");
+    expect(stageBlock).toContain("margin-top: 23px;");
+    expect(mapboxBlock).toContain("border-radius: 28px;");
+    expect(mapboxBlock).toContain("padding: 18px;");
+    expect(mapboxBlock).toContain("min-height: clamp(460px, 48vw, 680px);");
+    expect(src).toMatch(/&__panel\s*\{[\s\S]*?border-radius: 28px;[\s\S]*?padding: 24px;/);
+});
+
+test("Concept Map phone media fits the map instead of requiring horizontal scroll", () => {
+    const src = componentSource();
+    const mobile = src.slice(src.indexOf("@media (max-width: 720px)"));
+
+    expect(mobile).toContain("height: clamp(500px, 136vw, 650px);");
+    expect(mobile).toContain("min-width: 0;");
+    expect(mobile).toContain("overflow: hidden;");
+    expect(mobile).toContain("touch-action: none;");
+    expect(mobile).toContain("font-size: 17px;");
+    expect(mobile).toContain("stroke-width: 5.4px;");
+    expect(mobile).not.toContain("min-width: 640px");
+    expect(mobile).not.toContain("overflow-x: auto");
+    expect(mobile).not.toContain("min-width: 620px");
+});
+
+test("Concept Map wheel zoom supports in and out around the pointer", () => {
     const src = componentSource();
 
-    expect(src).toMatch(/onMount\(\(\) => \{[\s\S]*?bridgeCommand<string>\(\s*"cfaExplainMap:"/);
-    expect(src.match(/cfaExplainMap:/g)).toHaveLength(1);
+    expect(src).toContain("const svg = event.currentTarget as SVGSVGElement");
+    expect(src).toMatch(/const anchorX\s*=\s*\(\(event\.clientX - rect\.left\)/);
+    expect(src).toMatch(/const anchorY\s*=\s*\(\(event\.clientY - rect\.top\)/);
+    expect(src).toMatch(/Math\.exp\(-event\.deltaY \* 0\.0012\)/);
+    expect(src).toContain("const ratio = nextScale / mapState.scale");
+    expect(src).not.toContain("Math.abs(event.deltaY)");
+});
+
+test("Concept Map phone interactions support pan, pinch, and drag-safe node taps", () => {
+    const src = componentSource();
+
+    expect(src).toContain("const PHONE_MAP_SCALE = 1.42");
+    expect(src).toContain("centeredMapState(media.matches ? PHONE_MAP_SCALE : 1)");
+    expect(src).toContain("interface DragStart");
+    expect(src).toContain("on:pointerdown={onPointerDown}");
+    expect(src).toContain("on:pointermove={onPointerMove}");
+    expect(src).toContain("on:pointerup={onPointerUp}");
+    expect(src).toContain("on:touchcancel={onTouchCancel}");
+    expect(src).toContain("setPointerCapture(event.pointerId)");
+    expect(src).toContain("(dx * VIEW_W) / Math.max(1, rect.width)");
+    expect(src).toContain("suppressNextSelect = true");
+    expect(src).toMatch(/if \(suppressNextSelect\)[\s\S]*?return;/);
+    expect(src).toMatch(/clamp\(pinchStart\.scale \* ratio, 0\.92, 1\.8\)/);
+});
+
+test("production Concept Map excludes frozen spec-page copy", () => {
+    const src = componentSource();
+
+    for (
+        const copy of [
+            "Exact build target",
+            "The fill mechanic",
+            "The hierarchy",
+            "How the instant explanations work",
+            "New tab · identical on phone &amp; desktop",
+            "SAME ON PHONE &amp; DESKTOP",
+            "LIQUID GLASS",
+        ]
+    ) {
+        expect(src).not.toContain(copy);
+    }
+});
+
+test("aggregate display does not claim exam readiness while Readiness abstains", () => {
+    const src = componentSource();
+
+    expect(src).toContain("readinessAbstaining = data.heroMode === \"abstain\" || data.readiness.abstain");
+    expect(src).toContain("Readiness unavailable");
+    expect(src).toContain("% mapped topic signal");
+    expect(src).toContain("readiness unavailable");
+    expect(src).not.toMatch(/exam-ready/i);
+});
+
+test("persistent node labels keep the readability treatment", () => {
+    const src = componentSource();
+    const labelBlock = sourceBlock(src, ".cfa-node__label");
+    const centerLabelBlock = sourceBlock(src, ".cfa-node__clabel");
+
+    expect(src).toContain("class=\"cfa-node__label cfa-node__clabel\"");
+    expect(src).toContain("class=\"cfa-node__label cfa-node__tlabel\"");
+    expect(labelBlock).toContain("fill: var(--ink);");
+    expect(labelBlock).toContain("paint-order: stroke;");
+    expect(labelBlock).toContain("stroke: rgba(255, 255, 255, 0.96);");
+    expect(labelBlock).toContain("stroke-width: 4.5px;");
+    expect(labelBlock).toContain("filter: drop-shadow");
+    expect(centerLabelBlock).not.toContain("fill: #ffffff");
+});
+
+test("node circles keep the liquid-glass weight and shine treatment", () => {
+    const src = componentSource();
+
+    expect(src).toContain("id=\"cfa-node-glass\"");
+    expect(src).toContain("class=\"cfa-node__glass\"");
+    expect(src).toContain("class=\"cfa-node__shine\"");
+    expect(src).toContain("class=\"cfa-node__inner-rim\"");
+    expect(src).toMatch(/r=\{n\.r \+ 22\}/);
+    expect(src).toMatch(/stroke-width=\{n\.kind === "cfa" \? 2\.5 : 1\.5\}/);
+});
+
+test("Concept Map does not invoke a remote explanation bridge", () => {
+    const src = componentSource();
+
+    expect(src).not.toContain("cfaExplainMap:");
+    expect(src).not.toContain("bridgeCommandsAvailable");
+    expect(src).not.toContain("bridgeCommand<string>");
+    expect(src).not.toContain("aiExpl");
+    expect(src).not.toContain("aiStatus");
+    expect(src).not.toMatch(/onMount\(\(\) => \{[\s\S]*?explain/i);
     expect(src).toMatch(/on:click=\{\(\) => onSelect\(n\)\}/);
-    expect(src).not.toMatch(/on:click=\{\(\) => bridgeCommand<string>\(\s*"cfaExplainMap:/);
 });
 
-test("AI-off fallback copy and priority drill routing remain available", () => {
+test("deterministic explanation copy and priority drill routing remain available", () => {
     const src = componentSource();
 
-    expect(src).toContain("AI is off — these explanations are the deterministic templated fallback");
-    expect(src).toContain('on:click={() => go("cfa:priority")}');
+    expect(src).toContain("activeExpl = templatedExplanation(active)");
+    expect(src).toContain("Explanations are local and deterministic");
+    expect(src).not.toMatch(/AI-generated|batched call|Generating plain-English explanations with AI/);
+    expect(src).toContain("on:click={() => go(\"cfa:priority\")}");
     expect(src).toContain("{drillFor(active)}");
 });

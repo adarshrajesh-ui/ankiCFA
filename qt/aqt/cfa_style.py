@@ -3,11 +3,10 @@
 
 """CFA fork: the shared design system for the desktop CFA surfaces (F5).
 
-A single source of truth for the calm, finance-education aesthetic (modelled on
-Mark Meldrum's *learning* styling — restrained type scale, generous spacing, a
-calm slate/navy palette, quiet card + table chrome, no marketing chrome) so the
-Exam Readiness dialog, the Deadline dialog and the ethics card all read as one
-product.
+A single source of truth for the approved liquid-glass CFA aesthetic — pearl
+backgrounds, turquoise depth/accent, navy text, generous spacing and quiet
+glass cards — so the Home, Study, Concept Map, Readiness, reviewer chrome and
+Ethics card read as one product.
 
 Everything here is pure/presentational: a token table (:data:`TOKENS`), a
 :func:`dialog_qss` widget stylesheet, and small HTML builders (:func:`eyebrow`,
@@ -24,27 +23,25 @@ from __future__ import annotations
 # Kept in sync with the ``:root`` block in the ethics card stylesheet.
 # ---------------------------------------------------------------------------
 TOKENS: dict[str, str] = {
-    # Neutrals (navy-tinted ramp) — text, borders, quiet surfaces. Sourced from
-    # the real markmeldrum.com BuddyBoss brand (see cfa/ui/reference/BRAND.md).
-    "ink": "#122B46",  # primary text (brand navy — --bb-headings-color)
-    "muted": "#4D5C6D",  # secondary text (--bb-body-text-color)
-    "faint": "#939597",  # captions / disabled (--bb-alternate-text-color)
-    "line": "#E7E9EC",  # hairline borders (--bb-content-border-color)
-    "surface": "#F3F6F8",  # panels / table stripes (cool section band)
-    "bg": "#ffffff",  # page background
-    # Brand — the calm structural navy (coincides with ink on the real site).
-    "primary": "#122B46",
-    "primary_soft": "#F3F6F8",
-    "primary_hover": "#0E2238",  # darker navy for button hover (derived from primary)
+    # Neutrals and liquid-glass surfaces.
+    "ink": "#122B46",
+    "muted": "#4D5C6D",
+    "faint": "#8B97A4",
+    "line": "#DDEDEA",
+    "surface": "#E4F6F5",
+    "bg": "#FBFAF5",
+    # Brand — turquoise product accent from the approved new CFA pages.
+    "primary": "#14B8B1",
+    "primary_soft": "#E4F6F5",
+    "primary_hover": "#0E9C97",
     # Semantic — the pass / fail / caution triad.
     "pass": "#15803d",
     "pass_soft": "#f0fdf4",
     "fail": "#b91c1c",
     "fail_soft": "#fef2f2",
     "warn": "#b45309",
-    # Warm CTA accent — the site's --bb-primary-color orange (soft = derived tint).
-    "accent": "#DA5C01",
-    "accent_soft": "#FCEBDA",
+    "accent": "#14B8B1",
+    "accent_soft": "#DFF5F3",
     # Type scale (px).
     "fs_title": "22",
     "fs_hero": "28",

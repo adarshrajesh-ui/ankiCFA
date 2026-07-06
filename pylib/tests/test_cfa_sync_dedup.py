@@ -109,7 +109,9 @@ def test_dedup_would_fail_if_naive_count_used_for_giveup(server):
     raw = cs.raw_graded_review_count(desktop)
     deduped = cs.deduped_graded_review_count(desktop)
     assert raw >= 2
-    assert deduped < raw, "same-card-same-day double review must not double-count for scoring"
+    assert deduped < raw, (
+        "same-card-same-day double review must not double-count for scoring"
+    )
 
 
 def test_different_days_both_count(server):
@@ -162,7 +164,15 @@ _SAMPLE_ETHICS = {
     "near": 0,
     "total": 2,
     "selectionIndices": [24, 25, 26],
-    "spans": [{"phrase": "earnings figure", "tier": "full", "matched": True, "lo": 24, "hi": 28}],
+    "spans": [
+        {
+            "phrase": "earnings figure",
+            "tier": "full",
+            "matched": True,
+            "lo": 24,
+            "hi": 28,
+        }
+    ],
 }
 
 

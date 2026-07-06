@@ -41,6 +41,8 @@ from ethics_scoring import (
     PassageAttempt,
     find_gold_spans,
     grade_passage_attempt,
+    span_cap,
+    tokenize,
 )
 
 GRADES = ("correct", "somewhat", "partial", "wrong")
@@ -50,6 +52,7 @@ _SYSTEM_PROMPT = (
     "learner. They read a passage, judged the conduct Ethical or Unethical, and "
     "highlighted the phrase(s) they believe are the evidence. You get the "
     "passage, their verdict, the correct verdict, their highlighted phrases, and "
+    "the exact highlight token ranges/coverage when available, "
     "the governing Standard, and the authored GOLD evidence spans (each with a "
     "rationale). Grade the highlight SEMANTICALLY (meaning, not exact wording) "
     "and give feedback that "
@@ -60,8 +63,11 @@ _SYSTEM_PROMPT = (
     "underlying fact/evidence — different words, tense, paraphrase, or slightly "
     "different boundaries all count. Reward the right idea; never require exact "
     "token overlap.\n"
-    "- Extra learner phrases that are not evidence are tolerated unless they "
-    "dominate (many irrelevant phrases -> at best 'somewhat').\n\n"
+    "- Extra learner phrases that are not evidence are tolerated in proportion: "
+    "a few boundary words around the right evidence can still be correct; about "
+    "10 extra words beyond the decisive evidence should usually be 'somewhat'; "
+    "highlighting a whole paragraph or most of the passage is poor evidence "
+    "selection and must not be 'correct'.\n\n"
     "Highlight grade (about the spans ONLY, independent of the verdict):\n"
     "- 'correct'  : every gold span is matched and the selection is focused.\n"
     "- 'somewhat' : every gold span is matched but also lots of irrelevant text.\n"
@@ -72,16 +78,23 @@ _SYSTEM_PROMPT = (
     "correcting them.\n"
     "- Cite the governing CFA Standard. If the card supplies one, use it; "
     "otherwise infer the best Standard from the facts and gold rationales.\n"
-    "- Explain in natural CFA tutor language why the decisive evidence matters. "
-    "Do not force a template; vary the coaching to the learner's actual mistake.\n"
+    "- Infer what the learner was likely gunning for from their highlight(s), "
+    "then say whether that reasoning/evidence was right, wrong, overbroad, "
+    "partially relevant, or missing.\n"
+    "- Explain in natural CFA tutor language why the correct verdict is correct "
+    "and why the decisive evidence matters. Do not only say the answer is right.\n"
     "- If their verdict was wrong, explain the misread; if right but the "
     "highlight was off, say what stronger evidence to point to.\n"
+    "- Tell them the exact evidence that should have been highlighted.\n"
     "- The study tip must be concrete and specific to THIS Standard/skill.\n\n"
     "Reply with ONLY a JSON object, no prose, no code fence:\n"
     '{"verdict_correct": <true|false>, '
     '"highlight_grade": "correct|somewhat|partial|wrong", '
     '"confidence": <0.0-1.0>, '
     '"standard": "<the governing CFA Standard code and name you identify>", '
+    '"learner_intent": "<what the learner likely noticed or was trying to prove>", '
+    '"evidence_precision": "precise|mostly_precise|overbroad|partial|missing|wrong_case", '
+    '"needed_evidence": ["<exact decisive evidence phrase>", "..."], '
     '"explanation": "<what evidence was nailed and what was missed>", '
     '"coaching": "<personal feedback that references the learner\'s own '
     "verdict + highlighted words and the Standard; this is the payoff for AI grading>\", "
@@ -97,21 +110,114 @@ def _clean_grade(value: object, default: str) -> str:
     return default
 
 
+def _clean_precision(value: object, default: str) -> str:
+    allowed = {
+        "precise",
+        "mostly_precise",
+        "overbroad",
+        "partial",
+        "missing",
+        "wrong_case",
+    }
+    if isinstance(value, str):
+        cleaned = value.strip().lower().replace("-", "_").replace(" ", "_")
+        if cleaned in allowed:
+            return cleaned
+    return default
+
+
+def _normalise_learner_highlights(
+    learner_spans: Sequence[str],
+    learner_highlights: object = None,
+) -> list[dict]:
+    """Return structured highlight rows with text plus optional token bounds."""
+    out: list[dict] = []
+    if isinstance(learner_highlights, list):
+        for item in learner_highlights:
+            if not isinstance(item, dict):
+                continue
+            text = str(item.get("text") or item.get("phrase") or "").strip()
+            if not text:
+                continue
+            row: dict[str, object] = {"text": text}
+            for key in ("lo", "hi"):
+                try:
+                    if item.get(key) is not None:
+                        row[key] = int(item.get(key))
+                except (TypeError, ValueError):
+                    pass
+            out.append(row)
+    if out:
+        return out
+    return [{"text": str(p).strip()} for p in learner_spans if str(p).strip()]
+
+
+def _selection_summary(passage: str, selection_indices: Optional[Sequence[int]]) -> dict:
+    total = len(tokenize(passage))
+    selected = len(set(int(i) for i in (selection_indices or [])))
+    ratio = (selected / total) if total else 0.0
+    return {"selected": selected, "total": total, "ratio": ratio}
+
+
+def _fallback_precision(
+    passage: str,
+    grade: str,
+    gold_spans: Sequence[dict],
+    selection_indices: Optional[Sequence[int]],
+) -> str:
+    summary = _selection_summary(passage, selection_indices)
+    selected = int(summary["selected"])
+    total = int(summary["total"])
+    if selected == 0:
+        return "missing"
+    phrases = [g.get("phrase", "") for g in gold_spans]
+    gold_runs = find_gold_spans(passage, phrases)
+    gold_count = len({idx for run in gold_runs for idx in run})
+    cap = span_cap(gold_count, len(gold_runs))
+    if total and selected / total >= 0.65:
+        return "overbroad"
+    if selected > cap:
+        return "overbroad"
+    if grade == "correct":
+        return "precise"
+    if grade == "somewhat":
+        return "mostly_precise"
+    if grade == "partial":
+        return "partial"
+    return "missing"
+
+
 def _build_user_prompt(
     passage: str,
     answer_verdict: str,
     judged_verdict: str,
     gold_spans: Sequence[dict],
     learner_spans: Sequence[str],
+    selection_indices: Optional[Sequence[int]] = None,
+    learner_highlights: object = None,
     standard: str = "",
 ) -> str:
     gold_lines = "\n".join(
         f'  {i + 1}. "{g.get("phrase", "")}" — {g.get("rationale", "")}'
         for i, g in enumerate(gold_spans)
     )
+    highlights = _normalise_learner_highlights(learner_spans, learner_highlights)
+    learner_lines_parts = []
+    for h in highlights:
+        bounds = ""
+        if h.get("lo") is not None and h.get("hi") is not None:
+            bounds = f" (token range {h['lo']}-{h['hi']})"
+        learner_lines_parts.append(f'  - "{h["text"]}"{bounds}')
     learner_lines = (
-        "\n".join(f'  - "{p}"' for p in learner_spans if str(p).strip())
-        or "  (the learner highlighted nothing)"
+        "\n".join(learner_lines_parts) or "  (the learner highlighted nothing)"
+    )
+    summary = _selection_summary(passage, selection_indices)
+    coverage_line = (
+        "HIGHLIGHT COVERAGE: "
+        f"{summary['selected']} of {summary['total']} passage tokens "
+        f"({summary['ratio']:.0%}). Use this to judge precision/overbreadth.\n"
+        if selection_indices is not None
+        else "HIGHLIGHT COVERAGE: token ranges not supplied.\n"
     )
     standard_line = (
         f"GOVERNING STANDARD SUPPLIED BY CARD: {standard}\n"
@@ -124,7 +230,8 @@ def _build_user_prompt(
         f"CORRECT VERDICT: {answer_verdict}\n"
         f"LEARNER'S VERDICT: {judged_verdict}\n\n"
         f"GOLD EVIDENCE SPANS:\n{gold_lines}\n\n"
-        f"LEARNER'S HIGHLIGHTED PHRASES:\n{learner_lines}\n\n"
+        f"LEARNER'S HIGHLIGHTED PHRASES:\n{learner_lines}\n"
+        f"{coverage_line}\n"
         "Grade now. Reply with ONLY the JSON object."
     )
 
@@ -178,6 +285,7 @@ def grade_fallback(
     *,
     item_id: str = "",
     standard: str = "",
+    learner_highlights: object = None,
 ) -> dict:
     """The deterministic F1 grade, shaped like :func:`grade_semantic`'s result.
 
@@ -219,6 +327,20 @@ def grade_fallback(
         f"feedback tailored to your verdict and highlight{std_txt}."
     )
     study_tip = f"Review the evidence for Standard {standard}." if standard else ""
+    precision = _fallback_precision(
+        passage, res["highlight"], gold_spans, selection_indices
+    )
+    highlighted = [
+        str(h.get("text", "")).strip()
+        for h in _normalise_learner_highlights(learner_spans, learner_highlights)
+        if str(h.get("text", "")).strip()
+    ]
+    intent = (
+        "You appear to have focused on "
+        + "; ".join(f'"{h}"' for h in highlighted[:3])
+        if highlighted
+        else "No evidence highlight was captured."
+    )
     return {
         "ok": False,
         "source": "fallback",
@@ -228,6 +350,9 @@ def grade_fallback(
         "explanation": explanation,
         "coaching": coaching,
         "study_tip": study_tip,
+        "learner_intent": intent,
+        "evidence_precision": precision,
+        "needed_evidence": phrases,
         "confidence": None,
         "per_span": per_span,
         "error": error,
@@ -245,6 +370,7 @@ def grade_semantic(
     learner_spans: Sequence[str] = (),
     *,
     selection_indices: Optional[Sequence[int]] = None,
+    learner_highlights: object = None,
     max_tokens: int = 650,
     timeout: float = 30.0,
     complete_fn=None,
@@ -284,11 +410,19 @@ def grade_semantic(
                 error="llm_client_unavailable",
                 item_id=item_id,
                 standard=standard,
+                learner_highlights=learner_highlights,
             )
 
     system = _SYSTEM_PROMPT
     user = _build_user_prompt(
-        passage, answer_verdict, judged_verdict, gold_spans, learner_spans, standard
+        passage,
+        answer_verdict,
+        judged_verdict,
+        gold_spans,
+        learner_spans,
+        selection_indices,
+        learner_highlights,
+        standard,
     )
     result = complete_fn(
         system=system,
@@ -309,6 +443,7 @@ def grade_semantic(
             error=(result or {}).get("error", "ai_unavailable"),
             item_id=item_id,
             standard=standard,
+            learner_highlights=learner_highlights,
         )
 
     parsed = _extract_json(result.get("text", ""))
@@ -323,6 +458,7 @@ def grade_semantic(
             error="unparseable_response",
             item_id=item_id,
             standard=standard,
+            learner_highlights=learner_highlights,
         )
 
     grade = _clean_grade(parsed.get("highlight_grade"), "wrong")
@@ -352,6 +488,20 @@ def grade_semantic(
     explanation = str(parsed.get("explanation", "")).strip() or "Graded by AI."
     coaching = str(parsed.get("coaching", "")).strip()
     study_tip = str(parsed.get("study_tip", "")).strip()
+    fallback_precision = _fallback_precision(
+        passage, grade, gold_spans, selection_indices
+    )
+    learner_intent = str(parsed.get("learner_intent", "")).strip()
+    evidence_precision = _clean_precision(
+        parsed.get("evidence_precision"), fallback_precision
+    )
+    needed_raw = parsed.get("needed_evidence")
+    if isinstance(needed_raw, list):
+        needed_evidence = [str(x).strip() for x in needed_raw if str(x).strip()]
+    else:
+        needed_evidence = []
+    if not needed_evidence:
+        needed_evidence = phrases
     # Model may refine the named Standard; fall back to the card-supplied one.
     ai_standard = str(parsed.get("standard", "")).strip() or standard
     try:
@@ -367,6 +517,9 @@ def grade_semantic(
         "explanation": explanation,
         "coaching": coaching,
         "study_tip": study_tip,
+        "learner_intent": learner_intent,
+        "evidence_precision": evidence_precision,
+        "needed_evidence": needed_evidence,
         "confidence": confidence,
         "per_span": per_span,
         "error": None,

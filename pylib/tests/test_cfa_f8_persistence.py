@@ -14,7 +14,7 @@ seeding a desktop collection and syncing, a fresh "phone" collection ends up
 with:
 
 1. the **CFA study deck** (notes + cards),
-2. the **ethics passages deck** (the F1 one-passage note-type + its cards),
+2. the **ethics minimal-pairs deck** (the current phone-friendly note-type + its cards),
 3. the fork **exam config** (``cfa_exam_config`` in ``col.conf``) — the piece
    the ``.apkg`` path could not carry, and
 4. a working **shared-engine exam queue**: ``build_exam_queue`` (the read-only
@@ -25,6 +25,8 @@ Because the phone-side ``Collection`` here is backed by the identical Rust
 engine that F6 proved loads under AnkiDroid, a green run is honest evidence
 that the same content reaches the device over sync.
 """
+
+# pylint: disable=import-error,redefined-outer-name
 
 from __future__ import annotations
 
@@ -38,8 +40,8 @@ from anki import cfa
 from anki import cfa_sync as cs
 from tests.shared import getEmptyCol
 
-# The F1 ethics one-passage importer lives under cfa/ethics_pairs (a namespace
-# package with no anki dependency), so add it to the path directly.
+# The ethics importer lives under cfa/ethics_pairs (a namespace package with no
+# anki dependency), so add it to the path directly.
 _ETHICS_PKG = os.path.join(
     os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
     "cfa",
@@ -48,9 +50,11 @@ _ETHICS_PKG = os.path.join(
 if _ETHICS_PKG not in sys.path:
     sys.path.insert(0, _ETHICS_PKG)
 
-import passages as P  # noqa: E402
+import import_pairs as P  # noqa: E402
 
 CFA_DECK = "CFA Level II"
+ETHICS_DECK = P.nt.DECK_NAME
+ETHICS_NOTETYPE = P.nt.NOTETYPE_NAME
 EXAM_DATE = "2026-08-25"
 TOPIC_WEIGHTS = {"los::ethics": 0.20, "los::equity": 0.15, "los::fixed-income": 0.15}
 
@@ -95,9 +99,9 @@ def _seed_desktop():
         note.tags = tags
         col.add_note(note, deck_id)
 
-    # --- Ethics passages deck (F1 one-passage note-type) ---
-    passages = P.load_passages()[:5]
-    ethics_stats = P.import_passages(col, passages)
+    # --- Ethics minimal-pairs deck (current phone-friendly note-type) ---
+    pairs = P.load_pairs()[:5]
+    ethics_stats = P.import_pairs(col, pairs)
 
     # --- Fork exam config (persisted in col.conf -> syncs natively) ---
     cfa.set_exam_config(col, exam_date=EXAM_DATE, topic_weights=TOPIC_WEIGHTS)
@@ -122,20 +126,21 @@ def test_cfa_deck_and_ethics_deck_reach_the_phone(server):
 
     deck_names = {d.name for d in phone.decks.all_names_and_ids()}
     assert CFA_DECK in deck_names, deck_names
-    assert P.DECK_NAME in deck_names, deck_names
+    assert ETHICS_DECK in deck_names, deck_names
 
     # every seeded note (3 CFA + 5 ethics) and note-type made the trip
     assert phone.note_count() == desktop.note_count()
     assert phone.note_count() == 3 + ethics_stats["total"]
 
     phone_notetypes = {nt["name"] for nt in phone.models.all()}
-    assert P.NOTETYPE_NAME in phone_notetypes, phone_notetypes
+    assert ETHICS_NOTETYPE in phone_notetypes, phone_notetypes
 
     # the ethics cards carry their multi-span content, not just an empty shell
-    ethics_nids = phone.find_notes(f'note:"{P.NOTETYPE_NAME}"')
+    ethics_nids = phone.find_notes(f'note:"{ETHICS_NOTETYPE}"')
     assert len(ethics_nids) == ethics_stats["total"]
     sample = phone.get_note(ethics_nids[0])
-    assert sample["Passage"].strip()
+    assert sample["VignetteA"].strip()
+    assert sample["VignetteB"].strip()
     assert sample["GoldSpans"].strip()
 
 

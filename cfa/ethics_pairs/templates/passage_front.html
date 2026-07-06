@@ -311,6 +311,9 @@
     if (revealed) return;
     var tk = ev.target.closest(".cfa-tok");
     if (!tk || !passageEl.contains(tk)) return;
+    if (tk.setPointerCapture && ev.pointerId != null) {
+      try { tk.setPointerCapture(ev.pointerId); } catch (e) {}
+    }
     drag.on = true; drag.moved = false; drag.anchor = tokIndex(tk);
   });
   root.addEventListener("pointermove", function (ev) {
@@ -333,6 +336,10 @@
   root.addEventListener("pointerup", function (ev) {
     if (!drag.on || revealed) { drag.on = false; return; }
     drag.on = false;
+    var target = ev.target && ev.target.closest ? ev.target.closest(".cfa-tok") : null;
+    if (target && target.releasePointerCapture && ev.pointerId != null) {
+      try { target.releasePointerCapture(ev.pointerId); } catch (e) {}
+    }
     if (drag.moved) {
       var over = document.elementFromPoint(ev.clientX, ev.clientY);
       var tk = over && over.closest ? over.closest(".cfa-tok") : null;
@@ -379,6 +386,10 @@
       partial: "Partial credit — you matched some evidence (a close match counts), but missed at least one phrase.",
       wrong: "Not the evidence — here are the phrases that matter."
     };
+    var gradeTone = correct ? "ok" : (verdictOK ? "warn" : "no");
+    var gradeLabel = correct
+      ? "✓ Fully correct"
+      : (verdictOK ? "✓ Verdict right · evidence not complete" : "✗ Verdict needs review");
 
     // Render each gold span's tier: ✓ full match, ~ near (materially-overlapping) match, ✗ missed.
     var detail = "";
@@ -392,10 +403,10 @@
 
     var rv = root.querySelector("#cfa-reveal");
     rv.innerHTML =
-      '<div class="cfa-grade ' + (correct ? "ok" : "no") + '">' + (correct ? "✓ Fully correct" : "✗ Not fully correct") + "</div>" +
+      '<div class="cfa-grade ' + gradeTone + '">' + gradeLabel + "</div>" +
       '<ul class="cfa-breakdown">' +
-        "<li>Verdict: correct answer is <b>" + esc(answerVerdict) + "</b> — your call " + (verdictOK ? "✓" : "✗") + "</li>" +
-        "<li>Evidence spans: " + res.found + " of " + res.total + " found" + (res.near ? " (+" + res.near + " near)" : "") + " · " + hl.charAt(0).toUpperCase() + hl.slice(1) + "</li>" +
+        "<li>Verdict: answer <b>" + esc(answerVerdict) + "</b>; your verdict <b>" + esc(judgedVerdict) + "</b> " + (verdictOK ? "✓" : "✗") + "</li>" +
+        "<li>Evidence: " + res.found + " of " + res.total + " required spans fully found" + (res.near ? " (+" + res.near + " near)" : "") + " · " + hl.charAt(0).toUpperCase() + hl.slice(1) + "</li>" +
       "</ul>" +
       '<div class="cfa-hl-msg cfa-hl-' + hl + '">' + esc(messages[hl]) + "</div>" +
       '<ul class="cfa-span-detail">' + detail + "</ul>" +
@@ -419,12 +430,16 @@
       cluster: cluster,
       correct: correct,
       completed: true,
+      source: "fallback",
       answerVerdict: answerVerdict,
+      judgedVerdict: judgedVerdict,
       verdictOK: verdictOK,
       highlight: hl,
       found: res.found,
       near: res.near,
       total: res.total,
+      learnerSpans: learnerSpanTexts(),
+      selectionIndices: effSel,
       standard: srcText("standard"),
       rationale: srcText("rationale"),
       spans: []
@@ -450,11 +465,15 @@
   }
 
   function learnerSpanTexts() {
+    return learnerHighlights().map(function (h) { return h.text; });
+  }
+
+  function learnerHighlights() {
     var out = [];
     for (var s = 0; s < spans.length; s++) {
       var parts = [];
       for (var i = spans[s].lo; i <= spans[s].hi; i++) if (toks[i] != null) parts.push(toks[i]);
-      if (parts.length) out.push(parts.join(" "));
+      if (parts.length) out.push({ text: parts.join(" "), lo: spans[s].lo, hi: spans[s].hi });
     }
     return out;
   }
@@ -472,6 +491,7 @@
       judgedVerdict: judgedVerdict,
       goldSpans: goldSpansPayload,
       learnerSpans: learnerSpanTexts(),
+      learnerHighlights: learnerHighlights(),
       selectionIndices: effSel
     };
     if (/android/i.test(navigator.userAgent || "")) {
@@ -536,6 +556,25 @@
       box.hidden = false;
       return;
     }
+    if (pendingGrade) {
+      pendingGrade.source = "ai";
+      if (resp.standard) pendingGrade.standard = resp.standard;
+      if (resp.grade) pendingGrade.highlight = resp.grade;
+      if (typeof resp.correct === "boolean") {
+        pendingGrade.correct = !!resp.correct;
+        root.dataset.correct = resp.correct ? "1" : "0";
+      }
+      pendingGrade.ai = {
+        grade: resp.grade || "",
+        explanation: resp.explanation || "",
+        coaching: resp.coaching || "",
+        studyTip: resp.study_tip || "",
+        learnerIntent: resp.learner_intent || "",
+        evidencePrecision: resp.evidence_precision || "",
+        neededEvidence: resp.needed_evidence || []
+      };
+      try { localStorage.setItem("cfaEthics:pending", JSON.stringify(pendingGrade)); } catch (e) {}
+    }
     var spansHtml = "";
     var ps = resp.per_span || [];
     for (var i = 0; i < ps.length; i++) {
@@ -548,12 +587,21 @@
     var standard = resp.standard || srcText("standard");
     var conf = (typeof resp.confidence === "number")
       ? " · confidence " + Math.round(resp.confidence * 100) + "%" : "";
+    var needed = resp.needed_evidence || [];
+    var neededHtml = "";
+    for (var ni = 0; ni < needed.length; ni++) {
+      if (needed[ni]) neededHtml += "<li>" + esc(needed[ni]) + "</li>";
+    }
+    var precision = (resp.evidence_precision || "").toString().replace(/_/g, " ");
     box.innerHTML =
       '<div class="cfa-ai-head"><span class="cfa-badge cfa-ai-badge">AI feedback</span>' +
         "Graded by AI" + (standard ? " · " + esc(standard) : "") + conf + "</div>" +
       '<div class="cfa-ai-grade">Semantic grade: <b>' + esc(g.charAt(0).toUpperCase() + g.slice(1)) + "</b></div>" +
+      (resp.learner_intent ? '<div class="cfa-ai-intent"><b>What you likely noticed:</b> ' + esc(resp.learner_intent) + "</div>" : "") +
+      (precision ? '<div class="cfa-ai-precision"><b>Evidence precision:</b> ' + esc(precision) + "</div>" : "") +
       '<div class="cfa-ai-explain">' + esc(resp.explanation || "") + "</div>" +
       (resp.coaching ? '<div class="cfa-ai-coach">' + esc(resp.coaching) + "</div>" : "") +
+      (neededHtml ? '<div class="cfa-ai-needed"><b>Needed evidence:</b><ul>' + neededHtml + "</ul></div>" : "") +
       (resp.study_tip ? '<div class="cfa-ai-tip"><b>Study tip:</b> ' + esc(resp.study_tip) + "</div>" : "") +
       (spansHtml ? '<ul class="cfa-span-detail cfa-ai-spans">' + spansHtml + "</ul>" : "");
     box.hidden = false;

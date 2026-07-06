@@ -1,10 +1,10 @@
 # Model: Memory Score
 
-*Score-mapping + model-description doc (Phase A / A11). Source of truth:*
-`pylib/anki/cfa._py_memory_score` *(Python reference) and the Rust*
-`compute_cfa_scores` *RPC in* `rslib/src/scheduler/cfa_scores.rs` *(kept at
-parity, verified by* `just cfa-parity-test`*). No AI is involved — this is pure
-spaced-repetition statistics.*
+_Score-mapping + model-description doc (Phase A / A11). Source of truth:_
+`pylib/anki/cfa._py_memory_score` _(Python reference) and the Rust_
+`compute_cfa_scores` _RPC in_ `rslib/src/scheduler/cfa_scores.rs` _(kept at
+parity, verified by_ `just cfa-parity-test` _). No AI is involved — this is pure
+spaced-repetition statistics._
 
 ## What it answers
 

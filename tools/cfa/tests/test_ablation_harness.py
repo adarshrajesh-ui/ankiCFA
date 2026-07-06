@@ -17,8 +17,6 @@ import importlib.util
 import json
 import os
 
-import pytest
-
 REPO = os.path.dirname(
     os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 )
@@ -153,26 +151,41 @@ def test_real_observations_gate(tmp_path):
     with good.open("w") as fh:
         for i in range(60):
             # ON strictly best for every learner -> effect CIs clear zero.
-            fh.write(json.dumps({
-                "on": 0.80, "off": 0.70 + (i % 3) * 0.001,
-                "plain": 0.60,
-            }) + "\n")
+            fh.write(
+                json.dumps(
+                    {
+                        "on": 0.80,
+                        "off": 0.70 + (i % 3) * 0.001,
+                        "plain": 0.60,
+                    }
+                )
+                + "\n"
+            )
     assert A8.main(["--observations", str(good)]) == 0
 
     bad = tmp_path / "bad.jsonl"
     with bad.open("w") as fh:
         for i in range(60):
             # ON no better than OFF -> ON-OFF null -> hypothesis fails.
-            fh.write(json.dumps({
-                "on": 0.70, "off": 0.70, "plain": 0.60,
-            }) + "\n")
+            fh.write(
+                json.dumps(
+                    {
+                        "on": 0.70,
+                        "off": 0.70,
+                        "plain": 0.60,
+                    }
+                )
+                + "\n"
+            )
     assert A8.main(["--observations", str(bad)]) == 1
 
 
 def test_from_observations_parses_all_arms(tmp_path):
     p = tmp_path / "obs.jsonl"
-    rows = [{"on": 0.7, "off": 0.6, "plain": 0.5},
-            {"on": 0.8, "off": 0.65, "plain": 0.55}]
+    rows = [
+        {"on": 0.7, "off": 0.6, "plain": 0.5},
+        {"on": 0.8, "off": 0.65, "plain": 0.55},
+    ]
     with p.open("w") as fh:
         for r in rows:
             fh.write(json.dumps(r) + "\n")

@@ -71,6 +71,7 @@ rendering (e.g. warn colouring):
                                 <td
                                     class="cfa-table__td"
                                     class:is-right={column.align === "right"}
+                                    data-label={column.label}
                                 >
                                     <slot
                                         name="cell"
@@ -184,6 +185,65 @@ rendering (e.g. warn colouring):
             text-align: center;
             color: cfa.$cfa-muted;
             font-size: cfa.$cfa-fs-body;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .cfa-table {
+            overflow: visible;
+
+            &__scroll,
+            &__scroll.is-scrollable {
+                max-height: none;
+                overflow: visible;
+            }
+
+            table,
+            thead,
+            tbody,
+            tr,
+            th,
+            td {
+                display: block;
+            }
+
+            thead {
+                display: none;
+            }
+
+            tr {
+                border-bottom: 1px solid cfa.$cfa-line;
+            }
+
+            tbody tr:last-child {
+                border-bottom: 0;
+            }
+
+            &__td,
+            &.is-dense &__td {
+                display: grid;
+                grid-template-columns: minmax(112px, 0.72fr) minmax(0, 1fr);
+                gap: cfa.space(3);
+                align-items: center;
+                min-height: 46px;
+                padding: cfa.space(3);
+                text-align: left;
+                border-bottom: 0;
+                overflow-wrap: anywhere;
+            }
+
+            &__td.is-right {
+                text-align: left;
+            }
+
+            &__td::before {
+                content: attr(data-label);
+                color: cfa.$cfa-muted;
+                font-size: cfa.$cfa-fs-meta;
+                font-weight: cfa.$cfa-weight-semibold;
+                letter-spacing: cfa.$cfa-ls-caps;
+                text-transform: uppercase;
+            }
         }
     }
 </style>

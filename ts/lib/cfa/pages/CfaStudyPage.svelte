@@ -1,20 +1,28 @@
+<!--
+Copyright: Ankitects Pty Ltd and contributors
+License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
+-->
+
 <script lang="ts">
     import { bridgeCommand } from "@tslib/bridgecommand";
 
     import type { CfaStudyDeck, CfaStudyPayload } from "$lib/cfa";
+    import ProductShellNav from "$lib/cfa/ProductShellNav.svelte";
 
     import {
         integer,
         masteryPct,
         masteryWidth,
-        STUDY_NAV,
         syncChipLabel,
+        TOP_URGENT_DECK_COUNT,
         visibleStudyDecks,
     } from "./study";
 
     export let data: CfaStudyPayload;
 
     $: decks = visibleStudyDecks(data.decks);
+    $: topUrgencyDecks = decks.slice(0, TOP_URGENT_DECK_COUNT);
+    $: remainingDecks = decks.slice(TOP_URGENT_DECK_COUNT);
     $: selectedDeck = decks[0] ?? null;
     $: syncLabel = syncChipLabel(data);
 
@@ -29,26 +37,13 @@
 
 <div class="cfa-app cfa-study">
     <main class="cfa-study__page">
-        <nav class="cfa-study__appbar" aria-label="CFA Study sections">
-            <div class="cfa-study__appbar-in">
-                <div class="cfa-study__brand">ankiCFA <small>CFA Level II</small></div>
-                <div class="cfa-study__tabs">
-                    {#each STUDY_NAV as item}
-                        <button
-                            type="button"
-                            class:on={item.active}
-                            aria-current={item.active ? "page" : undefined}
-                            on:click={() => go(item.cmd)}
-                        >
-                            {item.label}
-                        </button>
-                    {/each}
-                </div>
-                <button type="button" class="cfa-study__sync-chip" on:click={() => go("cfa:sync-settings")}>
-                    <span class="cfa-study__dot"></span>{syncLabel}
-                </button>
-            </div>
-        </nav>
+        <ProductShellNav
+            active="study"
+            subtitle="CFA Level II"
+            syncStatus={syncLabel}
+            ariaLabel="CFA Study sections"
+            on:navigate={(event) => go(event.detail)}
+        />
 
         <section class="cfa-study__hero">
             <div class="cfa-study__hero-grid">
@@ -56,36 +51,58 @@
                     <div class="cfa-study__eyebrow">Study - Deck Command Center</div>
                     <h1>Your CFA decks, ready to build and study.</h1>
                     <p class="cfa-study__lede">
-                        The Study tab now starts with the deck library. Create a
-                        new deck, see what is due, and add cards to any topic
-                        without digging through secondary screens.
+                        Start with the shipped CFA/Ethics study path, see what is due,
+                        and add exam-style cards to any topic without digging through
+                        secondary screens.
                     </p>
                     <div class="cfa-study__hero-actions">
-                        <button type="button" class="cfa-study__btn primary" on:click={() => go("create")}>
-                            Create new deck
+                        <button
+                            type="button"
+                            class="cfa-study__btn primary"
+                            on:click={() => go("create-cfa")}
+                        >
+                            Create CFA/Ethics study deck
                         </button>
-                        <button type="button" class="cfa-study__btn secondary" on:click={() => go(deckCmd("add", selectedDeck))}>
-                            Add card to selected deck
+                        <button
+                            type="button"
+                            class="cfa-study__btn secondary"
+                            on:click={() => go(deckCmd("add", selectedDeck))}
+                        >
+                            Add CFA/Ethics card
                         </button>
-                        <button type="button" class="cfa-study__btn ghost" on:click={() => go("import")}>
+                        <button
+                            type="button"
+                            class="cfa-study__btn ghost"
+                            on:click={() => go("import")}
+                        >
                             Import CFA notes
                         </button>
                     </div>
                     <div class="cfa-study__metric-row">
-                        <div class="cfa-study__metric"><strong>{integer(data.totals.activeDecks)}</strong><span>active decks</span></div>
-                        <div class="cfa-study__metric"><strong>{integer(data.totals.dueToday)}</strong><span>cards due today</span></div>
-                        <div class="cfa-study__metric"><strong>{integer(data.totals.newQueued)}</strong><span>new cards queued</span></div>
+                        <div class="cfa-study__metric">
+                            <strong>{integer(data.totals.activeDecks)}</strong>
+                            <span>active decks</span>
+                        </div>
+                        <div class="cfa-study__metric">
+                            <strong>{integer(data.totals.dueToday)}</strong>
+                            <span>cards due today</span>
+                        </div>
+                        <div class="cfa-study__metric">
+                            <strong>{integer(data.totals.newQueued)}</strong>
+                            <span>new cards queued</span>
+                        </div>
                     </div>
                 </div>
                 <aside class="cfa-study__create-card">
                     <div>
-                        <div class="cfa-study__eyebrow">Fast create</div>
-                        <h2>New deck in one step.</h2>
-                        <p>Choose a CFA topic, name the deck, and start adding exam-style prompts immediately.</p>
+                        <div class="cfa-study__eyebrow">Premade path</div>
+                        <h2>Ethics cards before blank slates.</h2>
+                        <p>
+                            The primary action loads the shipped Ethics minimal-pairs
+                            deck and the default CFA card template, so creation starts
+                            from useful study material instead of an empty deck.
+                        </p>
                     </div>
-                    <button type="button" class="cfa-study__btn primary" on:click={() => go("create-cfa")}>
-                        Create CFA deck
-                    </button>
                 </aside>
             </div>
         </section>
@@ -97,50 +114,151 @@
                         <div class="cfa-study__eyebrow">Decks</div>
                         <h2>Pick a deck to study or expand</h2>
                     </div>
-                    <span class="cfa-study__tag">Top 3 by urgency</span>
+                    <span class="cfa-study__tag">Sorted by urgency</span>
                 </div>
-                <div class="cfa-study__deck-grid">
+                <div class="cfa-study__deck-list">
                     {#if decks.length === 0}
                         <article class="cfa-study__deck-card featured">
                             <div class="cfa-study__deck-top">
                                 <div class="cfa-study__deck-icon"></div>
                                 <div>
                                     <h3>No CFA decks yet</h3>
-                                    <p>Create a CFA deck or import notes to start building the workspace.</p>
+                                    <p>
+                                        Use the primary CFA/Ethics action above or
+                                        import notes to start building the workspace.
+                                    </p>
                                 </div>
-                            </div>
-                            <div class="cfa-study__deck-actions single">
-                                <button type="button" class="cfa-study__btn primary small" on:click={() => go("create-cfa")}>
-                                    Create CFA deck
-                                </button>
                             </div>
                         </article>
                     {:else}
-                        {#each decks as deck}
-                            <article class="cfa-study__deck-card" class:featured={deck.featured}>
-                                <div class="cfa-study__deck-top">
-                                    <div class="cfa-study__deck-icon"></div>
-                                    <div>
-                                        <h3>{deck.name}</h3>
-                                        <p>{deck.description}</p>
-                                    </div>
+                        <div class="cfa-study__deck-priority">
+                            <div class="cfa-study__deck-section-label">
+                                Top 3 by urgency
+                            </div>
+                            <div class="cfa-study__deck-grid cfa-study__deck-grid--top">
+                                {#each topUrgencyDecks as deck}
+                                    <article
+                                        class="cfa-study__deck-card"
+                                        class:featured={deck.featured}
+                                    >
+                                        <div class="cfa-study__deck-top">
+                                            <div class="cfa-study__deck-icon"></div>
+                                            <div>
+                                                <h3>{deck.name}</h3>
+                                                <p>{deck.description}</p>
+                                            </div>
+                                        </div>
+                                        <div class="cfa-study__deck-meta">
+                                            <div class="cfa-study__deck-stat">
+                                                <b>{integer(deck.due)}</b>
+                                                <span>due</span>
+                                            </div>
+                                            <div class="cfa-study__deck-stat">
+                                                <b>{integer(deck.newCount)}</b>
+                                                <span>new</span>
+                                            </div>
+                                            <div class="cfa-study__deck-stat">
+                                                <b>{masteryPct(deck)}</b>
+                                                <span>mastery</span>
+                                            </div>
+                                        </div>
+                                        <div
+                                            class="cfa-study__mastery"
+                                            aria-hidden="true"
+                                        >
+                                            <i style="width: {masteryWidth(deck)}%"></i>
+                                        </div>
+                                        <div class="cfa-study__deck-actions">
+                                            <button
+                                                type="button"
+                                                class="cfa-study__btn primary small"
+                                                on:click={() =>
+                                                    go(deckCmd("study", deck))}
+                                            >
+                                                Study deck
+                                            </button>
+                                            <button
+                                                type="button"
+                                                class="cfa-study__btn secondary small"
+                                                on:click={() =>
+                                                    go(deckCmd("add", deck))}
+                                            >
+                                                Add cards
+                                            </button>
+                                        </div>
+                                    </article>
+                                {/each}
+                            </div>
+                        </div>
+
+                        {#if remainingDecks.length}
+                            <div
+                                class="cfa-study__deck-scroll"
+                                aria-label="More CFA decks"
+                            >
+                                <div class="cfa-study__deck-section-label">
+                                    More decks
                                 </div>
-                                <div class="cfa-study__deck-meta">
-                                    <div class="cfa-study__deck-stat"><b>{integer(deck.due)}</b><span>due</span></div>
-                                    <div class="cfa-study__deck-stat"><b>{integer(deck.newCount)}</b><span>new</span></div>
-                                    <div class="cfa-study__deck-stat"><b>{masteryPct(deck)}</b><span>mastery</span></div>
+                                <div
+                                    class="cfa-study__deck-grid cfa-study__deck-grid--rest"
+                                >
+                                    {#each remainingDecks as deck}
+                                        <article
+                                            class="cfa-study__deck-card"
+                                            class:featured={deck.featured}
+                                        >
+                                            <div class="cfa-study__deck-top">
+                                                <div class="cfa-study__deck-icon"></div>
+                                                <div>
+                                                    <h3>{deck.name}</h3>
+                                                    <p>{deck.description}</p>
+                                                </div>
+                                            </div>
+                                            <div class="cfa-study__deck-meta">
+                                                <div class="cfa-study__deck-stat">
+                                                    <b>{integer(deck.due)}</b>
+                                                    <span>due</span>
+                                                </div>
+                                                <div class="cfa-study__deck-stat">
+                                                    <b>{integer(deck.newCount)}</b>
+                                                    <span>new</span>
+                                                </div>
+                                                <div class="cfa-study__deck-stat">
+                                                    <b>{masteryPct(deck)}</b>
+                                                    <span>mastery</span>
+                                                </div>
+                                            </div>
+                                            <div
+                                                class="cfa-study__mastery"
+                                                aria-hidden="true"
+                                            >
+                                                <i
+                                                    style="width: {masteryWidth(deck)}%"
+                                                ></i>
+                                            </div>
+                                            <div class="cfa-study__deck-actions">
+                                                <button
+                                                    type="button"
+                                                    class="cfa-study__btn primary small"
+                                                    on:click={() =>
+                                                        go(deckCmd("study", deck))}
+                                                >
+                                                    Study deck
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    class="cfa-study__btn secondary small"
+                                                    on:click={() =>
+                                                        go(deckCmd("add", deck))}
+                                                >
+                                                    Add cards
+                                                </button>
+                                            </div>
+                                        </article>
+                                    {/each}
                                 </div>
-                                <div class="cfa-study__mastery" aria-hidden="true"><i style="width: {masteryWidth(deck)}%"></i></div>
-                                <div class="cfa-study__deck-actions">
-                                    <button type="button" class="cfa-study__btn primary small" on:click={() => go(deckCmd("study", deck))}>
-                                        Study deck
-                                    </button>
-                                    <button type="button" class="cfa-study__btn secondary small" on:click={() => go(deckCmd("add", deck))}>
-                                        Add cards
-                                    </button>
-                                </div>
-                            </article>
-                        {/each}
+                            </div>
+                        {/if}
                     {/if}
                 </div>
             </div>
@@ -149,8 +267,14 @@
                 <div class="cfa-study__eyebrow">Add cards</div>
                 <h2>Quick add to any deck</h2>
                 <p>
-                    A lightweight composer stays beside the deck list, so adding
-                    a vignette card feels immediate but does not dominate the screen.
+                    A lightweight composer stays beside the deck list. The native Add
+                    Cards window opens on the selected deck with Basic selected, so you
+                    can turn the CFA/Ethics prompt below into a normal card.
+                </p>
+                <p class="cfa-study__native-note">
+                    Phone hand-off: Add and Import use Anki's native screens on this
+                    device; the CFA deck target and Basic note type are preserved where
+                    the native Add Cards screen is available.
                 </p>
                 <div class="cfa-study__composer">
                     <div class="cfa-study__field">
@@ -159,20 +283,39 @@
                     </div>
                     <div class="cfa-study__field">
                         <span class="cfa-study__field-label">Prompt</span>
-                        <div class="textarea">When does a lease classification change affect both leverage and interest coverage in a vignette?</div>
+                        <div class="textarea">
+                            When does a lease classification change affect both leverage
+                            and interest coverage in a vignette?
+                        </div>
                     </div>
                     <div class="cfa-study__field">
                         <span class="cfa-study__field-label">Answer</span>
-                        <div class="textarea">Compare recognition, liability measurement, and expense timing before drawing the ratio conclusion.</div>
+                        <div class="textarea">
+                            Compare recognition, liability measurement, and expense
+                            timing before drawing the ratio conclusion.
+                        </div>
                     </div>
-                    <button type="button" on:click={() => go(deckCmd("add", selectedDeck))}>Add card draft</button>
+                    <button
+                        type="button"
+                        on:click={() => go(deckCmd("add", selectedDeck))}
+                    >
+                        Add card draft
+                    </button>
                 </div>
 
                 <div class="cfa-study__quick-add-list">
                     {#each decks as deck}
                         <div class="cfa-study__quick-add-row">
-                            <div><strong>{deck.name}</strong><small>{integer(deck.newCount)} new cards staged</small></div>
-                            <button type="button" on:click={() => go(deckCmd("add", deck))}>Add</button>
+                            <div>
+                                <strong>{deck.name}</strong>
+                                <small>{integer(deck.newCount)} new cards staged</small>
+                            </div>
+                            <button
+                                type="button"
+                                on:click={() => go(deckCmd("add", deck))}
+                            >
+                                Add
+                            </button>
                         </div>
                     {/each}
                 </div>
@@ -180,8 +323,15 @@
         </section>
 
         <div class="cfa-study__footer-note">
-            <p><strong>Production note:</strong> {data.footerText}</p>
-            <button type="button" class="cfa-study__btn secondary small" on:click={() => go("cfa:conceptmap")}>
+            <p>
+                <strong>Production note:</strong>
+                {data.footerText}
+            </p>
+            <button
+                type="button"
+                class="cfa-study__btn secondary small"
+                on:click={() => go("cfa:conceptmap")}
+            >
                 Open Concept Map
             </button>
         </div>
@@ -207,10 +357,28 @@
         overflow-x: hidden;
         color: var(--ink);
         background:
-            radial-gradient(circle at 12% 0%, rgba(255, 255, 255, 0.96), transparent 23rem),
-            radial-gradient(circle at 86% 8%, rgba(20, 184, 177, 0.22), transparent 28rem),
-            radial-gradient(circle at 56% 70%, rgba(5, 59, 69, 0.16), transparent 34rem),
-            linear-gradient(135deg, var(--pearl) 0%, #eef9f7 42%, #d8f3ef 64%, rgba(5, 59, 69, 0.24) 100%);
+            radial-gradient(
+                circle at 12% 0%,
+                rgba(255, 255, 255, 0.96),
+                transparent 23rem
+            ),
+            radial-gradient(
+                circle at 86% 8%,
+                rgba(20, 184, 177, 0.22),
+                transparent 28rem
+            ),
+            radial-gradient(
+                circle at 56% 70%,
+                rgba(5, 59, 69, 0.16),
+                transparent 34rem
+            ),
+            linear-gradient(
+                135deg,
+                var(--pearl) 0%,
+                #eef9f7 42%,
+                #d8f3ef 64%,
+                rgba(5, 59, 69, 0.24) 100%
+            );
         font-family: var(--cfa-font-body);
         font-size: 18px;
         line-height: 1.5;
@@ -222,8 +390,16 @@
             inset: 0;
             pointer-events: none;
             background:
-                radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.72), transparent 13rem),
-                radial-gradient(circle at 78% 22%, rgba(20, 184, 177, 0.2), transparent 19rem);
+                radial-gradient(
+                    circle at 18% 18%,
+                    rgba(255, 255, 255, 0.72),
+                    transparent 13rem
+                ),
+                radial-gradient(
+                    circle at 78% 22%,
+                    rgba(20, 184, 177, 0.2),
+                    transparent 19rem
+                );
             mix-blend-mode: screen;
         }
 
@@ -277,92 +453,6 @@
             padding: 35px 28px 90px;
         }
 
-        &__appbar {
-            position: sticky;
-            top: 20px;
-            z-index: 30;
-            border: 1px solid var(--line);
-            border-radius: 28px;
-            background: rgba(255, 255, 255, 0.7);
-            box-shadow: 0 14px 50px rgba(5, 59, 69, 0.1);
-            backdrop-filter: blur(22px) saturate(1.25);
-            -webkit-backdrop-filter: blur(22px) saturate(1.25);
-        }
-
-        &__appbar-in {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            flex-wrap: wrap;
-            min-width: 0;
-            padding: 15px 18px;
-        }
-
-        &__brand {
-            color: var(--ink);
-            font-family: var(--cfa-font-heading);
-            font-size: 24px;
-            font-weight: 700;
-            letter-spacing: -0.01em;
-
-            small {
-                display: block;
-                color: var(--turq-ink);
-                font-family: var(--cfa-font-body);
-                font-size: 11px;
-                font-weight: 700;
-                letter-spacing: 0.16em;
-                text-transform: uppercase;
-            }
-        }
-
-        &__tabs {
-            display: flex;
-            gap: 4px;
-            flex-wrap: wrap;
-            min-width: 0;
-            margin-left: auto;
-
-            button {
-                border: 0;
-                border-radius: 999px;
-                background: transparent;
-                color: var(--muted);
-                padding: 10px 16px;
-                font-size: 16px;
-                font-weight: 700;
-                white-space: nowrap;
-
-                &:hover,
-                &.on {
-                    color: var(--turq-ink);
-                    background: rgba(20, 184, 177, 0.12);
-                    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
-                }
-            }
-        }
-
-        &__sync-chip {
-            display: inline-flex;
-            align-items: center;
-            gap: 9px;
-            border: 1px solid rgba(20, 184, 177, 0.22);
-            border-radius: 999px;
-            background: rgba(228, 246, 245, 0.58);
-            color: var(--turq-ink);
-            padding: 10px 15px;
-            font-weight: 700;
-            font-size: 15px;
-            white-space: nowrap;
-        }
-
-        &__dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 999px;
-            background: var(--turq);
-        }
-
         &__hero,
         &__glass-card,
         &__add-card-panel,
@@ -384,8 +474,16 @@
             border-radius: 40px;
             padding: 35px;
             background:
-                linear-gradient(135deg, rgba(255, 255, 255, 0.84), rgba(255, 255, 255, 0.48)),
-                radial-gradient(circle at 76% 18%, rgba(20, 184, 177, 0.2), transparent 24rem);
+                linear-gradient(
+                    135deg,
+                    rgba(255, 255, 255, 0.84),
+                    rgba(255, 255, 255, 0.48)
+                ),
+                radial-gradient(
+                    circle at 76% 18%,
+                    rgba(20, 184, 177, 0.2),
+                    transparent 24rem
+                );
             box-shadow: var(--shadow);
 
             &::after {
@@ -394,7 +492,12 @@
                 inset: 1px;
                 border-radius: 39px;
                 pointer-events: none;
-                background: linear-gradient(120deg, rgba(255, 255, 255, 0.68), transparent 30%, rgba(255, 255, 255, 0.16));
+                background: linear-gradient(
+                    120deg,
+                    rgba(255, 255, 255, 0.68),
+                    transparent 30%,
+                    rgba(255, 255, 255, 0.16)
+                );
                 mask: linear-gradient(#000, transparent 70%);
             }
         }
@@ -434,6 +537,7 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
+            min-height: 48px;
             min-width: 0;
             border: 1px solid rgba(255, 255, 255, 0.72);
             border-radius: 18px;
@@ -463,6 +567,7 @@
             }
 
             &.small {
+                min-height: 44px;
                 border-radius: 15px;
                 padding: 12px 13px;
                 box-shadow:
@@ -508,7 +613,11 @@
             gap: 24px;
             border-radius: 28px;
             padding: 24px;
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.78), rgba(228, 246, 245, 0.48));
+            background: linear-gradient(
+                145deg,
+                rgba(255, 255, 255, 0.78),
+                rgba(228, 246, 245, 0.48)
+            );
 
             h2 {
                 font-size: 34px;
@@ -554,28 +663,72 @@
             line-height: 1.2;
         }
 
+        &__deck-list,
+        &__deck-priority {
+            display: grid;
+            gap: 14px;
+            min-width: 0;
+        }
+
+        &__deck-scroll {
+            display: grid;
+            gap: 14px;
+            max-height: clamp(320px, calc(100vh - 420px), 560px);
+            overflow-y: auto;
+            padding-right: 4px;
+            scrollbar-gutter: stable;
+            overscroll-behavior: contain;
+            -webkit-overflow-scrolling: touch;
+        }
+
         &__deck-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 15px;
+            grid-template-columns: minmax(0, 1fr);
+            gap: 14px;
+        }
+
+        &__deck-section-label {
+            justify-self: start;
+            border-radius: 999px;
+            background: rgba(20, 184, 177, 0.12);
+            color: var(--turq-ink);
+            padding: 6px 10px;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
         }
 
         &__deck-card {
             display: grid;
-            gap: 16px;
+            grid-template-columns: minmax(240px, 1fr) minmax(220px, 0.72fr) minmax(
+                    150px,
+                    0.36fr
+                );
+            grid-template-areas:
+                "summary stats actions"
+                "summary mastery actions";
+            gap: 14px 18px;
+            align-items: center;
             min-width: 0;
+            min-height: 142px;
             border: 1px solid rgba(255, 255, 255, 0.66);
             border-radius: 24px;
             background: rgba(255, 255, 255, 0.5);
-            padding: 18px;
+            padding: 20px;
 
             &.featured {
                 outline: 3px solid rgba(20, 184, 177, 0.15);
-                background: linear-gradient(145deg, rgba(255, 255, 255, 0.72), rgba(228, 246, 245, 0.58));
+                background: linear-gradient(
+                    145deg,
+                    rgba(255, 255, 255, 0.72),
+                    rgba(228, 246, 245, 0.58)
+                );
             }
         }
 
         &__deck-top {
+            grid-area: summary;
             display: grid;
             grid-template-columns: auto minmax(0, 1fr);
             gap: 13px;
@@ -586,7 +739,11 @@
             width: 45px;
             height: 45px;
             border-radius: 16px;
-            background: linear-gradient(135deg, rgba(126, 219, 214, 0.95), rgba(14, 156, 151, 0.95));
+            background: linear-gradient(
+                135deg,
+                rgba(126, 219, 214, 0.95),
+                rgba(14, 156, 151, 0.95)
+            );
             box-shadow:
                 inset 0 1px 0 rgba(255, 255, 255, 0.55),
                 0 14px 28px rgba(5, 59, 69, 0.14);
@@ -603,6 +760,7 @@
         }
 
         &__deck-meta {
+            grid-area: stats;
             display: grid;
             grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 8px;
@@ -633,6 +791,7 @@
         }
 
         &__mastery {
+            grid-area: mastery;
             height: 9px;
             overflow: hidden;
             border-radius: 999px;
@@ -646,13 +805,10 @@
         }
 
         &__deck-actions {
+            grid-area: actions;
             display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
+            grid-template-columns: minmax(0, 1fr);
             gap: 9px;
-
-            &.single {
-                grid-template-columns: minmax(0, 1fr);
-            }
         }
 
         &__add-card-panel {
@@ -676,6 +832,17 @@
                 padding: 12px 14px;
                 font-weight: 800;
             }
+        }
+
+        &__native-note {
+            margin-top: 12px;
+            border: 1px solid rgba(20, 184, 177, 0.18);
+            border-radius: 16px;
+            background: rgba(228, 246, 245, 0.44);
+            padding: 11px 12px;
+            color: var(--turq-ink);
+            font-size: 14px;
+            font-weight: 700;
         }
 
         &__field {
@@ -763,48 +930,178 @@
         }
     }
 
-    @media (max-width: 980px) {
+    @media (max-width: 1120px) {
         .cfa-study {
-            &__hero-grid,
-            &__workspace-grid,
-            &__metric-row {
+            &__workspace-grid {
                 grid-template-columns: minmax(0, 1fr);
             }
 
             &__add-card-panel {
                 position: static;
             }
+        }
+    }
 
-            &__tabs {
-                margin-left: 0;
+    @media (max-width: 980px) {
+        .cfa-study {
+            &__hero-grid,
+            &__metric-row {
+                grid-template-columns: minmax(0, 1fr);
             }
         }
     }
 
     @media (max-width: 720px) {
         .cfa-study {
+            font-size: 16px;
+
             &__page {
-                padding: 22px 14px 70px;
+                width: 100%;
+                padding: 14px 12px 64px;
             }
 
             &__hero {
+                margin-top: 16px;
                 border-radius: 30px;
-                padding: 24px;
+                padding: 22px;
+            }
+
+            &__hero::after {
+                border-radius: 29px;
+            }
+
+            h1 {
+                font-size: clamp(32px, 10vw, 40px);
+                line-height: 1.04;
+            }
+
+            h2 {
+                font-size: 24px;
+            }
+
+            h3 {
+                font-size: 20px;
+            }
+
+            &__eyebrow {
+                font-size: 12px;
+                letter-spacing: 0.12em;
+            }
+
+            &__lede {
+                font-size: 16px;
+            }
+
+            &__hero-actions {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr);
+                gap: 10px;
+                margin-top: 22px;
+            }
+
+            &__btn {
+                width: 100%;
+                border-radius: 16px;
+                padding: 13px 16px;
+            }
+
+            &__metric-row {
+                gap: 10px;
+            }
+
+            &__metric {
+                padding: 12px;
+            }
+
+            &__glass-card,
+            &__add-card-panel,
+            &__create-card {
+                border-radius: 24px;
+                padding: 18px;
+            }
+
+            &__card-title {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr);
+                gap: 10px;
+            }
+
+            &__tag {
+                justify-self: start;
+            }
+
+            &__deck-list {
+                gap: 12px;
+            }
+
+            &__deck-scroll {
+                max-height: none;
+                overflow-y: visible;
+                padding-right: 0;
+                scrollbar-gutter: auto;
             }
 
             &__deck-grid,
-            &__deck-meta,
             &__deck-actions {
                 grid-template-columns: minmax(0, 1fr);
             }
 
-            &__appbar {
-                top: 10px;
-                border-radius: 22px;
+            &__deck-card {
+                grid-template-columns: minmax(0, 1fr);
+                grid-template-areas:
+                    "summary"
+                    "stats"
+                    "mastery"
+                    "actions";
+                min-height: 0;
+                gap: 12px;
+                border-radius: 20px;
+                padding: 16px;
             }
 
-            &__sync-chip {
-                white-space: normal;
+            &__deck-top {
+                gap: 11px;
+            }
+
+            &__deck-icon {
+                width: 38px;
+                height: 38px;
+                border-radius: 14px;
+            }
+
+            &__deck-meta {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 6px;
+            }
+
+            &__deck-stat {
+                padding: 8px;
+            }
+
+            &__deck-actions {
+                gap: 8px;
+            }
+
+            &__composer > button,
+            &__quick-add-row button {
+                min-height: 44px;
+            }
+
+            &__quick-add-row {
+                grid-template-columns: minmax(0, 1fr);
+
+                button {
+                    width: 100%;
+                }
+            }
+
+            &__footer-note {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr);
+
+                .cfa-study__btn {
+                    justify-self: stretch;
+                }
             }
         }
     }

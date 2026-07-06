@@ -1,0 +1,7 @@
+perfect-feature bundle generated 2026-07-05 15:37:35
+source: /Users/adarshrajesh/AlphaWeek2/ankiCFA/.lavish/perfect-feature.html
+markdown: /Users/adarshrajesh/AlphaWeek2/ankiCFA/.lavish/perfect-feature.md
+packet html: /Users/adarshrajesh/AlphaWeek2/ankiCFA/.lavish/perfect-feature-packet.html
+pdf: /Users/adarshrajesh/AlphaWeek2/ankiCFA/.lavish/perfect-feature.pdf
+desktop screenshot: /Users/adarshrajesh/AlphaWeek2/ankiCFA/.lavish/perfect-feature-desktop.png
+mobile screenshot: /Users/adarshrajesh/AlphaWeek2/ankiCFA/.lavish/perfect-feature-mobile.png

@@ -17,7 +17,7 @@ Compared against:
 
 - Counts, ranges, topics, and risk ordering come from the live `getCfaExamReadiness` payload, so exact frozen mock values can differ.
 - The Forgetting Watchlist is a topic-level proxy until card-level fade-risk rows are exposed; see `READINESS_BACKEND_GAPS.md`.
-- `Open latest mock review` and `Schedule full mock` route to the existing deadline/readiness planning flow until mock metadata exists; see `READINESS_BACKEND_GAPS.md`.
+- Latest mock review is disabled with unavailable copy until mock-attempt metadata exists; unsupported full-plan and full-mock CTAs are removed; see `READINESS_BACKEND_GAPS.md`.
 - The frozen folder did not include `mobile.png` or `feature.pdf` at implementation time, so desktop fidelity is canonical and Android/mobile screenshot comparison remains a follow-up when those artifacts are added.
 
 ## Verification Note

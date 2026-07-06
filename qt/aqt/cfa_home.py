@@ -62,6 +62,8 @@ class CfaHome:
             cfa.show_exam_readiness(mw)
         elif url == "cfa:conceptmap":
             mw.moveToState("cfaConceptMap")
+        elif url == "cfa:progress":
+            mw.moveToState("cfaProgress")
         elif url == "cfa:home":
             mw.moveToState("cfaHome")
         elif url == "cfa:deadline":
@@ -103,14 +105,7 @@ def open_sync_settings(mw: AnkiQt) -> None:
 
 
 def trigger_cfa_sync(mw: AnkiQt) -> None:
-    """Connect if needed; otherwise run the existing normal GUI sync."""
-    from aqt.cfa_sync_connect import connect_cfa_sync
+    """Use the same CFA sync/account flow as the toolbar Sync button."""
+    from aqt.cfa_sync_connect import trigger_cfa_sync as _trigger
 
-    try:
-        connected = mw.pm.sync_auth() is not None
-    except Exception:
-        connected = False
-    if connected:
-        mw.on_sync_button_clicked()
-    else:
-        connect_cfa_sync(mw)
+    _trigger(mw)

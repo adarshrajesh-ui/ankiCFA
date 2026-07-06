@@ -1013,9 +1013,15 @@ def _flatten_deck_tree(node: Any) -> list[Any]:
 
 def _cfa_study_payload(col: Collection) -> dict[str, Any]:
     """Deck-first Study payload from existing deck counts + CFA topic evidence."""
+    from anki.cfa_internal_state import is_internal_deck_name
+
     home = _cfa_home_payload(col)
     tree = col.sched.deck_due_tree()
-    rows = _flatten_deck_tree(tree)
+    # Never surface the machine-owned CFA::_Internal deck (app-state storage) as
+    # study material — its cards are suspended app-state, not flashcards.
+    rows = [
+        row for row in _flatten_deck_tree(tree) if not is_internal_deck_name(row.name)
+    ]
     cfa_rows = [
         row
         for row in rows
@@ -1028,9 +1034,13 @@ def _cfa_study_payload(col: Collection) -> dict[str, Any]:
 
     ranked = sorted(
         cfa_rows,
-        key=lambda row: (due(row) * 2 + int(row.new_count), int(row.new_count), row.name),
-        reverse=True,
-    )[:3]
+        key=lambda row: (
+            -(due(row) * 2 + int(row.new_count)),
+            -int(row.new_count),
+            row.name.lower(),
+            row.name,
+        ),
+    )
     deck_cards = [
         {
             "id": int(row.deck_id),
@@ -1041,7 +1051,7 @@ def _cfa_study_payload(col: Collection) -> dict[str, Any]:
             "learn": int(row.learn_count),
             "review": int(row.review_count),
             "mastery": _topic_mastery_for_deck(row.name, home["topics"]),
-            "featured": index == 0,
+            "featured": index < 3,
         }
         for index, row in enumerate(ranked)
     ]

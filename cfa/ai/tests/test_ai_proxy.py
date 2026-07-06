@@ -10,6 +10,7 @@ needed. Exercises the AI path and the AI-off fallback contract (source flips to
 
 from __future__ import annotations
 
+import inspect
 import os
 import sys
 
@@ -100,47 +101,9 @@ def test_grade_falls_back():
     assert r["source"] == "fallback"
 
 
-def _map_ok(*a, **k):
-    return {
-        "ok": True,
-        "text": '{"cfa": "You are about 58% overall.", "topic:equity": "Equity is at 62%."}',
-        "model": "gpt-4o-mini",
-        "error": None,
-        "usage": {},
-    }
-
-
-def test_mapexplain_ai_path():
-    r = ai_proxy.mapexplain(
-        {
-            "nodes": [
-                {"id": "cfa", "full": "CFA", "kind": "cfa", "pct": 58},
-                {"id": "topic:equity", "full": "Equity", "kind": "topic", "pct": 62},
-            ]
-        },
-        complete_fn=_map_ok,
-    )
-    assert r["ok"] is True
-    assert r["source"] == "ai"
-    assert r["explanations"]["cfa"] == "You are about 58% overall."
-    assert r["explanations"]["topic:equity"] == "Equity is at 62%."
-    assert r["model"] == "gpt-4o-mini"
-
-
-def test_mapexplain_falls_back_on_failure():
-    r = ai_proxy.mapexplain(
-        {"nodes": [{"id": "cfa", "full": "CFA", "kind": "cfa", "pct": 58}]},
-        complete_fn=_fail,
-    )
-    assert r["ok"] is False
-    assert r["source"] == "fallback"
-    assert r["explanations"] == {}
-
-
-def test_mapexplain_no_nodes():
-    r = ai_proxy.mapexplain({"nodes": []}, complete_fn=_map_ok)
-    assert r["source"] == "fallback"
-    assert r["error"] == "no_nodes"
+def test_concept_map_ai_endpoint_removed():
+    assert not hasattr(ai_proxy, "mapexplain")
+    assert "/cfa/mapexplain" not in inspect.getsource(ai_proxy.Handler.do_POST)
 
 
 def test_token_default():

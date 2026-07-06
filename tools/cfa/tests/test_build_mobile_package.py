@@ -11,6 +11,8 @@ tests require a built pylib (they open a real Collection), so they are guarded b
 ``importorskip("anki")``.
 """
 
+# pylint: disable=import-error,protected-access,redefined-outer-name
+
 from __future__ import annotations
 
 import importlib.util
@@ -107,6 +109,41 @@ def test_reimport_roundtrip_contains_both_decks(built_apkg, tmp_path):
         # Every bundled note made it across.
         total = summary["cfa_notes"] + summary["ethics_notes"]
         assert col.card_count() >= total
+    finally:
+        col.close()
+
+
+def test_reimport_roundtrip_contains_phone_feature_manifest(built_apkg, tmp_path):
+    """The package carries machine-readable CFA feature metadata as a synced internal note.
+
+    This gives phone/fork consumers a package-level manifest without requiring
+    native Android source to live in this repository.
+    """
+    pytest.importorskip("anki")
+    apkg, _ = built_apkg
+
+    from anki.cfa_internal_state import get_cfa_state_record
+    from anki.collection import Collection
+
+    dest = str(tmp_path / "dest-manifest.anki2")
+    col = Collection(dest)
+    try:
+        opts = col._backend.get_import_anki_package_presets()
+        col._backend.import_anki_package(package_path=apkg, options=opts)
+
+        manifest = get_cfa_state_record(col, build_mobile_package.PACKAGE_MANIFEST_KEY)
+        assert manifest is not None
+        assert manifest["package"] == "cfa-mobile-apkg"
+        assert manifest["decks"] == {
+            "main": "CFA Level II",
+            "ethics": "CFA::Ethics Pairs",
+        }
+        assert manifest["notetypes"] == {
+            "main": "CFA Knowledge",
+            "ethics": "CFA Ethics Minimal-Pair",
+        }
+        assert "minimal-pair-ethics-touch-highlighting" in manifest["phoneSupported"]
+        assert "cfa-concept-map-shell" in manifest["requiresNativeClient"]
     finally:
         col.close()
 

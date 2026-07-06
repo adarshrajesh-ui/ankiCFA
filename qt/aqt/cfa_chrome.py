@@ -36,6 +36,7 @@ from __future__ import annotations
 
 from typing import Any
 
+import aqt
 from aqt import gui_hooks
 
 
@@ -47,13 +48,17 @@ def _t() -> dict[str, str]:
 
 def _toolbar_css() -> str:
     t = _t()
-    # Re-skin the top bar: calm CFA surface, navy-muted links, warm accent hover.
+    # Re-skin the top bar as the same liquid-glass app bar used by the new CFA
+    # pages: pearl glass, turquoise active/hover state, no stock Anki blue.
     # Sync (#sync / #sync-spinner) keeps its structure — only its colour changes.
     return f"""
 <style id="cfa-chrome-toolbar">
   .header {{
-    background: {t["bg"]} !important;
-    border-bottom: 1px solid {t["line"]};
+    background: rgba(255, 255, 255, .70) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, .72);
+    box-shadow: 0 14px 50px rgba(5, 59, 69, .10);
+    backdrop-filter: blur(22px) saturate(1.25);
+    -webkit-backdrop-filter: blur(22px) saturate(1.25);
     font-family: {t["font"]};
   }}
   .hitem {{
@@ -90,6 +95,41 @@ def _toolbar_css() -> str:
     border-color: {t["accent"]};
     color: {t["accent"]} !important;
     background: {t["accent_soft"]};
+  }}
+  /* In native review mode Anki flattens the toolbar over the reviewer. Keep it
+     visible for reviewer shortcuts/chrome, but make it read as a deliberate CFA
+     review rail instead of an unrelated stock strip. */
+  body.flat .header {{
+    position: relative;
+    background: rgba(255, 255, 255, .72) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, .72);
+    box-shadow: 0 14px 50px rgba(5, 59, 69, .10);
+  }}
+  body.flat .header::before {{
+    content: "CFA review mode";
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: {t["accent"]};
+    font-size: {t["fs_eyebrow"]}px;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }}
+  @media (max-width: 640px) {{
+    body.flat .header {{
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }}
+    body.flat .header::before {{
+      display: none;
+    }}
+    body.flat .hitem {{
+      font-size: .82rem;
+      padding-inline: 10px;
+    }}
   }}
 </style>"""
 
@@ -151,6 +191,31 @@ def _deckbrowser_css() -> str:
     color: {t["faint"]};
     text-align: left;
   }}
+  @media (max-width: 640px) {{
+    body {{
+      overflow-x: hidden;
+      padding-inline: 12px;
+    }}
+    .cfa-deck-banner,
+    .cfa-deck-caption {{
+      padding-inline: 0;
+    }}
+    .cfa-deck-banner {{
+      margin-top: 16px;
+    }}
+    .cfa-deck-banner .title {{
+      font-size: 28px;
+      line-height: 1.08;
+    }}
+    a.deck {{
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+    }}
+    table {{
+      max-width: 100%;
+    }}
+  }}
 </style>"""
 
 
@@ -197,6 +262,22 @@ def _overview_css() -> str:
   #study:hover {{
     background: {t["primary_hover"]} !important;
   }}
+  @media (max-width: 640px) {{
+    body {{
+      overflow-x: hidden;
+      padding-inline: 12px;
+    }}
+    h3 {{
+      font-size: 34px;
+      line-height: 1.08;
+    }}
+    #study {{
+      width: 100%;
+      min-height: 48px;
+      box-sizing: border-box;
+      padding: 12px 18px;
+    }}
+  }}
 </style>"""
 
 
@@ -220,11 +301,20 @@ def _reviewer_bottom_css() -> str:
     return f"""
 <style id="cfa-chrome-reviewer-bottom">
   html, body {{
-    background: {t["bg"]} !important;
+    background: {t["primary_soft"]} !important;
     color: {t["ink"]};
     font-family: {t["font"]};
   }}
-  #outer {{ border-top: 1px solid {t["line"]} !important; }}
+  #outer {{
+    border-top: 1px solid {t["line"]} !important;
+    background: rgba(255, 255, 255, .94);
+    box-shadow: 0 -12px 30px rgba(18, 43, 70, .06);
+    padding: 6px 14px 8px;
+  }}
+  #innertable {{
+    max-width: 980px;
+    margin: 0 auto;
+  }}
   /* Edit / More — quiet text buttons, not native gray chrome. */
   .stat button {{
     background: transparent !important;
@@ -276,6 +366,75 @@ def _reviewer_bottom_css() -> str:
   /* Interval labels + remaining-count stay quiet. */
   .nobold, .stattxt {{ color: {t["faint"]}; }}
   .new-count {{ color: {t["ink"]}; }}
+  @media (max-width: 640px) {{
+    #outer {{
+      padding: 8px 8px calc(10px + env(safe-area-inset-bottom, 0px));
+    }}
+    #innertable,
+    #innertable > tbody,
+    #innertable > tbody > tr {{
+      display: block;
+      width: 100%;
+    }}
+    #innertable > tbody > tr {{
+      display: grid;
+      grid-template-columns: minmax(62px, .72fr) minmax(0, 2fr) minmax(62px, .72fr);
+      align-items: end;
+      gap: 6px;
+    }}
+    #middle {{
+      min-width: 0;
+    }}
+    #middle > center,
+    #middle > table,
+    #middle table {{
+      width: 100%;
+    }}
+    #middle table,
+    #middle tbody,
+    #middle tr {{
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 6px;
+    }}
+    #middle td[align=center] {{
+      flex: 1 1 calc(50% - 6px);
+      min-width: 0;
+      padding-top: 14px !important;
+    }}
+    #middle button,
+    #ansbut {{
+      width: 100%;
+      min-height: 46px;
+      margin: 0;
+      padding: 9px 10px;
+      box-sizing: border-box;
+    }}
+    #ansbut {{
+      min-height: 50px;
+    }}
+    #ansbut .stattxt {{
+      width: max-content;
+      max-width: 72vw;
+    }}
+    .stat {{
+      display: block !important;
+      padding-top: 4px;
+    }}
+    .stat button {{
+      width: 100%;
+      min-width: 0;
+      min-height: 42px;
+      margin: 0;
+      padding: 8px 6px;
+      font-size: .78rem;
+    }}
+    .nobold,
+    .stattxt {{
+      font-size: .68rem;
+    }}
+  }}
 </style>"""
 
 
@@ -319,6 +478,17 @@ def _editor_css() -> str:
   .editor-field:focus-within {{
     outline-color: {t["accent"]} !important;
   }}
+  @media (max-width: 640px) {{
+    body {{
+      overflow-x: hidden;
+    }}
+    .label-name {{
+      font-size: 12px;
+    }}
+    .editor-field {{
+      max-width: 100%;
+    }}
+  }}
 </style>"""
 
 
@@ -340,8 +510,96 @@ def _reviewer_css() -> str:
     # notetype CSS and ethics templates stay authoritative on the card itself.
     return f"""
 <style id="cfa-chrome-reviewer">
+  html, body {{
+    min-height: 100%;
+  }}
   body:not(.nightMode) {{
-    background: {t["primary_soft"]} !important;
+    background:
+      radial-gradient(circle at 12% 0%, rgba(255,255,255,.96), transparent 23rem),
+      radial-gradient(circle at 86% 8%, rgba(20,184,177,.22), transparent 28rem),
+      radial-gradient(circle at 56% 70%, rgba(5,59,69,.16), transparent 34rem),
+      linear-gradient(135deg, {t["bg"]} 0%, #EEF9F7 42%, #D8F3EF 64%, rgba(5,59,69,.24) 100%) !important;
+    color: {t["ink"]};
+    font-family: {t["font"]};
+  }}
+  body:not(.nightMode)::before {{
+    content: "ankiCFA · Review mode";
+    display: block;
+    box-sizing: border-box;
+    width: min(1040px, calc(100vw - 48px));
+    margin: 22px auto -10px;
+    padding: 0 4px;
+    color: {t["accent"]};
+    font-family: {t["font"]};
+    font-size: {t["fs_eyebrow"]}px;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }}
+  body:not(.nightMode) #qa {{
+    box-sizing: border-box;
+    width: min(1040px, calc(100vw - 48px));
+    min-height: min(58vh, 520px);
+    margin: 26px auto 22px;
+    padding: clamp(12px, 3vw, 28px);
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    text-align: left;
+  }}
+  body.nightMode #qa {{
+    box-sizing: border-box;
+    width: min(1040px, calc(100vw - 48px));
+    margin: 26px auto 22px;
+    padding: clamp(28px, 5vw, 54px);
+    border: 1px solid #2b323b;
+    border-radius: 28px;
+  }}
+  #qa .cfa-basic-review-card {{
+    max-width: 860px;
+    margin: 0 auto;
+    padding: clamp(30px, 5vw, 46px);
+    background: linear-gradient(135deg, rgba(255,255,255,.84), rgba(255,255,255,.50));
+    border: 1px solid rgba(255,255,255,.72);
+    border-radius: 34px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.78), 0 28px 90px rgba(5,59,69,.16);
+    backdrop-filter: blur(22px) saturate(1.18);
+    -webkit-backdrop-filter: blur(22px) saturate(1.18);
+    color: {t["ink"]};
+    line-height: 1.62;
+  }}
+  .nightMode #qa .cfa-basic-review-card {{
+    color: #e8ecf1;
+  }}
+  #qa .cfa-basic-review-eyebrow {{
+    font-family: {t["font"]};
+    font-size: {t["fs_eyebrow"]}px;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: {t["accent"]};
+    margin-bottom: 16px;
+  }}
+  #qa .cfa-basic-review-content {{
+    font-family: {t["font_heading"]};
+    font-size: 1.38rem;
+    line-height: 1.34;
+    color: {t["ink"]};
+  }}
+  .nightMode #qa .cfa-basic-review-content {{
+    color: #f2f5f8;
+  }}
+  #qa .cfa-basic-review-card--answer .cfa-basic-review-content {{
+    font-family: {t["font"]};
+    font-size: 1.02rem;
+    line-height: 1.68;
+  }}
+  #qa .cfa-basic-review-card hr#answer,
+  #qa .cfa-basic-review-card #answer {{
+    border: none;
+    border-top: 1px solid {t["line"]};
+    margin: 22px 0;
   }}
   /* Type-in-answer diff — CFA pass / fail / neutral washes, brand-ink text,
      replacing the stock bright-green / bright-red / grey traffic-light blocks. */
@@ -357,7 +615,130 @@ def _reviewer_css() -> str:
     background: {t["line"]} !important;
     color: {t["muted"]} !important;
   }}
+  @media (max-width: 640px) {{
+    body:not(.nightMode)::before {{
+      width: calc(100vw - 24px);
+      margin: 12px auto -8px;
+      padding: 0;
+    }}
+    body:not(.nightMode) #qa,
+    body.nightMode #qa {{
+      width: calc(100vw - 16px);
+      min-height: auto;
+      margin: 14px auto 12px;
+      padding: 8px;
+    }}
+    #qa .cfa-basic-review-card {{
+      padding: 22px 18px;
+      border-radius: 24px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.78), 0 18px 54px rgba(5,59,69,.16);
+    }}
+    #qa .cfa-basic-review-eyebrow {{
+      margin-bottom: 12px;
+    }}
+    #qa .cfa-basic-review-content {{
+      font-size: 1.18rem;
+      line-height: 1.38;
+    }}
+    #qa .cfa-basic-review-card--answer .cfa-basic-review-content {{
+      font-size: .98rem;
+      line-height: 1.62;
+    }}
+  }}
 </style>"""
+
+
+def _card_deck_name(card: Any) -> str:
+    try:
+        deck_id = card.current_deck_id()
+    except Exception:
+        return ""
+    try:
+        col = getattr(aqt.mw, "col", None)
+        if col is None:
+            return ""
+        return col.decks.name_if_exists(deck_id) or col.decks.name(deck_id)
+    except Exception:
+        return ""
+
+
+def _is_cfa_deck_name(deck_name: str) -> bool:
+    lower = deck_name.lower()
+    if "cfa" in lower:
+        return True
+    return any(fragment in lower for fragment in _cfa_study_deck_name_fragments())
+
+
+def _cfa_study_deck_name_fragments() -> tuple[str, ...]:
+    """Deck names the CFA Study page can surface even without a CFA prefix."""
+    try:
+        from anki import cfa
+
+        topics = [cfa.topic_display_name(topic) for topic in cfa.CANONICAL_TOPICS]
+    except Exception:
+        topics = []
+    aliases = (
+        "financial statement analysis",
+        "financial reporting & analysis",
+        "fra",
+        "equity valuation",
+        "equity investments",
+        "ethics standards",
+        "ethics & professional standards",
+        "quant methods",
+        "quantitative methods",
+    )
+    return tuple({*(topic.lower() for topic in topics), *aliases})
+
+
+def _is_cfa_study_review_active() -> bool:
+    try:
+        return bool(getattr(aqt.mw, "_cfa_review_from_study", False))
+    except Exception:
+        return False
+
+
+def _already_cfa_card(html: str) -> bool:
+    return any(
+        marker in html
+        for marker in (
+            "cfa-card",
+            "cfa-basic-review-card",
+            "cfa-ethics",
+            "cfa-passage",
+        )
+    )
+
+
+def _should_wrap_cfa_review_card(card: Any) -> bool:
+    return _is_cfa_study_review_active() or _is_cfa_deck_name(_card_deck_name(card))
+
+
+def _wrap_unbranded_cfa_card(html: str, kind: str) -> str:
+    phase = "Answer" if kind.endswith("Answer") else "Question"
+    modifier = phase.lower()
+    return (
+        f'<div class="cfa-basic-review-card cfa-basic-review-card--{modifier}">'
+        '<div class="cfa-basic-review-eyebrow">'
+        f"ankiCFA · Level II · {phase}"
+        "</div>"
+        f'<div class="cfa-basic-review-content">{html}</div>'
+        "</div>"
+    )
+
+
+def _wrap_basic_cfa_card(html: str, kind: str) -> str:
+    """Compatibility wrapper for proof tooling/tests that used the old name."""
+    return _wrap_unbranded_cfa_card(html, kind)
+
+
+def on_card_will_show(html: str, card: Any, kind: str) -> str:
+    """Wrap unbranded cards on the live CFA review path with a CFA frame."""
+    if not kind.startswith("review") or _already_cfa_card(html):
+        return html
+    if not _should_wrap_cfa_review_card(card):
+        return html
+    return _wrap_unbranded_cfa_card(html, kind)
 
 
 def _deckbrowser_banner() -> str:
@@ -418,6 +799,7 @@ def register() -> None:
     if _registered:
         return
     gui_hooks.webview_will_set_content.append(on_webview_will_set_content)
+    gui_hooks.card_will_show.append(on_card_will_show)
     gui_hooks.deck_browser_will_render_content.append(
         on_deck_browser_will_render_content
     )

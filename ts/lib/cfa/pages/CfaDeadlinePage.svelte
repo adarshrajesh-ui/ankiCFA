@@ -29,7 +29,14 @@ SetCfaExamDate RPC.
         type DeadlinePayload,
         type DeadlineRow,
     } from "$lib/cfa";
-    import { intervalCell, isAtRisk, newCardHint, recallCell, RISK_LABEL, riskMarker } from "./deadline";
+    import {
+        intervalCell,
+        isAtRisk,
+        newCardHint,
+        recallCell,
+        RISK_LABEL,
+        riskMarker,
+    } from "./deadline";
 
     /** The full Deadline payload (exam date, ranked rows, provenance). */
     export let data: DeadlinePayload;
@@ -117,9 +124,9 @@ SetCfaExamDate RPC.
                             class:is-new={deadlineRow.isNew}
                         >
                             {#if isAtRisk(deadlineRow)}
-                                <span class="cfa-deadline__risk" aria-hidden="true"
-                                    >{riskMarker(deadlineRow)}</span
-                                >
+                                <span class="cfa-deadline__risk" aria-hidden="true">
+                                    {riskMarker(deadlineRow)}
+                                </span>
                                 <span class="cfa-deadline__sr">{RISK_LABEL}:</span>
                             {/if}
                             {recallCell(deadlineRow)}
@@ -175,6 +182,8 @@ SetCfaExamDate RPC.
     }
 
     .cfa-deadline__date-input {
+        box-sizing: border-box;
+        min-height: 44px;
         font-family: cfa.$cfa-font-body;
         font-size: cfa.$cfa-fs-body;
         color: cfa.$cfa-ink;
@@ -191,6 +200,7 @@ SetCfaExamDate RPC.
     }
 
     .cfa-deadline__set {
+        min-height: 44px;
         font-family: cfa.$cfa-font-body;
         font-size: cfa.$cfa-fs-body;
         font-weight: cfa.$cfa-weight-semibold; // 600 — calm, never bold display
@@ -264,5 +274,27 @@ SetCfaExamDate RPC.
 
     .cfa-deadline__foot {
         margin-top: cfa.space(1);
+    }
+
+    @media (max-width: 640px) {
+        .cfa-deadline {
+            padding: cfa.space(4) cfa.space(3) calc(40px + env(safe-area-inset-bottom, 0px));
+        }
+
+        .cfa-deadline__inner {
+            gap: cfa.space(4);
+        }
+
+        .cfa-deadline__controls {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr);
+            align-items: stretch;
+        }
+
+        .cfa-deadline__date-input,
+        .cfa-deadline__set {
+            width: 100%;
+            min-height: 48px;
+        }
     }
 </style>

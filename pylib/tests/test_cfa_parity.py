@@ -43,13 +43,17 @@ def _add_card(col, deck_id, nt, front, topic):
     return col.find_cards(f"nid:{note.id}")[0]
 
 
-def _seed_topic(col, deck, nt, topic, n_cards, stability, reviews_each, first_ease, now):
+def _seed_topic(
+    col, deck, nt, topic, n_cards, stability, reviews_each, first_ease, now
+):
     """`n_cards` review cards with FSRS memory + `reviews_each` reviews on
     DISTINCT days (dedup is a no-op here so raw == de-duplicated)."""
     cids = [_add_card(col, deck, nt, f"{topic}-{i}", topic) for i in range(n_cards)]
     col.sched.set_due_date(cids, "0")
     data = json.dumps({"s": stability, "d": 5.0, "lrt": now - 86400})
-    col.db.executemany("update cards set data=?, ivl=? where id=?", [(data, 20, c) for c in cids])
+    col.db.executemany(
+        "update cards set data=?, ivl=? where id=?", [(data, 20, c) for c in cids]
+    )
     base_ms = now * 1000 - reviews_each * DAY_MS
     uid = col.db.scalar("select count(*) from revlog") or 0
     rows = []
@@ -72,7 +76,9 @@ def _seed_rich(col, now):
     _seed_topic(col, deck, nt, "los::topica", 20, 2000.0, 6, [3] * 20, now)
     _seed_topic(col, deck, nt, "los::topicb", 20, 8.0, 6, [3] * 10 + [1] * 10, now)
     cfa.set_exam_config(
-        col, exam_date="2026-12-01", topic_weights={"los::topica": 0.9, "los::topicb": 0.1}
+        col,
+        exam_date="2026-12-01",
+        topic_weights={"los::topica": 0.9, "los::topicb": 0.1},
     )
     return deck
 
@@ -93,7 +99,12 @@ def test_rpc_matches_python_reference_field_by_field():
     now = int(time.time())
     deck = _seed_rich(col, now)
 
-    for name in ("memory_score", "performance_score", "readiness_score", "bayesian_readiness"):
+    for name in (
+        "memory_score",
+        "performance_score",
+        "readiness_score",
+        "bayesian_readiness",
+    ):
         py = getattr(cfa, f"_py_{name}")(col, deck_id=deck, now_ts=now)
         rpc = getattr(cfa, name)(col, deck_id=deck, now_ts=now)
         for field in vars(py):
@@ -125,15 +136,19 @@ def test_rpc_dedups_same_day_reviews_but_python_reference_does_not():
     col.sched.set_due_date([dup], "0")
     col.db.execute(
         "update cards set data=?, ivl=? where id=?",
-        json.dumps({"s": 100.0, "d": 5.0, "lrt": now - 86400}), 20, dup,
+        json.dumps({"s": 100.0, "d": 5.0, "lrt": now - 86400}),
+        20,
+        dup,
     )
     now_ms = now * 1000
     # two graded reviews on the SAME day (a dual-device round-trip)
     col.db.executemany(
         "insert into revlog (id,cid,usn,ease,ivl,lastIvl,factor,time,type)"
         " values (?,?,?,?,?,?,?,?,?)",
-        [(now_ms, dup, -1, 3, 10, 5, 2500, 1000, 1),
-         (now_ms - 1000, dup, -1, 3, 10, 5, 2500, 1000, 1)],
+        [
+            (now_ms, dup, -1, 3, 10, 5, 2500, 1000, 1),
+            (now_ms - 1000, dup, -1, 3, 10, 5, 2500, 1000, 1),
+        ],
     )
     py = cfa._py_memory_score(col, deck_id=deck, now_ts=now)
     rpc = cfa.memory_score(col, deck_id=deck, now_ts=now)

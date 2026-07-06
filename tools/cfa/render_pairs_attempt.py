@@ -62,7 +62,9 @@ def _gold_spans_for(pair: dict) -> list[dict]:
     """The authored multi-span answer key on the violating vignette (falls back to legacy phrase)."""
     spans = pair.get("gold_spans")
     if isinstance(spans, list) and spans:
-        return [{"phrase": s["phrase"], "rationale": s.get("rationale", "")} for s in spans]
+        return [
+            {"phrase": s["phrase"], "rationale": s.get("rationale", "")} for s in spans
+        ]
     return [{"phrase": pair["decisive_phrase"], "rationale": pair.get("rationale", "")}]
 
 
@@ -85,7 +87,9 @@ def render_html(pair: dict, mode: str, ai_result: dict | None) -> str:
         "{{AnswerB}}": html.escape(pair["answer_b"], quote=False),
         "{{DecisiveFact}}": html.escape(pair.get("decisive_fact", ""), quote=False),
         "{{DecisivePhrase}}": html.escape(pair["decisive_phrase"], quote=False),
-        "{{DecisivePhraseCase}}": html.escape(pair["decisive_phrase_case"], quote=False),
+        "{{DecisivePhraseCase}}": html.escape(
+            pair["decisive_phrase_case"], quote=False
+        ),
         "{{GoldSpans}}": html.escape(gold_json, quote=False),
         "{{Standard}}": html.escape(pair["standard"], quote=False),
         "{{Rationale}}": html.escape(pair["rationale"], quote=False),
@@ -115,7 +119,9 @@ def render_html(pair: dict, mode: str, ai_result: dict | None) -> str:
 
     driver = ""
     if mode in ("perfect", "partial"):
-        driver = _driver_script(pair["answer_a"], pair["answer_b"], decisive_case, span_ranges)
+        driver = _driver_script(
+            pair["answer_a"], pair["answer_b"], decisive_case, span_ranges
+        )
 
     return (
         "<!doctype html><html><head><meta charset='utf-8'>"
@@ -125,7 +131,9 @@ def render_html(pair: dict, mode: str, ai_result: dict | None) -> str:
     )
 
 
-def _driver_script(answer_a: str, answer_b: str, decisive_case: str, span_ranges: list) -> str:
+def _driver_script(
+    answer_a: str, answer_b: str, decisive_case: str, span_ranges: list
+) -> str:
     """A tiny on-load driver that performs a full attempt using the real card handlers."""
     cfg = json.dumps(
         {
@@ -179,7 +187,10 @@ def _oracle_ai(pair: dict) -> dict:
         "verdict_correct": True,
         "highlight_grade": "correct",
         "explanation": "You identified the decisive evidence that makes this a violation.",
-        "spans": [{"phrase": s["phrase"], "matched": True, "note": "the decisive fact"} for s in gold_spans],
+        "spans": [
+            {"phrase": s["phrase"], "matched": True, "note": "the decisive fact"}
+            for s in gold_spans
+        ],
     }
 
     def fn(**kwargs):
@@ -207,8 +218,14 @@ def _oracle_ai(pair: dict) -> dict:
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--pair", default="SMD-01")
-    ap.add_argument("--mode", choices=["perfect", "partial", "blank"], default="perfect")
-    ap.add_argument("--ai", action="store_true", help="inject a pycmd oracle stub (AI-feedback block)")
+    ap.add_argument(
+        "--mode", choices=["perfect", "partial", "blank"], default="perfect"
+    )
+    ap.add_argument(
+        "--ai",
+        action="store_true",
+        help="inject a pycmd oracle stub (AI-feedback block)",
+    )
     ap.add_argument("--out", required=True)
     args = ap.parse_args(argv)
 

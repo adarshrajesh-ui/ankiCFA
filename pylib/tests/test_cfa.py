@@ -381,7 +381,9 @@ def test_memory_score_config_topic_total_matches_configured_topics():
     cfa.set_exam_config(
         col,
         exam_date="2026-12-01",
-        topic_weights={t: 1.0 / len(cfa.CANONICAL_TOPICS) for t in cfa.CANONICAL_TOPICS},
+        topic_weights={
+            t: 1.0 / len(cfa.CANONICAL_TOPICS) for t in cfa.CANONICAL_TOPICS
+        },
     )
     _seed_studied(col, deck, nt, "los::ethics", 5, 25)
     score = cfa.memory_score(col, deck_id=deck)

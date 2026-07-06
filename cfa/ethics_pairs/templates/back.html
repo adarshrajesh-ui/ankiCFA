@@ -41,8 +41,11 @@
 
   try { localStorage.removeItem("cfaEthics:pending"); } catch (e) {}
   var correct = !!pending.correct;
-  title.className = "big " + (correct ? "ok" : "no");
-  title.textContent = correct ? "✓ Recorded: fully correct" : "✗ Recorded: not fully correct";
+  var verdictsOK = allCaseVerdictsOK(pending);
+  title.className = "big " + (correct ? "ok" : (verdictsOK ? "warn" : "no"));
+  title.textContent = correct
+    ? "✓ Recorded: fully correct"
+    : (verdictsOK ? "✓ Recorded: case verdicts right, evidence not complete" : "✗ Recorded: case verdict needs review");
 
   // The learning payload — reveal the governing Standard + rationale (and the per-span evidence
   // breakdown) so the reflexive "Show answer" is never a dead-end. Mirrors the checked front reveal.
@@ -60,17 +63,25 @@
     return (s == null ? "" : String(s)).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   }
   function cap(s) { s = (s || "").toString(); return s.charAt(0).toUpperCase() + s.slice(1); }
+  function allCaseVerdictsOK(p) {
+    var vs = (p && p.verdicts) || {};
+    return !!(vs.A && vs.B && vs.A.ok && vs.B.ok);
+  }
 
   function buildPayloadHtml(p) {
     var html = "";
     // Verdicts + evidence summary (mirrors the front reveal breakdown, incl. near matches).
     var vs = p.verdicts || {};
     if (vs.A || vs.B) {
-      html += '<ul class="cfa-breakdown"><li>Case judgments: A ' +
-        ((vs.A && vs.A.ok) ? "\u2713" : "\u2717") + " \u00b7 B " +
+      html += '<ul class="cfa-breakdown"><li>Case verdicts: A answer <b>' +
+        esc((vs.A && vs.A.answer) || "") + "</b>, your verdict <b>" +
+        esc((vs.A && vs.A.judged) || "none") + "</b> " +
+        ((vs.A && vs.A.ok) ? "\u2713" : "\u2717") + "; B answer <b>" +
+        esc((vs.B && vs.B.answer) || "") + "</b>, your verdict <b>" +
+        esc((vs.B && vs.B.judged) || "none") + "</b> " +
         ((vs.B && vs.B.ok) ? "\u2713" : "\u2717") + "</li>";
       if (typeof p.found === "number" && typeof p.total === "number") {
-        html += "<li>Decisive phrases: " + p.found + " of " + p.total + " found" +
+        html += "<li>Evidence: " + p.found + " of " + p.total + " decisive phrases fully found" +
           (p.near ? " (+" + p.near + " near)" : "") +
           (p.highlight ? " \u00b7 " + esc(cap(p.highlight)) : "") + "</li>";
       }
@@ -97,6 +108,25 @@
     }
     if (p.rationale) {
       html += '<div class="cfa-rationale">' + esc(p.rationale) + "</div>";
+    }
+    if (p.ai) {
+      var ai = p.ai || {};
+      var needed = ai.neededEvidence || [];
+      var neededHtml = "";
+      for (var n = 0; n < needed.length; n++) {
+        if (needed[n]) neededHtml += "<li>" + esc(needed[n]) + "</li>";
+      }
+      var precision = (ai.evidencePrecision || "").toString().replace(/_/g, " ");
+      html += '<div class="cfa-ai">' +
+        '<div class="cfa-ai-head"><span class="cfa-badge cfa-ai-badge">AI feedback</span>' +
+          (ai.grade ? "Semantic grade: " + esc(cap(ai.grade)) : "Graded by AI") + "</div>" +
+        (ai.learnerIntent ? '<div class="cfa-ai-intent"><b>What you likely noticed:</b> ' + esc(ai.learnerIntent) + "</div>" : "") +
+        (precision ? '<div class="cfa-ai-precision"><b>Evidence precision:</b> ' + esc(precision) + "</div>" : "") +
+        (ai.explanation ? '<div class="cfa-ai-explain">' + esc(ai.explanation) + "</div>" : "") +
+        (ai.coaching ? '<div class="cfa-ai-coach">' + esc(ai.coaching) + "</div>" : "") +
+        (neededHtml ? '<div class="cfa-ai-needed"><b>Needed evidence:</b><ul>' + neededHtml + "</ul></div>" : "") +
+        (ai.studyTip ? '<div class="cfa-ai-tip"><b>Study tip:</b> ' + esc(ai.studyTip) + "</div>" : "") +
+        "</div>";
     }
     return html;
   }

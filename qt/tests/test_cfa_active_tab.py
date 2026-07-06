@@ -25,11 +25,15 @@ from aqt import toolbar
 _REPO = Path(__file__).resolve().parents[2]
 
 
-def _toolbar(state: str):
+def _toolbar(state: str, deck_name: str = "CFA Level II"):
     evals: list[str] = []
     web = SimpleNamespace(eval=lambda js: evals.append(js))
     web.requiresCol = None
-    mw = SimpleNamespace(state=state)
+    decks = SimpleNamespace(
+        selected=lambda: 1,
+        name_if_exists=lambda _did: deck_name,
+    )
+    mw = SimpleNamespace(state=state, col=SimpleNamespace(decks=decks))
     tb = toolbar.Toolbar(mw, web)  # type: ignore[arg-type]
     return tb, evals
 
@@ -51,16 +55,35 @@ def test_active_tab_highlights_current_cfa_state() -> None:
     js = evals[-1]
     assert 'active="cfa_readiness"' in js
     # all native CFA ids are candidates so the others get cleared
-    for tab in ("cfa_home", "cfa_study", "cfa_concept_map", "cfa_readiness"):
+    for tab in (
+        "cfa_home",
+        "cfa_study",
+        "cfa_ethics",
+        "cfa_concept_map",
+        "cfa_readiness",
+        "cfa_progress",
+    ):
         assert tab in js
     assert "classList.add('is-active')" in js
     assert "setAttribute('aria-current','page')" in js
     assert "classList.remove('is-active')" in js
 
 
+def test_study_flow_keeps_study_tab_active() -> None:
+    tb, evals = _toolbar("review", "CFA Level II")
+    tb._update_active_cfa_tab()
+    assert 'active="cfa_study"' in evals[-1]
+
+
+def test_ethics_flow_keeps_ethics_tab_active() -> None:
+    tb, evals = _toolbar("overview", "CFA::Ethics Pairs")
+    tb._update_active_cfa_tab()
+    assert 'active="cfa_ethics"' in evals[-1]
+
+
 def test_non_cfa_state_clears_all_highlights() -> None:
-    # On the deck list / a study session no CFA tab should read as active, so
-    # `active` is null and every candidate tab has its highlight removed.
+    # On the deck list no CFA tab should read as active, so `active` is null and
+    # every candidate tab has its highlight removed.
     tb, evals = _toolbar("deckBrowser")
     tb._update_active_cfa_tab()
     assert "active=null" in evals[-1]
@@ -70,8 +93,11 @@ def test_state_did_change_updates_highlight() -> None:
     tb, evals = _toolbar("cfaHome")
     tb._on_state_did_change("cfaConceptMap", "cfaHome")
     assert 'active="cfa_concept_map"' in evals[-1]
-    # a transition into a non-CFA state clears it
+    # study sessions keep the Study tab active
     tb._on_state_did_change("review", "cfaConceptMap")
+    assert 'active="cfa_study"' in evals[-1]
+    # a transition into a non-CFA, non-study state clears it
+    tb._on_state_did_change("deckBrowser", "review")
     assert "active=null" in evals[-1]
 
 

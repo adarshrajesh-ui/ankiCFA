@@ -46,9 +46,22 @@ def test_toolbar_gets_cfa_skin() -> None:
     wc = SimpleNamespace(head="", body="<div class='header'></div>")
     cfa_chrome.on_webview_will_set_content(wc, TopToolbar())
     assert "cfa-chrome-toolbar" in wc.head
-    # parity palette: brand navy + warm accent from the locked TOKENS
+    # parity palette: turquoise glass accent from the locked TOKENS
     assert cfa_style.TOKENS["accent"].lower() in wc.head.lower()
     assert ".hitem" in wc.head
+    # Review mode keeps native toolbar behavior, but it reads as a deliberate
+    # CFA review rail when Anki flattens it over the reviewer.
+    assert "body.flat .header" in wc.head
+    assert 'content: "CFA review mode";' in wc.head
+
+
+def test_toolbar_review_rail_has_phone_overflow_treatment() -> None:
+    css = cfa_chrome._toolbar_css()
+    assert "@media (max-width: 640px)" in css
+    assert "body.flat .header" in css
+    assert "-webkit-overflow-scrolling: touch;" in css
+    assert "body.flat .header::before" in css
+    assert "display: none;" in css
 
 
 def test_deckbrowser_gets_cfa_skin_and_banner() -> None:
@@ -136,6 +149,31 @@ def test_reviewer_bottom_primary_and_caution_cues() -> None:
     assert 'data-ease="3"' not in css
 
 
+def test_reviewer_bottom_is_deliberate_cfa_bar() -> None:
+    # The bottom reviewer controls remain Anki's real controls, but the bar
+    # should no longer read as a plain stock footer.
+    css = cfa_chrome._reviewer_bottom_css()
+    assert f"background: {cfa_style.TOKENS['primary_soft']} !important;" in css
+    assert "#innertable" in css
+    assert "box-shadow: 0 -12px 30px rgba(18, 43, 70, .06);" in css
+
+
+def test_reviewer_bottom_has_phone_layout_without_hiding_controls() -> None:
+    # Stock Anki hides Edit/More on narrow reviewer bars. The CFA mobile review
+    # chrome keeps those real controls reachable while wrapping the ease buttons.
+    css = cfa_chrome._reviewer_bottom_css()
+    assert "@media (max-width: 640px)" in css
+    assert "#innertable > tbody > tr" in css
+    assert (
+        "grid-template-columns: minmax(62px, .72fr) minmax(0, 2fr) minmax(62px, .72fr);"
+        in css
+    )
+    assert ".stat {" in css
+    assert "display: block !important;" in css
+    assert "min-height: 46px;" in css
+    assert "env(safe-area-inset-bottom, 0px)" in css
+
+
 def test_editor_gets_cfa_skin() -> None:
     # The note editor (Add Cards / Edit / Browse pane) — home of the flagship
     # tab-fill AI feature — shipped as pure stock Anki; the CFA skin must retone
@@ -178,10 +216,8 @@ def test_reviewer_retones_page_tint_and_type_answer_feedback() -> None:
     # neutral washes instead of the stock #afa / #faa / #ccc traffic-light blocks.
     css = cfa_chrome._reviewer_css()
     t = cfa_style.TOKENS
-    assert (
-        f"body:not(.nightMode) {{\n    background: {t['primary_soft']} !important;"
-        in css
-    )
+    assert "radial-gradient(circle at 86% 8%, rgba(20,184,177,.22)" in css
+    assert f"linear-gradient(135deg, {t['bg']} 0%" in css
     assert f".typeGood {{\n    background: {t['pass_soft']} !important;" in css
     assert f".typeBad {{\n    background: {t['fail_soft']} !important;" in css
     assert ".typeMissed" in css
@@ -189,6 +225,177 @@ def test_reviewer_retones_page_tint_and_type_answer_feedback() -> None:
     assert "#afa" not in css
     assert "#faa" not in css
     assert "#ccc" not in css
+
+
+def test_reviewer_frames_card_area_as_cfa_review_surface() -> None:
+    # The screenshot regression was the card itself sitting in a huge plain stock
+    # void. The reviewer body now provides the liquid-glass page and leaves the
+    # actual card shell to CFA-branded notes / the Basic wrapper.
+    css = cfa_chrome._reviewer_css()
+    assert 'content: "ankiCFA · Review mode";' in css
+    assert "body:not(.nightMode)::before" in css
+    assert "body:not(.nightMode) #qa" in css
+    assert "width: min(1040px, calc(100vw - 48px));" in css
+    assert "background: transparent;" in css
+    assert "box-shadow: none;" in css
+    assert "border-radius: 34px;" in css
+    assert "0 28px 90px rgba(5,59,69,.16)" in css
+
+
+def test_reviewer_body_has_phone_card_frame() -> None:
+    # On phone the Study -> reviewer body should use the same liquid-glass frame,
+    # but tightened to the viewport instead of a desktop-width review canvas.
+    css = cfa_chrome._reviewer_css()
+    assert "@media (max-width: 640px)" in css
+    assert "width: calc(100vw - 16px);" in css
+    assert "margin: 14px auto 12px;" in css
+    assert "#qa .cfa-basic-review-card" in css
+    assert "border-radius: 24px;" in css
+    assert "min-height: auto;" in css
+
+
+def test_basic_cards_in_cfa_decks_are_wrapped_for_review(monkeypatch) -> None:
+    # User-added Study cards can still be Basic notes. In CFA decks, the review
+    # hook wraps only their rendered HTML with a CFA frame; scheduling/card data
+    # is untouched.
+    decks = SimpleNamespace(
+        name_if_exists=lambda deck_id: "CFA Level II",
+        name=lambda deck_id: "CFA Level II",
+    )
+    monkeypatch.setattr(
+        cfa_chrome.aqt,
+        "mw",
+        SimpleNamespace(col=SimpleNamespace(decks=decks)),
+        raising=False,
+    )
+    card = SimpleNamespace(
+        current_deck_id=lambda: 42,
+        note_type=lambda: {"name": "Basic"},
+    )
+
+    html = cfa_chrome.on_card_will_show(
+        "Name the three factors in the Fama-French model.",
+        card,
+        "reviewQuestion",
+    )
+
+    assert "cfa-basic-review-card cfa-basic-review-card--question" in html
+    assert "ankiCFA · Level II · Question" in html
+    assert "Fama-French" in html
+
+
+def test_basic_cards_in_cfa_study_topic_decks_are_wrapped(monkeypatch) -> None:
+    # The Study page can surface CFA topic decks whose names do not literally
+    # contain "CFA". Those Basic cards still need the ankiCFA review frame.
+    decks = SimpleNamespace(
+        name_if_exists=lambda deck_id: "Equity Investments",
+        name=lambda deck_id: "Equity Investments",
+    )
+    monkeypatch.setattr(
+        cfa_chrome.aqt,
+        "mw",
+        SimpleNamespace(col=SimpleNamespace(decks=decks)),
+        raising=False,
+    )
+    card = SimpleNamespace(
+        current_deck_id=lambda: 42,
+        note_type=lambda: {"name": "Basic"},
+    )
+
+    html = cfa_chrome.on_card_will_show(
+        "Explain residual income valuation.",
+        card,
+        "reviewQuestion",
+    )
+
+    assert "cfa-basic-review-card cfa-basic-review-card--question" in html
+    assert "Explain residual income valuation." in html
+
+
+def test_basic_cards_launched_from_cfa_study_are_wrapped(monkeypatch) -> None:
+    # If Study falls back to an ordinary user deck, the live Study -> reviewer
+    # route still marks that review session as an ankiCFA study surface.
+    decks = SimpleNamespace(
+        name_if_exists=lambda deck_id: "Default",
+        name=lambda deck_id: "Default",
+    )
+    monkeypatch.setattr(
+        cfa_chrome.aqt,
+        "mw",
+        SimpleNamespace(
+            _cfa_review_from_study=True,
+            col=SimpleNamespace(decks=decks),
+        ),
+        raising=False,
+    )
+    card = SimpleNamespace(
+        current_deck_id=lambda: 1,
+        note_type=lambda: {"name": "Basic"},
+    )
+
+    html = cfa_chrome.on_card_will_show("Plain Basic", card, "reviewQuestion")
+
+    assert "cfa-basic-review-card cfa-basic-review-card--question" in html
+    assert "Plain Basic" in html
+
+
+def test_unbranded_cfa_knowledge_cards_launched_from_study_are_wrapped(
+    monkeypatch,
+) -> None:
+    # Existing seeded profiles may already have CFA Knowledge notes whose
+    # templates predate the branded .cfa-card markup. The live Study route should
+    # still frame their rendered card body as an ankiCFA review surface.
+    decks = SimpleNamespace(
+        name_if_exists=lambda deck_id: "CFA Level II",
+        name=lambda deck_id: "CFA Level II",
+    )
+    monkeypatch.setattr(
+        cfa_chrome.aqt,
+        "mw",
+        SimpleNamespace(
+            _cfa_review_from_study=True,
+            col=SimpleNamespace(decks=decks),
+        ),
+        raising=False,
+    )
+    card = SimpleNamespace(
+        current_deck_id=lambda: 42,
+        note_type=lambda: {"name": "CFA Knowledge"},
+    )
+
+    html = cfa_chrome.on_card_will_show(
+        "Name the three factors in the Fama-French model.",
+        card,
+        "reviewQuestion",
+    )
+
+    assert "cfa-basic-review-card cfa-basic-review-card--question" in html
+    assert "Fama-French" in html
+
+
+def test_card_wrapper_leaves_non_cfa_and_branded_cards_untouched(monkeypatch) -> None:
+    decks = SimpleNamespace(
+        name_if_exists=lambda deck_id: "Default",
+        name=lambda deck_id: "Default",
+    )
+    monkeypatch.setattr(
+        cfa_chrome.aqt,
+        "mw",
+        SimpleNamespace(col=SimpleNamespace(decks=decks)),
+        raising=False,
+    )
+    card = SimpleNamespace(
+        current_deck_id=lambda: 1,
+        note_type=lambda: {"name": "Basic"},
+    )
+
+    assert cfa_chrome.on_card_will_show("Plain", card, "reviewQuestion") == "Plain"
+    assert (
+        cfa_chrome.on_card_will_show(
+            '<div class="cfa-card">Branded</div>', card, "reviewQuestion"
+        )
+        == '<div class="cfa-card">Branded</div>'
+    )
 
 
 def test_other_contexts_untouched() -> None:
@@ -209,8 +416,11 @@ def test_register_is_idempotent() -> None:
     from aqt import gui_hooks
 
     cfa_chrome._registered = False
-    before = len(gui_hooks.webview_will_set_content._hooks)
+    before_web = len(gui_hooks.webview_will_set_content._hooks)
+    before_card = len(gui_hooks.card_will_show._hooks)
     cfa_chrome.register()
     cfa_chrome.register()
-    after = len(gui_hooks.webview_will_set_content._hooks)
-    assert after == before + 1  # registered exactly once despite two calls
+    after_web = len(gui_hooks.webview_will_set_content._hooks)
+    after_card = len(gui_hooks.card_will_show._hooks)
+    assert after_web == before_web + 1  # registered exactly once despite two calls
+    assert after_card == before_card + 1

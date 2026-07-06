@@ -59,10 +59,17 @@ def test_controller_loads_the_whole_collection_readiness_page() -> None:
     # so ethics-pair reviews and every CFA deck reach it. It must NOT scope to
     # whichever single deck happens to be current (which excluded ethics pairs).
     loaded: list[str] = []
+
+    def noop(*_args) -> None:
+        pass
+
+    def load_sveltekit_page(page: str) -> None:
+        loaded.append(page)
+
     web = SimpleNamespace(
-        set_bridge_command=lambda *a: None,
-        load_sveltekit_page=lambda page: loaded.append(page),
-        setFocus=lambda: None,
+        set_bridge_command=noop,
+        load_sveltekit_page=load_sveltekit_page,
+        setFocus=noop,
     )
     mw = SimpleNamespace(
         web=web,
@@ -75,18 +82,25 @@ def test_controller_loads_the_whole_collection_readiness_page() -> None:
 
 
 def test_link_handler_delegates_to_cfa_entry_points(monkeypatch) -> None:
-    from aqt import cfa
-    from aqt import cfa_home
+    from aqt import cfa, cfa_home
 
     calls: list[str] = []
-    monkeypatch.setattr(cfa, "study_by_exam_priority", lambda mw: calls.append("priority"))
+    monkeypatch.setattr(
+        cfa, "study_by_exam_priority", lambda mw: calls.append("priority")
+    )
     monkeypatch.setattr(cfa, "study_ethics_pairs", lambda mw: calls.append("ethics"))
     monkeypatch.setattr(cfa, "show_deadline", lambda mw: calls.append("deadline"))
     monkeypatch.setattr(cfa_home, "trigger_cfa_sync", lambda mw: calls.append("sync"))
-    monkeypatch.setattr(cfa_home, "open_sync_settings", lambda mw: calls.append("sync-settings"))
+    monkeypatch.setattr(
+        cfa_home, "open_sync_settings", lambda mw: calls.append("sync-settings")
+    )
 
     moved: list[str] = []
-    mw = SimpleNamespace(web=object(), moveToState=lambda s: moved.append(s))
+
+    def move_to_state(state: str) -> None:
+        moved.append(state)
+
+    mw = SimpleNamespace(web=object(), moveToState=move_to_state)
     ctrl = cfa_readiness.CfaReadiness(mw)  # type: ignore[arg-type]
     handler = ctrl._link_handler  # pylint: disable=protected-access
 
@@ -94,12 +108,10 @@ def test_link_handler_delegates_to_cfa_entry_points(monkeypatch) -> None:
         "cfa:priority",
         "cfa:risk-session",
         "cfa:readiness-drill",
-        "cfa:plan",
         "cfa:ethics",
         "cfa:deadline",
         "cfa:mock-review",
         "cfa:retention-queue",
-        "cfa:mock-schedule",
         "cfa:sync",
         "cfa:sync-settings",
     ):
@@ -107,6 +119,7 @@ def test_link_handler_delegates_to_cfa_entry_points(monkeypatch) -> None:
     handler("cfa:conceptmap")
     handler("cfa:study")
     handler("cfa:readiness")
+    handler("cfa:progress")
     handler("cfa:home")
     handler("cfa:decks")
 
@@ -114,13 +127,18 @@ def test_link_handler_delegates_to_cfa_entry_points(monkeypatch) -> None:
         "priority",
         "priority",
         "priority",
-        "priority",
         "ethics",
         "deadline",
-        "deadline",
-        "deadline",
+        "priority",
         "deadline",
         "sync",
         "sync-settings",
     ]
-    assert moved == ["cfaConceptMap", "cfaStudy", "cfaReadiness", "cfaHome", "deckBrowser"]
+    assert moved == [
+        "cfaConceptMap",
+        "cfaStudy",
+        "cfaReadiness",
+        "cfaProgress",
+        "cfaHome",
+        "deckBrowser",
+    ]

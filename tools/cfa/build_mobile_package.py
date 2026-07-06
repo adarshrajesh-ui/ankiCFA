@@ -24,8 +24,10 @@ launch (see F7 on-device wiring), and is also what we push + import onto the
 emulator to prove the ethics card renders and multi-span highlight works on
 device.
 
-The exam config is persisted into the built collection too, so a full-collection
-consumer (e.g. a fresh seed) inherits the CFA default exam date + topic weights.
+The exam config is persisted into the scratch collection before export. The
+package also carries a small ``CFA::_Internal`` manifest note so phone/fork
+consumers can see which CFA decks, templates, and phone-supported behaviours are
+present even on import paths that do not preserve arbitrary ``col.conf``.
 
 No AI — pure deck authoring, exactly mirroring the desktop first-launch seeder.
 """
@@ -42,6 +44,7 @@ def _repo_root() -> str:
 
 
 REPO = _repo_root()
+PACKAGE_MANIFEST_KEY = "cfa.mobile.package_manifest"
 
 
 def _ensure_import_paths() -> None:
@@ -65,6 +68,7 @@ def build_package(col_path: str, apkg_path: str) -> dict:
     import build_cfa_deck  # tools/cfa
     import import_pairs as ethics_pairs  # cfa/ethics_pairs
 
+    from anki.cfa_internal_state import upsert_cfa_state_record
     from anki.collection import Collection
     from anki.exporting import AnkiPackageExporter
 
@@ -73,9 +77,46 @@ def build_package(col_path: str, apkg_path: str) -> dict:
         deck_stats = build_cfa_deck.add_deck_notes(col)
         pairs = ethics_pairs.load_pairs()
         ethics_stats = ethics_pairs.import_pairs(col, pairs)
+        upsert_cfa_state_record(
+            col,
+            PACKAGE_MANIFEST_KEY,
+            {
+                "package": "cfa-mobile-apkg",
+                "version": 1,
+                "decks": {
+                    "main": build_cfa_deck.MAIN_DECK_NAME,
+                    "ethics": ethics_stats["deck"],
+                },
+                "notetypes": {
+                    "main": "CFA Knowledge",
+                    "ethics": ethics_stats["notetype"],
+                },
+                "phoneSupported": [
+                    "authored-cfa-level-ii-cards",
+                    "phone-friendly-cfa-study-card-template",
+                    "minimal-pair-ethics-touch-highlighting",
+                    "deterministic-ethics-grading",
+                    "named-source-footers",
+                    "content-type-tags",
+                ],
+                "requiresNativeClient": [
+                    "cfa-home-shell",
+                    "cfa-study-shell",
+                    "cfa-concept-map-shell",
+                    "cfa-readiness-shell",
+                    "first-launch-apkg-auto-import",
+                    "shared-rust-cfa-score-rpcs",
+                ],
+                "limits": [
+                    "this repo exports phone content/templates; native AnkiDroid UI lives outside this repo",
+                    "collection config such as cfa_exam_config may need normal sync if an importer does not preserve col.conf",
+                ],
+            },
+        )
 
         # Export the WHOLE collection (did=None) so both decks + their
-        # note-types + the ethics card templates travel together.
+        # note-types + the ethics card templates + internal manifest travel
+        # together.
         exporter = AnkiPackageExporter(col)
         exporter.did = None
         exporter.includeMedia = True
@@ -88,6 +129,7 @@ def build_package(col_path: str, apkg_path: str) -> dict:
             "ethics_notes": ethics_stats["total"],
             "ethics_deck": ethics_stats["deck"],
             "ethics_notetype": ethics_stats["notetype"],
+            "manifest_key": PACKAGE_MANIFEST_KEY,
         }
     finally:
         col.close()

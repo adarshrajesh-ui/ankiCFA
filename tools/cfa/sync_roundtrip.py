@@ -39,8 +39,10 @@ for _p in (os.path.join(_REPO, "out", "pylib"), os.path.join(_REPO, "pylib")):
 
 from anki import cfa  # noqa: E402
 from anki import cfa_sync as cs  # noqa: E402
-from anki.cards import CardId  # noqa: E402
-from anki.cards import FSRSMemoryState  # noqa: E402
+from anki.cards import (
+    CardId,  # noqa: E402
+    FSRSMemoryState,  # noqa: E402
+)
 from anki.collection import Collection  # noqa: E402
 
 
@@ -79,7 +81,9 @@ def _apply_score_state(col: Collection, cid: CardId) -> None:
     card.memory_state = FSRSMemoryState(stability=100.0, difficulty=5.0)
     card.desired_retention = 0.9
     card.last_review_time = (
-        int(last_review_ms // 1000) if last_review_ms is not None else int(time.time()) - 86_400
+        int(last_review_ms // 1000)
+        if last_review_ms is not None
+        else int(time.time()) - 86_400
     )
     col.update_card(card)
 
@@ -117,8 +121,7 @@ def _score_snapshot(col: Collection) -> dict:
             for topic in (_QUANT, _ETHICS)
         },
         "concept_topics": {
-            topic: _topic(bayesian.topics, topic).covered
-            for topic in (_QUANT, _ETHICS)
+            topic: _topic(bayesian.topics, topic).covered for topic in (_QUANT, _ETHICS)
         },
         "concept_topics_covered": bayesian.topics_covered,
     }
@@ -184,7 +187,9 @@ def main() -> int:
         _prepare_scored_reviews(desktop, [cfa_cid, ethics_cid])
         d_auth = cs.login(desktop, server)
         cs.sync(desktop, d_auth)
-        print("\n[desktop] created tagged CFA + ethics cards, logged in, uploaded to server")
+        print(
+            "\n[desktop] created tagged CFA + ethics cards, logged in, uploaded to server"
+        )
 
         phone = _new_collection(os.path.join(workdir, "phone.anki2"))
         p_auth = cs.login(phone, server)

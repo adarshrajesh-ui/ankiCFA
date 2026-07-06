@@ -1,16 +1,86 @@
 {
-  "_comment": "The ten official CFA Level II topic areas. This is the source-of-truth outline mirrored by cfa.CANONICAL_TOPICS (pylib/anki/cfa.py) and CANONICAL_TOPICS (rslib/src/scheduler/cfa_scores.rs). `tag` is the los:: join-key used everywhere and is exactly the prefix the authored deck (cfa/deck/*.jsonl) tags its cards with (Fixed Income uses the hyphenated los::fixed-income); `weight_low`/`weight_high` are the official CFA Institute Level II exam weight ranges (fractions). `order` follows the CFA curriculum sequence. All ten areas have authored cards, so all ten count as covered.",
-  "level": 2,
-  "topics": [
-    {"order": 1, "tag": "los::ethics", "slug": "ethics", "name": "Ethics & Professional Standards", "weight_low": 0.10, "weight_high": 0.15},
-    {"order": 2, "tag": "los::quant", "slug": "quant", "name": "Quantitative Methods", "weight_low": 0.05, "weight_high": 0.10},
-    {"order": 3, "tag": "los::econ", "slug": "econ", "name": "Economics", "weight_low": 0.05, "weight_high": 0.10},
-    {"order": 4, "tag": "los::fra", "slug": "fra", "name": "Financial Reporting & Analysis", "weight_low": 0.10, "weight_high": 0.15},
-    {"order": 5, "tag": "los::corp", "slug": "corp", "name": "Corporate Issuers", "weight_low": 0.05, "weight_high": 0.10},
-    {"order": 6, "tag": "los::equity", "slug": "equity", "name": "Equity Investments", "weight_low": 0.10, "weight_high": 0.15},
-    {"order": 7, "tag": "los::fixed-income", "slug": "fixed-income", "name": "Fixed Income", "weight_low": 0.10, "weight_high": 0.15},
-    {"order": 8, "tag": "los::derivatives", "slug": "derivatives", "name": "Derivatives", "weight_low": 0.05, "weight_high": 0.10},
-    {"order": 9, "tag": "los::altinv", "slug": "altinv", "name": "Alternative Investments", "weight_low": 0.05, "weight_high": 0.10},
-    {"order": 10, "tag": "los::portmgmt", "slug": "portmgmt", "name": "Portfolio Management", "weight_low": 0.10, "weight_high": 0.15}
-  ]
+    "_comment": "The ten official CFA Level II topic areas. This is the source-of-truth outline mirrored by cfa.CANONICAL_TOPICS (pylib/anki/cfa.py) and CANONICAL_TOPICS (rslib/src/scheduler/cfa_scores.rs). `tag` is the los:: join-key used everywhere and is exactly the prefix the authored deck (cfa/deck/*.jsonl) tags its cards with (Fixed Income uses the hyphenated los::fixed-income); `weight_low`/`weight_high` are the official CFA Institute Level II exam weight ranges (fractions). `order` follows the CFA curriculum sequence. All ten areas have authored cards, so all ten count as covered.",
+    "level": 2,
+    "topics": [
+        {
+            "order": 1,
+            "tag": "los::ethics",
+            "slug": "ethics",
+            "name": "Ethics & Professional Standards",
+            "weight_low": 0.10,
+            "weight_high": 0.15
+        },
+        {
+            "order": 2,
+            "tag": "los::quant",
+            "slug": "quant",
+            "name": "Quantitative Methods",
+            "weight_low": 0.05,
+            "weight_high": 0.10
+        },
+        {
+            "order": 3,
+            "tag": "los::econ",
+            "slug": "econ",
+            "name": "Economics",
+            "weight_low": 0.05,
+            "weight_high": 0.10
+        },
+        {
+            "order": 4,
+            "tag": "los::fra",
+            "slug": "fra",
+            "name": "Financial Reporting & Analysis",
+            "weight_low": 0.10,
+            "weight_high": 0.15
+        },
+        {
+            "order": 5,
+            "tag": "los::corp",
+            "slug": "corp",
+            "name": "Corporate Issuers",
+            "weight_low": 0.05,
+            "weight_high": 0.10
+        },
+        {
+            "order": 6,
+            "tag": "los::equity",
+            "slug": "equity",
+            "name": "Equity Investments",
+            "weight_low": 0.10,
+            "weight_high": 0.15
+        },
+        {
+            "order": 7,
+            "tag": "los::fixed-income",
+            "slug": "fixed-income",
+            "name": "Fixed Income",
+            "weight_low": 0.10,
+            "weight_high": 0.15
+        },
+        {
+            "order": 8,
+            "tag": "los::derivatives",
+            "slug": "derivatives",
+            "name": "Derivatives",
+            "weight_low": 0.05,
+            "weight_high": 0.10
+        },
+        {
+            "order": 9,
+            "tag": "los::altinv",
+            "slug": "altinv",
+            "name": "Alternative Investments",
+            "weight_low": 0.05,
+            "weight_high": 0.10
+        },
+        {
+            "order": 10,
+            "tag": "los::portmgmt",
+            "slug": "portmgmt",
+            "name": "Portfolio Management",
+            "weight_low": 0.10,
+            "weight_high": 0.15
+        }
+    ]
 }

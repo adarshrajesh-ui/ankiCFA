@@ -95,6 +95,8 @@ test.beforeAll(() => {
     fs.mkdirSync(OUT, { recursive: true });
 });
 
+test.skip(!process.env.CFA_SEED_REVIEWS, "deadline color-cue gate requires CFA_SEED_REVIEWS=1");
+
 test("at-risk Deadline rows carry a non-colour shape cue, not colour alone", async ({ page }) => {
     await page.goto("/cfa-home");
     const deckId = await cfaDeckId(page);

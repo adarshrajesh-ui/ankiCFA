@@ -4,11 +4,20 @@
 </style>
 <style id="cfa-chrome-reviewer-bottom">
   html, body {
-    background: #ffffff !important;
+    background: #F3F6F8 !important;
     color: #122B46;
     font-family: "IBM Plex Sans", -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   }
-  #outer { border-top: 1px solid #E7E9EC !important; }
+  #outer {
+    border-top: 1px solid #E7E9EC !important;
+    background: rgba(255, 255, 255, .94);
+    box-shadow: 0 -12px 30px rgba(18, 43, 70, .06);
+    padding: 6px 14px 8px;
+  }
+  #innertable {
+    max-width: 980px;
+    margin: 0 auto;
+  }
   /* Edit / More — quiet text buttons, not native gray chrome. */
   .stat button {
     background: transparent !important;

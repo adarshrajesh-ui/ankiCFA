@@ -224,13 +224,13 @@ The fork keeps its merge surface deliberately small. Almost all CFA logic sits i
 **new, fork-only files** that upstream Anki will never touch; only three existing
 files receive small, additive edits:
 
-| Layer       | File                                 | CFA change                                                                                        |
-| ----------- | ------------------------------------ | ------------------------------------------------------------------------------------------------- |
-| proto       | `proto/anki/scheduler.proto`         | +1 RPC (`BuildExamQueue`) + scoring RPC (`ComputeCfaScores`)                                      |
-| Rust core   | `rslib/src/scheduler/service/mod.rs` | `build_exam_queue` + `compute_cfa_scores` (faithful port of `cfa.py`, incl. per-(card,day) dedup) |
-| Desktop lib | `pylib/anki/scheduler/v3.py`, `cfa.py` | thin wrappers; `cfa.py` delegates scores to the Rust RPC                                       |
-| AI          | `cfa/ai/`, `cfa/ethics_pairs/`       | shared LLM client, semantic ethics grader, eval harness, provenance schema                       |
-| Sync        | `pylib/anki/cfa_sync.py`             | local `anki-sync-server` harness + review-conflict rule for round-trip proofs                   |
+| Layer       | File                                   | CFA change                                                                                        |
+| ----------- | -------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| proto       | `proto/anki/scheduler.proto`           | +1 RPC (`BuildExamQueue`) + scoring RPC (`ComputeCfaScores`)                                      |
+| Rust core   | `rslib/src/scheduler/service/mod.rs`   | `build_exam_queue` + `compute_cfa_scores` (faithful port of `cfa.py`, incl. per-(card,day) dedup) |
+| Desktop lib | `pylib/anki/scheduler/v3.py`, `cfa.py` | thin wrappers; `cfa.py` delegates scores to the Rust RPC                                          |
+| AI          | `cfa/ai/`, `cfa/ethics_pairs/`         | shared LLM client, semantic ethics grader, eval harness, provenance schema                        |
+| Sync        | `pylib/anki/cfa_sync.py`               | local `anki-sync-server` harness + review-conflict rule for round-trip proofs                     |
 
 New fork-only files (no upstream merge surface):
 [`pylib/anki/cfa.py`](./pylib/anki/cfa.py) (exam config + memory score),
@@ -259,33 +259,33 @@ and merge-difficulty analysis.
 Full acceptance mapping with evidence paths:
 [`proof/friday/ACCEPTANCE.md`](./proof/friday/ACCEPTANCE.md). Summary:
 
-| # | Requirement | How we satisfy it | Re-run |
-|---|-------------|-------------------|--------|
-| **D1** | Every AI output traces to a named source | Provenance record on every grade (`source`, `standard`, `item_id`, `model`, `rationale`); example in [`proof/friday/ethics/item5-emitted-payload.json`](./proof/friday/ethics/item5-emitted-payload.json) | inspect card after ethics review |
-| **D2** | Eval before students see output; cutoff | 30 human-labeled ethics attempts; **LLM agreement 0.833 ≥ 0.80 → PASS** ([`proof/friday/phase0/eval-gate-PASS-ai-on-gpt4o.txt`](./proof/friday/phase0/eval-gate-PASS-ai-on-gpt4o.txt)) | `just cfa-ethics-eval` (needs `OPENAI_API_KEY`) |
-| **D3** | Scores work with AI off + in-app toggle | Scores are AI-free (`ComputeCfaScores`); toggles in **CFA → AI Settings…** | `just cfa-parity-test` · `just cfa-ai-toggle-test` |
-| **D4** | Two-way sync, no lost/double reviews | Desktop ↔ `anki-sync-server` ↔ phone round-trip; more-recent-wins conflict rule | `just cfa-sync-test` · [`proof/friday/sync/roundtrip*.mp4`](./proof/friday/sync/) |
-| **D5** | Offline review, sync on reconnect | Phone reviews offline, full-download on reconnect | [`proof/friday/sync/offline-then-sync.mp4`](./proof/friday/sync/offline-then-sync.mp4) |
-| **D6** | Phone: 3 scores + ranges + give-up | Native Readiness screen on arm64 emulator | [`proof/friday/phase0/mobile-09-readiness.png`](./proof/friday/phase0/mobile-09-readiness.png) |
-| **D7** | Eval numbers + phone→desktop recording | Eval gate log + sync recording | eval log above · [`proof/friday/sync/roundtrip-take1-phone-reviews.mp4`](./proof/friday/sync/roundtrip-take1-phone-reviews.mp4) |
+| #      | Requirement                              | How we satisfy it                                                                                                                                                                                         | Re-run                                                                                                                          |
+| ------ | ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| **D1** | Every AI output traces to a named source | Provenance record on every grade (`source`, `standard`, `item_id`, `model`, `rationale`); example in [`proof/friday/ethics/item5-emitted-payload.json`](./proof/friday/ethics/item5-emitted-payload.json) | inspect card after ethics review                                                                                                |
+| **D2** | Eval before students see output; cutoff  | 30 human-labeled ethics attempts; **LLM agreement 0.833 ≥ 0.80 → PASS** ([`proof/friday/phase0/eval-gate-PASS-ai-on-gpt4o.txt`](./proof/friday/phase0/eval-gate-PASS-ai-on-gpt4o.txt))                    | `just cfa-ethics-eval` (needs `OPENAI_API_KEY`)                                                                                 |
+| **D3** | Scores work with AI off + in-app toggle  | Scores are AI-free (`ComputeCfaScores`); toggles in **CFA → AI Settings…**                                                                                                                                | `just cfa-parity-test` · `just cfa-ai-toggle-test`                                                                              |
+| **D4** | Two-way sync, no lost/double reviews     | Desktop ↔ `anki-sync-server` ↔ phone round-trip; more-recent-wins conflict rule                                                                                                                           | `just cfa-sync-test` · [`proof/friday/sync/roundtrip*.mp4`](./proof/friday/sync/)                                               |
+| **D5** | Offline review, sync on reconnect        | Phone reviews offline, full-download on reconnect                                                                                                                                                         | [`proof/friday/sync/offline-then-sync.mp4`](./proof/friday/sync/offline-then-sync.mp4)                                          |
+| **D6** | Phone: 3 scores + ranges + give-up       | Native Readiness screen on arm64 emulator                                                                                                                                                                 | [`proof/friday/phase0/mobile-09-readiness.png`](./proof/friday/phase0/mobile-09-readiness.png)                                  |
+| **D7** | Eval numbers + phone→desktop recording   | Eval gate log + sync recording                                                                                                                                                                            | eval log above · [`proof/friday/sync/roundtrip-take1-phone-reviews.mp4`](./proof/friday/sync/roundtrip-take1-phone-reviews.mp4) |
 
 ### Desktop AI — what, why, skipped
 
-| Built | Why | Fallback |
-|-------|-----|----------|
+| Built                                | Why                                                                                        | Fallback                                                  |
+| ------------------------------------ | ------------------------------------------------------------------------------------------ | --------------------------------------------------------- |
 | **Semantic ethics grading** (GPT-4o) | Span-matching misses paraphrased evidence; LLM judges highlight quality against gold spans | Deterministic 4-tier span grader (same tiers, no network) |
-| **Tab-to-fill card backs** | Speed up authoring CFA items in the editor | Button disabled / tooltip when AI off |
-| **Shared `cfa/ai/llm_client`** | One cost-capped, retrying client; never raises | `ok=False` → caller uses fallback |
+| **Tab-to-fill card backs**           | Speed up authoring CFA items in the editor                                                 | Button disabled / tooltip when AI off                     |
+| **Shared `cfa/ai/llm_client`**       | One cost-capped, retrying client; never raises                                             | `ok=False` → caller uses fallback                         |
 
 **Skipped:** deck-wide RAG (keyword/vector search), AI-generated questions, AI in
 the score pipeline, cloud-hosted keys.
 
 **Eval vs baseline (side-by-side):**
 
-| Grader | Grade agreement | Notes |
-|--------|-----------------|-------|
-| Deterministic span matcher | **0.733** | frozen preview column on the same 30 attempts |
-| LLM semantic (GPT-4o) | **0.833** | **PASS** at cutoff 0.80 |
+| Grader                     | Grade agreement | Notes                                         |
+| -------------------------- | --------------- | --------------------------------------------- |
+| Deterministic span matcher | **0.733**       | frozen preview column on the same 30 attempts |
+| LLM semantic (GPT-4o)      | **0.833**       | **PASS** at cutoff 0.80                       |
 
 Re-run: `just cfa-ethics-eval` (AI-on gate) · `just cfa-eval` (held-out recall-model
 simulation — accuracy 0.686, AUC 0.763 on 30 held-out concepts).

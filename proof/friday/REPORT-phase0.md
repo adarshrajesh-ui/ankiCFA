@@ -7,7 +7,7 @@ The core win: the honest CFA scores now come from **one read-only Rust engine**,
 `ComputeCfaScores`, that desktop and the AnkiDroid client both call — computed in
 exactly one place, so desktop == mobile == old Python. It is a faithful f64 port
 of `pylib/anki/cfa.py` (Memory / Performance / Readiness + the Bayesian hero
-band) using the *same* SQL and math, so parity holds by construction:
+band) using the _same_ SQL and math, so parity holds by construction:
 `just cfa-parity-test` shows the RPC equals the Python reference **field-by-field
 to 1e-9**. Added the requested **double-count fix** — graded reviews counted at
 most once per (card, day), so an offline dual-device round-trip can't inflate the

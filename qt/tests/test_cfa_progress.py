@@ -11,6 +11,8 @@ nav had no Progress entry. It is now the ``cfaProgress`` main-window state: a
 click away, and the current-tab highlight tracks it. Fails on stock Anki.
 """
 
+# pylint: disable=protected-access
+
 from __future__ import annotations
 
 import os
@@ -62,6 +64,12 @@ def test_controller_loads_the_themed_graphs_page() -> None:
     assert loaded == ["graphs"]
 
 
+def test_sync_refresh_map_covers_progress_page() -> None:
+    from aqt import cfa_sync_connect as cc
+
+    assert cc._CFA_STATE_PAGES["cfaProgress"] == "graphs"
+
+
 def test_link_handler_opens_browser_on_chart_drill_in(monkeypatch) -> None:
     # Clicking a bar in a graph emits `browserSearch: <query>`; the native state
     # must honour it exactly like the NewDeckStats dialog did, opening the
@@ -78,3 +86,23 @@ def test_link_handler_opens_browser_on_chart_drill_in(monkeypatch) -> None:
 
     assert handled is False
     assert searched == [" deck:current added:1"]
+
+
+def test_link_handler_routes_phone_product_nav() -> None:
+    moved: list[str] = []
+    mw = SimpleNamespace(web=object(), moveToState=moved.append)
+    ctrl = cfa_progress.CfaProgress(mw)  # type: ignore[arg-type]
+
+    ctrl._link_handler("cfa:home")
+    ctrl._link_handler("cfa:study")
+    ctrl._link_handler("cfa:conceptmap")
+    ctrl._link_handler("cfa:readiness")
+    ctrl._link_handler("cfa:progress")
+
+    assert moved == [
+        "cfaHome",
+        "cfaStudy",
+        "cfaConceptMap",
+        "cfaReadiness",
+        "cfaProgress",
+    ]

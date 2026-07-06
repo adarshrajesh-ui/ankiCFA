@@ -351,7 +351,9 @@ def test_fill_note_front_to_back():
 
 def test_fill_note_back_to_front():
     note = _basic("", "Modified duration estimates price change per 1% yield move.")
-    res = fill_note(note, complete_fn=_ok_complete("What does modified duration estimate?"))
+    res = fill_note(
+        note, complete_fn=_ok_complete("What does modified duration estimate?")
+    )
     assert res["ok"] and res["status"] == "filled" and res["target"] == "front"
     assert note.fields[0] == "What does modified duration estimate?"
     assert note.fields[1].startswith("Modified duration")  # source untouched
@@ -477,7 +479,7 @@ def test_hint_style_stays_on_cfa_palette_no_monospace():
     import aqt.cfa_tab_fill as tf
 
     js = tf._HINT_JS
-    assert "#da5c01" in js  # warm CFA accent on the AI sparkle
+    assert "#14b8b1" in js  # turquoise CFA accent on the AI sparkle
     assert "font:inherit" in js  # kbd cap uses body font, never monospace
 
 

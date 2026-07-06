@@ -95,7 +95,7 @@ struct CfaExamConfig {
 // --- small numeric helpers (mirror cfa.py) ----------------------------------
 
 fn clamp01(x: f64) -> f64 {
-    x.max(0.0).min(1.0)
+    x.clamp(0.0, 1.0)
 }
 
 fn fmean(values: &[f64]) -> f64 {
@@ -130,7 +130,11 @@ fn weighted_range(pairs: &[(f64, f64)]) -> (f64, f64, f64) {
     }
     let point = pairs.iter().map(|(v, w)| v * w).sum::<f64>() / total_w;
     let spread = if pairs.len() > 1 {
-        let var = pairs.iter().map(|(v, w)| w * (v - point).powi(2)).sum::<f64>() / total_w;
+        let var = pairs
+            .iter()
+            .map(|(v, w)| w * (v - point).powi(2))
+            .sum::<f64>()
+            / total_w;
         var.sqrt()
     } else {
         0.0
@@ -236,7 +240,11 @@ impl Collection {
         let timing = self.timing_today()?;
         let today = timing.days_elapsed as i64;
         let next_day_at = timing.next_day_at.0;
-        let now = if input.now != 0 { input.now } else { timing.now.0 };
+        let now = if input.now != 0 {
+            input.now
+        } else {
+            timing.now.0
+        };
 
         // Deck scoping (deck + subdecks), mirroring `deck_and_child_ids`.
         let deck_filter = if input.whole_collection {
@@ -347,13 +355,10 @@ impl Collection {
         );
         let mut stmt = self.storage.db.prepare(&sql)?;
         let card_rows = stmt
-            .query_and_then(params![today, next_day_at, now], |r| -> Result<(
-                i64,
-                String,
-                Option<f64>,
-            )> {
-                Ok((r.get(0)?, r.get(1)?, r.get(2)?))
-            })?
+            .query_and_then(
+                params![today, next_day_at, now],
+                |r| -> Result<(i64, String, Option<f64>)> { Ok((r.get(0)?, r.get(1)?, r.get(2)?)) },
+            )?
             .collect::<Result<Vec<_>>>()?;
 
         let review_counts = self.graded_reviews_by_card(deck_filter, next_day_at)?;
@@ -369,8 +374,10 @@ impl Collection {
         let last_review_at = last_ms.map(|ms| iso_local_seconds(ms / 1000));
 
         // Group per-card (tags, R) into per-topic scores.
-        let mut per_r: HashMap<&str, Vec<f64>> =
-            topic_prefixes.iter().map(|t| (t.as_str(), vec![])).collect();
+        let mut per_r: HashMap<&str, Vec<f64>> = topic_prefixes
+            .iter()
+            .map(|t| (t.as_str(), vec![]))
+            .collect();
         let mut per_reviews: HashMap<&str, u32> =
             topic_prefixes.iter().map(|t| (t.as_str(), 0)).collect();
         for (cid, tags, r) in &card_rows {
@@ -518,14 +525,12 @@ impl Collection {
         );
         let mut stmt = self.storage.db.prepare(&sql)?;
         let card_rows = stmt
-            .query_and_then(params![today, next_day_at, now], |r| -> Result<(
-                i64,
-                String,
-                Option<f64>,
-                i64,
-            )> {
-                Ok((r.get(0)?, r.get(1)?, r.get(2)?, r.get(3)?))
-            })?
+            .query_and_then(
+                params![today, next_day_at, now],
+                |r| -> Result<(i64, String, Option<f64>, i64)> {
+                    Ok((r.get(0)?, r.get(1)?, r.get(2)?, r.get(3)?))
+                },
+            )?
             .collect::<Result<Vec<_>>>()?;
 
         // Per card: total/success counts, last-review ms, first graded ease.
@@ -542,21 +547,16 @@ impl Collection {
         );
         let mut stats_stmt = self.storage.db.prepare(&stats_sql)?;
         let mut stats: HashMap<i64, (i64, i64, i64, Option<i64>)> = HashMap::new();
-        let stat_rows = stats_stmt.query_and_then([], |r| -> Result<(
-            i64,
-            i64,
-            i64,
-            i64,
-            Option<i64>,
-        )> {
-            Ok((
-                r.get(0)?,
-                r.get(1)?,
-                r.get::<_, Option<i64>>(2)?.unwrap_or(0),
-                r.get::<_, Option<i64>>(3)?.unwrap_or(0),
-                r.get(4)?,
-            ))
-        })?;
+        let stat_rows =
+            stats_stmt.query_and_then([], |r| -> Result<(i64, i64, i64, i64, Option<i64>)> {
+                Ok((
+                    r.get(0)?,
+                    r.get(1)?,
+                    r.get::<_, Option<i64>>(2)?.unwrap_or(0),
+                    r.get::<_, Option<i64>>(3)?.unwrap_or(0),
+                    r.get(4)?,
+                ))
+            })?;
         for row in stat_rows {
             let (cid, total, succ, last_ms, first_ease) = row?;
             stats.insert(cid, (total, succ, last_ms, first_ease));
@@ -567,8 +567,10 @@ impl Collection {
             topic_prefixes.iter().map(|t| (t.as_str(), 0)).collect();
         let mut per_fail: HashMap<&str, i64> =
             topic_prefixes.iter().map(|t| (t.as_str(), 0)).collect();
-        let mut per_recall: HashMap<&str, Vec<f64>> =
-            topic_prefixes.iter().map(|t| (t.as_str(), vec![])).collect();
+        let mut per_recall: HashMap<&str, Vec<f64>> = topic_prefixes
+            .iter()
+            .map(|t| (t.as_str(), vec![]))
+            .collect();
         for (cid, tags, r, ivl) in &card_rows {
             let Some(topic) = topic_of(tags, topic_prefixes) else {
                 continue;
@@ -767,7 +769,11 @@ fn cfa_readiness_score(
     let cov = mem.coverage_pct;
     let acc = |m: f64, p: f64| cov * (0.5 * m + 0.5 * p) + (1.0 - cov) * GUESS_RATE;
 
-    let (mp, pl, ph) = (mem.point.unwrap(), mem.range_low.unwrap(), mem.range_high.unwrap());
+    let (mp, pl, ph) = (
+        mem.point.unwrap(),
+        mem.range_low.unwrap(),
+        mem.range_high.unwrap(),
+    );
     let (pp, ppl, pph) = (
         perf.point.unwrap(),
         perf.range_low.unwrap(),
@@ -819,8 +825,7 @@ mod tests {
         card.due = 0;
         card.interval = 30;
         card.decay = Some(FSRS5_DEFAULT_DECAY);
-        card.last_review_time =
-            Some(TimestampSecs::now().adding_secs(-86_400 * days_since_review));
+        card.last_review_time = Some(TimestampSecs::now().adding_secs(-86_400 * days_since_review));
         card.memory_state = Some(FsrsMemoryState {
             stability: 100.0,
             difficulty: 5.0,
@@ -886,14 +891,23 @@ mod tests {
                 let cid = add_reviewed_card(&mut col, &[&tag], 1);
                 // distinct ids, all in the past; ~80% correct.
                 let ease = if i % 5 == 0 { 1 } else { 3 };
-                add_review(&mut col, cid, now_ms - ((ti * 100 + i) as i64) * 86_400_000, ease);
+                add_review(
+                    &mut col,
+                    cid,
+                    now_ms - ((ti * 100 + i) as i64) * 86_400_000,
+                    ease,
+                );
             }
         }
         let n_topics = CANONICAL_TOPICS.len() as u32;
         let n_reviews = n_topics * 30; // 30 cards/topic, one review each
         let out = scores(&mut col);
         let mem = out.memory.unwrap();
-        assert!(!mem.abstain, "full-coverage cohort -> no abstain: {}", mem.reason);
+        assert!(
+            !mem.abstain,
+            "full-coverage cohort -> no abstain: {}",
+            mem.reason
+        );
         assert_eq!(mem.graded_reviews, n_reviews);
         assert_eq!(mem.topics_total, n_topics);
         assert_eq!(mem.topics_covered, n_topics);

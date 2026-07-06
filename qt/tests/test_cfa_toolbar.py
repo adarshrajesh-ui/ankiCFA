@@ -131,6 +131,41 @@ def test_create_account_link_flips_with_login_state() -> None:
     assert inn.link_handlers["cfa_sync_settings"] == inn._cfaSyncSettingsLinkHandler
 
 
+def test_sync_link_without_collection_opens_settings(monkeypatch) -> None:
+    # Native-sync contract: with no collection open there is nothing to sync, so
+    # the Sync control opens the CFA settings/status dialog instead.
+    from aqt import cfa_sync_connect as cc
+
+    calls: list[str] = []
+    monkeypatch.setattr(cc, "open_sync_settings", lambda mw: calls.append("settings"))
+
+    tb = _toolbar_with_auth(False, None)
+    tb.mw.col = None  # type: ignore[assignment]
+    tb.mw.on_sync_button_clicked = lambda: calls.append("stock-sync")  # type: ignore[attr-defined]
+
+    tb._syncLinkHandler()
+
+    assert calls == ["settings"]
+
+
+def test_sync_link_with_collection_runs_normal_anki_sync(monkeypatch) -> None:
+    # Native-sync contract: once a collection is open the Sync control always
+    # runs Anki's own sync flow (which opens the AnkiWeb login when the device
+    # isn't linked yet), regardless of prior login state. No custom server.
+    from aqt import cfa_sync_connect as cc
+
+    calls: list[str] = []
+    monkeypatch.setattr(cc, "open_sync_settings", lambda mw: calls.append("settings"))
+
+    tb = _toolbar_with_auth(True, "cfa")
+    tb.mw.col = object()  # type: ignore[assignment]
+    tb.mw.on_sync_button_clicked = lambda: calls.append("stock-sync")  # type: ignore[attr-defined]
+
+    tb._syncLinkHandler()
+
+    assert calls == ["stock-sync"]
+
+
 def test_center_links_builds_single_account_control() -> None:
     # The old clunky pair of always-visible create_link("cfa_connect") +
     # create_link("cfa_logout") is gone; exactly one settings/status chip is

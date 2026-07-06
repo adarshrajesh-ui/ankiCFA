@@ -4,6 +4,7 @@ I drove the live `ankidroid_cfa` emulator (AnkiDroid `com.ichi2.anki.debug`) to
 verify the mobile side directly. Screenshots in this dir.
 
 ## Confirmed: the mobile app is a NATIVE CFA product
+
 - **Branding** — title bar reads **"ankiCFA / 40 cards due"**; custom app icon
   (dark tile, red star) in the launcher (`mobile-01…04`).
 - **CFA content** — decks `CFA` ▸ `Ethics Pairs` + `CFA Level II`; the Ethics
@@ -13,7 +14,9 @@ verify the mobile side directly. Screenshots in this dir.
   Browser / Statistics) — a CFA-first information architecture (`mobile-06`).
 
 ## D6 evidence — phone shows the 3 scores with give-up (`mobile-09-readiness.png`)
+
 `CfaExamReadinessActivity` renders:
+
 - Header **"ANKICFA · CFA LEVEL II — Exam Readiness"**.
 - **Three scores** — READINESS / MEMORY / PERFORMANCE — each with its state
   ("N/A — abstaining") and the give-up reason.
@@ -31,9 +34,10 @@ render once the profile has ≥200 graded reviews / ≥50% coverage (this demo
 profile has 1 review, so it's honestly in give-up state).
 
 ## Honest gaps (why this isn't yet full "desktop == mobile parity")
+
 - The screen says **"Source: on-device (deterministic)"** — the app is built
   from the pre-RPC AAR (21:03) and `CfaScoresProvider` is on its **fallback**
-  path (`SOURCE_FALLBACK`), a *second* Kotlin implementation. The fallback was
+  path (`SOURCE_FALLBACK`), a _second_ Kotlin implementation. The fallback was
   clearly written to mirror the engine (identical thresholds/wording/topics),
   but true single-engine parity needs the RPC.
 - **To close it (mobile worker's integration step):** now that the RPC is on

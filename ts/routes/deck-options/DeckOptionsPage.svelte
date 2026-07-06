@@ -84,74 +84,74 @@ License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
     <ConfigSelector {state} on:presetchange={onPresetChange} />
 
     <div class="deck-options-page">
-    <Container
-        breakpoint="sm"
-        --gutter-inline="0.25rem"
-        --gutter-block="0.75rem"
-        class="container-columns"
-    >
-        <div>
-            <Row class="row-columns">
-                <DailyLimits
-                    {state}
-                    api={dailyLimits}
-                    bind:this={dailyLimitsComponent}
-                />
-            </Row>
-
-            <Row class="row-columns">
-                <NewOptions {state} api={newOptions} />
-            </Row>
-
-            <Row class="row-columns">
-                <LapseOptions {state} api={lapseOptions} />
-            </Row>
-
-            <Row class="row-columns">
-                <DisplayOrder {state} api={displayOrder} />
-            </Row>
-
-            <Row class="row-columns">
-                <FsrsOptionsOuter
-                    {state}
-                    api={{}}
-                    bind:this={fsrsOptionsOuterComponent}
-                />
-            </Row>
-        </div>
-
-        <div>
-            <Row class="row-columns">
-                <BuryOptions {state} api={buryOptions} />
-            </Row>
-
-            <Row class="row-columns">
-                <AudioOptions {state} api={audioOptions} />
-            </Row>
-
-            <Row class="row-columns">
-                <TimerOptions {state} api={timerOptions} />
-            </Row>
-
-            <Row class="row-columns">
-                <AutoAdvance {state} api={timerOptions} />
-            </Row>
-
-            {#if $addons.length}
+        <Container
+            breakpoint="sm"
+            --gutter-inline="0.25rem"
+            --gutter-block="0.75rem"
+            class="container-columns"
+        >
+            <div>
                 <Row class="row-columns">
-                    <Addons {state} />
+                    <DailyLimits
+                        {state}
+                        api={dailyLimits}
+                        bind:this={dailyLimitsComponent}
+                    />
                 </Row>
-            {/if}
 
-            <Row class="row-columns">
-                <EasyDays {state} api={easyDays} />
-            </Row>
+                <Row class="row-columns">
+                    <NewOptions {state} api={newOptions} />
+                </Row>
 
-            <Row class="row-columns">
-                <AdvancedOptions {state} api={advancedOptions} />
-            </Row>
-        </div>
-    </Container>
+                <Row class="row-columns">
+                    <LapseOptions {state} api={lapseOptions} />
+                </Row>
+
+                <Row class="row-columns">
+                    <DisplayOrder {state} api={displayOrder} />
+                </Row>
+
+                <Row class="row-columns">
+                    <FsrsOptionsOuter
+                        {state}
+                        api={{}}
+                        bind:this={fsrsOptionsOuterComponent}
+                    />
+                </Row>
+            </div>
+
+            <div>
+                <Row class="row-columns">
+                    <BuryOptions {state} api={buryOptions} />
+                </Row>
+
+                <Row class="row-columns">
+                    <AudioOptions {state} api={audioOptions} />
+                </Row>
+
+                <Row class="row-columns">
+                    <TimerOptions {state} api={timerOptions} />
+                </Row>
+
+                <Row class="row-columns">
+                    <AutoAdvance {state} api={timerOptions} />
+                </Row>
+
+                {#if $addons.length}
+                    <Row class="row-columns">
+                        <Addons {state} />
+                    </Row>
+                {/if}
+
+                <Row class="row-columns">
+                    <EasyDays {state} api={easyDays} />
+                </Row>
+
+                <Row class="row-columns">
+                    <AdvancedOptions {state} api={advancedOptions} />
+                </Row>
+            </div>
+        </Container>
     </div>
 </div>
 

@@ -55,14 +55,14 @@ os.environ.setdefault("ANKI_API_HOST", "0.0.0.0")
 # Import aqt (which pulls in QtWebEngineWidgets) BEFORE any QApplication instance
 # exists, else Qt raises "QtWebEngineWidgets must be imported ... before a
 # QCoreApplication instance is created". This mirrors tools/cfa/render_f5_proof.py.
-import aqt  # noqa: E402
-from aqt import mediasrv  # noqa: E402
 from PyQt6.QtWidgets import QApplication  # noqa: E402
 
+import aqt  # noqa: E402
 from anki import cfa  # noqa: E402
 from anki.cards import CardId  # noqa: E402
 from anki.collection import Collection  # noqa: E402
 from anki.decks import DeckId  # noqa: E402
+from aqt import mediasrv  # noqa: E402
 
 DAY = 86_400
 

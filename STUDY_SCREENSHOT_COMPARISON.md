@@ -15,5 +15,5 @@ Compared against:
 ## Intentional Deviations
 
 - Deck counts and labels come from the live Anki deck tree, so exact numbers can differ from the frozen mock.
-- The quick-add composer opens existing Add Cards for the selected deck instead of inserting the visible prompt/answer draft. See `STUDY_BACKEND_GAPS.md`.
+- The quick-add composer opens existing Add Cards for the selected deck with the Basic note type selected instead of silently inserting the visible prompt/answer card. See `STUDY_BACKEND_GAPS.md`.
 - Native Android/Kotlin source is not present in this checkout; Android fidelity is implemented as the shared Svelte mobile-width Study surface.

@@ -49,9 +49,7 @@ def main() -> None:
     password = os.environ.get("CFA_SYNC_PASS", "cfa-exam-2026")
     port = os.environ.get("CFA_SYNC_PORT", "27701")
     host = os.environ.get("CFA_SYNC_HOST", "0.0.0.0")
-    base = os.environ.get(
-        "CFA_SYNC_BASE", str(Path.home() / ".cfa-syncserver")
-    )
+    base = os.environ.get("CFA_SYNC_BASE", str(Path.home() / ".cfa-syncserver"))
     Path(base).mkdir(parents=True, exist_ok=True)
 
     # The Rust sync server reads these standard anki-sync-server env vars.

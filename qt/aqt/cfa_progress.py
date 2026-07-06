@@ -53,7 +53,25 @@ class CfaProgress:
         # dialog so the "drill into a chart" affordance keeps working here.
         import aqt
 
-        if cmd.startswith("browserSearch"):
+        if cmd == "cfa:home":
+            self.mw.moveToState("cfaHome")
+        elif cmd == "cfa:study":
+            self.mw.moveToState("cfaStudy")
+        elif cmd == "cfa:conceptmap":
+            self.mw.moveToState("cfaConceptMap")
+        elif cmd == "cfa:readiness":
+            self.mw.moveToState("cfaReadiness")
+        elif cmd == "cfa:progress":
+            self.mw.moveToState("cfaProgress")
+        elif cmd == "cfa:sync":
+            from aqt.cfa_home import trigger_cfa_sync
+
+            trigger_cfa_sync(self.mw)
+        elif cmd == "cfa:sync-settings":
+            from aqt.cfa_home import open_sync_settings
+
+            open_sync_settings(self.mw)
+        elif cmd.startswith("browserSearch"):
             _, query = cmd.split(":", 1)
             browser = aqt.dialogs.open("Browser", self.mw)
             browser.search_for(query)

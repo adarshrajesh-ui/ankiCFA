@@ -105,7 +105,7 @@ class MainWebView(AnkiWebView):
         AnkiWebView.__init__(self, kind=AnkiWebViewKind.MAIN)
         self.mw = mw
         self.setFocusPolicy(Qt.FocusPolicy.WheelFocus)
-        self.setMinimumWidth(400)
+        self.setMinimumWidth(320)
         self.setAcceptDrops(True)
 
     # Importing files via drag & drop
@@ -178,6 +178,10 @@ class AnkiQt(QMainWindow):
     pm: ProfileManagerType
     web: MainWebView
     bottomWeb: BottomWebView
+    _BOTTOM_CHROME_OWNER_STATES = frozenset({"deckBrowser", "overview", "review"})
+    _CFA_PRODUCT_STATES = frozenset(
+        {"cfaHome", "cfaStudy", "cfaConceptMap", "cfaReadiness"}
+    )
 
     def __init__(
         self,
@@ -787,9 +791,33 @@ class AnkiQt(QMainWindow):
         self.state = state
         gui_hooks.state_will_change(state, oldState)
         getattr(self, f"_{state}State", lambda *_: None)(oldState, *args)
+        self._syncTopChromeForState(state)
+        self._clearBottomChromeIfOrphaned(state)
         if state != "resetRequired":
             self.bottomWeb.adjustHeightToFit()
         gui_hooks.state_did_change(state, oldState)
+
+    def _syncTopChromeForState(self, state: MainWindowState) -> None:
+        """Reserve the native top toolbar for stock Anki/reviewer states."""
+        if state in self._CFA_PRODUCT_STATES:
+            self.toolbarWeb.reset_timer()
+            self.toolbarWeb.hide_timer.stop()
+            self.toolbarWeb.hidden = True
+            self.toolbarWeb.setVisible(False)
+            self.toolbarWeb.setFixedHeight(0)
+            return
+
+        self.toolbarWeb.setVisible(True)
+        self.toolbarWeb.setMinimumHeight(0)
+        self.toolbarWeb.setMaximumHeight(QWIDGETSIZE_MAX)
+        self.toolbarWeb.hidden = False
+        self.toolbarWeb.show()
+        self.toolbarWeb.adjustHeightToFit()
+
+    def _clearBottomChromeIfOrphaned(self, state: MainWindowState) -> None:
+        """Clear stale reviewer/overview chrome on states that do not own it."""
+        if state not in self._BOTTOM_CHROME_OWNER_STATES:
+            self.bottomWeb.clear_for_shell_state()
 
     def _cfaHomeState(self, oldState: MainWindowState) -> None:
         # CFA fork: the native landing dashboard (defensive — this runs inside
@@ -881,9 +909,10 @@ class AnkiQt(QMainWindow):
         if newState not in {"resetRequired", "review"}:
             self.reviewer.auto_advance_enabled = False
             self.reviewer.cleanup()
+            self._cfa_review_from_study = False
+            self._cfa_review_deck_id = None
             self.toolbarWeb.elevate()
             self.toolbarWeb.show()
-            self.bottomWeb.show()
 
     # Resetting state
     ##########################################################################
@@ -1729,6 +1758,16 @@ title="{}" {}>{}</button>""".format(
     ##########################################################################
 
     def setupHooks(self) -> None:
+        # CFA chrome needs to be registered before any reviewer/deck webview is
+        # first built. setup_menu() also registers it, but review styling should
+        # not depend on menu construction succeeding.
+        try:
+            from aqt.cfa_chrome import register as register_cfa_chrome
+
+            register_cfa_chrome()
+        except Exception:
+            pass
+
         hooks.schema_will_change.append(self.onSchemaMod)
         hooks.notes_will_be_deleted.append(self.onRemNotes)
         hooks.card_odue_was_invalid.append(self.onOdueInvalid)

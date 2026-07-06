@@ -64,16 +64,19 @@ class CfaReadiness:
             "cfa:priority",
             "cfa:risk-session",
             "cfa:readiness-drill",
-            "cfa:plan",
+            # Legacy/cached Readiness builds used this command for an unsupported
+            # "latest mock review" CTA. Keep it on a real study flow instead of
+            # opening the unrelated Deadline planner or a blank page.
+            "cfa:mock-review",
         }:
             cfa.study_by_exam_priority(mw)
         elif url == "cfa:ethics":
             cfa.study_ethics_pairs(mw)
         elif url in {
             "cfa:deadline",
-            "cfa:mock-review",
+            # The Readiness payload does not expose exact fading card IDs yet, so
+            # this opens the existing deadline-aware weakest-first review flow.
             "cfa:retention-queue",
-            "cfa:mock-schedule",
         }:
             cfa.show_deadline(mw)
         elif url == "cfa:study":
@@ -82,6 +85,8 @@ class CfaReadiness:
             mw.moveToState("cfaReadiness")
         elif url == "cfa:conceptmap":
             mw.moveToState("cfaConceptMap")
+        elif url == "cfa:progress":
+            mw.moveToState("cfaProgress")
         elif url == "cfa:home":
             mw.moveToState("cfaHome")
         elif url == "cfa:decks":

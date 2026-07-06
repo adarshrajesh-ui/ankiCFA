@@ -31,9 +31,8 @@ The feature is the product core: learning intelligence for CFA, not a deck-brows
 - Node size: exam weight.
 - Node fill: mastery, light gray to turquoise.
 - Hover / tap preview: show node name and mastery percent.
-- Click / tap pin: show plain-English explanation and fastest next drill.
-- AI explanations: batched when the tab opens so interactions are instant.
-- AI-off mode: templated explanations still work.
+- Click / tap pin: show deterministic plain-English explanation and fastest next drill.
+- Explanations are local templated copy, so interactions are instant without an AI/API call.
 - Give-up rule: insufficient evidence stays gray; do not fake precision.
 
 ## Visual Requirements
@@ -49,7 +48,7 @@ The feature is the product core: learning intelligence for CFA, not a deck-brows
 ## Desktop Production Notes
 
 - Use the frozen `source.html` as the visual reference.
-- Preserve app-bar placement, stage proportions, map/panel relationship, hierarchy explanation sections, AI batching explanation, and phone/desktop parity section.
+- Preserve app-bar placement, stage proportions, map/panel relationship, deterministic explanation sections, and phone/desktop parity section.
 - The desktop page should support hover, click, and scroll/zoom affordances without degrading the map clarity.
 
 ## Android Production Notes

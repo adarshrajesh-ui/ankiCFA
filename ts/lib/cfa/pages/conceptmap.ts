@@ -4,17 +4,16 @@
 // -----------------------------------------------------------------------------
 // Pure engine for the CFA Concept Map — the radial "mastery map" tab.
 //
-// Matches the approved interactive spec (.lavish/concept-map-spec.html): CFA in
-// the centre (biggest), the 10 test sections orbiting it (SIZE ∝ exam weight),
-// each section's subsections beyond. Node FILL goes light-gray → turquoise by
-// mastery (100% = fully turquoise). The layout is FIXED and deterministic
-// (server-precomputable, no randomness) so the map becomes a stable mental map.
+// CFA sits in the centre (biggest), the 10 test sections orbit it (SIZE ∝ exam
+// weight), each section's subsections beyond. Node FILL travels from gray/pearl
+// through aqua into deep teal by mastery evidence. The layout is FIXED and
+// deterministic (server-precomputable, no randomness) so the map becomes a stable
+// mental map.
 //
 // No DOM / no Svelte — data → node geometry + fill + templated explanations —
-// so the geometry, the honest give-up (abstain) rule, and the AI-off explanation
-// fallback are all trivially unit-testable. The Svelte component only draws what
-// this module returns; the batched-AI wording (when AI is ON) is layered on top
-// of the templated text this file produces, which is ALSO the AI-off fallback.
+// so the geometry, the honest give-up (abstain) rule, and the local explanation
+// copy are all trivially unit-testable. The Svelte component only draws what
+// this module returns.
 // -----------------------------------------------------------------------------
 
 import type { TopicRow } from "../types";
@@ -25,20 +24,34 @@ export const VIEW_H = 740;
 export const CX = 500;
 export const CY = 366;
 /** Centre CFA node radius. */
-export const CFA_R = 60;
-/** Empty (0% mastery) fill — the light gray end of the mastery ramp. */
+export const CFA_R = 70;
+/** Empty (0% mastery) fill — the neutral gray end of the mastery ramp. */
 export const EMPTY_FILL = "#E9EDF1";
-/** Fully-mastered fill — the turquoise "mastery/progress" semantic (distinct
- * from the orange CTA accent), per the spec footer. */
+/** Turquoise accent used for halos/glows around active mastery nodes. */
 export const TURQ_FILL = "#14B8B1";
+
+type Rgb = readonly [number, number, number];
+
+interface MasteryRampStop {
+    at: number;
+    rgb: Rgb;
+}
+
+const MASTERY_RAMP: readonly MasteryRampStop[] = [
+    { at: 0, rgb: [0xe9, 0xed, 0xf1] },
+    { at: 0.4, rgb: [0xe3, 0xfa, 0xf8] },
+    { at: 0.7, rgb: [0x4c, 0xd3, 0xcf] },
+    { at: 0.85, rgb: [0x0c, 0x8c, 0x94] },
+    { at: 1, rgb: [0x03, 0x4d, 0x5d] },
+];
 
 /** SIZE ∝ exam weight. `w` is exam weight as a PERCENT (e.g. 12.5), mirroring
  * the spec's `topicR`/`subR`. Bigger exam weight ⇒ bigger node. */
 export function topicRadius(weightPct: number): number {
-    return 20 + weightPct * 1.55;
+    return 24 + weightPct * 1.75;
 }
 export function subRadius(weightPct: number): number {
-    return 12 + weightPct * 0.5;
+    return 15 + weightPct * 0.66;
 }
 
 // --- fixed, organic layout per canonical topic (keyed by slug) ---------------
@@ -66,8 +79,20 @@ const TOPIC_LAYOUT: Record<string, TopicLayout> = {
     fra: { slug: "fra", ang: 20, r1j: 8, band: "10–15%", subs: [["Intercorporate", -12], ["Pensions", 12]] },
     corp: { slug: "corp", ang: 58, r1j: -9, band: "5–10%", subs: [["Capital Structure", -11], ["ESG", 11]] },
     equity: { slug: "equity", ang: 96, r1j: 7, band: "10–15%", subs: [["FCFE / FCFF", -12], ["Residual Income", 12]] },
-    "fixed-income": { slug: "fixed-income", ang: 140, r1j: -8, band: "10–15%", subs: [["Term Structure", -12], ["Credit", 12]] },
-    derivatives: { slug: "derivatives", ang: 176, r1j: 5, band: "5–10%", subs: [["Forwards / Futures", -11], ["Options", 11]] },
+    "fixed-income": {
+        slug: "fixed-income",
+        ang: 140,
+        r1j: -8,
+        band: "10–15%",
+        subs: [["Term Structure", -12], ["Credit", 12]],
+    },
+    derivatives: {
+        slug: "derivatives",
+        ang: 176,
+        r1j: 5,
+        band: "5–10%",
+        subs: [["Forwards / Futures", -11], ["Options", 11]],
+    },
     altinv: { slug: "altinv", ang: 212, r1j: 11, band: "5–10%", subs: [["Real Estate", -11], ["Private Equity", 11]] },
     portmgmt: { slug: "portmgmt", ang: 240, r1j: -6, band: "10–15%", subs: [["Active Mgmt", -12], ["Risk", 12]] },
 };
@@ -88,8 +113,16 @@ const CANONICAL: Record<string, string> = {
 };
 /** Deterministic curriculum order used to place any topic not in TOPIC_LAYOUT. */
 const CANONICAL_ORDER = [
-    "ethics", "quant", "econ", "fra", "corp",
-    "equity", "fixed-income", "derivatives", "altinv", "portmgmt",
+    "ethics",
+    "quant",
+    "econ",
+    "fra",
+    "corp",
+    "equity",
+    "fixed-income",
+    "derivatives",
+    "altinv",
+    "portmgmt",
 ];
 
 function rad(deg: number): number {
@@ -97,18 +130,29 @@ function rad(deg: number): number {
 }
 
 /**
- * The exact light-gray → turquoise interpolation from the spec (`mix`): 0 = the
- * empty gray, 1 = full turquoise. A null mastery (abstaining) renders as the
- * empty gray so an unearned node is honestly dim, never faked bright.
+ * A perceptually wider mastery ramp: neutral gray/pearl → aqua → saturated teal.
+ * A null mastery (abstaining) renders as empty gray so an unearned node is
+ * honestly dim, never faked bright.
  */
 export function fillFor(mastery: number | null): string {
     if (mastery === null) {
         return EMPTY_FILL;
     }
     const m = Math.max(0, Math.min(1, mastery));
-    const g = [0xe9, 0xed, 0xf1];
-    const t = [0x14, 0xb8, 0xb1];
-    const c = g.map((gv, i) => Math.round(gv + (t[i] - gv) * m));
+    for (let i = 1; i < MASTERY_RAMP.length; i++) {
+        const prev = MASTERY_RAMP[i - 1]!;
+        const next = MASTERY_RAMP[i]!;
+        if (m <= next.at) {
+            const local = (m - prev.at) / (next.at - prev.at);
+            const c = [
+                Math.round(prev.rgb[0] + (next.rgb[0] - prev.rgb[0]) * local),
+                Math.round(prev.rgb[1] + (next.rgb[1] - prev.rgb[1]) * local),
+                Math.round(prev.rgb[2] + (next.rgb[2] - prev.rgb[2]) * local),
+            ];
+            return `rgb(${c[0]}, ${c[1]}, ${c[2]})`;
+        }
+    }
+    const c = MASTERY_RAMP[MASTERY_RAMP.length - 1]!.rgb;
     return `rgb(${c[0]}, ${c[1]}, ${c[2]})`;
 }
 
@@ -153,14 +197,14 @@ export function masteryPct(mastery: number | null): number | null {
     return mastery === null ? null : Math.round(mastery * 100);
 }
 
-/** Calm one-word readiness label for a node's fill (spec's panel wording). */
+/** Calm one-word signal label for a node's fill. */
 export function masteryLabel(mastery: number | null): string {
     if (mastery === null) {
         return "no data yet";
     }
     const pct = mastery * 100;
     if (pct >= 70) {
-        return "exam-ready";
+        return "strong signal";
     }
     if (pct >= 45) {
         return "getting there";
@@ -301,7 +345,7 @@ export function buildConceptMap(topics: TopicRow[], cfaMastery?: number | null):
         id: "cfa",
         kind: "cfa",
         name: "CFA",
-        full: "Overall CFA readiness",
+        full: "Overall concept coverage",
         parent: null,
         x: CX,
         y: CY,
@@ -319,20 +363,19 @@ export function buildConceptMap(topics: TopicRow[], cfaMastery?: number | null):
 }
 
 /**
- * The templated, plain-English "why" for a node. This is BOTH the AI-off
- * fallback AND the ~80% templated base the batched AI call warms when AI is on,
- * so the map is always fully explanatory offline (the give-up rule is honoured
- * verbatim here). Deterministic, but written casually — not a rigid one-liner.
+ * The templated, plain-English "why" for a node. The map is always fully
+ * explanatory with this local deterministic copy; the give-up rule is honoured
+ * verbatim here. Deterministic, but written casually — not a rigid one-liner.
  */
 export function templatedExplanation(node: ConceptNode): string {
     const { kind, full, pct, mastery, parent } = node;
 
     if (mastery === null || pct === null) {
         if (kind === "cfa") {
-            return "Your overall readiness is still gray — there aren't enough graded "
-                + "reviews yet to roll up an honest number. Study a few sections and "
-                + "this centre node starts to fill. (The give-up rule: no evidence, no "
-                + "fake confidence.)";
+            return "Your overall map signal is still gray — there aren't enough graded "
+                + "reviews yet to roll up an honest topic-evidence number. Study a few "
+                + "sections and this centre node starts to fill. Readiness will keep "
+                + "withholding a pass/fail call until the evidence is thick enough.";
         }
         const what = kind === "sub" ? `${full} (under ${parent})` : full;
         return `${what} is gray because there isn't enough evidence yet to score it — `
@@ -348,10 +391,10 @@ export function templatedExplanation(node: ConceptNode): string {
     }
 
     if (kind === "cfa") {
-        return `This is your overall CFA readiness — about ${pct}%. It's the `
-            + "weight-adjusted roll-up of every section below, so your biggest, "
-            + "dimmest sections move it the most. Filling a heavy gray section lifts "
-            + "the centre far more than topping up one that's already turquoise.";
+        return `This is the map's weighted topic signal — about ${pct}% from the `
+            + "sections with usable evidence. It is not a pass/fail readiness call: "
+            + "Readiness may still abstain when coverage or graded evidence is thin. "
+            + "Your biggest, dimmest sections move this centre node the most.";
     }
     if (kind === "sub") {
         return `You're at about ${pct}% on ${full} (under ${parent}). This reflects the `

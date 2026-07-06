@@ -1,7 +1,13 @@
+<!--
+Copyright: Ankitects Pty Ltd and contributors
+License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
+-->
+
 <script lang="ts">
     import { bridgeCommand } from "@tslib/bridgecommand";
 
     import type { CfaHomePayload, TopicRow } from "$lib/cfa";
+    import ProductShellNav from "$lib/cfa/ProductShellNav.svelte";
 
     import {
         buildConceptMap,
@@ -15,7 +21,6 @@
         commandCenterLead,
         examCountdown,
         homeMetricChips,
-        HOME_NAV,
         recommendedSessions,
         shortTopicName,
         syncChipLabel,
@@ -81,7 +86,10 @@
             return "Overall";
         }
         const topicName = node.kind === "sub" ? node.parent : node.full;
-        return risks.find((risk) => risk.topic === topicName)?.label ?? masteryLabel(node.mastery);
+        return (
+            risks.find((risk) => risk.topic === topicName)?.label ??
+            masteryLabel(node.mastery)
+        );
     }
 
     function mapEvidence(node: ConceptNode): string {
@@ -96,9 +104,10 @@
     }
 
     function mapDetail(node: ConceptNode, selected: boolean): string {
-        const dependency = node.kind === "sub" && node.parent
-            ? `inherits ${node.parent} section evidence`
-            : "dependency graph pending";
+        const dependency =
+            node.kind === "sub" && node.parent
+                ? `inherits ${node.parent} section evidence`
+                : "dependency graph pending";
         if (selected) {
             return `Open the existing priority queue for this area. Exact per-concept due counts require a backend concept queue.`;
         }
@@ -213,39 +222,38 @@
 
 <div class="cfa-app cfa-home">
     <main class="cfa-home__page">
-        <nav class="cfa-home__appbar" aria-label="CFA sections">
-            <div class="cfa-home__appbar-in">
-                <div class="cfa-home__brand">ankiCFA <small>CFA Level II</small></div>
-                <div class="cfa-home__tabs">
-                    {#each HOME_NAV as item (item.cmd)}
-                        <button
-                            type="button"
-                            class:on={item.cmd === "cfa:home"}
-                            aria-current={item.cmd === "cfa:home" ? "page" : undefined}
-                            on:click={() => go(item.cmd)}
-                        >
-                            {item.label}
-                        </button>
-                    {/each}
-                </div>
-                <button type="button" class="cfa-home__sync-chip" on:click={() => go("cfa:sync")}>
-                    <span class="cfa-home__dot"></span>{syncLabel}
-                </button>
-            </div>
-        </nav>
+        <ProductShellNav
+            active="home"
+            subtitle="CFA Level II"
+            syncStatus={syncLabel}
+            ariaLabel="CFA sections"
+            on:navigate={(event) => go(event.detail)}
+        />
 
         <section class="cfa-home__hero">
             <div class="cfa-home__eyebrow">Home · CFA Command Center</div>
             <h1>Today’s work</h1>
             <p class="cfa-home__lede">{lead}</p>
             <div class="cfa-home__actions" aria-label="Primary Home actions">
-                <button type="button" class="cfa-home__btn primary" on:click={() => go("cfa:priority")}>
+                <button
+                    type="button"
+                    class="cfa-home__btn primary"
+                    on:click={() => go("cfa:priority")}
+                >
                     Begin priority session
                 </button>
-                <button type="button" class="cfa-home__btn secondary" on:click={() => go("cfa:conceptmap")}>
+                <button
+                    type="button"
+                    class="cfa-home__btn secondary"
+                    on:click={() => go("cfa:conceptmap")}
+                >
                     Open Concept Map
                 </button>
-                <button type="button" class="cfa-home__btn secondary" on:click={() => go("cfa:readiness")}>
+                <button
+                    type="button"
+                    class="cfa-home__btn secondary"
+                    on:click={() => go("cfa:readiness")}
+                >
                     View weak areas
                 </button>
             </div>
@@ -255,7 +263,8 @@
                 {/each}
             </div>
             <div class="cfa-home__countdown" data-tone={countdown.tone}>
-                <b>{countdown.headline}</b><span>{countdown.sub}</span>
+                <b>{countdown.headline}</b>
+                <span>{countdown.sub}</span>
             </div>
         </section>
 
@@ -270,12 +279,18 @@
                 </div>
                 <div class="cfa-home__risk-list">
                     {#each risks as risk (risk.topic)}
-                        <button type="button" class="cfa-home__risk" on:click={() => go("cfa:readiness")}>
+                        <button
+                            type="button"
+                            class="cfa-home__risk"
+                            on:click={() => go("cfa:readiness")}
+                        >
                             <span>
                                 <strong>{risk.topic}</strong>
                                 <small>{risk.detail}</small>
                             </span>
-                            <span class="cfa-home__score" data-tone={risk.tone}>{risk.label}</span>
+                            <span class="cfa-home__score" data-tone={risk.tone}>
+                                {risk.label}
+                            </span>
                         </button>
                     {/each}
                 </div>
@@ -287,7 +302,11 @@
                         <div class="cfa-home__eyebrow">Concept Map preview</div>
                         <h2>Mastery shape</h2>
                     </div>
-                    <button type="button" class="cfa-home__status-pill as-button" on:click={() => go("cfa:conceptmap")}>
+                    <button
+                        type="button"
+                        class="cfa-home__status-pill as-button"
+                        on:click={() => go("cfa:conceptmap")}
+                    >
                         Live graph
                     </button>
                 </div>
@@ -301,18 +320,53 @@
                     on:touchmove={onTouchMove}
                     on:touchend={onTouchEnd}
                 >
-                    <svg viewBox="0 0 {VIEW_W} {VIEW_H}" role="group" aria-label="Interactive CFA concept map preview nodes">
+                    <svg
+                        viewBox="0 0 {VIEW_W} {VIEW_H}"
+                        role="group"
+                        aria-label="Interactive CFA concept map preview nodes"
+                    >
                         <defs>
-                            <radialGradient id="home-map-node-gloss" cx="30%" cy="22%" r="78%">
-                                <stop offset="0" stop-color="#ffffff" stop-opacity="0.95" />
-                                <stop offset="0.44" stop-color="#7edbd6" stop-opacity="0.62" />
-                                <stop offset="1" stop-color="#0e9c97" stop-opacity="0.82" />
+                            <radialGradient
+                                id="home-map-node-gloss"
+                                cx="30%"
+                                cy="22%"
+                                r="78%"
+                            >
+                                <stop
+                                    offset="0"
+                                    stop-color="#ffffff"
+                                    stop-opacity="0.95"
+                                />
+                                <stop
+                                    offset="0.44"
+                                    stop-color="#7edbd6"
+                                    stop-opacity="0.62"
+                                />
+                                <stop
+                                    offset="1"
+                                    stop-color="#0e9c97"
+                                    stop-opacity="0.82"
+                                />
                             </radialGradient>
-                            <filter id="home-map-shadow" x="-40%" y="-40%" width="180%" height="180%">
-                                <feDropShadow dx="0" dy="12" stdDeviation="10" flood-color="#053b45" flood-opacity="0.16" />
+                            <filter
+                                id="home-map-shadow"
+                                x="-40%"
+                                y="-40%"
+                                width="180%"
+                                height="180%"
+                            >
+                                <feDropShadow
+                                    dx="0"
+                                    dy="12"
+                                    stdDeviation="10"
+                                    flood-color="#053b45"
+                                    flood-opacity="0.16"
+                                />
                             </filter>
                         </defs>
-                        <g transform="translate({mapState.x} {mapState.y}) scale({mapState.scale})">
+                        <g
+                            transform="translate({mapState.x} {mapState.y}) scale({mapState.scale})"
+                        >
                             <g fill="none" stroke-linecap="round">
                                 {#each map.edges as edge}
                                     <line
@@ -320,7 +374,9 @@
                                         y1={edge.y1}
                                         x2={edge.x2}
                                         y2={edge.y2}
-                                        stroke={edge.width > 1.5 ? "rgba(20,184,177,.32)" : "rgba(5,59,69,.14)"}
+                                        stroke={edge.width > 1.5
+                                            ? "rgba(20,184,177,.32)"
+                                            : "rgba(5,59,69,.14)"}
                                         stroke-width={edge.width}
                                     />
                                 {/each}
@@ -333,7 +389,10 @@
                                     class:is-sub={node.kind === "sub"}
                                     role="button"
                                     tabindex="0"
-                                    aria-label="{node.full}: {mapDetail(node, selectedMapId === node.id)}"
+                                    aria-label="{node.full}: {mapDetail(
+                                        node,
+                                        selectedMapId === node.id,
+                                    )}"
                                     on:mouseenter={() => (hotMapId = node.id)}
                                     on:mouseleave={() => (hotMapId = null)}
                                     on:focus={() => (hotMapId = node.id)}
@@ -362,7 +421,9 @@
                                             x={node.x}
                                             y={node.y + (node.kind === "cfa" ? 6 : 4)}
                                             text-anchor="middle"
-                                        >{shortNodeLabel(node)}</text>
+                                        >
+                                            {shortNodeLabel(node)}
+                                        </text>
                                     {/if}
                                 </g>
                             {/each}
@@ -370,10 +431,12 @@
                     </svg>
                 </div>
                 <div class="cfa-home__hover-note">
-                    <b>{activeTitle}</b>{activeDetail}
+                    <b>{activeTitle}</b>
+                    {activeDetail}
                 </div>
                 <p class="cfa-home__tiny">
-                    Scroll or trackpad over the map to move through the field; pinch zoom is supported on touch screens.
+                    Scroll or trackpad over the map to move through the field; pinch
+                    zoom is supported on touch screens.
                 </p>
             </article>
         </section>
@@ -384,7 +447,9 @@
                     <div class="cfa-home__eyebrow">{session.eyebrow}</div>
                     <h3>{session.title}</h3>
                     <p>{session.detail}</p>
-                    <div class="cfa-home__impact" aria-hidden="true"><i style="width: {session.impactPct}%"></i></div>
+                    <div class="cfa-home__impact" aria-hidden="true">
+                        <i style="width: {session.impactPct}%"></i>
+                    </div>
                     <span class="cfa-home__tiny">{session.meta}</span>
                 </article>
             {/each}
@@ -420,14 +485,32 @@
         font-size: 18.75px;
         line-height: 1.5;
         background:
-            radial-gradient(circle at 12% 0%, rgba(255, 255, 255, 0.96), transparent 23rem),
-            radial-gradient(circle at 86% 8%, rgba(20, 184, 177, 0.22), transparent 28rem),
-            radial-gradient(circle at 55% 70%, rgba(5, 59, 69, 0.16), transparent 34rem),
-            linear-gradient(135deg, var(--pearl) 0%, #eef9f7 42%, #d8f3ef 64%, rgba(5, 59, 69, 0.24) 100%);
+            radial-gradient(
+                circle at 12% 0%,
+                rgba(255, 255, 255, 0.96),
+                transparent 23rem
+            ),
+            radial-gradient(
+                circle at 86% 8%,
+                rgba(20, 184, 177, 0.22),
+                transparent 28rem
+            ),
+            radial-gradient(
+                circle at 55% 70%,
+                rgba(5, 59, 69, 0.16),
+                transparent 34rem
+            ),
+            linear-gradient(
+                135deg,
+                var(--pearl) 0%,
+                #eef9f7 42%,
+                #d8f3ef 64%,
+                rgba(5, 59, 69, 0.24) 100%
+            );
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
         position: relative;
-        overflow: hidden;
+        overflow-x: hidden;
 
         &::before {
             content: "";
@@ -435,13 +518,27 @@
             inset: 0;
             pointer-events: none;
             background:
-                radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.72), transparent 13rem),
-                radial-gradient(circle at 78% 22%, rgba(20, 184, 177, 0.2), transparent 19rem);
+                radial-gradient(
+                    circle at 18% 18%,
+                    rgba(255, 255, 255, 0.72),
+                    transparent 13rem
+                ),
+                radial-gradient(
+                    circle at 78% 22%,
+                    rgba(20, 184, 177, 0.2),
+                    transparent 19rem
+                );
             mix-blend-mode: screen;
         }
 
         button {
             font: inherit;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
         }
 
         &__page {
@@ -452,75 +549,6 @@
             padding: 35px 28px 100px;
         }
 
-        &__appbar {
-            position: sticky;
-            top: 20px;
-            z-index: 30;
-            border: 1px solid var(--line);
-            border-radius: 28px;
-            background: rgba(255, 255, 255, 0.7);
-            box-shadow: 0 14px 50px rgba(5, 59, 69, 0.1);
-            backdrop-filter: blur(22px) saturate(1.25);
-            -webkit-backdrop-filter: blur(22px) saturate(1.25);
-        }
-
-        &__appbar-in {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            flex-wrap: wrap;
-            padding: 15px 18px;
-        }
-
-        &__brand {
-            font-family: var(--cfa-font-heading);
-            font-size: 24px;
-            font-weight: 700;
-            letter-spacing: -0.01em;
-            color: var(--ink);
-
-            small {
-                display: block;
-                font-family: var(--cfa-font-body);
-                font-size: 11px;
-                font-weight: 700;
-                letter-spacing: 0.16em;
-                color: var(--turq-ink);
-                text-transform: uppercase;
-            }
-        }
-
-        &__tabs {
-            display: flex;
-            gap: 4px;
-            margin-left: auto;
-            flex-wrap: wrap;
-
-            button {
-                cursor: pointer;
-                border: 0;
-                color: var(--muted);
-                background: transparent;
-                font-size: 16px;
-                font-weight: 700;
-                padding: 10px 16px;
-                border-radius: 999px;
-
-                &:hover,
-                &.on {
-                    color: var(--turq-ink);
-                    background: rgba(20, 184, 177, 0.12);
-                    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
-                }
-
-                &:focus-visible {
-                    outline: 3px solid rgba(20, 184, 177, 0.36);
-                    outline-offset: 2px;
-                }
-            }
-        }
-
-        &__sync-chip,
         &__status-pill {
             display: inline-flex;
             align-items: center;
@@ -535,20 +563,12 @@
             white-space: nowrap;
         }
 
-        &__sync-chip,
         &__status-pill.as-button {
             cursor: pointer;
 
             &:hover {
                 background: rgba(228, 246, 245, 0.8);
             }
-        }
-
-        &__dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 999px;
-            background: var(--turq);
         }
 
         &__hero,
@@ -565,8 +585,16 @@
             margin-top: 33px;
             border-radius: 40px;
             background:
-                linear-gradient(135deg, rgba(255, 255, 255, 0.84), rgba(255, 255, 255, 0.48)),
-                radial-gradient(circle at 75% 20%, rgba(20, 184, 177, 0.2), transparent 24rem);
+                linear-gradient(
+                    135deg,
+                    rgba(255, 255, 255, 0.84),
+                    rgba(255, 255, 255, 0.48)
+                ),
+                radial-gradient(
+                    circle at 75% 20%,
+                    rgba(20, 184, 177, 0.2),
+                    transparent 24rem
+                );
             padding: 35px;
 
             &::after {
@@ -575,7 +603,12 @@
                 inset: 1px;
                 border-radius: 39px;
                 pointer-events: none;
-                background: linear-gradient(120deg, rgba(255, 255, 255, 0.68), transparent 30%, rgba(255, 255, 255, 0.16));
+                background: linear-gradient(
+                    120deg,
+                    rgba(255, 255, 255, 0.68),
+                    transparent 30%,
+                    rgba(255, 255, 255, 0.16)
+                );
                 mask: linear-gradient(#000, transparent 70%);
             }
         }
@@ -786,12 +819,20 @@
 
         &__map-mini {
             position: relative;
-            min-height: 350px;
+            min-height: clamp(300px, 32vw, 350px);
             border-radius: 25px;
             border: 1px solid rgba(255, 255, 255, 0.68);
             background:
-                radial-gradient(circle at 50% 45%, rgba(20, 184, 177, 0.1), transparent 10rem),
-                linear-gradient(135deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.3));
+                radial-gradient(
+                    circle at 50% 45%,
+                    rgba(20, 184, 177, 0.1),
+                    transparent 10rem
+                ),
+                linear-gradient(
+                    135deg,
+                    rgba(255, 255, 255, 0.72),
+                    rgba(255, 255, 255, 0.3)
+                );
             overflow: hidden;
             min-width: 0;
             cursor: grab;
@@ -804,7 +845,7 @@
             svg {
                 display: block;
                 width: 100%;
-                height: 350px;
+                height: clamp(300px, 32vw, 350px);
             }
         }
 
@@ -903,25 +944,124 @@
             &__grid--sessions {
                 grid-template-columns: minmax(0, 1fr);
             }
-
-            &__tabs {
-                margin-left: 0;
-            }
         }
 
         @media (max-width: 620px) {
             font-size: 16px;
 
             &__page {
-                padding: 20px 14px 72px;
+                width: 100%;
+                padding: 14px 12px 64px;
             }
 
             h1 {
-                font-size: 44px;
+                font-size: clamp(34px, 12vw, 42px);
+                line-height: 1.04;
+                letter-spacing: -0.04em;
+            }
+
+            h2 {
+                font-size: 24px;
+            }
+
+            h3 {
+                font-size: 20px;
+            }
+
+            &__eyebrow {
+                font-size: 12px;
+                letter-spacing: 0.12em;
             }
 
             &__hero {
-                padding: 26px;
+                margin-top: 16px;
+                border-radius: 30px;
+                padding: 22px;
+            }
+
+            &__hero::after {
+                border-radius: 29px;
+            }
+
+            &__lede {
+                font-size: 16px;
+            }
+
+            &__actions,
+            &__meta-row {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr);
+                gap: 10px;
+            }
+
+            &__actions {
+                margin-top: 22px;
+            }
+
+            &__btn {
+                width: 100%;
+                min-height: 48px;
+                border-radius: 16px;
+                padding: 13px 16px;
+            }
+
+            &__meta-chip,
+            &__countdown {
+                width: 100%;
+                border-radius: 16px;
+            }
+
+            &__countdown {
+                justify-content: flex-start;
+            }
+
+            &__grid {
+                gap: 14px;
+                margin-top: 16px;
+            }
+
+            &__glass-card {
+                border-radius: 24px;
+                padding: 18px;
+            }
+
+            &__card-title {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr);
+                gap: 10px;
+
+                .cfa-home__status-pill {
+                    justify-self: start;
+                }
+            }
+
+            &__risk {
+                grid-template-columns: minmax(0, 1fr);
+                gap: 10px;
+                min-height: 64px;
+                padding: 14px;
+            }
+
+            &__score {
+                justify-self: start;
+            }
+
+            &__map-mini {
+                min-height: 280px;
+                border-radius: 20px;
+                touch-action: pan-y pinch-zoom;
+
+                svg {
+                    height: 280px;
+                }
+            }
+
+            &__hover-note {
+                border-radius: 16px;
+            }
+
+            &__session-card {
+                gap: 8px;
             }
         }
     }

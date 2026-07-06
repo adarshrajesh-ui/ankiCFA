@@ -34,7 +34,7 @@ Sync remains a tab. If the user clicks Sync while disconnected, production shoul
 - Hero: `Today’s work`, with concise next-action copy.
 - Primary action: `Begin priority session`.
 - Secondary actions: `Open Concept Map`, `View weak areas`.
-- Metric chips: days to exam, graded reviews, topic coverage, AI explanations.
+- Metric chips: days to exam, graded reviews, topic coverage, local explanations.
 - Priority risk card with exam-weighted weak areas.
 - Concept Map preview card with interactive sphere map.
 - Recommended session card.

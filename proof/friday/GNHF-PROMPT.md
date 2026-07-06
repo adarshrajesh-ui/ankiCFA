@@ -91,7 +91,7 @@ PHASE A — BUILD EVERY FEATURE (commit as you go). Do this before Phase B.
 5) Concept Map (new tab, identical on phone and desktop) — an approved interactive spec exists at .lavish/concept-map-spec.html; match it.
    - Radial hierarchy: CFA in the center (biggest), the 10 test sections orbiting it, each section's subsections beyond.
    - Node SIZE is proportional to exam weight; node FILL goes light-gray -> turquoise by mastery (100% = fully turquoise, 50% = half turquoise / half gray).
-   - Hover a node -> its name + how full it is (%). Click a node -> a casual, plain-English AI explanation of how that score came to be, served from a SINGLE batched AI call on load (templated fallback when AI is off).
+   - Hover a node -> its name + how full it is (%). Click a node -> a casual, plain-English deterministic explanation of how that score came to be, using local templated copy only.
    - Minimalist, clean, organic-but-stable layout; same behavior on both platforms (pinch-zoom on phone).
 
 6) Two-way sync (this is core — make it rock-solid)

@@ -8,8 +8,9 @@ deterministic fallback), shipped to BOTH desktop first-run AND the mobile bootst
 the one-passage duplication. Keep Python<->JS grader parity byte-for-byte.
 
 ## Decisions / conventions (autonomous)
+
 - **Multi-span on the violating vignette.** The learner highlights EVERY decisive span in the
-  vignette that is a *violation* (not one contiguous phrase). Grading reuses the one-passage
+  vignette that is a _violation_ (not one contiguous phrase). Grading reuses the one-passage
   `grade_spans_tolerant` / `span_tier` (partial-credit tiers: correct / somewhat / partial / wrong),
   with the same `SPAN_CAP_SLACK = 4` and half-overlap "near" threshold. The shared block in the
   pairs `front.html` is the multi-span `CFA-SPAN-SHARED` block (mirrored to
@@ -27,6 +28,7 @@ the one-passage duplication. Keep Python<->JS grader parity byte-for-byte.
   passthrough note.
 
 ## Increment log
+
 (Each increment: item, commit SHA, before/after evidence paths, tests added, PR link, handoffs.)
 
 **PR:** https://github.com/adarshrajesh-ui/ankiCFA/pull/23
@@ -37,6 +39,7 @@ the one-passage duplication. Keep Python<->JS grader parity byte-for-byte.
 > to origin/main. I now verify `git branch --show-current == friday/ethics` before every commit/push.
 
 ### INC1 — multi-span + partial-credit on the minimal-pairs flagship
+
 - **Commit:** `db6994487`
 - **Gap (before):** the pairs card graded ONE contiguous `decisive_phrase` via `grade_highlight`
   (breakdown said "Decisive phrase" singular; instruction "Highlight the phrase"). No multi-span, no
@@ -61,6 +64,7 @@ the one-passage duplication. Keep Python<->JS grader parity byte-for-byte.
 - **Handoffs:** e2e test update (`ts/tests/e2e/ethics_pairs_flow.test.ts`) → HANDOFF.md.
 
 ### INC2 — AI semantic grade + provenance wired into the pairs card
+
 - **Commit:** `cad869342`
 - **Gap (before):** `ai_grading.grade_semantic`/`grade_fallback` results carried no `standard`/
   `item_id`, so the card could not render "Graded by AI · II(A) …" from the grader's provenance.
@@ -89,6 +93,7 @@ the one-passage duplication. Keep Python<->JS grader parity byte-for-byte.
   → HANDOFF.md (card already degrades gracefully without it).
 
 ### INC3 — minimal-pairs is the seeded + bundled ethics deck on BOTH platforms
+
 - **Commit:** `9a1e0a30f`
 - **Gap (before):** desktop seeded `CFA::Ethics Pairs` (via `seed_collection.py` → `import_pairs`,
   already correct) but the mobile builder bundled the one-passage `CFA::Ethics Passages` deck — a
@@ -113,6 +118,7 @@ the one-passage duplication. Keep Python<->JS grader parity byte-for-byte.
 - **Desktop seeding:** already `CFA::Ethics Pairs` (confirmed, no change needed).
 
 ### INC4 — retire the one-passage duplication (ONE ethics feature)
+
 - **Commit:** `0b6a0c389`
 - **Gap (before):** the one-passage flow was a parallel ethics feature — bundled on mobile (fixed in
   INC3) and exposed via the desktop "Study Ethics (One-Passage)" menu action + its on-demand seeder
@@ -135,6 +141,7 @@ the one-passage duplication. Keep Python<->JS grader parity byte-for-byte.
   `qt/tests/test_cfa_f0b.py`. Exact edits in HANDOFF.md.
 
 ### INC5 — persist attempt-detail hooks (structured payload for W5 custom_data)
+
 - **Commit:** `1d64e6322`
 - **Gap (before):** the front stashed only `{ pairId, cluster, correct }` in localStorage — no
   verdicts, spans, tiers, grade tier, or source/standard provenance. W5 could persist only pass/fail.

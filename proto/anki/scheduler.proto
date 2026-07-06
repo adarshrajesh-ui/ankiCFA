@@ -289,7 +289,8 @@ message CfaTopicPosterior {
   bool covered = 9;
 }
 
-// Bayesian readiness "hero" band; never abstains (mirrors cfa.BayesianReadiness).
+// Bayesian readiness "hero" band; never abstains (mirrors
+// cfa.BayesianReadiness).
 message CfaBayesianReadiness {
   double accuracy = 1;
   double ci_low = 2;

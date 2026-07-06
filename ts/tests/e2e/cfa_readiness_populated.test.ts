@@ -103,20 +103,27 @@ test.beforeAll(() => {
     fs.mkdirSync(OUT, { recursive: true });
 });
 
-test("CFA Home renders REAL score ranges (not abstain) with a study history", async ({ page }) => {
+test.skip(!process.env.CFA_SEED_REVIEWS, "populated render gate requires CFA_SEED_REVIEWS=1");
+
+test("CFA Home renders the populated Command Center state with a study history", async ({ page }) => {
     await page.goto("/cfa-home");
     await page.waitForLoadState("networkidle");
 
-    const stats = page.locator(".cfa-stat");
-    await expect(stats).toHaveCount(3);
-    for (const name of ["Memory", "Performance", "Readiness"]) {
-        await expect(page.locator(".cfa-stat__label", { hasText: name })).toBeVisible();
-    }
+    await expect(page.getByRole("heading", { name: "Today’s work" })).toBeVisible();
+    await expect(page.getByText("Home · CFA Command Center")).toBeVisible();
+
+    const metrics = page.getByLabel("Current CFA metrics");
+    await expect(metrics.getByText(/[1-9]\d* graded reviews/)).toBeVisible();
+    await expect(metrics.getByText(/[1-9]\d*% topic coverage/)).toBeVisible();
+    await expect(metrics.getByText("Local explanations ready")).toBeVisible();
+
+    await expect(page.getByText("Priority risk")).toBeVisible();
+    await expect(page.getByText("Concept Map preview")).toBeVisible();
+    await expect(page.getByRole("group", { name: "Interactive Concept Map preview" })).toBeVisible();
 
     // The populated state must NOT show the abstain microcopy anywhere.
+    await expect(page.getByText(/Not enough data/)).toHaveCount(0);
     await expect(page.getByText("Awaiting reviews")).toHaveCount(0);
-    // At least one score card renders a real percentage range (e.g. "83%").
-    await expect(page.locator(".cfa-stat").getByText(/\d+%/).first()).toBeVisible();
 
     await page.screenshot({
         path: path.join(OUT, "01-cfa-home-populated.png"),
@@ -131,16 +138,18 @@ test("Exam Readiness renders real ranges + a lit coverage map", async ({ page })
     await page.goto(`/cfa-readiness/${deckId}`);
     await page.waitForLoadState("networkidle");
 
-    await expect(page.locator(".cfa-page-heading__title")).toHaveText("CFA Level II");
+    await expect(page.locator(".cfa-product-nav__brand small")).toHaveText("CFA Level II");
     await expect(page.locator(".cfa-hero")).toBeVisible();
 
     // Not the abstain hero.
-    await expect(page.getByText("Not enough data — keep studying")).toHaveCount(0);
+    await expect(page.getByText(/No pass\/fail call yet/)).toHaveCount(0);
+    await expect(page.getByText(/Not enough data/)).toHaveCount(0);
     await expect(page.getByText("Awaiting reviews")).toHaveCount(0);
 
-    // Three real score cards, each with a percentage.
+    // Three real score cards, each with a whole-number low-high range.
     await expect(page.locator(".cfa-stat")).toHaveCount(3);
-    await expect(page.locator(".cfa-stat").getByText(/\d+%/).first()).toBeVisible();
+    await expect(page.locator(".cfa-stat.abstain")).toHaveCount(0);
+    await expect(page.locator(".cfa-stat", { hasText: /\d+-\d+/ }).first()).toBeVisible();
 
     // The coverage map now has real per-topic recall data (the empty-state hint
     // must be gone), and still lists every canonical area + weight.
@@ -148,6 +157,7 @@ test("Exam Readiness renders real ranges + a lit coverage map", async ({ page })
     await expect(table).toBeVisible();
     await expect(page.locator(".cfa-readiness__table-hint")).toHaveCount(0);
     await expect(table.getByText("Fixed Income", { exact: true })).toBeVisible();
+    await expect(table.locator('.cfa-readiness__topic-stat[data-label="Weight"]').getByText("12%").first()).toBeVisible();
 
     await page.screenshot({
         path: path.join(OUT, "02-cfa-readiness-populated.png"),

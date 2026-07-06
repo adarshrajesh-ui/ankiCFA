@@ -98,6 +98,8 @@ test.beforeAll(() => {
     fs.mkdirSync(OUT, { recursive: true });
 });
 
+test.skip(!!process.env.CFA_SEED_REVIEWS, "fresh Deadline render gate requires an unseeded profile");
+
 test("Deadline planner ranks the CFA deck weakest-first with real data", async ({ page }) => {
     await page.goto("/cfa-home");
     const deckId = await cfaDeckId(page);

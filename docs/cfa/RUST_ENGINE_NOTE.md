@@ -67,7 +67,7 @@ all-scores; same-day dedup).
    the same codegen that produces the Python and TypeScript bindings. Putting the
    scoring in Python would strand it on desktop and force a second, drift-prone
    implementation for mobile — the exact failure `ComputeCfaScores` exists to
-   prevent (desktop and phone must read *identical* numbers).
+   prevent (desktop and phone must read _identical_ numbers).
 2. **They need FSRS internals.** Retrievability comes from
    `FSRS::current_retrievability_seconds(memory_state, elapsed, decay)` and the
    card's `memory_state` / `last_review_time` / `decay` fields — all Rust-side.
@@ -75,25 +75,25 @@ all-scores; same-day dedup).
    (search/browser sorting) and its retrievability graphs keeps our numbers
    identical to what the app already shows. This applies to all three RPCs.
 3. **Performance at 50k cards.** Each RPC is a read-only search + bulk tag query
-   + an O(n log n) sort in native code with no per-card RPC round-trips — the
-   difference between a snappy call and a UI stall when the benchmark deck reaches
-   50,000 cards (see `L1/bench.txt`).
+   - an O(n log n) sort in native code with no per-card RPC round-trips — the
+     difference between a snappy call and a UI stall when the benchmark deck reaches
+     50,000 cards (see `L1/bench.txt`).
 4. **Correctness is testable at the core.** All scoring is unit-tested in Rust
    against real `Collection` state, so the guarantees (read-only, deterministic
    order, dedup) are verified where the logic lives — 24 tests total.
 
 ## Exact upstream files touched
 
-| File                                 | Change                                                                                                                                                                          |
-| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `proto/anki/scheduler.proto`         | +3 rpcs on `SchedulerService` (`BuildExamQueue`, `DeadlineRetention`, `ComputeCfaScores`), appended after the last existing rpc; +6 request/response messages. Purely additive. |
-| `rslib/src/scheduler/mod.rs`         | +2 module declarations (`mod cfa_deadline; mod cfa_scores;`).                                                                                                                   |
-| `rslib/src/scheduler/service/mod.rs` | 3 trait methods (dispatch to inherent impls); inherent `Collection::build_exam_queue` + scoring helpers; 11 exam-queue unit tests. New `use` imports only.                      |
-| `rslib/src/scheduler/cfa_deadline.rs`| **New fork-only file** (383 lines): `Collection::deadline_retention` + 10 tests.                                                                                               |
-| `rslib/src/scheduler/cfa_scores.rs`  | **New fork-only file** (959 lines): `Collection::compute_cfa_scores` (port of `cfa.py`) + 3 tests.                                                                             |
-| `pylib/anki/scheduler/v3.py`         | +1 thin `build_exam_queue(...)` wrapper over the generated binding.                                                                                                            |
-| `pylib/anki/cfa_deadline.py`         | **New fork-only file**: thin `deadline_retention(...)` wrapper.                                                                                                                |
-| `pylib/anki/cfa.py`                  | **New fork-only file**: exam config, memory/performance/readiness Python reference, `compute_cfa_scores` wrapper.                                                             |
+| File                                  | Change                                                                                                                                                                          |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `proto/anki/scheduler.proto`          | +3 rpcs on `SchedulerService` (`BuildExamQueue`, `DeadlineRetention`, `ComputeCfaScores`), appended after the last existing rpc; +6 request/response messages. Purely additive. |
+| `rslib/src/scheduler/mod.rs`          | +2 module declarations (`mod cfa_deadline; mod cfa_scores;`).                                                                                                                   |
+| `rslib/src/scheduler/service/mod.rs`  | 3 trait methods (dispatch to inherent impls); inherent `Collection::build_exam_queue` + scoring helpers; 11 exam-queue unit tests. New `use` imports only.                      |
+| `rslib/src/scheduler/cfa_deadline.rs` | **New fork-only file** (383 lines): `Collection::deadline_retention` + 10 tests.                                                                                                |
+| `rslib/src/scheduler/cfa_scores.rs`   | **New fork-only file** (959 lines): `Collection::compute_cfa_scores` (port of `cfa.py`) + 3 tests.                                                                              |
+| `pylib/anki/scheduler/v3.py`          | +1 thin `build_exam_queue(...)` wrapper over the generated binding.                                                                                                             |
+| `pylib/anki/cfa_deadline.py`          | **New fork-only file**: thin `deadline_retention(...)` wrapper.                                                                                                                 |
+| `pylib/anki/cfa.py`                   | **New fork-only file**: exam config, memory/performance/readiness Python reference, `compute_cfa_scores` wrapper.                                                               |
 
 Everything else (`_backend_generated.py`, `out/ts/lib/generated/backend.ts`, the
 Rust service trait/dispatch) is **generated** from the proto — no hand edits.

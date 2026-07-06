@@ -1,0 +1,4 @@
+33442f9df22c8f334acfcbd05471f1451ca96641accdd3b2383306da2ed990a5  AnkiDroid/build/outputs/apk/full/release/AnkiDroid-full-arm64-v8a-release.apk
+b474e623997f74be8129b6ca3276ca96226cf1a2f68ffea7da30c239a9c546e0  AnkiDroid/build/outputs/apk/full/release/AnkiDroid-full-armeabi-v7a-release.apk
+92d0b7c20b3c1af0d86e10aa4cd4585cdab2a4eafafdaf6bae3e2d35b799ab97  AnkiDroid/build/outputs/apk/full/release/AnkiDroid-full-x86-release.apk
+5094c3b11435417c99aaac8f79f404e2fbe3621f2b17e28ad0710fe476e63745  AnkiDroid/build/outputs/apk/full/release/AnkiDroid-full-x86_64-release.apk

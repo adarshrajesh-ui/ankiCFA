@@ -1,6 +1,10 @@
 // Copyright: Ankitects Pty Ltd and contributors
 // License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
 
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+
 import { assert, test } from "vitest";
 
 import type { DeadlineRow } from "../types";
@@ -14,6 +18,16 @@ import {
     RISK_LABEL,
     riskMarker,
 } from "./deadline";
+
+const here = dirname(fileURLToPath(import.meta.url));
+
+function componentSource(): string {
+    return readFileSync(join(here, "CfaDeadlinePage.svelte"), "utf8");
+}
+
+function dataTableSource(): string {
+    return readFileSync(join(here, "../DataTable.svelte"), "utf8");
+}
 
 function studied(recall: number, interval: number, warn = recall < 0.85): DeadlineRow {
     return {
@@ -84,4 +98,18 @@ test("riskMarker returns a shape glyph only for at-risk rows", () => {
 
 test("RISK_LABEL is the redundant screen-reader label for an at-risk row", () => {
     assert.equal(RISK_LABEL, "at risk");
+});
+
+test("Deadline phone layout keeps date CTA and table rows in the page flow", () => {
+    const src = componentSource();
+    const table = dataTableSource();
+
+    assert.include(src, "@media (max-width: 640px)");
+    assert.include(src, "grid-template-columns: minmax(0, 1fr);");
+    assert.include(src, "min-height: 48px;");
+    assert.include(src, "width: 100%;");
+    assert.include(table, "data-label={column.label}");
+    assert.include(table, "max-height: none;");
+    assert.include(table, "overflow: visible;");
+    assert.include(table, "content: attr(data-label);");
 });

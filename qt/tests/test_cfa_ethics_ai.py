@@ -63,6 +63,21 @@ def test_handle_grade_request_fallback_correct():
     json.dumps(res)
 
 
+def test_handle_grade_request_forwards_structured_highlights():
+    res = handle_grade_request(
+        _payload(
+            learnerSpans=["whole passage"],
+            learnerHighlights=[{"text": "whole passage", "lo": 0, "hi": 40}],
+            selectionIndices=list(range(0, 41)),
+        ),
+        force_fallback=True,
+    )
+    assert res["source"] == "fallback"
+    assert res["evidence_precision"] == "overbroad"
+    assert "whole passage" in res["learner_intent"]
+    json.dumps(res)
+
+
 def test_ensure_path_makes_llm_client_importable():
     # Regression: the "always deterministic fallback" bug was ai_grading's
     # `from cfa.ai.llm_client import complete` failing because the repo root was

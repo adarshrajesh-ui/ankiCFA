@@ -7,6 +7,7 @@
 // deterministic and testable, using only the existing honest-readiness payload.
 // -----------------------------------------------------------------------------
 
+import { productNavItems } from "../productNav";
 import type {
     CfaColumn,
     CfaTone,
@@ -17,6 +18,7 @@ import type {
     TopicRow,
 } from "../types";
 
+import { formatAbstainReasonForBand, formatHeroAbstainReason } from "./evidence";
 import { shortTopicName } from "./home";
 
 /**
@@ -26,12 +28,7 @@ import { shortTopicName } from "./home";
  */
 export const LOW_RECALL = 0.6;
 
-export const READINESS_NAV = [
-    { cmd: "cfa:study", label: "Study" },
-    { cmd: "cfa:conceptmap", label: "Concept Map" },
-    { cmd: "cfa:readiness", label: "Readiness", active: true },
-    { cmd: "cfa:sync", label: "Sync" },
-];
+export const READINESS_NAV = productNavItems("readiness");
 
 export interface ReadinessScoreCard {
     name: string;
@@ -75,8 +72,8 @@ export function bandTone(band: ScoreBand): CfaTone {
 }
 
 /** The faint sub-line under a StatCard: the give-up reason, or the midpoint. */
-export function bandSub(band: ScoreBand): string {
-    return band.abstain ? band.reason : `midpoint ${pct(band.point)}`;
+export function bandSub(band: ScoreBand, caption: ExamReadinessCaption): string {
+    return band.abstain ? formatAbstainReasonForBand(band, caption) : `midpoint ${pct(band.point)}`;
 }
 
 /** The readiness card carries its verdict label alongside the name. */
@@ -102,12 +99,13 @@ export function syncChipLabel(data: ExamReadinessPayload): string {
 export function readinessLead(data: ExamReadinessPayload): string {
     if (data.heroMode === "bayesian_call" && data.heroBayesian) {
         const scoreRange = bandValue(data.readiness);
-        return `Pass call: ${data.heroBayesian.call.toLowerCase()}, ${scoreRange} projected readiness range. This is a local evidence model, not validated against real CFA exam data; when evidence is thin, the product abstains instead of inventing confidence.`;
+        return `Pass call: ${data.heroBayesian.call.toLowerCase()}, ${scoreRange} projected readiness range. Based on stored reviews, first exposures, graded answers, and topic coverage; when evidence is thin, Readiness withholds the call.`;
     }
     if (data.heroAbstain) {
-        return `No pass/fail call yet: ${data.heroAbstain.reason}. This local evidence model is not validated against real CFA exam data, so Readiness abstains until the evidence is thick enough.`;
+        const reason = formatHeroAbstainReason(data.heroAbstain.reason, data.caption);
+        return `No pass/fail call yet: ${reason}. Keep studying to build enough review, first-exposure, and coverage evidence.`;
     }
-    return "No pass/fail call yet. Readiness is a local evidence model, not validated against real CFA exam data, and it abstains when evidence is thin.";
+    return "No pass/fail call yet. Readiness withholds the call until enough review, first-exposure, and coverage evidence is available.";
 }
 
 /** The per-topic recall cell text: a range, or an explicit "no data". */
@@ -217,6 +215,10 @@ export interface ActionPlanItem {
     title: string;
     detail: string;
     time: string;
+    cmd: string;
+    cta: string;
+    routeNote: string;
+    ariaLabel: string;
 }
 
 function midpoint(row: TopicRow): number | null {
@@ -300,7 +302,11 @@ export function buildReadinessRisks(topics: TopicRow[], limit = 3): ReadinessRis
             return {
                 topic: topic.topic,
                 title: riskTitle(topic),
-                detail: `${shortTopicName(topic.topic)} carries ${pct(topic.weight)} exam weight with ${integer(topic.reviewedCards)} reviewed cards, ${integer(topic.gradedReviews)} graded reviews, and ${recallText(topic)} recall evidence.`,
+                detail: `${shortTopicName(topic.topic)} carries ${pct(topic.weight)} exam weight with ${
+                    integer(topic.reviewedCards)
+                } reviewed cards, ${integer(topic.gradedReviews)} graded reviews, and ${
+                    recallText(topic)
+                } recall evidence.`,
                 priority,
                 ...label,
             };
@@ -324,7 +330,7 @@ export function confidenceChips(topics: TopicRow[]): { label: string; tone: "tur
     return [
         { label: strong.length ? `Strong: ${strong.join(", ")}` : "Strong: awaiting evidence", tone: "turq" },
         { label: uncovered.length ? `Uncovered: ${uncovered.join(", ")}` : "Uncovered: none flagged", tone: "warn" },
-        { label: "Works offline, AI off", tone: "neutral" },
+        { label: "Evidence: stored reviews", tone: "neutral" },
     ];
 }
 
@@ -338,8 +344,10 @@ export function retentionWatchlist(topics: TopicRow[], limit = 3): RetentionItem
             return {
                 title: `${shortTopicName(topic.topic)} retention checkpoint`,
                 detail: topic.recallRange === null
-                    ? `${integer(topic.reviewedCards)} reviewed cards - exact fading cards need card-level backend evidence`
-                    : `${rangeText(topic.recallRange.low, topic.recallRange.high)} recall - ${integer(topic.gradedReviews)} graded reviews`,
+                    ? `${integer(topic.reviewedCards)} reviewed cards - recall range appears after more graded evidence`
+                    : `${rangeText(topic.recallRange.low, topic.recallRange.high)} recall - ${
+                        integer(topic.gradedReviews)
+                    } graded reviews`,
                 risk,
             };
         });
@@ -350,16 +358,23 @@ export function actionPlan(risks: ReadinessRisk[]): ActionPlanItem[] {
         {
             topic: "CFA",
             title: "Build readiness evidence",
-            detail: "Start with existing priority study until enough graded reviews unlock the local pass/fail call.",
+            detail: "Start with priority study until enough evidence unlocks the pass/fail call.",
             label: "High risk",
             tone: "high",
             priority: 0,
         } satisfies ReadinessRisk,
     ];
     const times = ["18 min", "7 min", "10 min"];
-    return plan.slice(0, 3).map((risk, index) => ({
-        title: `${shortTopicName(risk.topic)} risk drill`,
-        detail: risk.detail,
-        time: times[index] ?? "10 min",
-    }));
+    return plan.slice(0, 3).map((risk, index) => {
+        const topic = shortTopicName(risk.topic);
+        return {
+            title: `${topic} priority focus`,
+            detail: risk.detail,
+            time: times[index] ?? "10 min",
+            cmd: "cfa:risk-session",
+            cta: "Start priority study",
+            routeNote: "Uses the existing weakest-first priority study flow.",
+            ariaLabel: `Start priority study for ${topic}`,
+        };
+    });
 }

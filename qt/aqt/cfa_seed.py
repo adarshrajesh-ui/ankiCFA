@@ -14,6 +14,8 @@ untouched. If the deck sources are unavailable (e.g. a packaged build without
 ``tools/``), the hook logs and returns without disturbing the profile.
 """
 
+# pylint: disable=import-error,broad-exception-caught
+
 from __future__ import annotations
 
 import os
@@ -99,6 +101,46 @@ def ensure_ethics_passages_deck(col: object) -> int:
     except Exception as exc:  # pragma: no cover - defensive; never break study
         print(f"CFA ethics passages on-demand seeding skipped: {exc}", file=sys.stderr)
         return 0
+
+
+def ensure_cfa_study_decks(col: object) -> dict[str, object]:
+    """Idempotently create the shipped CFA study decks for an explicit user action.
+
+    This deliberately bypasses the first-launch ``cfa_seeded`` guard: the Study
+    page button is a user request to repair/load the CFA deck bundle now. The
+    underlying seeder remains idempotent, so existing decks with cards are not
+    duplicated or clobbered. If the full deck builder is unavailable, fall back
+    to the priority Ethics minimal-pairs deck.
+    """
+    summary: dict[str, object] = {
+        "main_deck": "CFA Level II",
+        "ethics_deck": "CFA::Ethics Pairs",
+        "main_seeded": False,
+        "ethics_seeded": False,
+        "notes_added": 0,
+        "ethics_added": 0,
+        "config_set": False,
+    }
+    repo = _repo_root()
+    if not repo:
+        summary["seed_degraded"] = "deck sources unavailable"
+        return summary
+
+    tools_cfa = os.path.join(repo, "tools", "cfa")
+    if tools_cfa not in sys.path:
+        sys.path.insert(0, tools_cfa)
+
+    try:
+        import seed_collection  # type: ignore[import-not-found]
+
+        return seed_collection.seed_collection(col, repo_root=repo)
+    except Exception as exc:  # pragma: no cover - defensive; never break Study
+        print(f"CFA study deck seeding degraded: {exc}", file=sys.stderr)
+        added = ensure_ethics_deck(col)
+        summary["ethics_seeded"] = bool(added)
+        summary["ethics_added"] = added
+        summary["seed_degraded"] = str(exc)
+        return summary
 
 
 def maybe_seed(mw: AnkiQt) -> None:

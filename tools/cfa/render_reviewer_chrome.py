@@ -1,10 +1,11 @@
 """Render before/after proof of the CFA main-reviewer chrome (D-P4-14).
 
-Reconstructs the Anki reviewer body DOM — a card sitting on the reviewer page,
-plus a type-in-answer diff (typeGood / typeBad / typeMissed) — over the real
-stock reviewer CSS, then overlays the exact `_reviewer_css()` the app injects,
-so the shipped reskin is faithfully shown without launching Anki. Writes
-reviewer-{before,after}.html into proof/reviewer-chrome/.
+Reconstructs the Anki reviewer body DOM — an unbranded Basic-style CFA card
+sitting on the reviewer page, plus a type-in-answer diff (typeGood / typeBad /
+typeMissed) — over the real stock reviewer CSS, then overlays the exact
+`_reviewer_css()` + Basic-card wrapper the app injects, so the shipped reskin is
+faithfully shown without launching Anki. Writes reviewer-{before,after}.html
+into proof/reviewer-chrome/.
 """
 
 from __future__ import annotations
@@ -36,28 +37,31 @@ STOCK_CSS = """
   .type span { padding: 0 1px; border-radius: 2px; }
 """
 
-# A card that doesn't paint its own background + a type-in-answer diff row, so
-# both the page-tint change and the retoned feedback colours are visible.
-BODY = """
+# A Basic card that doesn't paint its own background, matching the screenshot
+# regression, plus a type-in-answer diff row so feedback colors stay visible.
+BASIC_CARD = """
+<div class="card">
+  <p>Name the three factors in the Fama-French model.</p>
+  <div class="type">
+    <span class="typeGood">Mkt</span><span class="typeBad">x</span><span class="typeMissed">SMB</span>
+  </div>
+</div>
+"""
+
+
+def _body(card_html: str) -> str:
+    return f"""
   <div id="qa" dir="auto">
-    <div class="card">
-      <div style="font-size:14px;letter-spacing:.14em;text-transform:uppercase;color:#DA5C01;font-weight:700;">
-        ankiCFA &middot; Type the answer
-      </div>
-      <p style="color:#4D5C6D;">Spell the CFA Standard code for material nonpublic information.</p>
-      <div class="type">
-        <span class="typeGood">II(A</span><span class="typeBad">x</span><span class="typeMissed">)</span>
-      </div>
-    </div>
+    {card_html}
   </div>
 """
 
 
-def _page(title: str, extra_head: str) -> str:
+def _page(title: str, extra_head: str, card_html: str) -> str:
     return (
         f"<!doctype html><html><head><meta charset=utf-8><title>{title}</title>"
         f"<style>{STOCK_CSS}</style>{extra_head}</head>"
-        f"<body>{BODY}</body></html>"
+        f"<body>{_body(card_html)}</body></html>"
     )
 
 
@@ -65,9 +69,16 @@ def main() -> None:
     out = os.path.join(_ROOT, "proof/reviewer-chrome")
     os.makedirs(out, exist_ok=True)
     with open(os.path.join(out, "reviewer-before.html"), "w") as f:
-        f.write(_page("Reviewer body — stock Anki (before)", ""))
+        f.write(_page("Reviewer body — stock Anki (before)", "", BASIC_CARD))
     with open(os.path.join(out, "reviewer-after.html"), "w") as f:
-        f.write(_page("Reviewer body — CFA chrome (after)", cfa_chrome._reviewer_css()))
+        wrapped = cfa_chrome._wrap_basic_cfa_card(BASIC_CARD, "reviewQuestion")
+        f.write(
+            _page(
+                "Reviewer body — CFA chrome (after)",
+                cfa_chrome._reviewer_css(),
+                wrapped,
+            )
+        )
     print("wrote reviewer-before.html / reviewer-after.html to", out)
 
 

@@ -54,8 +54,22 @@ class CfaConceptMap:
             cfa.study_by_exam_priority(mw)
         elif url == "cfa:ethics":
             cfa.study_ethics_pairs(mw)
+        elif url == "cfa:study":
+            mw.moveToState("cfaStudy")
+        elif url == "cfa:conceptmap":
+            mw.moveToState("cfaConceptMap")
         elif url == "cfa:readiness":
             cfa.show_exam_readiness(mw)
+        elif url == "cfa:progress":
+            mw.moveToState("cfaProgress")
+        elif url == "cfa:sync":
+            from aqt.cfa_home import trigger_cfa_sync
+
+            trigger_cfa_sync(mw)
+        elif url == "cfa:sync-settings":
+            from aqt.cfa_home import open_sync_settings
+
+            open_sync_settings(mw)
         elif url == "cfa:home":
             mw.moveToState("cfaHome")
         elif url == "cfa:decks":

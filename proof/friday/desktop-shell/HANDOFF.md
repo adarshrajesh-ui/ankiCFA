@@ -18,6 +18,7 @@ main-tree HEAD onto `friday/ethics`, so my branding commit (`d9687c72b`) landed
 on **friday/ethics** and `friday/desktop-shell` got reset to `6ef32ec8c`.
 
 Fix applied:
+
 - Cherry-picked my clean commit onto `friday/desktop-shell` → `22013a473`, pushed.
 - Reset `friday/ethics` back to its real tip `be05088ce` with `git reset --mixed`
   (drops only my stray commit; **all** working-tree files, incl. every worker's

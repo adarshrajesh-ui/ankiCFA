@@ -93,10 +93,8 @@ def setup_menu(mw: AnkiQt) -> None:
     ai_settings.setStatusTip("Turn the optional AI features on or off.")
     qconnect(ai_settings.triggered, lambda: _open_ai_settings(mw))
 
-    sync_settings = menu.addAction("Settings & Sync…")
-    sync_settings.setStatusTip(
-        "Connect this device, sync now, and see account status."
-    )
+    sync_settings = menu.addAction("Settings && Sync…")
+    sync_settings.setStatusTip("Connect this device, sync now, and see account status.")
     qconnect(sync_settings.triggered, lambda: _open_sync_settings(mw))
 
     # Keep a reference so the menu (and its slots) survive garbage collection.
@@ -149,17 +147,6 @@ def setup_menu(mw: AnkiQt) -> None:
     except Exception:
         pass
 
-    # Concept Map: register the SINGLE batched AI-explanation bridge (pycmd).
-    # Safe to call unconditionally — with the master AI toggle off it returns the
-    # AI-off marker immediately (no network) and the map keeps its templated
-    # explanations, and registration never raises.
-    try:
-        from aqt.cfa_concept_map_ai import register as _register_map_ai
-
-        _register_map_ai()
-    except Exception:
-        pass
-
 
 def logout_of_sync(mw: AnkiQt) -> None:
     """Log out of the sync account (AnkiWeb or self-hosted).
@@ -185,8 +172,7 @@ def logout_of_sync(mw: AnkiQt) -> None:
     account = mw.pm.profile.get("syncUser") or "your sync account"
     if not askUser(
         f"Log out of {account}?\n\n"
-        "You'll need to log in again to sync (your custom sync-server URL is "
-        "kept).",
+        "You'll need to log in again to sync your CFA progress across devices.",
         parent=mw,
         title="Log out of Sync",
     ):

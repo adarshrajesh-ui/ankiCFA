@@ -234,7 +234,7 @@ def add_deck_notes(col, deck_dir: str = DECK_DIR) -> dict:
     has cards); this always appends. Returns a summary dict with the number of
     notes added and the topic weights persisted.
     """
-    from cfa_notetype import ensure_cfa_notetype
+    from cfa_notetype import ensure_cfa_notetype  # type: ignore[import-not-found]
 
     from anki import cfa
 

@@ -44,6 +44,7 @@ for _p in (os.path.join(_ROOT, "out", "pylib"), os.path.join(_ROOT, "pylib")):
         sys.path.insert(0, _p)
 
 from anki import cfa  # noqa: E402
+from anki.cards import CardId  # noqa: E402
 from anki.collection import Collection  # noqa: E402
 from anki.decks import DeckId  # noqa: E402
 
@@ -122,7 +123,7 @@ def build_deck(col: Collection, n_cards: int) -> DeckId:
     now = int(time.time())
 
     studied_target = int(n_cards * STUDIED_FRACTION)
-    studied_cids: list[int] = []
+    studied_cids: list[CardId] = []
     for i in range(n_cards):
         topic = topics[i % len(topics)]
         note = col.new_note(nt)
@@ -189,7 +190,7 @@ def bench_review_loop(col: Collection, reps: int) -> tuple[Stat, Stat]:
 
     for _ in range(reps):
         t0 = time.perf_counter()
-        queued = col.sched.get_queued_cards(fetch_limit=1)
+        queued = col.sched.get_queued_cards(fetch_limit=1)  # type: ignore[union-attr]
         next_stat.samples_ms.append((time.perf_counter() - t0) * 1000.0)
         if not queued.cards:
             break
@@ -198,11 +199,11 @@ def bench_review_loop(col: Collection, reps: int) -> tuple[Stat, Stat]:
         card._load_from_backend_card(qc.card)
         card.start_timer()
         states = col._backend.get_scheduling_states(card.id)
-        answer = col.sched.build_answer(
+        answer = col.sched.build_answer(  # type: ignore[union-attr]
             card=card, states=states, rating=CardAnswer.GOOD
         )
         t0 = time.perf_counter()
-        col.sched.answer_card(answer)
+        col.sched.answer_card(answer)  # type: ignore[union-attr]
         ack_stat.samples_ms.append((time.perf_counter() - t0) * 1000.0)
     return next_stat, ack_stat
 
@@ -265,15 +266,15 @@ def bench_sync(col_path: str, reps: int) -> Stat:
                 for _ in range(reps):
                     # Grade one real due card through the backend so there is a
                     # genuine incremental change (card + revlog) to push.
-                    queued = col.sched.get_queued_cards(fetch_limit=1)
+                    queued = col.sched.get_queued_cards(fetch_limit=1)  # type: ignore[union-attr]
                     if queued.cards:
                         qc = queued.cards[0]
                         card = Card(col)
                         card._load_from_backend_card(qc.card)
                         card.start_timer()
                         states = col._backend.get_scheduling_states(card.id)
-                        col.sched.answer_card(
-                            col.sched.build_answer(
+                        col.sched.answer_card(  # type: ignore[union-attr]
+                            col.sched.build_answer(  # type: ignore[union-attr]
                                 card=card, states=states, rating=CardAnswer.GOOD
                             )
                         )

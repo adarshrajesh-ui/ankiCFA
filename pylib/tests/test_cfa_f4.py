@@ -387,7 +387,9 @@ def test_bayesian_readiness_with_full_canonical_config_totals_all():
     cfa.set_exam_config(
         col,
         exam_date="2026-12-01",
-        topic_weights={t: 1.0 / len(cfa.CANONICAL_TOPICS) for t in cfa.CANONICAL_TOPICS},
+        topic_weights={
+            t: 1.0 / len(cfa.CANONICAL_TOPICS) for t in cfa.CANONICAL_TOPICS
+        },
     )
     r = cfa.bayesian_readiness(col, deck_id=deck)
     assert r.topics_total == len(cfa.CANONICAL_TOPICS)

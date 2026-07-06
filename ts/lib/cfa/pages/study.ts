@@ -1,14 +1,10 @@
 // Copyright: Ankitects Pty Ltd and contributors
 // License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
 
+import { productNavItems } from "../productNav";
 import type { CfaStudyDeck, CfaStudyPayload } from "../types";
 
-export const STUDY_NAV = [
-    { cmd: "cfa:study", label: "Study", active: true },
-    { cmd: "cfa:conceptmap", label: "Concept Map" },
-    { cmd: "cfa:readiness", label: "Readiness" },
-    { cmd: "cfa:sync", label: "Sync" },
-];
+export const STUDY_NAV = productNavItems("study");
 
 export function integer(n: number): string {
     return n.toLocaleString("en-US");
@@ -29,13 +25,14 @@ export function syncChipLabel(data: CfaStudyPayload): string {
     return data.sync.lastSyncedAt ? `Synced ${data.sync.lastSyncedLabel}` : "Sync ready";
 }
 
-export function visibleStudyDecks(decks: CfaStudyDeck[], limit = 3): CfaStudyDeck[] {
+export const TOP_URGENT_DECK_COUNT = 3;
+
+export function visibleStudyDecks(decks: CfaStudyDeck[]): CfaStudyDeck[] {
     return [...decks]
         .sort((a, b) => {
             const aUrgency = a.due * 2 + a.newCount;
             const bUrgency = b.due * 2 + b.newCount;
             return bUrgency - aUrgency || a.name.localeCompare(b.name);
         })
-        .slice(0, limit)
-        .map((deck, index) => ({ ...deck, featured: index === 0 }));
+        .map((deck, index) => ({ ...deck, featured: index < TOP_URGENT_DECK_COUNT }));
 }

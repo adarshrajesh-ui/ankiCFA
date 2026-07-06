@@ -2,7 +2,7 @@
 
 From **W-sync** (branch `friday/sync`). Items below are OUTSIDE the sync
 workstream's edit scope (sync run/config scripts, desktop custom-sync config,
-AnkiDroid sync *config*, `card.custom_data` persistence hook, double-count
+AnkiDroid sync _config_, `card.custom_data` persistence hook, double-count
 tests, `proof/friday/sync/**`). They are written here for the owning workstream.
 
 ---
@@ -29,11 +29,11 @@ and a first-launch bootstrap. Observed during increment 2:
   the DeckPicker exits to the home screen — both make deterministic UI automation
   of the sync flow fragile.
 
-**Impact on W-sync:** the sync *mechanism* is proven end-to-end (real
+**Impact on W-sync:** the sync _mechanism_ is proven end-to-end (real
 `FULL_UPLOAD` from the phone with real content on the server, real
 `FULL_DOWNLOAD` to a second device, a clean single-review delta crossing
 phone→desktop). But because the phone's persisted collection resets, a
-*device-observable* round-trip (seeing a desktop-made review appear and STICK on
+_device-observable_ round-trip (seeing a desktop-made review appear and STICK on
 the phone) can't be reliably captured. Reverse-direction correctness is instead
 proven by the machine-checked pytest against the real server + real Rust sync
 engine.

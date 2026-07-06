@@ -78,7 +78,7 @@ def summarize(col: Collection) -> dict:
 def cmd_sync(args: argparse.Namespace) -> int:
     col = open_col(args.base)
     try:
-        auth = cs.login(col, _server_stub())
+        auth = cs.login(col, _server_stub())  # type: ignore[arg-type]
         before = summarize(col)
         required = cs.sync(col, auth)
         after = summarize(col)
@@ -162,7 +162,13 @@ def _server_stub() -> _ServerStub:
 
 
 def _required_name(required: int) -> str:
-    for name in ("NO_CHANGES", "NORMAL_SYNC", "FULL_SYNC", "FULL_DOWNLOAD", "FULL_UPLOAD"):
+    for name in (
+        "NO_CHANGES",
+        "NORMAL_SYNC",
+        "FULL_SYNC",
+        "FULL_DOWNLOAD",
+        "FULL_UPLOAD",
+    ):
         if getattr(cs, name, object()) == required:
             return name
     return str(required)

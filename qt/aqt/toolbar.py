@@ -226,6 +226,15 @@ class BottomWebView(ToolbarWebView):
             qconnect(self.animation.finished, lambda: self.setFixedHeight(height))
             self.animation.start()
 
+    def clear_for_shell_state(self) -> None:
+        """Remove stale bottom chrome when a main-window state does not own it."""
+        self.reset_timer()
+        self.resetHandlers()
+        self.stdHtml("", default_css=False)
+        self.web_height = 0
+        self.hidden = False
+        self.setFixedHeight(0)
+
     def hide_if_allowed(self) -> None:
         if self.mw.state != "review":
             return
@@ -311,9 +320,7 @@ class Toolbar:
         gui_hooks.top_toolbar_did_redraw(self)
 
     # CFA fork: which main-window states own a persistent top-bar nav tab, and
-    # the id of the tab that should read as "active" while in that state. Ethics
-    # launches into the shared overview/review flow rather than a dedicated state,
-    # so it has no persistent active tab.
+    # the id of the tab that should read as "active" while in that state.
     _CFA_STATE_TABS = {
         "cfaHome": "cfa_home",
         "cfaStudy": "cfa_study",
@@ -321,6 +328,15 @@ class Toolbar:
         "cfaReadiness": "cfa_readiness",
         "cfaProgress": "cfa_progress",
     }
+    _CFA_STUDY_STATES = {"overview", "review"}
+    _CFA_NAV_IDS = [
+        "cfa_home",
+        "cfa_study",
+        "cfa_ethics",
+        "cfa_concept_map",
+        "cfa_readiness",
+        "cfa_progress",
+    ]
 
     def _update_active_cfa_tab(self) -> None:
         """Highlight the CFA nav tab matching the current main-window state.
@@ -332,12 +348,28 @@ class Toolbar:
         so navigating to the deck list or a study session leaves no stale
         highlight). Pure presentation — no scores or navigation change.
         """
-        self._eval_active_cfa_tab(
-            self._CFA_STATE_TABS.get(getattr(self.mw, "state", ""))
-        )
+        self._eval_active_cfa_tab(self._active_cfa_tab_for_state())
 
     def _on_state_did_change(self, new_state: str, old_state: str) -> None:
-        self._eval_active_cfa_tab(self._CFA_STATE_TABS.get(new_state))
+        self._eval_active_cfa_tab(self._active_cfa_tab_for_state(new_state))
+
+    def _active_cfa_tab_for_state(self, state: str | None = None) -> str | None:
+        if state is None:
+            state = cast(str, getattr(self.mw, "state", ""))
+        if state in self._CFA_STUDY_STATES:
+            return self._active_cfa_study_tab()
+        return self._CFA_STATE_TABS.get(state)
+
+    def _active_cfa_study_tab(self) -> str:
+        try:
+            decks = self.mw.col.decks
+            deck_name = decks.name_if_exists(decks.selected()) or ""
+        except Exception:
+            deck_name = ""
+        deck_name = deck_name.lower()
+        if "cfa" in deck_name and "ethics" in deck_name:
+            return "cfa_ethics"
+        return "cfa_study"
 
     def _eval_active_cfa_tab(self, active: str | None) -> None:
         self.web.eval(
@@ -350,8 +382,7 @@ class Toolbar:
             "el.setAttribute('aria-current','page');}"
             "else{el.classList.remove('is-active');"
             "el.removeAttribute('aria-current');}"
-            "});})();"
-            % (json.dumps(list(self._CFA_STATE_TABS.values())), json.dumps(active))
+            "});})();" % (json.dumps(self._CFA_NAV_IDS), json.dumps(active))
         )
 
     # Available links
@@ -412,7 +443,7 @@ class Toolbar:
                 "cfa_study",
                 "Study",
                 self._cfaStudyLinkHandler,
-                tip="Study by exam priority (weakest first)",
+                tip="Open CFA Study workspace",
                 id="cfa_study",
             ),
             self.create_link(
@@ -583,7 +614,9 @@ class Toolbar:
         self.mw.onStats()
 
     def _syncLinkHandler(self) -> None:
-        self.mw.on_sync_button_clicked()
+        from aqt.cfa_sync_connect import trigger_cfa_sync
+
+        trigger_cfa_sync(self.mw)
 
     # HTML & CSS
     ######################################################################

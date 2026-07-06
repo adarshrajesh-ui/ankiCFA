@@ -41,7 +41,9 @@ from typing import Any, Callable, Optional
 # The repo root (qt/aqt/cfa_tab_fill.py -> 3 up) MUST be on sys.path so
 # ``from cfa.ai.llm_client import ...`` resolves in the running app; otherwise
 # AI Back silently reports "AI is off" even with a working key.
-_REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+_REPO_ROOT = os.path.dirname(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+)
 
 
 def _ensure_repo_root() -> None:
@@ -312,7 +314,13 @@ def draft_field(
     """
     source_text = (source_text or "").strip()
     if not source_text:
-        return {"ok": False, "text": "", "error": "empty_source", "model": None, "target": target}
+        return {
+            "ok": False,
+            "text": "",
+            "error": "empty_source",
+            "model": None,
+            "target": target,
+        }
     _ensure_repo_root()
     from cfa.ai.tabfill import build_messages as _shared_messages
 
@@ -321,20 +329,44 @@ def draft_field(
     system, user = _shared_messages(source_text, target, notetype_name)
     try:
         res = complete_fn(
-            system, user, max_tokens=max_tokens, temperature=0.2,
+            system,
+            user,
+            max_tokens=max_tokens,
+            temperature=0.2,
             purpose=f"tabfill_{target}",
         )
     except Exception as exc:  # pragma: no cover - client is no-raise; belt+braces
-        return {"ok": False, "text": "", "error": f"client_error:{type(exc).__name__}",
-                "model": None, "target": target}
+        return {
+            "ok": False,
+            "text": "",
+            "error": f"client_error:{type(exc).__name__}",
+            "model": None,
+            "target": target,
+        }
     if not isinstance(res, dict) or not res.get("ok"):
-        return {"ok": False, "text": "", "error": (res or {}).get("error", "ai_unavailable"),
-                "model": (res or {}).get("model"), "target": target}
+        return {
+            "ok": False,
+            "text": "",
+            "error": (res or {}).get("error", "ai_unavailable"),
+            "model": (res or {}).get("model"),
+            "target": target,
+        }
     text = (res.get("text") or "").strip()
     if not text:
-        return {"ok": False, "text": "", "error": "empty_completion",
-                "model": res.get("model"), "target": target}
-    return {"ok": True, "text": text, "error": None, "model": res.get("model"), "target": target}
+        return {
+            "ok": False,
+            "text": "",
+            "error": "empty_completion",
+            "model": res.get("model"),
+            "target": target,
+        }
+    return {
+        "ok": True,
+        "text": text,
+        "error": None,
+        "model": res.get("model"),
+        "target": target,
+    }
 
 
 def fill_note(
@@ -361,13 +393,23 @@ def fill_note(
         front_idx = fi if front_idx is None else front_idx
         back_idx = bi if back_idx is None else back_idx
     if len(fields) < 2 or front_idx == back_idx:
-        return {"ok": False, "status": "single_field", "text": "", "error": "single_field"}
+        return {
+            "ok": False,
+            "status": "single_field",
+            "text": "",
+            "error": "single_field",
+        }
 
     front_text = _strip_html(fields[front_idx])
     back_text = _strip_html(fields[back_idx])
     target = infer_target(front_text, back_text)
     if target is None:
-        return {"ok": False, "status": "nothing_to_fill", "text": "", "error": "nothing_to_fill"}
+        return {
+            "ok": False,
+            "status": "nothing_to_fill",
+            "text": "",
+            "error": "nothing_to_fill",
+        }
 
     source_text = front_text if target == "back" else back_text
     target_idx = back_idx if target == "back" else front_idx
@@ -379,7 +421,12 @@ def fill_note(
 
     drafted = draft_field(source_text, target, notetype_name, complete_fn=complete_fn)
     if not drafted["ok"]:
-        return {"ok": False, "status": "ai_unavailable", "text": "", "error": drafted["error"]}
+        return {
+            "ok": False,
+            "status": "ai_unavailable",
+            "text": "",
+            "error": drafted["error"],
+        }
 
     fields[target_idx] = drafted["text"]
     _tag_note(note)
@@ -435,7 +482,9 @@ def _fill_back_action(editor: Any) -> None:
                 parent=editor.widget,
             )
         elif status == "ai_unavailable":
-            tooltip("AI Fill is unavailable right now — try again.", parent=editor.widget)
+            tooltip(
+                "AI Fill is unavailable right now — try again.", parent=editor.widget
+            )
         # nothing_to_fill / single_field / no_note -> silent (Tab just navigated)
 
     # Persist the current field text first so front/back are fresh, then fill.
@@ -498,7 +547,7 @@ _HINT_JS = (
     "if(!document.getElementById('cfa-tabfill-style')){var s=document.createElement('style');"
     "s.id='cfa-tabfill-style';s.textContent='.cfa-tabfill-hint{position:absolute;left:8px;bottom:6px;"
     "pointer-events:none;font-size:12px;line-height:1;color:#4d5c6d;display:flex;align-items:center;"
-    "gap:5px;opacity:.92;z-index:5}.cfa-tabfill-hint .cfa-tabfill-spark{color:#da5c01;font-size:13px}"
+    "gap:5px;opacity:.92;z-index:5}.cfa-tabfill-hint .cfa-tabfill-spark{color:#14b8b1;font-size:13px}"
     ".cfa-tabfill-hint kbd{font:inherit;border:1px solid var(--border,#d5d9e0);border-radius:4px;"
     "padding:0 5px;background:var(--canvas-elevated,#f1f3f7);color:#122b46}';"
     "document.head.appendChild(s);}"

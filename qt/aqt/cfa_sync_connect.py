@@ -1,35 +1,105 @@
 # Copyright: Ankitects Pty Ltd and contributors
 # License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
 
-"""One-click CFA sync setup for the desktop.
+"""CFA sync for the desktop — a thin CFA-branded wrapper over *normal Anki sync*.
 
-Demoing phone<->desktop sync against the self-hosted CFA ``anki-sync-server``
-normally means a trip through *Preferences > Syncing* to set a custom URL, then
-a separate login. This collapses both into a single action (a CFA-menu item and
-a top-bar "Connect" link): point the desktop at the local CFA server, log in
-with the fixed CFA credentials, and kick off a normal GUI sync.
+The CFA product syncs through ordinary Anki collection sync (AnkiWeb by
+default, or whatever server the user configures in *Preferences > Syncing*).
+There is no custom CFA sync server in the product path: CFA state rides inside
+the collection as notes/cards/revlog/config/custom-data and travels with the
+normal sync, so "Sync" and "Connect & Sync" simply drive Anki's own sync/login
+flow (``on_sync_button_clicked``) — which opens the AnkiWeb login dialog when
+the device isn't linked yet and otherwise syncs.
 
-It only calls the same PUBLIC ``ProfileManager`` / ``Collection`` sync APIs the
-stock GUI uses (``set_custom_sync_url`` / ``sync_login`` / ``set_sync_key`` /
-``on_sync_button_clicked``), so it changes no sync/auth behaviour — it just
-fills in the fields for you. Credentials/URL match ``tools/cfa/sync_server.py``
-and are overridable via the same ``CFA_SYNC_*`` env vars.
+Earlier builds hard-pointed the profile at a *local* dev sync server
+(``http://127.0.0.1:27701/``) with fixed credentials. If that loopback URL is
+still persisted it makes every sync silently target a server that isn't running
+(the "sync is dead" symptom), so :func:`heal_stale_local_sync_url` clears it and
+lets Anki fall back to AnkiWeb. The optional self-hosted dev server lives on in
+``tools/cfa/sync_server.py`` for testing only, not as the product path.
 """
 
 from __future__ import annotations
 
+import logging
 import os
+import urllib.parse
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from aqt.main import AnkiQt
 
-# Match tools/cfa/sync_server.py (and tools/cfa/desktop_sync.py).
-CFA_SYNC_URL = os.environ.get("CFA_SYNC_URL", "http://127.0.0.1:27701/")
-CFA_SYNC_USER = os.environ.get("CFA_SYNC_USER", "cfa")
-CFA_SYNC_PASS = os.environ.get("CFA_SYNC_PASS", "cfa-friday")
+logger = logging.getLogger(__name__)
+
+
+def _env_or_default(name: str, default: str) -> str:
+    return os.environ.get(name) or default
+
+
+# Defaults for the OPTIONAL developer self-hosted sync server
+# (``tools/cfa/sync_server.py`` / ``tools/cfa/desktop_sync.py``). These are NOT
+# used by the product sync path — the desktop syncs through normal Anki sync.
+CFA_SYNC_URL = _env_or_default("CFA_SYNC_URL", "http://127.0.0.1:27701/")
+CFA_SYNC_USER = _env_or_default("CFA_SYNC_USER", "cfa")
+CFA_SYNC_PASS = _env_or_default("CFA_SYNC_PASS", "cfa-friday")
 CFA_LAST_SYNC_AT_KEY = "cfaLastSyncAt"
+SYNC_DIALOG_MIN_WIDTH = 280
+SYNC_DIALOG_DEFAULT_WIDTH = 390
+SYNC_DIALOG_DEFAULT_HEIGHT = 430
+SYNC_DIALOG_BUTTON_MIN_HEIGHT = 44
+SYNC_DIALOG_SCREEN_MARGIN = 32
+
+
+def _sync_dialog_width(mw: AnkiQt | None) -> int:
+    """Return a dialog width that fits small screens without desktop source churn."""
+    width = SYNC_DIALOG_DEFAULT_WIDTH
+    try:
+        handle = mw.windowHandle() if mw is not None else None
+        screen = handle.screen() if handle is not None else None
+        available = screen.availableGeometry().width() if screen is not None else 0
+    except Exception:
+        available = 0
+    if available > 0:
+        width = min(width, max(SYNC_DIALOG_MIN_WIDTH, available - SYNC_DIALOG_SCREEN_MARGIN))
+    return width
+
+
+def _is_loopback_url(url: str | None) -> bool:
+    """True when ``url`` targets a loopback host (a local dev sync server)."""
+    if not url:
+        return False
+    try:
+        host = (urllib.parse.urlparse(url).hostname or "").lower()
+    except Exception:
+        return False
+    return host in ("127.0.0.1", "localhost", "::1", "0.0.0.0")
+
+
+def heal_stale_local_sync_url(mw: AnkiQt | None) -> bool:
+    """Drop a stale loopback custom sync URL so sync uses AnkiWeb / the user's server.
+
+    A loopback custom URL is never a real product endpoint — it is the leftover
+    local dev server that earlier CFA builds configured. Clearing it lets
+    ``sync_endpoint()`` fall back to AnkiWeb (or whatever the user configures in
+    Preferences). Returns True if a stale URL was cleared. Never raises.
+    """
+    if mw is None:
+        return False
+    try:
+        current = mw.pm.custom_sync_url()
+    except Exception:
+        return False
+    if not _is_loopback_url(current):
+        return False
+    try:
+        mw.pm.set_custom_sync_url(None)
+        logger.info("Cleared stale loopback CFA sync URL; using AnkiWeb")
+        return True
+    except Exception:
+        logger.warning("Failed clearing stale loopback CFA sync URL", exc_info=True)
+        return False
+
 
 _SYNC_TRACKING_REGISTERED = False
 
@@ -60,7 +130,7 @@ def account_link_spec(logged_in: bool, account: str | None = None) -> dict[str, 
     return {
         "cmd": "cfa_sync_settings",
         "label": "Connect & Sync",
-        "tip": "Connect this desktop to the CFA sync server and sync",
+        "tip": "Connect this device and sync CFA progress",
         "id": "cfa_account",
     }
 
@@ -92,7 +162,22 @@ def _sync_endpoint(mw: AnkiQt | None) -> str:
         endpoint = mw.pm.sync_endpoint() if mw is not None else None
     except Exception:
         endpoint = None
-    return endpoint or CFA_SYNC_URL
+    return (endpoint or "").strip()
+
+
+def _sync_endpoint_label(endpoint: str | None) -> str:
+    """Human label for the sync target, never a raw URL: a configured custom
+    server reads as "Custom server"; the default (AnkiWeb) reads as "AnkiWeb"."""
+    return "Custom server" if (endpoint or "").strip() else "AnkiWeb"
+
+
+def sync_connection_error_message(_endpoint: str | None = None) -> str:
+    """Product-safe connection error text for the normal dialog surface."""
+    return (
+        "ankiCFA couldn't connect this device to sync.\n\n"
+        "Open Settings & Sync, confirm your account is connected, then try "
+        "Connect & Sync again."
+    )
 
 
 def _last_synced_label(value: str | None) -> str:
@@ -108,8 +193,11 @@ def _last_synced_label(value: str | None) -> str:
 
 
 def _now_iso() -> str:
-    return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace(
-        "+00:00", "Z"
+    return (
+        datetime.now(timezone.utc)
+        .replace(microsecond=0)
+        .isoformat()
+        .replace("+00:00", "Z")
     )
 
 
@@ -127,11 +215,11 @@ def sync_status_payload(mw: AnkiQt | None) -> dict[str, Any]:
     elif connected:
         status = "Connected"
         tone = "pass"
-        detail = "Offline-ready. Tap Sync now when you want this device current."
+        detail = "Ready to sync reviews, progress, and settings when you want this device current."
     else:
         status = "Not connected"
         tone = "muted"
-        detail = "Connect once, then use Sync now from this CFA screen."
+        detail = "Connect this device once to keep reviews, progress, and settings current across devices."
     return {
         "connected": connected,
         "syncing": syncing,
@@ -140,7 +228,9 @@ def sync_status_payload(mw: AnkiQt | None) -> dict[str, Any]:
         "account": account or "Not connected",
         "lastSyncedAt": last_synced_at,
         "lastSyncedLabel": _last_synced_label(last_synced_at),
-        "endpoint": _sync_endpoint(mw),
+        "endpoint": (
+            _sync_endpoint_label(_sync_endpoint(mw)) if connected else "Not connected"
+        ),
         "detail": detail,
         "actionLabel": "Sync now" if connected else "Connect & Sync",
     }
@@ -152,8 +242,21 @@ def mark_sync_finished(mw: AnkiQt | None) -> None:
         profile[CFA_LAST_SYNC_AT_KEY] = _now_iso()
 
 
+# The open CFA product state -> the SvelteKit page to reload after a sync. Every
+# CFA screen derives its numbers from the collection (revlog/cards/config), so a
+# reload after sync is all that is needed for synced reviews and config to move
+# Home, Study, Concept Map and Readiness.
+_CFA_STATE_PAGES = {
+    "cfaHome": "cfa-home",
+    "cfaStudy": "cfa-study",
+    "cfaConceptMap": "cfa-concept-map",
+    "cfaReadiness": "cfa-readiness/0",
+    "cfaProgress": "graphs",
+}
+
+
 def register_sync_status_tracking(mw: AnkiQt) -> None:
-    """Persist a lightweight last-sync timestamp for CFA status surfaces."""
+    """Persist a last-sync timestamp and refresh the open CFA screen after sync."""
     global _SYNC_TRACKING_REGISTERED
     if _SYNC_TRACKING_REGISTERED:
         return
@@ -167,9 +270,13 @@ def register_sync_status_tracking(mw: AnkiQt) -> None:
             mw.toolbar.draw()
         except Exception:
             pass
+        # Refresh whichever CFA screen is open so the just-synced collection
+        # (reviews, ethics attempts, exam config, internal state) is reflected
+        # immediately instead of on the next manual navigation.
         try:
-            if getattr(mw, "state", "") == "cfaHome":
-                mw.web.load_sveltekit_page("cfa-home")
+            page = _CFA_STATE_PAGES.get(getattr(mw, "state", ""))
+            if page is not None:
+                mw.web.load_sveltekit_page(page)
         except Exception:
             pass
 
@@ -178,50 +285,82 @@ def register_sync_status_tracking(mw: AnkiQt) -> None:
 
 def open_sync_settings(mw: AnkiQt) -> None:
     """Open the native CFA sync status/actions dialog."""
-    from aqt.qt import QDialog, QHBoxLayout, QLabel, QPushButton, QVBoxLayout, qconnect
     from aqt.cfa_style import apply
+    from aqt.qt import QDialog, QLabel, QPushButton, QVBoxLayout, qconnect
 
     status = sync_status_payload(mw)
     dialog = QDialog(mw)
-    dialog.setWindowTitle("ankiCFA — Settings & Sync")
-    dialog.resize(430, 260)
+    dialog.setObjectName("cfaSyncDialog")
+    dialog.setWindowTitle("ankiCFA - Settings & Sync")
+    dialog_width = _sync_dialog_width(mw)
+    dialog.setMinimumWidth(min(SYNC_DIALOG_MIN_WIDTH, dialog_width))
+    dialog.resize(dialog_width, SYNC_DIALOG_DEFAULT_HEIGHT)
+    dialog.setSizeGripEnabled(True)
     apply(dialog)
+    dialog.setStyleSheet(
+        dialog.styleSheet()
+        + f"""
+        QDialog#cfaSyncDialog QPushButton {{
+            min-height: {SYNC_DIALOG_BUTTON_MIN_HEIGHT}px;
+            border-radius: 12px;
+            padding: 8px 14px;
+        }}
+        QLabel#cfaSyncHeading {{
+            font-size: 22px;
+            font-weight: 700;
+        }}
+        QLabel#cfaSyncRow {{
+            padding: 8px 10px;
+            border: 1px solid #DDEDEA;
+            border-radius: 12px;
+            background: #FFFFFF;
+        }}
+        """
+    )
 
     layout = QVBoxLayout()
-    heading = QLabel("Settings & Sync")
+    layout.setContentsMargins(16, 16, 16, 16)
+    layout.setSpacing(12)
+    heading = QLabel("Sync your CFA prep")
     heading.setObjectName("cfaSyncHeading")
+    heading.setMinimumWidth(0)
+    heading.setWordWrap(True)
     layout.addWidget(heading)
 
     for label, value in (
         ("Status", status["status"]),
         ("Account", status["account"]),
         ("Last synced", status["lastSyncedLabel"]),
-        ("Server", status["endpoint"]),
     ):
         row = QLabel(f"<b>{label}:</b> {value}")
+        row.setObjectName("cfaSyncRow")
+        row.setMinimumWidth(0)
         row.setWordWrap(True)
         layout.addWidget(row)
 
     detail = QLabel(str(status["detail"]))
+    detail.setMinimumWidth(0)
     detail.setWordWrap(True)
     layout.addWidget(detail)
 
-    buttons = QHBoxLayout()
+    buttons = QVBoxLayout()
+    buttons.setSpacing(8)
     primary = QPushButton(str(status["actionLabel"]))
     primary.setDefault(True)
+    primary.setMinimumHeight(SYNC_DIALOG_BUTTON_MIN_HEIGHT)
 
     def run_primary() -> None:
         dialog.accept()
-        if sync_status_payload(mw)["connected"]:
-            mw.on_sync_button_clicked()
-        else:
-            connect_cfa_sync(mw)
+        # connect_cfa_sync heals any stale local URL and drives the normal Anki
+        # sync flow, which handles both the linked and not-yet-linked cases.
+        connect_cfa_sync(mw)
 
     qconnect(primary.clicked, run_primary)
     buttons.addWidget(primary)
 
     if status["connected"]:
         logout = QPushButton("Log out")
+        logout.setMinimumHeight(SYNC_DIALOG_BUTTON_MIN_HEIGHT)
 
         def run_logout() -> None:
             dialog.accept()
@@ -233,6 +372,7 @@ def open_sync_settings(mw: AnkiQt) -> None:
         buttons.addWidget(logout)
 
     close = QPushButton("Close")
+    close.setMinimumHeight(SYNC_DIALOG_BUTTON_MIN_HEIGHT)
     qconnect(close.clicked, dialog.reject)
     buttons.addWidget(close)
     layout.addLayout(buttons)
@@ -240,48 +380,44 @@ def open_sync_settings(mw: AnkiQt) -> None:
     dialog.exec()
 
 
+def trigger_cfa_sync(mw: AnkiQt) -> None:
+    """Toolbar/page Sync entry point — always the normal Anki sync flow.
+
+    ``on_sync_button_clicked`` opens the AnkiWeb login dialog when the device is
+    not linked yet and otherwise syncs, so a single call covers both states. Any
+    stale loopback dev URL is dropped first so sync targets AnkiWeb, not a dead
+    local server.
+    """
+    if not hasattr(mw, "col"):
+        if getattr(mw.pm, "sync_auth", lambda: None)() is None:
+            open_sync_settings(mw)
+        else:
+            mw.on_sync_button_clicked()
+        return
+    if mw.col is None:
+        open_sync_settings(mw)
+        return
+    heal_stale_local_sync_url(mw)
+    mw.on_sync_button_clicked()
+
+
 def connect_cfa_sync(mw: AnkiQt) -> None:
-    """Point desktop at the local CFA server, log in, and sync — in one click."""
-    from aqt.utils import showWarning, tooltip
+    """Sync this desktop using normal Anki sync (AnkiWeb by default).
+
+    No custom server and no fixed credentials: drop any stale loopback dev URL,
+    then run Anki's own sync flow, which opens the AnkiWeb login when the device
+    isn't linked yet and otherwise syncs. CFA state travels inside the collection
+    (notes/cards/revlog/config/custom-data), so the normal sync carries it all.
+    """
+    from aqt.utils import showWarning
 
     if mw.col is None:
-        showWarning("Open a profile first, then Connect.", parent=mw, title="CFA Sync")
-        return
-
-    # 1. Point at the local CFA server. set_custom_sync_url also drops any stale
-    #    AnkiWeb redirect URL, so the custom endpoint actually takes effect.
-    mw.pm.set_custom_sync_url(CFA_SYNC_URL)
-
-    # 2. Log in against that server (mints a fresh hkey). This is the same call
-    #    the stock login dialog makes; on localhost it returns in well under a
-    #    second, so a direct call is fine.
-    try:
-        auth = mw.col.sync_login(CFA_SYNC_USER, CFA_SYNC_PASS, CFA_SYNC_URL)
-    except Exception as exc:
         showWarning(
-            f"Couldn't reach the CFA sync server at {CFA_SYNC_URL}.\n\n"
-            "Start it in a terminal with:\n\n    just cfa-syncserver\n\n"
-            "…then click Connect again.\n\n"
-            f"(details: {exc})",
+            "Open a profile first, then sync your CFA progress.",
             parent=mw,
-            title="CFA Sync",
+            title="ankiCFA — Sync",
         )
         return
 
-    mw.pm.set_sync_key(auth.hkey)
-    mw.pm.set_sync_username(CFA_SYNC_USER)
-
-    # Flip the top-bar account control from "Connect" to "Log out" right away
-    # (the single context-aware control keys off pm.sync_auth()).
-    try:
-        mw.toolbar.draw()
-    except Exception:
-        pass
-
-    # 3. Run the normal GUI sync — it shows the progress UI and, on the very
-    #    first sync of a device, the Download-from / Upload-to direction choice.
-    tooltip(
-        f"Connected to the CFA sync server as {CFA_SYNC_USER} — syncing…",
-        parent=mw,
-    )
+    heal_stale_local_sync_url(mw)
     mw.on_sync_button_clicked()

@@ -37,6 +37,9 @@ from ethics_scoring import (  # noqa: E402
 )
 
 FRONT = os.path.join(PKG, "templates", "passage_front.html")
+BACK = os.path.join(PKG, "templates", "passage_back.html")
+PAIR_FRONT = os.path.join(PKG, "templates", "front.html")
+PAIR_BACK = os.path.join(PKG, "templates", "back.html")
 PASSAGES = os.path.join(PKG, "passages.jsonl")
 JS_LOGIC = os.path.join(HERE, "js", "passage_logic.js")
 JS_RUNNER = os.path.join(HERE, "js", "run_span_matrix.js")
@@ -189,6 +192,35 @@ def test_tolerant_bank_perfect_selection_still_correct():
         assert grade_spans_tolerant(perfect, runs)["grade"] == "correct", r["item_id"]
 
 
+def test_tolerant_boundaries_allow_a_few_extra_words():
+    rows = {r["item_id"]: r for r in _load_raw()}
+    p = rows["PSG-01"]
+    runs = find_gold_spans(p["passage"], [g["phrase"] for g in p["gold_spans"]])
+    tight = [i for run in runs for i in run]
+    # Four extra boundary words total is within the multi-span cap: mostly right.
+    selected = sorted(set(tight + [max(tight) + i for i in range(1, 5)]))
+    assert grade_spans_tolerant(selected, runs)["grade"] == "correct"
+
+
+def test_tolerant_ten_extra_words_is_somewhat_right():
+    rows = {r["item_id"]: r for r in _load_raw()}
+    p = rows["PSG-01"]
+    runs = find_gold_spans(p["passage"], [g["phrase"] for g in p["gold_spans"]])
+    tight = [i for run in runs for i in run]
+    selected = sorted(set(tight + [max(tight) + i for i in range(1, 11)]))
+    assert grade_spans_tolerant(selected, runs)["grade"] == "somewhat"
+
+
+def test_tolerant_whole_passage_is_somewhat_not_correct():
+    rows = {r["item_id"]: r for r in _load_raw()}
+    p = rows["PSG-01"]
+    runs = find_gold_spans(p["passage"], [g["phrase"] for g in p["gold_spans"]])
+    selected = list(range(len(p["passage"].split())))
+    res = grade_spans_tolerant(selected, runs)
+    assert res["grade"] == "somewhat"
+    assert res["found"] == res["total"]
+
+
 # -------------------------------------------------------------------- find_gold_spans
 
 
@@ -235,6 +267,28 @@ def test_passage_attempt_partial_highlight_not_fully_correct():
     spans = _spans_for(passage, ["traded on the tip", "told his friend to buy"])
     res = grade_passage_attempt(PassageAttempt(UNETHICAL, UNETHICAL, spans[0], spans))
     assert res["highlight"] == "partial" and res["correct"] is False
+
+
+def test_feedback_copy_separates_verdict_from_evidence():
+    # A right verdict with incomplete evidence used to render as a confusing
+    # "Correct answer ... your call ✓" immediately followed by "Not fully
+    # correct". The templates now name the two axes separately.
+    passage_front = open(FRONT, encoding="utf-8").read()
+    passage_back = open(BACK, encoding="utf-8").read()
+    pair_front = open(PAIR_FRONT, encoding="utf-8").read()
+    pair_back = open(PAIR_BACK, encoding="utf-8").read()
+    all_templates = "\n".join([passage_front, passage_back, pair_front, pair_back])
+
+    assert "Verdict right · evidence not complete" in passage_front
+    assert "Recorded: verdict right, evidence not complete" in passage_back
+    assert "Case verdicts right \\u00b7 evidence not complete" in pair_front
+    assert "Recorded: case verdicts right, evidence not complete" in pair_back
+    assert " — your call " not in passage_front
+    assert " — your call " not in passage_back
+    assert "correct answer is <b>" not in passage_front
+    assert "correct answer is <b>" not in passage_back
+    assert "Correct answer:" not in all_templates
+    assert "Not fully correct" not in all_templates
 
 
 # ------------------------------------------------------------- the 30-passage bank

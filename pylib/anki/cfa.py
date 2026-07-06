@@ -1333,8 +1333,6 @@ def bayesian_readiness(
 
     Delegates to the shared Rust engine; see :func:`_py_bayesian_readiness`."""
     try:
-        return _bayesian_from_pb(
-            _compute_scores_via_rpc(col, deck_id, now_ts).bayesian
-        )
+        return _bayesian_from_pb(_compute_scores_via_rpc(col, deck_id, now_ts).bayesian)
     except AttributeError:
         return _py_bayesian_readiness(col, deck_id=deck_id, now_ts=now_ts)

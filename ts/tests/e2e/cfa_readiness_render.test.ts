@@ -12,7 +12,9 @@
 // II" deck), then drives the two shipped CFA web surfaces exactly as the desktop
 // app does and asserts they render REAL backend data — never a static mock:
 //   * /cfa-home        — the native landing dashboard (server resolves the CFA
-//                        deck) → three honest score cards + coverage caption.
+//                        deck) → the approved Command Center contract: next
+//                        work, real metric chips, priority risks, concept map
+//                        preview, and session cards.
 //   * /cfa-readiness/N — the Exam Readiness page for the CFA Level II deck →
 //                        the three scores, the honest hero, and the full
 //                        per-topic COVERAGE MAP (all 10 canonical CFA areas with
@@ -121,19 +123,30 @@ test.beforeAll(() => {
     fs.mkdirSync(OUT, { recursive: true });
 });
 
-test("CFA Home dashboard renders the three honest scores with real data", async ({ page }) => {
+test.skip(!!process.env.CFA_SEED_REVIEWS, "fresh-profile render gate requires an unseeded profile");
+
+test("CFA Home renders the approved Command Center with real CFA data", async ({ page }) => {
     await page.goto("/cfa-home");
     await page.waitForLoadState("networkidle");
 
-    // Three honest-score StatCards, each naming its score.
-    const stats = page.locator(".cfa-stat");
-    await expect(stats).toHaveCount(3);
-    for (const name of ["Memory", "Performance", "Readiness"]) {
-        await expect(page.locator(".cfa-stat__label", { hasText: name })).toBeVisible();
-    }
+    await expect(page.locator(".cfa-product-nav")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Today’s work" })).toBeVisible();
+    await expect(page.getByText("Home · CFA Command Center")).toBeVisible();
 
-    // The coverage caption reports real topic totals (10 canonical areas).
-    await expect(page.getByText(/\(\d+\/10 topics\)/)).toBeVisible();
+    const metrics = page.getByLabel("Current CFA metrics");
+    await expect(metrics.getByText(/\d+ days to exam/)).toBeVisible();
+    await expect(metrics.getByText("0 graded reviews")).toBeVisible();
+    await expect(metrics.getByText("0% topic coverage")).toBeVisible();
+    await expect(metrics.getByText("Local explanations ready")).toBeVisible();
+
+    await expect(page.getByRole("button", { name: "Begin priority session" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Open Concept Map" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "View weak areas" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Heavy topics holding readiness down" })).toBeVisible();
+    await expect(page.getByText("Concept Map preview")).toBeVisible();
+    await expect(page.getByRole("group", { name: "Interactive Concept Map preview" })).toBeVisible();
+    await expect(page.getByText("Recommended session")).toBeVisible();
+    await expect(page.getByText("Maintenance", { exact: true })).toBeVisible();
 
     await page.screenshot({
         path: path.join(OUT, "01-cfa-home.png"),
@@ -148,12 +161,13 @@ test("Exam Readiness renders three scores + the full per-topic coverage map", as
     await page.goto(`/cfa-readiness/${deckId}`);
     await page.waitForLoadState("networkidle");
 
-    // Heading + the real deck name (proves it is bound to the resolved deck).
-    await expect(page.locator(".cfa-page-heading__title")).toHaveText("CFA Level II");
+    // Product shell deck label proves this page is bound to the resolved deck.
+    await expect(page.locator(".cfa-product-nav__brand small")).toHaveText("CFA Level II");
 
     // The honest hero (a fresh deck has no graded reviews → abstain, not a fake
     // green pass call — this is the honesty contract).
     await expect(page.locator(".cfa-hero")).toBeVisible();
+    await expect(page.getByText(/No pass\/fail call yet: Not enough data/)).toBeVisible();
 
     // The three honest-score cards.
     await expect(page.locator(".cfa-stat")).toHaveCount(3);
@@ -168,8 +182,8 @@ test("Exam Readiness renders three scores + the full per-topic coverage map", as
     for (const topic of CANONICAL_TOPICS) {
         await expect(table.getByText(topic, { exact: true })).toBeVisible();
     }
-    // Real exam-weight values are present (0.12 for the five heavy areas).
-    await expect(table.getByText("0.12").first()).toBeVisible();
+    // Real exam-weight values are presented as percentages (12% for heavy areas).
+    await expect(table.locator('.cfa-readiness__topic-stat[data-label="Weight"]').getByText("12%").first()).toBeVisible();
 
     await page.screenshot({
         path: path.join(OUT, "02-cfa-readiness.png"),
@@ -183,9 +197,10 @@ test("Readiness route renders for an empty deck without crashing (empty state)",
     await page.goto("/cfa-readiness/1");
     await page.waitForLoadState("networkidle");
 
-    await expect(page.locator(".cfa-page-heading__title")).toBeVisible();
+    await expect(page.locator(".cfa-product-nav__brand small")).toHaveText("Default");
     await expect(page.locator(".cfa-stat")).toHaveCount(3);
-    await expect(page.getByText("Not enough data — keep studying")).toBeVisible();
+    await expect(page.getByText(/No pass\/fail call yet: Not enough data/)).toBeVisible();
+    await expect(page.locator(".cfa-readiness__table-hint")).toContainText("No reviews yet");
 
     await page.screenshot({
         path: path.join(OUT, "03-cfa-readiness-empty-deck.png"),

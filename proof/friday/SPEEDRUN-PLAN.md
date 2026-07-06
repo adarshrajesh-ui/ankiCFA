@@ -8,7 +8,7 @@
 ## 0. Mission & the honesty rule
 
 A **CFA Level II exam-prep app built on Anki** — a native CFA product, not "Anki
-with a CFA tab." Answer three *separate* questions, each with a range: **Memory**,
+with a CFA tab." Answer three _separate_ questions, each with a range: **Memory**,
 **Performance**, **Readiness**. **Honesty rule (non-negotiable):** never print or
 show a number without the evidence behind it; label any synthetic/simulated data
 `SIMULATED`; keep the give-up rule (abstain when data is insufficient); the app
@@ -67,47 +67,47 @@ fill; sync engine round-trip + offline conflict + dedup.
 - **A1 [P0] AI beats a simpler baseline.** Add a keyword/TF-IDF (and optionally
   vector) baseline grader; a 3-way side-by-side (deterministic-span vs TF-IDF vs
   LLM) on `cfa/ethics_pairs/eval_attempts.jsonl`. New `cfa/eval/baseline_compare.py`
-  + `just cfa-baseline-compare`. *Verify:* test + `L1/baseline-compare.txt`.
+  - `just cfa-baseline-compare`. _Verify:_ test + `L1/baseline-compare.txt`.
 - **A2 [P0] Wrong-answer rate + cutoff.** In `cfa/ethics_pairs/eval_ai_grading.py`
   add a named `wrong_answer_rate` (false-accepts of human-incorrect) + gate on
-  `accuracy>=A_CUT AND wrong_answer_rate<=W_CUT`. *Verify:* test + `eval-gate.txt`.
+  `accuracy>=A_CUT AND wrong_answer_rate<=W_CUT`. _Verify:_ test + `eval-gate.txt`.
 - **A3 [P1] Memory calibration (Sunday).** `cfa/eval/calibration.py`: **Brier +
   log loss + reliability chart** on held-out reviews (prefer a real revlog fixture;
-  else label `SIMULATED`). `just cfa-calibration`. *Evidence:* `calibration.png`
-  + `calibration.txt`.
+  else label `SIMULATED`). `just cfa-calibration`. _Evidence:_ `calibration.png`
+  - `calibration.txt`.
 - **A4 [P1] Performance-model accuracy (Sunday).** Predict whether the student gets
   held-out exam-style questions right (topic mastery, difficulty, timing,
   coverage); report **accuracy on held-out questions**. `cfa/eval/performance_eval.py`
-  + `just cfa-performance-eval`. *Evidence:* `performance-eval.txt`.
+  - `just cfa-performance-eval`. _Evidence:_ `performance-eval.txt`.
 - **A5 [P1] Paraphrase gap 7d.** `cfa/eval/paraphrase_test.py`: recall-on-card vs
   accuracy-on-reworded (30 concepts × 2), report the **memory-vs-performance gap**.
-  `just cfa-paraphrase`. *Evidence:* `paraphrase-gap.txt`.
+  `just cfa-paraphrase`. _Evidence:_ `paraphrase-gap.txt`.
 - **A6 [P1] Card-gen gold set 7f.** `cfa/eval/cardgen_gold.jsonl` (50 known-correct
   CFA QA) + `cfa/eval/cardgen_check.py`: generate 50 cards from a named source,
   bucket correct+useful / wrong / correct-but-bad, **cutoff declared up front**,
-  block failures. `just cfa-cardgen-check`. *Evidence:* `cardgen-check.txt`.
+  block failures. `just cfa-cardgen-check`. _Evidence:_ `cardgen-check.txt`.
 - **A7 [P1] Coverage map + topics 8→10.** `cfa/outline/level2_topics.json` (10
   official areas); extend `CANONICAL_TOPICS` to 10 in **both** `pylib/anki/cfa.py`
   and `rslib/src/scheduler/cfa_scores.rs` (keep Rust==Python parity); update
   `topics_total==8` tests to 10; render a coverage map (topic→covered?→%) on the
-  readiness dashboard. *Verify:* `just cfa-scores-test cfa-parity-test cfa-f4-test
+  readiness dashboard. _Verify:_ `just cfa-scores-test cfa-parity-test cfa-f4-test
   cfa-deck-test` + `coverage-map.png`.
 - **A8 [P1] Study-feature ablation §8.** One feature (recommend the exam-priority
   points-at-stake queue), a one-sentence hypothesis, **3 builds** (feature ON /
   feature OFF / plain unmodified Anki) on the same cohort + questions + study-time
   budget; pre-registered metric **with a range**; report null results honestly;
   label `SIMULATED`. `tools/cfa/ablation_harness.py` + `just cfa-ablation`.
-  *Evidence:* `ablation.txt`.
+  _Evidence:_ `ablation.txt`.
 - **A9 [P1] One-command benchmark §10/7h.** `just bench` + `tools/cfa/bench.py`:
   ~50k-card deck, print **p50/p95/worst** for answerCard ack, next-card,
   dashboard first load, dashboard refresh, sync. `just bench-smoke` for CI.
-  *Evidence:* `bench.txt`.
+  _Evidence:_ `bench.txt`.
 - **A10 [P1] Crash + offline robustness 7g.** `pylib/tests/test_cfa_crash_robustness.py`:
   kill mid-review ~20× → zero corruption (`quick_check`); plus offline + AI-off →
-  still returns a score. `just cfa-crash-test`. *Evidence:* `crash-robustness.txt`.
+  still returns a score. `just cfa-crash-test`. _Evidence:_ `crash-robustness.txt`.
 - **A11 [P1] Score-mapping + model-description docs (Sunday).** Write the
   memory / performance / readiness **method + range + give-up rule**, one short
-  page each, in `docs/cfa/MODEL-*.md`. *Evidence:* the docs + `PROGRESS.md` entry.
+  page each, in `docs/cfa/MODEL-*.md`. _Evidence:_ the docs + `PROGRESS.md` entry.
 - **A12 [P2] Unify Rust-change note.** `docs/cfa/RUST_ENGINE_NOTE.md` covers all 3
   RPCs + why-Rust + upstream files + merge difficulty; fix stale test counts.
 - **A13 [P2] Desktop installer (Sunday).** Build a packaged installer
@@ -136,6 +136,7 @@ Both apps. **At least 3 passes; each pass more critical than the last.** Fix ALL
 blocker + major issues. Everything noted down.
 
 ### Process (repeat per pass, per app)
+
 1. **Inventory** every screen + state into `UI-INVENTORY.md` (desktop: CFA Home,
    Reviewer, Ethics minimal-pairs, **Readiness**, Exam-priority, AI Settings,
    Connect/Logout, deck browser, deck config, stats, menus/toolbar, empty/loading/
@@ -163,6 +164,7 @@ blocker + major issues. Everything noted down.
    add a Playwright/adb check that the screen actually renders with data.
 
 ### Must-fix named issues
+
 - **Desktop Readiness does nothing** → make it actually open and render the three
   scores + ranges + coverage map with real data; add a functional test.
 - **Connect / Logout controls are clunky** → redesign into clear, discoverable,

@@ -1,9 +1,9 @@
 # Model: Performance Score
 
-*Score-mapping + model-description doc (Phase A / A11). Source of truth:*
-`pylib/anki/cfa._py_performance_score` *(Python reference) and the Rust*
-`compute_cfa_scores` *RPC in* `rslib/src/scheduler/cfa_scores.rs` *(kept at
-parity, verified by* `just cfa-parity-test`*). No AI is involved.*
+_Score-mapping + model-description doc (Phase A / A11). Source of truth:_
+`pylib/anki/cfa._py_performance_score` _(Python reference) and the Rust_
+`compute_cfa_scores` _RPC in_ `rslib/src/scheduler/cfa_scores.rs` _(kept at
+parity, verified by_ `just cfa-parity-test` _). No AI is involved._
 
 ## What it answers
 
@@ -21,9 +21,9 @@ between the two is measured directly in `cfa/eval/paraphrase_test.py`; see
    its **earliest graded review** (`min(revlog.id)` with `ease > 0`). That is
    the one time you answered the prompt with no recent study of it — the best
    available proxy for an unseen item.
-2. **Correct = anything but *Again*.** On the Anki ease scale
+2. **Correct = anything but _Again_.** On the Anki ease scale
    `1=Again, 2=Hard, 3=Good, 4=Easy`, a first exposure counts as **correct when
-   `ease >= 2`** (`_CORRECT_EASE`); only *Again* is a miss.
+   `ease >= 2`** (`_CORRECT_EASE`); only _Again_ is a miss.
 3. **Rate as a Wilson interval.** The performance score is the first-exposure
    success rate reported as a **95 % Wilson score interval** (`_wilson`, `z =
    1.96`), not a raw proportion. Wilson bounds stay inside `[0, 1]` and widen

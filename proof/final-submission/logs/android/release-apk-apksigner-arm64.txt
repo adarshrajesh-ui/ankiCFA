@@ -1,0 +1,17 @@
+Verifies
+Verified using v1 scheme (JAR signing): false
+Verified using v2 scheme (APK Signature Scheme v2): true
+Verified using v3 scheme (APK Signature Scheme v3): false
+Verified using v3.1 scheme (APK Signature Scheme v3.1): false
+Verified using v4 scheme (APK Signature Scheme v4): false
+Verified for SourceStamp: false
+Number of signers: 1
+Signer #1 certificate DN: CN=Sahil Ahmad, OU=mru, O=mru c, L=har, ST=in, C=in
+Signer #1 certificate SHA-256 digest: 0a8ebeea7a7d04f21a737debedfb0b2ec439c84936e4bb69dc7f14894f0be42a
+Signer #1 certificate SHA-1 digest: a443abe5b597ab23f13d7001f16c095c71776955
+Signer #1 certificate MD5 digest: f3ce72c2b2ac7f02860dd320555a78b6
+Signer #1 key algorithm: RSA
+Signer #1 key size (bits): 2048
+Signer #1 public key SHA-256 digest: f539ed14c066fa4e59a47fe55b89dca3169d74befc5d02f9950fbe295bc0bc8a
+Signer #1 public key SHA-1 digest: fa95d8be461c9dcb6590007555b83b2719e068b3
+Signer #1 public key MD5 digest: fd7682f8748df02d0e1c49c4f05e2971

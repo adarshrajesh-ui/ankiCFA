@@ -155,15 +155,19 @@ def test_kill_mid_review_leaves_no_corruption():
 
 def test_offline_ai_off_still_scores():
     from anki import cfa
-    from cfa.ai.llm_client import CONF_AI_MASTER
+
+    # Mirrors the desktop AI master toggle key (cfa/ai/llm_client.py). pylib
+    # scoring is pure-local and never reads it, so pylib tests must not import
+    # the desktop ``cfa`` package (not on sys.path here); the literal is enough.
+    conf_ai_master = "cfa_ai_enabled"
 
     path = _build_collection()
     col = Collection(path)
     try:
         # Force AI hard OFF at the collection level; the scoring path must not
         # care (it is pure local computation, no network, no LLM).
-        col.set_config(CONF_AI_MASTER, False)
-        assert col.get_config(CONF_AI_MASTER) is False
+        col.set_config(conf_ai_master, False)
+        assert col.get_config(conf_ai_master) is False
 
         mem = cfa.memory_score(col)
         perf = cfa.performance_score(col)

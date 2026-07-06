@@ -353,6 +353,9 @@
     if (revealed) return;
     var tk = ev.target.closest(".cfa-tok");
     if (!tk) return;
+    if (tk.setPointerCapture && ev.pointerId != null) {
+      try { tk.setPointerCapture(ev.pointerId); } catch (e) {}
+    }
     drag.on = true; drag.moved = false; drag.caseId = caseOf(tk); drag.anchor = tokIndex(tk);
   });
   root.addEventListener("pointermove", function (ev) {
@@ -376,6 +379,10 @@
   root.addEventListener("pointerup", function (ev) {
     if (!drag.on || revealed) { drag.on = false; return; }
     drag.on = false;
+    var target = ev.target && ev.target.closest ? ev.target.closest(".cfa-tok") : null;
+    if (target && target.releasePointerCapture && ev.pointerId != null) {
+      try { target.releasePointerCapture(ev.pointerId); } catch (e) {}
+    }
     if (drag.moved) {
       var over = document.elementFromPoint(ev.clientX, ev.clientY);
       var tk = over && over.closest ? over.closest(".cfa-tok") : null;
@@ -409,7 +416,10 @@
       panel.classList.add(ok ? "correct" : "wrong");
       var v = document.createElement("div");
       v.className = "cfa-verdict";
-      v.textContent = "Correct answer: " + (answers[caseId] === "violate" ? "Violates" : "Conforms") + " — your call " + (ok ? "\u2713" : "\u2717");
+      v.textContent =
+        "Answer: " + (answers[caseId] === "violate" ? "Violates" : "Conforms") +
+        " · Your verdict: " + (judged[caseId] === "violate" ? "Violates" : "Conforms") +
+        " " + (ok ? "\u2713" : "\u2717");
       panel.appendChild(v);
     });
     root.querySelectorAll(".cfa-judge-btn").forEach(function (x) { x.disabled = true; });
@@ -441,6 +451,11 @@
       partial: "Partial credit — you matched some evidence (a close match counts), but missed at least one phrase.",
       wrong: "Not the deciding phrase — here are the phrases that matter."
     };
+    var verdictsOK = aOK && bOK;
+    var gradeTone = correct ? "ok" : (verdictsOK ? "warn" : "no");
+    var gradeLabel = correct
+      ? "\u2713 Fully correct"
+      : (verdictsOK ? "\u2713 Case verdicts right \u00b7 evidence not complete" : "\u2717 Case verdict needs review");
 
     // Per-span tier breakdown: ✓ full match, ~ near (materially-overlapping) match, ✗ missed.
     var detail = "";
@@ -454,10 +469,10 @@
 
     var rv = root.querySelector("#cfa-reveal");
     rv.innerHTML =
-      '<div class="cfa-grade ' + (correct ? "ok" : "no") + '">' + (correct ? "\u2713 Fully correct" : "\u2717 Not fully correct") + "</div>" +
+      '<div class="cfa-grade ' + gradeTone + '">' + gradeLabel + "</div>" +
       '<ul class="cfa-breakdown">' +
-        "<li>Case judgments: A " + (aOK ? "\u2713" : "\u2717") + " \u00b7 B " + (bOK ? "\u2713" : "\u2717") + "</li>" +
-        "<li>Decisive phrases: " + res.found + " of " + res.total + " found" + (res.near ? " (+" + res.near + " near)" : "") + " \u00b7 " + hl.charAt(0).toUpperCase() + hl.slice(1) + "</li>" +
+        "<li>Case verdicts: A answer <b>" + esc(answers.A) + "</b>, your verdict <b>" + esc(judged.A || "none") + "</b> " + (aOK ? "\u2713" : "\u2717") + "; B answer <b>" + esc(answers.B) + "</b>, your verdict <b>" + esc(judged.B || "none") + "</b> " + (bOK ? "\u2713" : "\u2717") + "</li>" +
+        "<li>Evidence: " + res.found + " of " + res.total + " decisive phrases fully found" + (res.near ? " (+" + res.near + " near)" : "") + " \u00b7 " + hl.charAt(0).toUpperCase() + hl.slice(1) + "</li>" +
       "</ul>" +
       '<div class="cfa-hl-msg cfa-hl-' + hl + '">' + esc(messages[hl]) + "</div>" +
       '<ul class="cfa-span-detail">' + detail + "</ul>" +
@@ -494,6 +509,7 @@
       found: res.found,
       near: res.near,
       total: res.total,
+      learnerSpans: learnerSpanTexts(),
       selectionIndices: effSel,
       spans: []
     };
@@ -521,12 +537,16 @@
   }
 
   function learnerSpanTexts() {
+    return learnerHighlights().map(function (h) { return h.text; });
+  }
+
+  function learnerHighlights() {
     var toks = cfaTokenize(vignettes[decisiveCase]);
     var out = [], arr = spansByCase[decisiveCase];
     for (var s = 0; s < arr.length; s++) {
       var parts = [];
       for (var i = arr[s].lo; i <= arr[s].hi; i++) if (toks[i] != null) parts.push(toks[i]);
-      if (parts.length) out.push(parts.join(" "));
+      if (parts.length) out.push({ text: parts.join(" "), lo: arr[s].lo, hi: arr[s].hi });
     }
     return out;
   }
@@ -544,6 +564,7 @@
       judgedVerdict: judged[decisiveCase] === "violate" ? "violate" : (judged[decisiveCase] || ""),
       goldSpans: goldSpansPayload,
       learnerSpans: learnerSpanTexts(),
+      learnerHighlights: learnerHighlights(),
       selectionIndices: effSel
     };
     // Desktop: the Python pycmd bridge holds the key and grades (its callback
@@ -623,6 +644,20 @@
     if (pendingGrade) {
       pendingGrade.source = "ai";
       if (resp.standard) pendingGrade.standard = resp.standard;
+      if (resp.grade) pendingGrade.highlight = resp.grade;
+      if (typeof resp.correct === "boolean") {
+        pendingGrade.correct = !!resp.correct;
+        root.dataset.correct = resp.correct ? "1" : "0";
+      }
+      pendingGrade.ai = {
+        grade: resp.grade || "",
+        explanation: resp.explanation || "",
+        coaching: resp.coaching || "",
+        studyTip: resp.study_tip || "",
+        learnerIntent: resp.learner_intent || "",
+        evidencePrecision: resp.evidence_precision || "",
+        neededEvidence: resp.needed_evidence || []
+      };
       try { localStorage.setItem("cfaEthics:pending", JSON.stringify(pendingGrade)); } catch (e) {}
     }
     var spansHtml = "";
@@ -637,12 +672,21 @@
     var standard = resp.standard || srcText("standard");
     var conf = (typeof resp.confidence === "number")
       ? " \u00b7 confidence " + Math.round(resp.confidence * 100) + "%" : "";
+    var needed = resp.needed_evidence || [];
+    var neededHtml = "";
+    for (var ni = 0; ni < needed.length; ni++) {
+      if (needed[ni]) neededHtml += "<li>" + esc(needed[ni]) + "</li>";
+    }
+    var precision = (resp.evidence_precision || "").toString().replace(/_/g, " ");
     box.innerHTML =
       '<div class="cfa-ai-head"><span class="cfa-badge cfa-ai-badge">AI feedback</span>' +
         "Graded by AI" + (standard ? " \u00b7 " + esc(standard) : "") + conf + "</div>" +
       '<div class="cfa-ai-grade">Semantic grade: <b>' + esc(g.charAt(0).toUpperCase() + g.slice(1)) + "</b></div>" +
+      (resp.learner_intent ? '<div class="cfa-ai-intent"><b>What you likely noticed:</b> ' + esc(resp.learner_intent) + "</div>" : "") +
+      (precision ? '<div class="cfa-ai-precision"><b>Evidence precision:</b> ' + esc(precision) + "</div>" : "") +
       '<div class="cfa-ai-explain">' + esc(resp.explanation || "") + "</div>" +
       (resp.coaching ? '<div class="cfa-ai-coach">' + esc(resp.coaching) + "</div>" : "") +
+      (neededHtml ? '<div class="cfa-ai-needed"><b>Needed evidence:</b><ul>' + neededHtml + "</ul></div>" : "") +
       (resp.study_tip ? '<div class="cfa-ai-tip"><b>Study tip:</b> ' + esc(resp.study_tip) + "</div>" : "") +
       (spansHtml ? '<ul class="cfa-span-detail cfa-ai-spans">' + spansHtml + "</ul>" : "");
     box.hidden = false;

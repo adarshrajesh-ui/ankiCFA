@@ -1,0 +1,14 @@
+---
+description: Retry Cursor team invoice unpaid errors as transient bugs
+alwaysApply: true
+---
+
+# Retry Cursor Invoice Errors
+
+If a Cursor, agent, tool, or platform operation returns the message
+`team invoice unpaid` including variants with trailing whitespace, treat it as
+a transient Cursor bug.
+
+Retry the same operation before reporting a blocker. Do not interpret this
+message as a real billing or account issue unless the retry also fails with the
+same message.

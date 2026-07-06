@@ -13,7 +13,6 @@ OpenAI key — gates access.
 Endpoints (Authorization: Bearer <token>; JSON bodies):
   POST /cfa/tabfill    {front, notetype?}            -> {ok, text, source, model, error}
   POST /cfa/grade      {passage, answerVerdict, ...}  -> ai_grading.grade_semantic result
-  POST /cfa/mapexplain {nodes:[{id,full,kind,pct,...}]} -> {ok, source, explanations, model, error}
   GET  /cfa/health                                  -> {ok, keyPresent, model}
 
 The OpenAI key is NEVER returned or logged. With no key (or on any failure) every
@@ -72,64 +71,83 @@ def fill(
 
     target = tabfill_lib.infer_target(front, back)
     if target is None:
-        return {"ok": False, "text": "", "target": None, "source": "fallback",
-                "model": None, "error": "nothing_to_fill"}
+        return {
+            "ok": False,
+            "text": "",
+            "target": None,
+            "source": "fallback",
+            "model": None,
+            "error": "nothing_to_fill",
+        }
     source_text = front if target == "back" else back
     system, user = tabfill_lib.build_messages(source_text, target, notetype)
     if complete_fn is None:
         complete_fn = llm_client.complete
     res = complete_fn(
-        system, user, max_tokens=400, temperature=0.2,
+        system,
+        user,
+        max_tokens=400,
+        temperature=0.2,
         purpose=f"tabfill_{target}_mobile",
     )
     if not isinstance(res, dict) or not res.get("ok"):
-        return {"ok": False, "text": "", "target": target, "source": "fallback",
-                "model": (res or {}).get("model"),
-                "error": (res or {}).get("error", "ai_unavailable")}
+        return {
+            "ok": False,
+            "text": "",
+            "target": target,
+            "source": "fallback",
+            "model": (res or {}).get("model"),
+            "error": (res or {}).get("error", "ai_unavailable"),
+        }
     text = (res.get("text") or "").strip()
     if not text:
-        return {"ok": False, "text": "", "target": target, "source": "fallback",
-                "model": res.get("model"), "error": "empty_completion"}
-    return {"ok": True, "text": text, "target": target, "source": "ai",
-            "model": res.get("model"), "error": None}
+        return {
+            "ok": False,
+            "text": "",
+            "target": target,
+            "source": "fallback",
+            "model": res.get("model"),
+            "error": "empty_completion",
+        }
+    return {
+        "ok": True,
+        "text": text,
+        "target": target,
+        "source": "ai",
+        "model": res.get("model"),
+        "error": None,
+    }
 
 
 def grade(payload: dict[str, Any], *, complete_fn=None) -> dict[str, Any]:
     """Semantic ethics grade via the shared pure grader (falls back on failure)."""
     from ai_grading import grade_semantic
 
+    selection = payload.get("selectionIndices")
+    if isinstance(selection, list):
+        selection_indices = []
+        for i in selection:
+            try:
+                selection_indices.append(int(i))
+            except (TypeError, ValueError):
+                pass
+    else:
+        selection_indices = None
+    learner_highlights = payload.get("learnerHighlights")
+    if not isinstance(learner_highlights, list):
+        learner_highlights = None
     return grade_semantic(
         str(payload.get("passage", "")),
         str(payload.get("answerVerdict", "")),
         str(payload.get("judgedVerdict", "")),
         payload.get("goldSpans") or [],
         [str(p) for p in (payload.get("learnerSpans") or [])],
+        selection_indices=selection_indices,
+        learner_highlights=learner_highlights,
         item_id=str(payload.get("itemId", "")),
         standard=str(payload.get("standard", "")),
         complete_fn=complete_fn,
     )
-
-
-def mapexplain(payload: dict[str, Any], *, complete_fn=None) -> dict[str, Any]:
-    """Concept Map — the SINGLE batched node-explanation via the shared pure engine.
-
-    ``payload`` is ``{"nodes": [{id, full, kind, pct, band, parent}, ...]}`` — the
-    same node list the desktop pycmd bridge (``cfa_concept_map_ai``) sends. Returns
-    ``{ok, source, explanations, model, error}`` where ``explanations`` is an
-    ``{id: text}`` dict. On AI-off / no key / any failure ``ok`` is False,
-    ``explanations`` is empty and ``source`` is "fallback", so the phone's map keeps
-    its deterministic templated wording. Never raises (``explain_map`` is no-raise)."""
-    from cfa.ai.mapexplain import explain_map
-
-    result = explain_map(payload.get("nodes"), complete_fn=complete_fn)
-    ok = bool(result.get("ok"))
-    return {
-        "ok": ok,
-        "source": "ai" if ok else "fallback",
-        "explanations": result.get("explanations") or {},
-        "model": result.get("model"),
-        "error": result.get("error"),
-    }
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -163,11 +181,14 @@ class Handler(BaseHTTPRequestHandler):
         if self.path.rstrip("/") == "/cfa/health":
             if not self._authed():
                 return self._send(401, {"error": "unauthorized"})
-            return self._send(200, {
-                "ok": True,
-                "keyPresent": llm_client.key_present(),
-                "model": llm_client._model(),
-            })
+            return self._send(
+                200,
+                {
+                    "ok": True,
+                    "keyPresent": llm_client.key_present(),
+                    "model": llm_client._model(),
+                },
+            )
         self._send(404, {"error": "not_found"})
 
     def do_POST(self) -> None:
@@ -186,17 +207,25 @@ class Handler(BaseHTTPRequestHandler):
         route = self.path.rstrip("/")
         try:
             if route == "/cfa/tabfill":
-                return self._send(200, fill(
-                    str(payload.get("front", "")),
-                    str(payload.get("back", "")),
-                    str(payload.get("notetype", ""))))
+                return self._send(
+                    200,
+                    fill(
+                        str(payload.get("front", "")),
+                        str(payload.get("back", "")),
+                        str(payload.get("notetype", "")),
+                    ),
+                )
             if route == "/cfa/grade":
                 return self._send(200, grade(payload))
-            if route == "/cfa/mapexplain":
-                return self._send(200, mapexplain(payload))
         except Exception as exc:  # pragma: no cover - endpoints are no-raise
-            return self._send(200, {"ok": False, "source": "fallback",
-                                    "error": f"proxy_error:{type(exc).__name__}"})
+            return self._send(
+                200,
+                {
+                    "ok": False,
+                    "source": "fallback",
+                    "error": f"proxy_error:{type(exc).__name__}",
+                },
+            )
         self._send(404, {"error": "not_found"})
 
 
@@ -205,8 +234,11 @@ def main(argv: Optional[list[str]] = None) -> int:
 
     ap = argparse.ArgumentParser(description="CFA AI proxy for mobile")
     ap.add_argument("--host", default=os.environ.get("CFA_AI_PROXY_HOST", "0.0.0.0"))
-    ap.add_argument("--port", type=int,
-                    default=int(os.environ.get("CFA_AI_PROXY_PORT", str(DEFAULT_PORT))))
+    ap.add_argument(
+        "--port",
+        type=int,
+        default=int(os.environ.get("CFA_AI_PROXY_PORT", str(DEFAULT_PORT))),
+    )
     args = ap.parse_args(argv)
 
     srv = ThreadingHTTPServer((args.host, args.port), Handler)

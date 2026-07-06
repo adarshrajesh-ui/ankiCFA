@@ -24,8 +24,8 @@ function congratsSource(): string {
 test("D-P4-11: congrats screen adopts the CFA design system", () => {
     const src = congratsSource();
     // The CFA theme (fonts + :root tokens) and the brand Eyebrow are pulled in…
-    expect(src).toContain('import "$lib/cfa/theme.scss";');
-    expect(src).toContain('import Eyebrow from "$lib/cfa/Eyebrow.svelte";');
+    expect(src).toContain("import \"$lib/cfa/theme.scss\";");
+    expect(src).toContain("import Eyebrow from \"$lib/cfa/Eyebrow.svelte\";");
     // …a brand eyebrow introduces the session-complete heading…
     expect(src).toMatch(/<Eyebrow[^>]*>[^<]*ankiCFA · Level II · Session complete/);
     // …and the container opts into the CFA page base.
@@ -50,7 +50,7 @@ test("D-P4-11: functional congrats behaviour is preserved", () => {
     // that drive the screen must be untouched.
     expect(src).toContain("congratsInfo");
     expect(src).toContain("buildNextLearnMsg");
-    expect(src).toContain('bridgeLink("unbury"');
-    expect(src).toContain('bridgeLink("customStudy"');
+    expect(src).toContain("bridgeLink(\"unbury\"");
+    expect(src).toContain("bridgeLink(\"customStudy\"");
     expect(src).toContain("info.deckDescription");
 });

@@ -9,12 +9,15 @@ Fixed sync facts (see `tools/cfa/sync_server.py`):
 desktop endpoint `http://127.0.0.1:27701/`, phone endpoint `http://10.0.2.2:27701/`.
 
 Test/build reuse (no cold Rust build — Python/scripts/config only):
+
 ```
 PYTHONPATH="$PWD/pylib:/Users/adarshrajesh/AlphaWeek2/ankiCFA/out/pylib:." \
   /Users/adarshrajesh/AlphaWeek2/ankiCFA/out/pyenv/bin/python -m pytest pylib/tests/<file> -q
 ```
+
 `anki` resolves as a namespace-package merge: worktree `pylib/anki/*.py` (edits win)
-+ main tree `out/pylib/anki` (compiled `_rsbridge.so` + generated modules).
+
+- main tree `out/pylib/anki` (compiled `_rsbridge.so` + generated modules).
 
 ---
 
@@ -38,11 +41,13 @@ collection (**660 cards / 660 notes / 3 revlog**, decks CFA, CFA Level II,
 CFA::Ethics Passages, y). Both devices now share one collection via the server.
 
 BEFORE evidence:
+
 - `proof/friday/sync/inc1-before-00-deckpicker.png` — emulator DeckPicker (pre-config)
 - `proof/friday/sync/inc1-before-prefs.txt`, `inc1-before-prefs-fresh.txt` — on-device
   prefs showing NO hkey / username / syncBaseUrl (not logged in, no custom server)
 
 AFTER evidence:
+
 - `proof/friday/sync/inc1-after-02-ankidroid.png` — app up with backup/Sync prompt
 - `proof/friday/sync/inc1-after-04-syncing.png` — DeckPicker synced (sync badge cleared)
 - `proof/friday/sync/inc1-after-05-sync-settings.png` — **Sync settings: AnkiWeb
@@ -55,7 +60,7 @@ Scope files: `tools/cfa/sync_server.py`, `tools/cfa/adb_helpers.sh`,
 `tools/cfa/configure_phone_sync.sh`, `tools/cfa/desktop_sync.py`,
 justfile recipes `cfa-syncserver` / `cfa-sync-dedup-test`.
 
-Commit: c886dcfbb   PR: https://github.com/adarshrajesh-ui/ankiCFA/pull/26
+Commit: c886dcfbb PR: https://github.com/adarshrajesh-ui/ankiCFA/pull/26
 
 ---
 
@@ -69,6 +74,7 @@ sides (no lost / duplicated review). `proof/friday/sync/inc2-roundtrip-test.log`
 (7 passed, incl. existing forward/reverse/conflict).
 
 **Human proof (emulator):**
+
 - `roundtrip-take1-phone-reviews.mp4` — reviewing a CFA card + the ethics
   (one-passage) card (verdict "Unethical" selected) on the phone.
 - `roundtrip.mp4` — review + a successful sync (snackbar "Collection synced").
@@ -77,6 +83,7 @@ sides (no lost / duplicated review). `proof/friday/sync/inc2-roundtrip-test.log`
   `inc2-phone-fullsync-dialog.png` (real "Select collection to keep" full-sync UI).
 
 **Phone→desktop with REAL data (verified against the SQLite files):**
+
 - Desktop full-downloaded the phone's uploaded collection incl. the reviews made
   on camera (`inc2-desktop-after-phone-reviews.txt`; ids 1783136442121,
   1783136453524).
@@ -107,7 +114,7 @@ Helpers in `pylib/anki/cfa_sync.py`: `raw_graded_review_count`,
 `deduped_graded_review_count`, `_collection_day`.
 
 BEFORE: `inc3-before-dedup-contract.txt` (naive count would double-count)
-AFTER:  `inc3-dedup-test.log` (4 passed, AI-off)
+AFTER: `inc3-dedup-test.log` (4 passed, AI-off)
 
 HANDOFF: orchestrator must apply dedup in `memory_score()` (currently raw count).
 
@@ -122,9 +129,9 @@ Offline review revlog **1783138068339** lands on desktop (see
 `inc4-offline-delta.txt`, `inc4-desktop-revlog-after.txt`).
 
 BEFORE: `inc4-before-deckpicker.png`, `inc4-desktop-revlog-before.txt` (262 rows)
-AFTER:  `inc4-offline-01-front.png` (airplane + reviewer),
-        `inc4-after-synced.png`, `inc4-phone-sync-log.txt` (Full Upload),
-        `offline-then-sync.mp4`, `inc4-desktop-revlog-after.txt` (new id)
+AFTER: `inc4-offline-01-front.png` (airplane + reviewer),
+`inc4-after-synced.png`, `inc4-phone-sync-log.txt` (Full Upload),
+`offline-then-sync.mp4`, `inc4-desktop-revlog-after.txt` (new id)
 
 Commit: 6c9af060e
 

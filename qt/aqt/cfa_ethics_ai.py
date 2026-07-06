@@ -32,7 +32,9 @@ _MSG_PREFIX = "cfaGradeEthics:"
 
 # ai_grading lives under cfa/ethics_pairs (a PEP-420 namespace dir, imported by
 # path here so aqt does not depend on the repo layout being importable).
-_REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+_REPO_ROOT = os.path.dirname(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+)
 _ETHICS_DIR = os.path.join(_REPO_ROOT, "cfa", "ethics_pairs")
 
 
@@ -55,7 +57,6 @@ def _grading_ai_enabled() -> bool:
     unavailable (grade_semantic still falls back safely if the key/call fails)."""
     try:
         import aqt
-
         from aqt.cfa_ai_settings import ai_active
 
         col = getattr(getattr(aqt, "mw", None), "col", None)
@@ -105,11 +106,20 @@ def handle_grade_request(
     learner_spans = payload.get("learnerSpans") or []
     if not isinstance(learner_spans, list):
         learner_spans = []
+    learner_highlights = payload.get("learnerHighlights")
+    if not isinstance(learner_highlights, list):
+        learner_highlights = None
     selection = payload.get("selectionIndices")
     if not isinstance(selection, list):
         selection = None
     spans = [str(p) for p in learner_spans]
-    sel = [int(i) for i in selection] if selection else None
+    sel = []
+    for i in selection or []:
+        try:
+            sel.append(int(i))
+        except (TypeError, ValueError):
+            pass
+    sel = sel or None
     item_id = str(payload.get("itemId", ""))
     standard = str(payload.get("standard", ""))
 
@@ -127,6 +137,7 @@ def handle_grade_request(
             error="ai_off",
             item_id=item_id,
             standard=standard,
+            learner_highlights=learner_highlights,
         )
 
     try:
@@ -137,6 +148,7 @@ def handle_grade_request(
             gold_spans,
             spans,
             selection_indices=sel,
+            learner_highlights=learner_highlights,
             item_id=item_id,
             standard=standard,
         )
@@ -153,6 +165,7 @@ def handle_grade_request(
             error=f"bridge_error:{type(exc).__name__}",
             item_id=item_id,
             standard=standard,
+            learner_highlights=learner_highlights,
         )
 
 

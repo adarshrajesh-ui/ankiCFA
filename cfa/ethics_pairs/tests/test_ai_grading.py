@@ -328,6 +328,55 @@ def test_prompt_includes_evidence_and_never_the_key():
     assert sent["max_tokens"] == 650
 
 
+def test_prompt_includes_structured_highlights_and_coverage():
+    oracle = _oracle_client(
+        json.dumps(
+            {
+                "highlight_grade": "somewhat",
+                "learner_intent": "They noticed the earnings figure and the trade.",
+                "evidence_precision": "overbroad",
+                "needed_evidence": [g["phrase"] for g in GOLD],
+                "explanation": "Covered the right facts but with extra context.",
+                "spans": [],
+            }
+        )
+    )
+    res = A.grade_semantic(
+        PASSAGE,
+        "unethical",
+        "unethical",
+        GOLD,
+        ["the exact unreleased quarterly earnings figure", "sells the company"],
+        selection_indices=list(range(0, 20)),
+        learner_highlights=[
+            {"text": "the exact unreleased quarterly earnings figure", "lo": 15, "hi": 20},
+            {"text": "sells the company", "lo": 30, "hi": 32},
+        ],
+        complete_fn=oracle,
+    )
+    prompt = oracle.last["user"]
+    assert '"the exact unreleased quarterly earnings figure" (token range 15-20)' in prompt
+    assert "HIGHLIGHT COVERAGE: 20 of" in prompt
+    assert "Use this to judge precision/overbreadth" in prompt
+    assert res["evidence_precision"] == "overbroad"
+    assert "earnings figure" in res["learner_intent"]
+    assert res["needed_evidence"] == [g["phrase"] for g in GOLD]
+
+
+def test_fallback_marks_whole_paragraph_as_overbroad():
+    res = A.grade_fallback(
+        PASSAGE,
+        "unethical",
+        "unethical",
+        GOLD,
+        [PASSAGE],
+        selection_indices=list(range(len(PASSAGE.split()))),
+    )
+    assert res["grade"] == "somewhat"
+    assert res["evidence_precision"] == "overbroad"
+    assert res["correct"] is False
+
+
 # ------------------------------------------------------------------- eval harness
 
 
@@ -430,11 +479,13 @@ def test_wrong_answer_rate_reported_and_zero_under_ai_off():
     assert report["wrong_answer_rate_cut"] == E.WRONG_ANSWER_RATE_CUT
 
 
-def test_ai_off_never_fails_process_even_below_accuracy_cut():
+def test_ai_off_never_fails_process_even_below_accuracy_cut(monkeypatch):
     # AI-off accuracy (0.733) is below ACCURACY_CUT, but the AI-off contract
     # means the process must still succeed and score honestly.
     assert E.ACCURACY_CUT > 0.733  # precondition: the cut is above the fallback
     os.environ.pop("OPENAI_API_KEY", None)
+    run_eval = E.run_eval
+    monkeypatch.setattr(E, "run_eval", lambda: run_eval(complete_fn=_off_client))
     assert E.main([]) == 0
 
 

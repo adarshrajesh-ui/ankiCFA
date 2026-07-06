@@ -17,8 +17,8 @@ one-passage flagship is no longer exposed.
 62–63):
 
 ```python
-    passages = menu.addAction("Study Ethics (One-Passage)")
-    qconnect(passages.triggered, lambda: study_ethics_passages(mw))
+passages = menu.addAction("Study Ethics (One-Passage)")
+qconnect(passages.triggered, lambda: study_ethics_passages(mw))
 ```
 
 Then the now-unused `study_ethics_passages(mw)` function (currently starting ~line 215) can be
@@ -67,22 +67,22 @@ Standard to appear**. The block only shows when `resp.source === "ai"`.
 `qt/aqt/cfa_ethics_ai.py::handle_grade_request`, forward the two payload keys into `grade_semantic`:
 
 ```python
-    item_id = str(payload.get("itemId", ""))
-    standard = str(payload.get("standard", ""))
-    ...
-    return grade_semantic(
-        passage, answer_verdict, judged_verdict, gold_spans,
-        [str(p) for p in learner_spans],
-        selection_indices=[int(i) for i in selection] if selection else None,
-        item_id=item_id, standard=standard,   # <-- add these two
-    )
+item_id = str(payload.get("itemId", ""))
+standard = str(payload.get("standard", ""))
+...
+return grade_semantic(
+    passage, answer_verdict, judged_verdict, gold_spans,
+    [str(p) for p in learner_spans],
+    selection_indices=[int(i) for i in selection] if selection else None,
+    item_id=item_id, standard=standard,   # <-- add these two
+)
 ```
 
 (and pass `item_id=item_id, standard=standard` to the defensive `grade_fallback(...)` in the except
 branch). The pairs `front.html` already includes `itemId` + `standard` in the `cfaGradeEthics:`
 payload. This is a 2-line enhancement, not required for correctness.
 
-If the bridge owner wants to *enforce* the AI master/grading toggles server-side (col.conf keys
+If the bridge owner wants to _enforce_ the AI master/grading toggles server-side (col.conf keys
 `cfa_ai_enabled` + `cfa_ai_grading_enabled`): gate `handle_grade_request` so it returns the
 deterministic fallback (`grade_fallback(...)` with `error="ai_disabled"`) when either toggle is
 absent/false, before calling `grade_semantic`. The card already degrades gracefully (it only shows
@@ -103,38 +103,62 @@ reveals the grade — see the pairs `front.html` `reveal()`):
 
 ```jsonc
 {
-  "pairId": "SMD-01",          // note PairId (stable id of the item)
-  "itemId": "SMD-01",          // alias of pairId, for parity with the one-passage payload
-  "cluster": "cluster::suitability-mnpi-diligence",
-  "completed": true,           // gate: back only honors a completed attempt for this card
-  "correct": true,             // overall deterministic grade (both verdicts right AND highlight "correct")
-  "standard": "II(A) Material Nonpublic Information",  // named governing Standard
-  "rationale": "Standard II(A) prohibits acting on material nonpublic information …",  // overall rationale
-  "source": "fallback",        // "ai" once the AI feedback returns, else "fallback" (deterministic)
-  "verdicts": {                // per-case conform/violate verdict + correctness
-    "A": {"judged": "violate", "answer": "violate", "ok": true},
-    "B": {"judged": "conform", "answer": "conform", "ok": true}
-  },
-  "decisiveCase": "A",         // which vignette holds the decisive (violating) spans
-  "highlight": "correct",      // multi-span grade tier: correct|somewhat|partial|wrong
-  "found": 2,                  // # gold spans FULLY covered
-  "near": 0,                   // # gold spans NEAR-matched (materially overlapping)
-  "total": 2,                  // # gold spans authored on the violating vignette
-  "selectionIndices": [24,25,26,27,28,42,43,44,45,46,47,48,49,50], // union of token indices highlighted in the decisive vignette
-  "spans": [                   // per-span detail (token index range within the decisive vignette)
-    {
-      "phrase": "exact unreleased quarterly earnings figure",
-      "rationale": "…why this is the MNPI…",
-      "tier": "full",          // full|near|none
-      "matched": true,         // tier !== "none"
-      "lo": 24, "hi": 28       // inclusive token-index range of the GOLD span (decisive vignette)
+    "pairId": "SMD-01", // note PairId (stable id of the item)
+    "itemId": "SMD-01", // alias of pairId, for parity with the one-passage payload
+    "cluster": "cluster::suitability-mnpi-diligence",
+    "completed": true, // gate: back only honors a completed attempt for this card
+    "correct": true, // overall deterministic grade (both verdicts right AND highlight "correct")
+    "standard": "II(A) Material Nonpublic Information", // named governing Standard
+    "rationale": "Standard II(A) prohibits acting on material nonpublic information …", // overall rationale
+    "source": "fallback", // "ai" once the AI feedback returns, else "fallback" (deterministic)
+    "verdicts": { // per-case conform/violate verdict + correctness
+        "A": { "judged": "violate", "answer": "violate", "ok": true },
+        "B": { "judged": "conform", "answer": "conform", "ok": true }
     },
-    { "phrase": "sells the company out of her clients' portfolios", "rationale": "…", "tier": "full", "matched": true, "lo": 42, "hi": 50 }
-  ]
+    "decisiveCase": "A", // which vignette holds the decisive (violating) spans
+    "highlight": "correct", // multi-span grade tier: correct|somewhat|partial|wrong
+    "found": 2, // # gold spans FULLY covered
+    "near": 0, // # gold spans NEAR-matched (materially overlapping)
+    "total": 2, // # gold spans authored on the violating vignette
+    "selectionIndices": [
+        24,
+        25,
+        26,
+        27,
+        28,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50
+    ], // union of token indices highlighted in the decisive vignette
+    "spans": [ // per-span detail (token index range within the decisive vignette)
+        {
+            "phrase": "exact unreleased quarterly earnings figure",
+            "rationale": "…why this is the MNPI…",
+            "tier": "full", // full|near|none
+            "matched": true, // tier !== "none"
+            "lo": 24,
+            "hi": 28 // inclusive token-index range of the GOLD span (decisive vignette)
+        },
+        {
+            "phrase": "sells the company out of her clients' portfolios",
+            "rationale": "…",
+            "tier": "full",
+            "matched": true,
+            "lo": 42,
+            "hi": 50
+        }
+    ]
 }
 ```
 
 Notes for W5:
+
 - Token indices are into the **decisive vignette** tokenized by the shared `cfaTokenize` (whitespace
   split). They are stable for a given item's authored text.
 - The `source` field is `"fallback"` at reveal time and is upgraded to `"ai"` in-place if/when the
@@ -151,12 +175,13 @@ Notes for W5:
 INCREMENT 1. The minimal-pair card is now a MULTI-SPAN highlight (the learner highlights EVERY
 decisive span in the violating vignette, graded with partial-credit tiers), not a single contiguous
 phrase. The existing Playwright e2e test highlights only the single `decisive_phrase` and asserts
-"Fully correct"; under multi-span that is now a *partial* grade (1 of N spans), so the test needs a
+"Fully correct"; under multi-span that is now a _partial_ grade (1 of N spans), so the test needs a
 small update. `just build` (this workstream's per-increment gate) does NOT run e2e — the e2e suite
 runs via `just test-e2e` — so this does not block the flagship, but the test should be brought in
 line. `ts/tests/e2e/` is outside the ethics edit scope, hence this handoff.
 
 Exact changes in `ts/tests/e2e/ethics_pairs_flow.test.ts`:
+
 - The card now reads a `GoldSpans` field (JSON `[{phrase, rationale}]`); add it to the `fields` map
   in `renderFront` (parse from `pair.gold_spans`, JSON-stringify into `{{GoldSpans}}`), OR leave it
   empty to exercise the legacy single-phrase fallback. To test the real flagship, pass the real
@@ -175,6 +200,7 @@ the token-locator helpers already in the file (`findGoldIndices`) are sufficient
 `pair.gold_spans`.
 
 ## Status of handoffs
+
 - [ ] W1: remove "Study Ethics (One-Passage)" menu action in `qt/aqt/cfa.py`; retire the dead
       `ensure_ethics_passages_deck` in `qt/aqt/cfa_seed.py`; update `qt/tests/test_cfa_menu.py` +
       `qt/tests/test_cfa_f0b.py`.

@@ -9,7 +9,7 @@ doc, not another tab's files.** Companion contracts:
 ## 0. What we are building
 
 A **native CFA Level II prep product**, not "Anki with a CFA menu." The app
-*is* a CFA study tool: it boots into a CFA Home dashboard, it is branded
+_is_ a CFA study tool: it boots into a CFA Home dashboard, it is branded
 ankiCFA, its flagship study modes are CFA-specific (minimal-pairs ethics,
 exam-priority queue, deadline/peak-on-exam-day, readiness), and desktop and
 mobile read identical numbers from one shared Rust engine.
@@ -34,10 +34,10 @@ read-only dashboard whose single data source is the shared engine (§4):
 - **Three honest scores**, each shown as a **range** (never a bare number) with
   its give-up state: **Memory** (exam-weighted FSRS retrievability ± spread),
   **Performance** (first-exposure Wilson 95%), **Readiness** (wide logistic
-  P(pass), carrying the standing caveat *"not validated against real exam
-  data"*). When a score abstains, Home shows its `reason` string verbatim
+  P(pass), carrying the standing caveat _"not validated against real exam
+  data"_). When a score abstains, Home shows its `reason` string verbatim
   ("not enough data: …") — abstention is a feature, not an error.
-- **Bayesian readiness "hero"** — the headline band that *never* abstains:
+- **Bayesian readiness "hero"** — the headline band that _never_ abstains:
   accuracy point + 95% credible band + an explicit `likely pass` / `likely
   fail` call with its probability, narrowing as evidence accrues.
 - **Days to exam** (from the persisted exam config) and entry points to
@@ -57,7 +57,7 @@ owns the retirement sweep). Ethics AI grading (semantic highlight grading) must
 work on the minimal-pairs flow and degrade to the deterministic grader when AI
 is off (see AI-PROVENANCE.md).
 
-## 4. Shared score engine — `ComputeCfaScores` RPC  ✅ shipped in Phase-0
+## 4. Shared score engine — `ComputeCfaScores` RPC ✅ shipped in Phase-0
 
 One engine, in Rust, computes all four honest scores; desktop (`anki.cfa`) and
 mobile (`col.backend.computeCfaScores`) both call it, so the numbers are
@@ -86,6 +86,7 @@ Weights + exam date come from `col.conf["cfa_exam_config"]` (already synced) —
 they are **not** passed in the request, so one call reproduces `cfa.py` verbatim.
 
 **Guarantees (verified in-tree):**
+
 - **Parity:** the Rust engine equals the Python reference `anki.cfa._py_*`
   field-by-field to **1e-9** (`just cfa-parity-test`) — so desktop == mobile ==
   old Python.
@@ -112,7 +113,7 @@ ranges + give-up.
 
 See [AI-PROVENANCE.md](AI-PROVENANCE.md): AI is off by default, gated by three
 `col.conf` keys (master + per-feature + key-present), every AI feature has a
-deterministic fallback, and AI touches *content* only — the scores are always
+deterministic fallback, and AI touches _content_ only — the scores are always
 deterministic (**D3**). See [SYNC-SETUP.md](SYNC-SETUP.md) for the real
 two-way-sync harness (**D4/D5**).
 
@@ -130,7 +131,7 @@ two-way-sync harness (**D4/D5**).
   aside during test runs).
 - **Isolation:** the desktop tree is edited by multiple tabs concurrently. Work
   on your own branch/worktree; do **not** edit another tab's files. Interface
-  questions are answered by editing *this* doc, not by reaching into a worker's
+  questions are answered by editing _this_ doc, not by reaching into a worker's
   code.
 
 ## 7. Acceptance (D1–D7) — see `proof/friday/ACCEPTANCE.md`

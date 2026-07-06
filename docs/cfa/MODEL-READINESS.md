@@ -1,9 +1,9 @@
 # Model: Readiness Score
 
-*Score-mapping + model-description doc (Phase A / A11). Source of truth:*
-`pylib/anki/cfa._py_readiness_score` *(Python reference) and the Rust*
-`compute_cfa_scores` *RPC in* `rslib/src/scheduler/cfa_scores.rs` *(kept at
-parity, verified by* `just cfa-parity-test`*). No AI is involved.*
+_Score-mapping + model-description doc (Phase A / A11). Source of truth:_
+`pylib/anki/cfa._py_readiness_score` _(Python reference) and the Rust_
+`compute_cfa_scores` _RPC in_ `rslib/src/scheduler/cfa_scores.rs` _(kept at
+parity, verified by_ `just cfa-parity-test` _). No AI is involved._
 
 > **Standing caveat (always shown):** `not validated against real exam data`
 > (`READINESS_LABEL`). This is a coarse, deliberately-wide, **uncalibrated**
@@ -67,7 +67,7 @@ tested outcome.
 - **Uncalibrated by design.** The `READINESS_LABEL` caveat travels with the
   score everywhere it is shown. The separate calibration harness
   (`cfa/eval/calibration.py`) measures Brier / log loss / reliability of the
-  underlying recall probabilities — the readiness *pass-mapping itself* is not
+  underlying recall probabilities — the readiness _pass-mapping itself_ is not
   claimed to be calibrated.
 - A separate **Bayesian readiness** number (`_py_bayesian_readiness`) exists for
   the F4 dashboard that, unlike this score, never abstains and simply widens its

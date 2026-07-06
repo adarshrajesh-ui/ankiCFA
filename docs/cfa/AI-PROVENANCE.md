@@ -21,15 +21,16 @@ provenance record so the UI can badge it and a reviewer can audit it:
 }
 ```
 
-| field | type | meaning |
-|---|---|---|
-| `source` | `"ai"` \| `"fallback"` | `ai` = a live model call succeeded and was used; `fallback` = the deterministic no-network path produced it (no key, AI off, cost cap, error). **Required.** |
-| `standard` | string | The CFA Standard / LOS the item is about (e.g. `III(A)`), or `""` if not applicable. |
-| `item_id` | string | Stable id of the item this record describes (card/note key or ethics-pair id) so records can be joined back to content. **Required.** |
-| `model` | string | Model id used when `source=="ai"` (e.g. `gpt-4o`); `""` for `fallback`. |
-| `rationale` | string | Short human-readable justification/explanation shown to the learner and kept for audit. Never contains the API key. |
+| field       | type                   | meaning                                                                                                                                                      |
+| ----------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `source`    | `"ai"` \| `"fallback"` | `ai` = a live model call succeeded and was used; `fallback` = the deterministic no-network path produced it (no key, AI off, cost cap, error). **Required.** |
+| `standard`  | string                 | The CFA Standard / LOS the item is about (e.g. `III(A)`), or `""` if not applicable.                                                                         |
+| `item_id`   | string                 | Stable id of the item this record describes (card/note key or ethics-pair id) so records can be joined back to content. **Required.**                        |
+| `model`     | string                 | Model id used when `source=="ai"` (e.g. `gpt-4o`); `""` for `fallback`.                                                                                      |
+| `rationale` | string                 | Short human-readable justification/explanation shown to the learner and kept for audit. Never contains the API key.                                          |
 
 Rules:
+
 - `source=="fallback"` ⟹ `model==""`. `source=="ai"` ⟹ `model` is set.
 - The record is **content**, not a secret: it may be stored on the note / synced.
   The API key never appears in any field or log.
@@ -42,11 +43,11 @@ AI is **off by default** and gated by three collection-config keys, which sync
 natively with the collection (so a choice made on desktop reaches the phone).
 Defined in `cfa/ai/llm_client.py`:
 
-| key | default | meaning |
-|---|---|---|
-| `cfa_ai_enabled` | `false` | **master** switch — off ⟹ all AI off regardless of the others |
-| `cfa_ai_grading_enabled` | `false` | ethics semantic-grading feature |
-| `cfa_ai_tabfill_enabled` | `false` | tab-to-fill feature |
+| key                      | default | meaning                                                       |
+| ------------------------ | ------- | ------------------------------------------------------------- |
+| `cfa_ai_enabled`         | `false` | **master** switch — off ⟹ all AI off regardless of the others |
+| `cfa_ai_grading_enabled` | `false` | ethics semantic-grading feature                               |
+| `cfa_ai_tabfill_enabled` | `false` | tab-to-fill feature                                           |
 
 The effective gate for a feature is the **AND of three conditions**:
 
@@ -76,5 +77,5 @@ is read — so the gate is testable without a backend (`just cfa-ai-toggle-test`
 
 The honest scores (`ComputeCfaScores` / `anki.cfa`) contain **no AI** — pure
 spaced-repetition statistics — so with AI off the three scores and the Bayesian
-band are fully deterministic (acceptance **D3**). AI only ever augments *content*
+band are fully deterministic (acceptance **D3**). AI only ever augments _content_
 (grading, tab-fill, explanations), never the numbers.

@@ -24,8 +24,8 @@ function deckOptsSource(): string {
 test("D-P4-18: deck-options adopts the CFA design system", () => {
     const src = deckOptsSource();
     // The CFA theme (fonts + :root tokens) and brand Eyebrow are pulled in…
-    expect(src).toContain('import "$lib/cfa/theme.scss";');
-    expect(src).toContain('import Eyebrow from "$lib/cfa/Eyebrow.svelte";');
+    expect(src).toContain("import \"$lib/cfa/theme.scss\";");
+    expect(src).toContain("import Eyebrow from \"$lib/cfa/Eyebrow.svelte\";");
     // …a brand eyebrow introduces the settings surface…
     expect(src).toMatch(/<Eyebrow[^>]*>[^<]*ankiCFA · Level II · Study settings/);
     // …and the content opts into the CFA page base, light-mode gated.

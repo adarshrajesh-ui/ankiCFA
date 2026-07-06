@@ -1,0 +1,699 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ankiCFA Lane 4 Brief</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #07080b;
+      --panel: #10131a;
+      --panel-2: #151925;
+      --ink: #f5f2e8;
+      --muted: #a8acb8;
+      --line: rgba(255, 255, 255, 0.12);
+      --gold: #d9aa4f;
+      --gold-2: #f0cf80;
+      --red: #ef6b6b;
+      --green: #71d39b;
+      --blue: #7aa7ff;
+      --shadow: 0 20px 70px rgba(0, 0, 0, 0.42);
+      --radius: 24px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      background:
+        radial-gradient(circle at top left, rgba(217, 170, 79, 0.18), transparent 34rem),
+        radial-gradient(circle at 90% 8%, rgba(122, 167, 255, 0.1), transparent 30rem),
+        var(--bg);
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      line-height: 1.5;
+    }
+
+    .page {
+      width: min(1180px, calc(100vw - 32px));
+      margin: 0 auto;
+      padding: 36px 0 64px;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 32px;
+      background:
+        linear-gradient(135deg, rgba(217, 170, 79, 0.16), transparent 36%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02)),
+        #0b0d13;
+      box-shadow: var(--shadow);
+      padding: clamp(28px, 5vw, 56px);
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      right: -120px;
+      top: -120px;
+      width: 360px;
+      height: 360px;
+      border-radius: 999px;
+      border: 1px solid rgba(217, 170, 79, 0.24);
+      background: radial-gradient(circle, rgba(217, 170, 79, 0.16), transparent 68%);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid rgba(217, 170, 79, 0.42);
+      border-radius: 999px;
+      background: rgba(217, 170, 79, 0.1);
+      color: var(--gold-2);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      padding: 8px 12px;
+    }
+
+    h1 {
+      max-width: 880px;
+      margin: 22px 0 14px;
+      font-size: clamp(38px, 7vw, 76px);
+      line-height: 0.92;
+      letter-spacing: -0.07em;
+    }
+
+    .lead {
+      max-width: 780px;
+      margin: 0;
+      color: var(--muted);
+      font-size: clamp(17px, 2vw, 21px);
+    }
+
+    .notice {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 14px;
+      align-items: start;
+      margin-top: 24px;
+      border: 1px solid rgba(239, 107, 107, 0.32);
+      border-radius: 18px;
+      background: rgba(239, 107, 107, 0.08);
+      padding: 16px;
+      color: #ffd7d7;
+    }
+
+    .notice strong {
+      color: #fff;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin: 20px 0 34px;
+    }
+
+    .stat {
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.045);
+      padding: 18px;
+    }
+
+    .stat .k {
+      color: var(--gold-2);
+      font-size: 26px;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+    }
+
+    .stat .v {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .section {
+      margin-top: 28px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(16, 19, 26, 0.86);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: flex-start;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+      padding: 22px;
+    }
+
+    .section h2 {
+      margin: 0 0 6px;
+      font-size: 24px;
+      letter-spacing: -0.03em;
+    }
+
+    .section p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .badge {
+      flex: 0 0 auto;
+      border: 1px solid rgba(217, 170, 79, 0.38);
+      border-radius: 999px;
+      color: var(--gold-2);
+      background: rgba(217, 170, 79, 0.09);
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .questions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+      padding: 22px;
+    }
+
+    form.question,
+    .question {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.02));
+      padding: 18px;
+    }
+
+    .question h3 {
+      margin: 0;
+      font-size: 17px;
+      letter-spacing: -0.02em;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    label.option,
+    label.check {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      min-width: 0;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      background: rgba(0, 0, 0, 0.16);
+      padding: 10px 12px;
+      cursor: pointer;
+    }
+
+    input[type="radio"],
+    input[type="checkbox"] {
+      margin-top: 3px;
+      accent-color: var(--gold);
+    }
+
+    input[type="text"],
+    textarea,
+    select {
+      width: 100%;
+      min-width: 0;
+      border: 1px solid rgba(255, 255, 255, 0.13);
+      border-radius: 14px;
+      background: rgba(0, 0, 0, 0.28);
+      color: var(--ink);
+      padding: 11px 12px;
+      font: inherit;
+    }
+
+    textarea {
+      min-height: 92px;
+      resize: vertical;
+    }
+
+    .inline {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--gold-2), var(--gold));
+      color: #15100a;
+      padding: 11px 14px;
+      font: inherit;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 10px 30px rgba(217, 170, 79, 0.18);
+    }
+
+    button.secondary {
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--ink);
+      box-shadow: none;
+    }
+
+    .footer-actions {
+      position: sticky;
+      bottom: 16px;
+      z-index: 2;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: center;
+      margin-top: 28px;
+      border: 1px solid rgba(217, 170, 79, 0.38);
+      border-radius: 22px;
+      background: rgba(10, 12, 17, 0.92);
+      backdrop-filter: blur(16px);
+      padding: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .footer-actions p {
+      margin: 0;
+      color: var(--muted);
+      max-width: 720px;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 28px;
+      transform: translateX(-50%);
+      max-width: min(520px, calc(100vw - 32px));
+      border: 1px solid rgba(113, 211, 155, 0.45);
+      border-radius: 999px;
+      background: rgba(12, 37, 24, 0.96);
+      color: #dfffea;
+      padding: 10px 14px;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 180ms ease, transform 180ms ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(-6px);
+    }
+
+    @media (max-width: 880px) {
+      .stats,
+      .questions,
+      .inline {
+        grid-template-columns: 1fr;
+      }
+
+      .section-header {
+        flex-direction: column;
+      }
+
+      .badge {
+        white-space: normal;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <span class="eyebrow">Lane 4 · Package + Premier CFA UX</span>
+      <h1>Let’s make ankiCFA feel inevitable, not skinned.</h1>
+      <p class="lead">
+        Before I branch, package, audit, or redesign anything, answer the questions below so the work lands on your exact target: what “premier CFA product” means, how strict the proof must be, and where Android should depart from stock Anki.
+      </p>
+      <div class="notice">
+        <strong>Gating noted</strong>
+        <span>I will not run the branch instructions until lanes 1-3 are merged into <code>cfa/final-integration</code>. These answers define the brief I’ll use once that gate is open.</span>
+      </div>
+    </section>
+
+    <div class="stats">
+      <div class="stat"><div class="k">2</div><div class="v">Products</div></div>
+      <div class="stat"><div class="k">All</div><div class="v">Screens Audited</div></div>
+      <div class="stat"><div class="k">0</div><div class="v">Stock-Anki Feel</div></div>
+      <div class="stat"><div class="k">Proof</div><div class="v">Install + Launch</div></div>
+    </div>
+
+    <section class="section">
+      <div class="section-header">
+        <div>
+          <h2>Packaging + Release Evidence</h2>
+          <p>Define exactly what “ship” means for desktop and Android, including signing, installer formats, devices, and evidence.</p>
+        </div>
+        <span class="badge">Must answer</span>
+      </div>
+      <div class="questions">
+        <form class="question" data-lavish-question="desktop-installer" onsubmit="queueForm(event, 'desktop-installer', 'Desktop installer target')">
+          <h3>1. What desktop package is required?</h3>
+          <label class="option"><input type="radio" name="answer" value="macOS DMG only"> macOS DMG only</label>
+          <label class="option"><input type="radio" name="answer" value="macOS signed .app plus DMG"> macOS signed .app plus DMG</label>
+          <label class="option"><input type="radio" name="answer" value="macOS signed and notarized DMG"> macOS signed and notarized DMG</label>
+          <label class="option"><input type="radio" name="answer" value="Other desktop format"> Other / additional format</label>
+          <input type="text" name="notes" placeholder="If other: exact platform and format" />
+          <button type="submit">Queue answer</button>
+        </form>
+
+        <form class="question" data-lavish-question="desktop-signing" onsubmit="queueForm(event, 'desktop-signing', 'Desktop signing credentials')">
+          <h3>2. What signing materials are available?</h3>
+          <label class="option"><input type="radio" name="answer" value="Use existing local signing identity"> Use an existing local signing identity</label>
+          <label class="option"><input type="radio" name="answer" value="Ad-hoc signing is acceptable"> Ad-hoc signing is acceptable</label>
+          <label class="option"><input type="radio" name="answer" value="Unsigned package is acceptable for this lane"> Unsigned package is acceptable for this lane</label>
+          <label class="option"><input type="radio" name="answer" value="Need agent to discover what's available"> Discover what is available locally</label>
+          <textarea name="notes" placeholder="Certificate names, Apple team constraints, notarization requirements, passwords location hints, etc."></textarea>
+          <button type="submit">Queue answer</button>
+        </form>
+
+        <form class="question" data-lavish-question="android-signing" onsubmit="queueForm(event, 'android-signing', 'Android APK signing')">
+          <h3>3. What counts as a signed Android APK?</h3>
+          <label class="option"><input type="radio" name="answer" value="Release APK signed with existing production keystore"> Release APK signed with existing production keystore</label>
+          <label class="option"><input type="radio" name="answer" value="Release APK signed with local test keystore"> Release APK signed with local test keystore</label>
+          <label class="option"><input type="radio" name="answer" value="Debug signed APK is acceptable"> Debug-signed APK is acceptable</label>
+          <label class="option"><input type="radio" name="answer" value="Need agent to discover keystore setup"> Discover current keystore setup first</label>
+          <textarea name="notes" placeholder="Keystore path, alias, env vars, package ID/version expectations, or constraints."></textarea>
+          <button type="submit">Queue answer</button>
+        </form>
+
+        <form class="question" data-lavish-question="install-proof" onsubmit="queueForm(event, 'install-proof', 'Install and launch proof')">
+          <h3>4. What proof do you want for install and launch?</h3>
+          <label class="check"><input type="checkbox" name="answer" value="Installer/APK file checksums"> Installer/APK file checksums</label>
+          <label class="check"><input type="checkbox" name="answer" value="Install transcript logs"> Install transcript logs</label>
+          <label class="check"><input type="checkbox" name="answer" value="Launch screenshots"> Launch screenshots</label>
+          <label class="check"><input type="checkbox" name="answer" value="Desktop clean profile launch"> Desktop clean profile launch</label>
+          <label class="check"><input type="checkbox" name="answer" value="Android emulator install and launch"> Android emulator install and launch</label>
+          <label class="check"><input type="checkbox" name="answer" value="Physical Android device install and launch"> Physical Android device install and launch</label>
+          <textarea name="notes" placeholder="Preferred emulator/device, Android version, desktop machine expectations, proof folder naming."></textarea>
+          <button type="submit">Queue answer</button>
+        </form>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-header">
+        <div>
+          <h2>Product Positioning</h2>
+          <p>These choices drive the design critique rubric, copy tone, information density, and what “purpose-built CFA” means.</p>
+        </div>
+        <span class="badge">Design north star</span>
+      </div>
+      <div class="questions">
+        <form class="question" data-lavish-question="brand-archetype" onsubmit="queueForm(event, 'brand-archetype', 'Brand archetype')">
+          <h3>5. Which brand archetype should dominate?</h3>
+          <label class="option"><input type="radio" name="answer" value="Bloomberg Terminal precision"> Bloomberg Terminal precision: dense, fast, elite</label>
+          <label class="option"><input type="radio" name="answer" value="Linear-grade study product"> Linear-grade study product: refined, calm, modern</label>
+          <label class="option"><input type="radio" name="answer" value="McKinsey exam command center"> McKinsey exam command center: executive, structured, premium</label>
+          <label class="option"><input type="radio" name="answer" value="High-performance trading cockpit"> High-performance trading cockpit: kinetic, metric-heavy, aggressive</label>
+          <textarea name="notes" placeholder="References, anti-references, adjectives to hit or avoid."></textarea>
+          <button type="submit">Queue answer</button>
+        </form>
+
+        <form class="question" data-lavish-question="audience" onsubmit="queueForm(event, 'audience', 'Primary CFA user')">
+          <h3>6. Who is the primary user?</h3>
+          <label class="option"><input type="radio" name="answer" value="Level I first-time candidate"> Level I first-time candidate</label>
+          <label class="option"><input type="radio" name="answer" value="Level II retaker optimizing speed"> Level II retaker optimizing speed</label>
+          <label class="option"><input type="radio" name="answer" value="Level III professional with limited time"> Level III professional with limited time</label>
+          <label class="option"><input type="radio" name="answer" value="All levels with adaptive depth"> All levels with adaptive depth</label>
+          <textarea name="notes" placeholder="Expected study workflow, daily session length, mobile vs desktop split, power-user needs."></textarea>
+          <button type="submit">Queue answer</button>
+        </form>
+
+        <form class="question" data-lavish-question="visual-system" onsubmit="queueForm(event, 'visual-system', 'Visual system direction')">
+          <h3>7. How far should the color system evolve?</h3>
+          <label class="option"><input type="radio" name="answer" value="Preserve current desktop CFA scheme and extend to Android"> Preserve current desktop CFA scheme and extend to Android</label>
+          <label class="option"><input type="radio" name="answer" value="Improve current dark black gold CFA scheme"> Improve the dark black/gold CFA scheme</label>
+          <label class="option"><input type="radio" name="answer" value="Create a more institutional premium palette"> Create a more institutional premium palette</label>
+          <label class="option"><input type="radio" name="answer" value="Explore several palettes before implementing"> Explore several palettes before implementing</label>
+          <textarea name="notes" placeholder="Must-use colors, forbidden colors, contrast requirements, light mode expectations."></textarea>
+          <button type="submit">Queue answer</button>
+        </form>
+
+        <form class="question" data-lavish-question="copy-tone" onsubmit="queueForm(event, 'copy-tone', 'UX copy tone')">
+          <h3>8. What should the copy sound like?</h3>
+          <label class="option"><input type="radio" name="answer" value="Concise and institutional"> Concise and institutional</label>
+          <label class="option"><input type="radio" name="answer" value="Coach-like and motivational"> Coach-like and motivational</label>
+          <label class="option"><input type="radio" name="answer" value="Quant desk and performance focused"> Quant desk and performance focused</label>
+          <label class="option"><input type="radio" name="answer" value="Minimal, almost no marketing copy"> Minimal, almost no marketing copy</label>
+          <textarea name="notes" placeholder="Examples of phrases that feel right or wrong."></textarea>
+          <button type="submit">Queue answer</button>
+        </form>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-header">
+        <div>
+          <h2>Audit Scope + Critique Standard</h2>
+          <p>“Every screen” can mean core flows only, all reachable dialogs, settings subpages, edge states, empty states, and error states. Set the bar here.</p>
+        </div>
+        <span class="badge">Science pass</span>
+      </div>
+      <div class="questions">
+        <form class="question" data-lavish-question="screen-enumeration" onsubmit="queueForm(event, 'screen-enumeration', 'Screen enumeration scope')">
+          <h3>9. What screen universe should I enumerate?</h3>
+          <label class="check"><input type="checkbox" name="answer" value="Core happy-path screens"> Core happy-path screens</label>
+          <label class="check"><input type="checkbox" name="answer" value="All dialogs and menus"> All dialogs and menus</label>
+          <label class="check"><input type="checkbox" name="answer" value="Settings/preferences subpages"> Settings/preferences subpages</label>
+          <label class="check"><input type="checkbox" name="answer" value="Empty and first-run states"> Empty and first-run states</label>
+          <label class="check"><input type="checkbox" name="answer" value="Error and offline states"> Error and offline states</label>
+          <label class="check"><input type="checkbox" name="answer" value="Reviewer edge states"> Reviewer edge states</label>
+          <textarea name="notes" placeholder="Any screens to exclude, known impossible surfaces, or must-cover hidden flows."></textarea>
+          <button type="submit">Queue answer</button>
+        </form>
+
+        <form class="question" data-lavish-question="severity-policy" onsubmit="queueForm(event, 'severity-policy', 'Severity policy')">
+          <h3>10. What does “fix them all” mean?</h3>
+          <label class="option"><input type="radio" name="answer" value="Fix critical high medium and low defects"> Fix critical, high, medium, and low defects</label>
+          <label class="option"><input type="radio" name="answer" value="Fix critical high medium; log low polish"> Fix critical/high/medium; log low polish</label>
+          <label class="option"><input type="radio" name="answer" value="Fix anything visible in final screenshots"> Fix anything visible in final screenshots</label>
+          <label class="option"><input type="radio" name="answer" value="Agent discretion with rationale"> Agent discretion with rationale</label>
+          <textarea name="notes" placeholder="Severity definitions you want, hard blockers, acceptable deferrals."></textarea>
+          <button type="submit">Queue answer</button>
+        </form>
+
+        <form class="question" data-lavish-question="audit-rounds" onsubmit="queueForm(event, 'audit-rounds', 'Audit rounds')">
+          <h3>11. How many strict passes should I plan for?</h3>
+          <label class="option"><input type="radio" name="answer" value="Minimum two passes plus final critical pass"> Minimum two passes plus final critical pass</label>
+          <label class="option"><input type="radio" name="answer" value="Three passes plus final critical pass"> Three passes plus final critical pass</label>
+          <label class="option"><input type="radio" name="answer" value="Repeat until zero unresolved visible defects"> Repeat until zero unresolved visible defects</label>
+          <label class="option"><input type="radio" name="answer" value="Time-box passes and report residual risk"> Time-box passes and report residual risk</label>
+          <input type="text" name="notes" placeholder="If time-boxed: max hours or deadline" />
+          <button type="submit">Queue answer</button>
+        </form>
+
+        <form class="question" data-lavish-question="critique-log" onsubmit="queueForm(event, 'critique-log', 'Critique log format')">
+          <h3>12. What critique log format do you want?</h3>
+          <label class="option"><input type="radio" name="answer" value="Markdown log in proof folder"> Markdown log in proof folder</label>
+          <label class="option"><input type="radio" name="answer" value="CSV plus screenshot folders"> CSV plus screenshot folders</label>
+          <label class="option"><input type="radio" name="answer" value="HTML report with before after screenshots"> HTML report with before/after screenshots</label>
+          <label class="option"><input type="radio" name="answer" value="All of the above"> All of the above</label>
+          <textarea name="notes" placeholder="Naming convention, screenshot dimensions, whether to include raw notes."></textarea>
+          <button type="submit">Queue answer</button>
+        </form>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-header">
+        <div>
+          <h2>Desktop + Android Redesign Boundaries</h2>
+          <p>Help decide where to preserve existing Anki behavior and where to replace presentation, navigation, hierarchy, and motion.</p>
+        </div>
+        <span class="badge">Implementation guardrails</span>
+      </div>
+      <div class="questions">
+        <form class="question" data-lavish-question="desktop-depth" onsubmit="queueForm(event, 'desktop-depth', 'Desktop redesign depth')">
+          <h3>13. How aggressive should desktop changes be?</h3>
+          <label class="option"><input type="radio" name="answer" value="Polish existing CFA desktop surfaces only"> Polish existing CFA desktop surfaces only</label>
+          <label class="option"><input type="radio" name="answer" value="Rework hierarchy and copy across desktop"> Rework hierarchy and copy across desktop</label>
+          <label class="option"><input type="radio" name="answer" value="Substantial desktop UI overhaul too"> Substantial desktop UI overhaul too</label>
+          <label class="option"><input type="radio" name="answer" value="Desktop secondary to Android but must pass audit"> Desktop secondary to Android but must pass audit</label>
+          <textarea name="notes" placeholder="Desktop screens that matter most: deck list, reviewer, browser, stats, add cards, options, etc."></textarea>
+          <button type="submit">Queue answer</button>
+        </form>
+
+        <form class="question" data-lavish-question="android-depth" onsubmit="queueForm(event, 'android-depth', 'Android redesign depth')">
+          <h3>14. How hard should I rip apart Android?</h3>
+          <label class="option"><input type="radio" name="answer" value="Replace visual styling and copy, keep navigation"> Replace styling/copy, keep navigation</label>
+          <label class="option"><input type="radio" name="answer" value="Rework navigation and major screen hierarchy"> Rework navigation and major hierarchy</label>
+          <label class="option"><input type="radio" name="answer" value="Build a CFA-first shell around core Anki functions"> Build a CFA-first shell around core Anki functions</label>
+          <label class="option"><input type="radio" name="answer" value="Maximum redesign within installable APK constraints"> Maximum redesign within installable APK constraints</label>
+          <textarea name="notes" placeholder="Any Android layouts you already hate, or flows that must be radically better."></textarea>
+          <button type="submit">Queue answer</button>
+        </form>
+
+        <form class="question" data-lavish-question="must-keep" onsubmit="queueForm(event, 'must-keep', 'Must preserve behavior')">
+          <h3>15. What behavior must remain unchanged?</h3>
+          <label class="check"><input type="checkbox" name="answer" value="Scheduling and review logic"> Scheduling and review logic</label>
+          <label class="check"><input type="checkbox" name="answer" value="Sync behavior and account flows"> Sync behavior and account flows</label>
+          <label class="check"><input type="checkbox" name="answer" value="Import/export compatibility"> Import/export compatibility</label>
+          <label class="check"><input type="checkbox" name="answer" value="Keyboard shortcuts"> Keyboard shortcuts</label>
+          <label class="check"><input type="checkbox" name="answer" value="Existing user profile data compatibility"> Existing user profile data compatibility</label>
+          <textarea name="notes" placeholder="Any behavior I may change or remove if it improves CFA focus."></textarea>
+          <button type="submit">Queue answer</button>
+        </form>
+
+        <form class="question" data-lavish-question="mobile-priorities" onsubmit="queueForm(event, 'mobile-priorities', 'Mobile screen priorities')">
+          <h3>16. Rank the Android surfaces by importance.</h3>
+          <textarea name="notes" placeholder="Example: 1 Reviewer, 2 Deck dashboard, 3 Stats/progress, 4 Add/edit card, 5 Browse/search, 6 Settings, 7 Sync/login. Add your order and any must-have CFA-specific widgets."></textarea>
+          <button type="submit">Queue ranking</button>
+        </form>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-header">
+        <div>
+          <h2>Workflow, Branching + PR Expectations</h2>
+          <p>Confirm how often to commit, what “lightweight checks” means, and whether I should use subagents after the brief is locked.</p>
+        </div>
+        <span class="badge">Execution</span>
+      </div>
+      <div class="questions">
+        <form class="question" data-lavish-question="merge-gate" onsubmit="queueForm(event, 'merge-gate', 'Merge gate')">
+          <h3>17. How should I detect lanes 1-3 are merged?</h3>
+          <label class="option"><input type="radio" name="answer" value="Wait for explicit user confirmation"> Wait for your explicit confirmation</label>
+          <label class="option"><input type="radio" name="answer" value="Check git branch status when instructed"> Check git branch status when instructed</label>
+          <label class="option"><input type="radio" name="answer" value="Proceed if cfa/final-integration exists and is current"> Proceed if <code>cfa/final-integration</code> exists and is current</label>
+          <textarea name="notes" placeholder="Any exact branches/remotes to inspect, or branch safety constraints."></textarea>
+          <button type="submit">Queue answer</button>
+        </form>
+
+        <form class="question" data-lavish-question="commit-cadence" onsubmit="queueForm(event, 'commit-cadence', 'Commit cadence')">
+          <h3>18. What does “commit often” mean?</h3>
+          <label class="option"><input type="radio" name="answer" value="Commit after every coherent screen or package milestone"> After every coherent screen/package milestone</label>
+          <label class="option"><input type="radio" name="answer" value="Commit after each audit pass and packaging proof"> After each audit pass and packaging proof</label>
+          <label class="option"><input type="radio" name="answer" value="Commit every 30-60 minutes of progress"> Every 30-60 minutes of progress</label>
+          <label class="option"><input type="radio" name="answer" value="Agent discretion, but keep commits reviewable"> Agent discretion, but keep commits reviewable</label>
+          <textarea name="notes" placeholder="Preferred commit message style or PR breakdown notes."></textarea>
+          <button type="submit">Queue answer</button>
+        </form>
+
+        <form class="question" data-lavish-question="checks" onsubmit="queueForm(event, 'checks', 'Lightweight checks')">
+          <h3>19. Which lightweight checks are required?</h3>
+          <label class="check"><input type="checkbox" name="answer" value="Desktop targeted build only"> Desktop targeted build only</label>
+          <label class="check"><input type="checkbox" name="answer" value="Android assemble/install only"> Android assemble/install only</label>
+          <label class="check"><input type="checkbox" name="answer" value="UI lint/typecheck where touched"> UI lint/typecheck where touched</label>
+          <label class="check"><input type="checkbox" name="answer" value="Smoke tests only"> Smoke tests only</label>
+          <label class="check"><input type="checkbox" name="answer" value="No full no-mistakes gate"> No full no-mistakes gate</label>
+          <textarea name="notes" placeholder="Anything too expensive to run, or commands you specifically want used/avoided."></textarea>
+          <button type="submit">Queue answer</button>
+        </form>
+
+        <form class="question" data-lavish-question="success-definition" onsubmit="queueForm(event, 'success-definition', 'Final success definition')">
+          <h3>20. What is the final acceptance bar?</h3>
+          <textarea name="notes" placeholder="Complete this sentence: Ship Lane 4 when... Include PR expectations, artifacts, screenshots, remaining-defect tolerance, and launch proof standards."></textarea>
+          <button type="submit">Queue acceptance bar</button>
+        </form>
+      </div>
+    </section>
+
+    <div class="footer-actions">
+      <p>
+        Answer as many as you want. Each card queues a precise instruction; when ready, use Lavish’s Send to Agent control. You can also annotate any text or card directly.
+      </p>
+      <button class="secondary" data-lavish-action onclick="queueAllPrompt()">Queue one summary prompt</button>
+    </div>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite">Queued for agent</div>
+
+  <script>
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.add("show");
+      window.clearTimeout(window.__toastTimer);
+      window.__toastTimer = window.setTimeout(() => toast.classList.remove("show"), 1600);
+    }
+
+    function valuesFor(form) {
+      const data = new FormData(form);
+      const answers = data.getAll("answer").filter(Boolean);
+      const notes = String(data.get("notes") || "").trim();
+      return { answers, notes };
+    }
+
+    function queueForm(event, key, label) {
+      event.preventDefault();
+      const form = event.currentTarget;
+      const { answers, notes } = valuesFor(form);
+      if (!answers.length && !notes) {
+        showToast("Choose or type an answer first");
+        return;
+      }
+      const answerText = answers.length ? answers.join(", ") : "No preset selected";
+      const noteText = notes ? `\nNotes: ${notes}` : "";
+      const prompt = `${label}: ${answerText}${noteText}`;
+      if (window.lavish && window.lavish.queuePrompt) {
+        window.lavish.queuePrompt(prompt, {
+          tag: "lane4-brief",
+          text: `${label}: ${answerText}`,
+          element: form,
+          queueKey: key,
+          data: { question: key, answers, notes }
+        });
+      }
+      showToast(`Queued: ${label}`);
+    }
+
+    function queueAllPrompt() {
+      const forms = [...document.querySelectorAll("form.question")];
+      const lines = [];
+      for (const form of forms) {
+        const heading = form.querySelector("h3")?.textContent?.trim() || "Question";
+        const { answers, notes } = valuesFor(form);
+        if (answers.length || notes) {
+          lines.push(`${heading}\nAnswer: ${answers.join(", ") || "No preset selected"}${notes ? `\nNotes: ${notes}` : ""}`);
+        }
+      }
+      if (!lines.length) {
+        showToast("Answer at least one card first");
+        return;
+      }
+      const prompt = `Use this Lane 4 brief for packaging and Phase B UI/UX overhaul:\n\n${lines.join("\n\n")}`;
+      if (window.lavish && window.lavish.queuePrompt) {
+        window.lavish.queuePrompt(prompt, {
+          tag: "lane4-brief-summary",
+          text: "Lane 4 brief summary",
+          queueKey: "lane4-brief-summary",
+          data: { answeredQuestions: lines.length }
+        });
+      }
+      showToast("Queued summary prompt");
+    }
+  </script>
+</body>
+</html>

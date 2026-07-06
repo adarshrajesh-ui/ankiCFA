@@ -52,6 +52,7 @@ HONESTY (non-negotiable)
 Stdlib only; deterministic given ``--seed``; no build required.
 Metric convention: exam-weighted accuracy in [0, 1], higher is better.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -70,8 +71,8 @@ K = 6.0
 
 # Cohort / deck / study-budget defaults for the SIMULATED arm.
 DEFAULT_LEARNERS = 200
-CARDS_PER_TOPIC = 12          # a fresh, one-pass deck: each card studied 0/1x
-EXAM_Q_PER_TOPIC = 6          # held-out exam questions per topic
+CARDS_PER_TOPIC = 12  # a fresh, one-pass deck: each card studied 0/1x
+EXAM_Q_PER_TOPIC = 6  # held-out exam questions per topic
 # Fraction of the remaining mastery gap a *fully* studied topic closes. Studying
 # k of a topic's cards closes (k / CARDS_PER_TOPIC) of that fraction — so study
 # has diminishing returns per topic and a per-topic ceiling (you can't pour
@@ -138,8 +139,9 @@ def _bootstrap_ci(
     return (lo, hi)
 
 
-def _allocate(arm: str, weights: list[float], m0: list[float],
-              budget: int) -> list[int]:
+def _allocate(
+    arm: str, weights: list[float], m0: list[float], budget: int
+) -> list[int]:
     """How many of each topic's cards the given ARM studies, for one learner.
 
     Returns a per-topic count in [0, CARDS_PER_TOPIC] summing to ``budget``.
@@ -185,10 +187,13 @@ def _post_study_mastery(m0: list[float], counts: list[int]) -> list[float]:
     return out
 
 
-def simulate(seed: int = 0, learners: int = DEFAULT_LEARNERS,
-             budget_frac: float = DEFAULT_BUDGET_FRAC,
-             uniform_weights: bool = False,
-             topics_path: str = TOPICS_JSON) -> dict:
+def simulate(
+    seed: int = 0,
+    learners: int = DEFAULT_LEARNERS,
+    budget_frac: float = DEFAULT_BUDGET_FRAC,
+    uniform_weights: bool = False,
+    topics_path: str = TOPICS_JSON,
+) -> dict:
     """Seeded three-arm ablation DGP. Deterministic given ``seed``.
 
     Every arm sees the SAME learners, the SAME starting masteries, the SAME
@@ -217,8 +222,7 @@ def simulate(seed: int = 0, learners: int = DEFAULT_LEARNERS,
         # A single stream of exam Bernoulli draws, reused across arms so the
         # only thing that moves an arm's score is its post-study mastery.
         exam_u = [
-            [rng.random() for _ in range(EXAM_Q_PER_TOPIC)]
-            for _ in range(n_topics)
+            [rng.random() for _ in range(EXAM_Q_PER_TOPIC)] for _ in range(n_topics)
         ]
         for arm in ARMS:
             counts = _allocate(arm, weights, m0, budget)
@@ -273,8 +277,9 @@ def _from_observations(path: str) -> dict:
     }
 
 
-def _paired_diff_ci(a: list[float], b: list[float],
-                    seed: int) -> tuple[float, float, float]:
+def _paired_diff_ci(
+    a: list[float], b: list[float], seed: int
+) -> tuple[float, float, float]:
     """Mean paired difference (a - b) and its bootstrap 95% CI."""
     diffs = [x - y for x, y in zip(a, b)]
     lo, hi = _bootstrap_ci(diffs, seed=seed)
@@ -288,8 +293,12 @@ def analyze(sim: dict, seed: int = 0) -> dict:
         sim["budget_cards"] is not None and sim["budget_cards"] < MIN_BUDGET_CARDS
     )
     if give_up:
-        return {"abstain": True, "learners": learners,
-                "budget_cards": sim["budget_cards"], **sim}
+        return {
+            "abstain": True,
+            "learners": learners,
+            "budget_cards": sim["budget_cards"],
+            **sim,
+        }
 
     arm_stats = {}
     for a in ARMS:
@@ -302,10 +311,12 @@ def analyze(sim: dict, seed: int = 0) -> dict:
     return {
         "abstain": False,
         "arm_stats": arm_stats,
-        "on_minus_off": {"mean": on_off[0], "ci_low": on_off[1],
-                         "ci_high": on_off[2]},
-        "on_minus_plain": {"mean": on_plain[0], "ci_low": on_plain[1],
-                           "ci_high": on_plain[2]},
+        "on_minus_off": {"mean": on_off[0], "ci_low": on_off[1], "ci_high": on_off[2]},
+        "on_minus_plain": {
+            "mean": on_plain[0],
+            "ci_low": on_plain[1],
+            "ci_high": on_plain[2],
+        },
         **sim,
     }
 
@@ -315,8 +326,7 @@ def _fmt(m: dict, simulated: bool) -> str:
     lines = [
         f"A8 study-feature ablation — exam-priority queue [{tag}]",
         "=" * 68,
-        "FEATURE   : exam-priority points-at-stake study queue "
-        "(BuildExamQueue)",
+        "FEATURE   : exam-priority points-at-stake study queue (BuildExamQueue)",
         "HYPOTHESIS: at equal study time, allocating by exam-weight x weakness",
         "            beats weakness-only and plain deck order on exam-weighted",
         "            accuracy.",
@@ -343,8 +353,7 @@ def _fmt(m: dict, simulated: bool) -> str:
     else:
         lines += [f"cohort    : {m['learners']} learners (real observations)"]
     if m.get("uniform_weights"):
-        lines += ["control   : UNIFORM WEIGHTS (null) — ON key collapses "
-                  "onto OFF key"]
+        lines += ["control   : UNIFORM WEIGHTS (null) — ON key collapses onto OFF key"]
     lines += ["-" * 68, "Per-arm exam-weighted accuracy (mean [95% CI]):"]
     for a in ARMS:
         s = m["arm_stats"][a]
@@ -356,8 +365,10 @@ def _fmt(m: dict, simulated: bool) -> str:
     def _eff(name: str, d: dict) -> str:
         clears = d["ci_low"] > 0
         verdict = "REAL effect (CI clears 0)" if clears else "NULL (CI includes 0)"
-        return (f"  {name:22s}: {d['mean']:+.4f} "
-                f"[{d['ci_low']:+.4f}, {d['ci_high']:+.4f}]  -> {verdict}")
+        return (
+            f"  {name:22s}: {d['mean']:+.4f} "
+            f"[{d['ci_low']:+.4f}, {d['ci_high']:+.4f}]  -> {verdict}"
+        )
 
     lines += [
         "-" * 68,
@@ -380,13 +391,22 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="A8 study-feature ablation (3 builds)")
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--learners", type=int, default=DEFAULT_LEARNERS)
-    ap.add_argument("--budget-frac", type=float, default=DEFAULT_BUDGET_FRAC,
-                    help="study budget as a fraction of the deck (0..1)")
-    ap.add_argument("--uniform-weights", action="store_true",
-                    help="honest null control: equal topic weights")
-    ap.add_argument("--observations", metavar="FILE",
-                    help="score real per-learner arm outcomes (JSONL); "
-                         "drops the SIMULATED label")
+    ap.add_argument(
+        "--budget-frac",
+        type=float,
+        default=DEFAULT_BUDGET_FRAC,
+        help="study budget as a fraction of the deck (0..1)",
+    )
+    ap.add_argument(
+        "--uniform-weights",
+        action="store_true",
+        help="honest null control: equal topic weights",
+    )
+    ap.add_argument(
+        "--observations",
+        metavar="FILE",
+        help="score real per-learner arm outcomes (JSONL); drops the SIMULATED label",
+    )
     ap.add_argument("--json", action="store_true", help="emit JSON only")
     args = ap.parse_args(argv)
 
@@ -394,9 +414,12 @@ def main(argv: list[str] | None = None) -> int:
         sim = _from_observations(args.observations)
         simulated = False
     else:
-        sim = simulate(seed=args.seed, learners=args.learners,
-                       budget_frac=args.budget_frac,
-                       uniform_weights=args.uniform_weights)
+        sim = simulate(
+            seed=args.seed,
+            learners=args.learners,
+            budget_frac=args.budget_frac,
+            uniform_weights=args.uniform_weights,
+        )
         simulated = True
 
     m = analyze(sim, seed=args.seed)

@@ -6,22 +6,23 @@
 use std::future::Future;
 use std::sync::LazyLock;
 
+use anki_proto::scheduler as scheduler_pb;
 use axum::http::StatusCode;
 use fsrs::FSRS5_DEFAULT_DECAY;
 use reqwest::Client;
 use reqwest::Url;
 use serde_json::json;
-use tempfile::TempDir;
 use tempfile::tempdir;
+use tempfile::TempDir;
 use tokio::sync::Mutex;
 use tokio::sync::MutexGuard;
 use tracing::Instrument;
 use tracing::Span;
+use wiremock::matchers::method;
+use wiremock::matchers::path;
 use wiremock::Mock;
 use wiremock::MockServer;
 use wiremock::ResponseTemplate;
-use wiremock::matchers::method;
-use wiremock::matchers::path;
 
 use crate::card::CardQueue;
 use crate::card::CardType;
@@ -45,16 +46,15 @@ use crate::sync::collection::normal::SyncOutput;
 use crate::sync::collection::protocol::EmptyInput;
 use crate::sync::collection::protocol::SyncProtocol;
 use crate::sync::collection::start::StartRequest;
-use crate::sync::collection::upload::CORRUPT_MESSAGE;
 use crate::sync::collection::upload::UploadResponse;
+use crate::sync::collection::upload::CORRUPT_MESSAGE;
 use crate::sync::http_client::HttpSyncClient;
+use crate::sync::http_server::default_ip_header;
 use crate::sync::http_server::SimpleServer;
 use crate::sync::http_server::SyncServerConfig;
-use crate::sync::http_server::default_ip_header;
 use crate::sync::login::HostKeyRequest;
 use crate::sync::login::SyncAuth;
 use crate::sync::request::IntoSyncRequest;
-use anki_proto::scheduler as scheduler_pb;
 
 struct TestAuth {
     username: String,

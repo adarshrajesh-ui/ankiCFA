@@ -23,6 +23,7 @@ from __future__ import annotations
 import os
 import sys
 import tempfile
+from typing import cast
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
@@ -64,7 +65,9 @@ def main(argv: list[str] | None = None) -> int:
     args = sys.argv[1:] if argv is None else argv
     outdir = args[0] if args else "."
     os.makedirs(outdir, exist_ok=True)
-    app = QApplication.instance() or QApplication(["render-ai-settings"])
+    app = cast(
+        QApplication, QApplication.instance() or QApplication(["render-ai-settings"])
+    )
 
     _grab(app, True, os.path.join(outdir, "d6-ai-settings-master-on.png"))
     _grab(app, False, os.path.join(outdir, "d6-ai-settings-master-off.png"))

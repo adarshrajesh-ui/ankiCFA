@@ -1,0 +1,635 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ankiCFA Lane 4: What Happens Now</title>
+  <script type="module">
+    import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: "base",
+      themeVariables: {
+        background: "#07080B",
+        primaryColor: "#151925",
+        primaryTextColor: "#F5F2E8",
+        primaryBorderColor: "#D9AA4F",
+        lineColor: "#D9AA4F",
+        secondaryColor: "#10131A",
+        tertiaryColor: "#1D2331",
+        fontFamily: "Inter, system-ui, sans-serif"
+      }
+    });
+  </script>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #07080b;
+      --panel: #10131a;
+      --panel-2: #151925;
+      --panel-3: #1d2331;
+      --ink: #f5f2e8;
+      --muted: #a8acb8;
+      --faint: #757b8b;
+      --line: rgba(245, 242, 232, 0.13);
+      --gold: #d9aa4f;
+      --gold-2: #f0cf80;
+      --green: #71d39b;
+      --red: #ef6b6b;
+      --blue: #7aa7ff;
+      --radius: 22px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at 12% 0%, rgba(217, 170, 79, 0.18), transparent 32rem),
+        radial-gradient(circle at 90% 10%, rgba(122, 167, 255, 0.09), transparent 30rem),
+        var(--bg);
+      color: var(--ink);
+      line-height: 1.48;
+    }
+
+    .page {
+      width: min(1220px, calc(100vw - 32px));
+      margin: 0 auto;
+      padding: 34px 0 70px;
+    }
+
+    .hero {
+      border: 1px solid var(--line);
+      border-radius: 32px;
+      background:
+        linear-gradient(135deg, rgba(217, 170, 79, 0.16), transparent 34%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02)),
+        #0b0d13;
+      padding: clamp(28px, 5vw, 54px);
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.42);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      border: 1px solid rgba(217, 170, 79, 0.42);
+      border-radius: 999px;
+      background: rgba(217, 170, 79, 0.1);
+      color: var(--gold-2);
+      padding: 7px 11px;
+      font-size: 12px;
+      font-weight: 850;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      max-width: 940px;
+      margin: 20px 0 12px;
+      font-size: clamp(38px, 6.5vw, 72px);
+      line-height: 0.94;
+      letter-spacing: -0.065em;
+    }
+
+    .lead {
+      max-width: 880px;
+      margin: 0;
+      color: var(--muted);
+      font-size: clamp(17px, 2vw, 21px);
+    }
+
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin: 22px 0 30px;
+    }
+
+    .status-card,
+    .section,
+    .lane-card,
+    .gate {
+      border: 1px solid var(--line);
+      background: rgba(16, 19, 26, 0.86);
+      box-shadow: 0 18px 60px rgba(0, 0, 0, 0.32);
+    }
+
+    .status-card {
+      min-width: 0;
+      border-radius: 20px;
+      padding: 17px;
+    }
+
+    .status-card strong {
+      display: block;
+      color: var(--gold-2);
+      font-size: 25px;
+      line-height: 1;
+      letter-spacing: -0.04em;
+    }
+
+    .status-card span {
+      display: block;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+    }
+
+    .section {
+      margin-top: 24px;
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.015));
+      padding: 22px;
+    }
+
+    h2 {
+      margin: 0 0 6px;
+      font-size: 25px;
+      letter-spacing: -0.035em;
+    }
+
+    h3 {
+      margin: 0;
+      font-size: 17px;
+      letter-spacing: -0.02em;
+    }
+
+    p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .pill {
+      flex: 0 0 auto;
+      border: 1px solid rgba(217, 170, 79, 0.4);
+      border-radius: 999px;
+      background: rgba(217, 170, 79, 0.1);
+      color: var(--gold-2);
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 850;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .content {
+      padding: 22px;
+    }
+
+    .flow-wrap {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(0, 0, 0, 0.18);
+      padding: 18px;
+      overflow: auto;
+    }
+
+    .mermaid {
+      min-width: 720px;
+    }
+
+    .lanes {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .lane-card {
+      min-width: 0;
+      border-radius: 18px;
+      padding: 16px;
+    }
+
+    .lane-card .num {
+      display: inline-grid;
+      place-items: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 999px;
+      background: rgba(217, 170, 79, 0.14);
+      color: var(--gold-2);
+      font-weight: 900;
+      margin-bottom: 10px;
+    }
+
+    .lane-card ul,
+    .checklist {
+      margin: 12px 0 0;
+      padding-left: 18px;
+      color: var(--muted);
+    }
+
+    li + li {
+      margin-top: 7px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      overflow-wrap: anywhere;
+    }
+
+    th,
+    td {
+      border-bottom: 1px solid var(--line);
+      padding: 12px 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      color: var(--gold-2);
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    td {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    td strong {
+      color: var(--ink);
+    }
+
+    code {
+      color: var(--gold-2);
+      background: rgba(217, 170, 79, 0.1);
+      border: 1px solid rgba(217, 170, 79, 0.18);
+      border-radius: 7px;
+      padding: 1px 5px;
+      font-size: 0.92em;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .gate {
+      border-radius: 18px;
+      padding: 17px;
+    }
+
+    .gate.pass {
+      border-color: rgba(113, 211, 155, 0.35);
+    }
+
+    .gate.warn {
+      border-color: rgba(239, 107, 107, 0.36);
+    }
+
+    .tag {
+      display: inline-flex;
+      margin-bottom: 10px;
+      border-radius: 999px;
+      padding: 5px 9px;
+      font-size: 12px;
+      font-weight: 850;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .pass .tag {
+      background: rgba(113, 211, 155, 0.12);
+      color: #c9f8db;
+    }
+
+    .warn .tag {
+      background: rgba(239, 107, 107, 0.12);
+      color: #ffd2d2;
+    }
+
+    .footer-note {
+      margin-top: 20px;
+      color: var(--faint);
+      font-size: 13px;
+    }
+
+    @media (max-width: 980px) {
+      .status-grid,
+      .lanes,
+      .two-col {
+        grid-template-columns: 1fr;
+      }
+
+      .section-header {
+        flex-direction: column;
+      }
+
+      .pill {
+        white-space: normal;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <span class="eyebrow">Lane 4 · What I’m doing now</span>
+      <h1>Eight agents, one integrator, one ship-quality result.</h1>
+      <p class="lead">
+        This is the operating plan from this point forward: convert the parallel audits into implementation, build a CFA-first desktop and Android experience, package both apps, and deliver a Markdown + PDF evidence packet with screenshots.
+      </p>
+    </section>
+
+    <div class="status-grid">
+      <div class="status-card"><strong>8</strong><span>Agents In Play</span></div>
+      <div class="status-card"><strong>1</strong><span>Lead Integrator</span></div>
+      <div class="status-card"><strong>2</strong><span>Package Targets</span></div>
+      <div class="status-card"><strong>PDF + MD</strong><span>Final Proof</span></div>
+    </div>
+
+    <section class="section">
+      <div class="section-header">
+        <div>
+          <h2>Execution Flow</h2>
+          <p>The lead owns all edits, commits, packaging, and PR creation. Support agents widen coverage and feed verified targets into the lead.</p>
+        </div>
+        <span class="pill">Integration First</span>
+      </div>
+      <div class="content">
+        <div class="flow-wrap">
+          <pre class="mermaid">
+flowchart TD
+  A["Support agents finish audits<br/>desktop, Android, packaging, critique, report"] --> B["Lead integrator synthesizes targets"]
+  B --> C["Branch safety + commit baseline<br/>cfa/lane4-package-ui from cfa/final-integration"]
+  C --> D["Implement CFA UI pass<br/>Android radical shell + desktop polish"]
+  D --> E["Run strict screenshot audit rounds"]
+  E --> F{"Critical or High defects remain?"}
+  F -- "Yes" --> D
+  F -- "No" --> G["Package desktop DMG + signed Android APK"]
+  G --> H["Install + launch proof<br/>logs, checksums, screenshots"]
+  H --> I["REPORT.md + proof-packet.pdf"]
+  I --> J["Final commit(s) + PR into cfa/final-integration"]
+          </pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-header">
+        <div>
+          <h2>Agent Roles</h2>
+          <p>Quality is improved by parallel audit and design coverage; implementation stays centralized to avoid conflicting edits.</p>
+        </div>
+        <span class="pill">8-agent model</span>
+      </div>
+      <div class="content">
+        <div class="lanes">
+          <article class="lane-card">
+            <span class="num">1</span>
+            <h3>Lead Integrator</h3>
+            <ul>
+              <li>Creates branch and keeps commits coherent.</li>
+              <li>Implements desktop/mobile UI and build changes.</li>
+              <li>Runs checks, packages, proves install/launch.</li>
+              <li>Creates the final PR.</li>
+            </ul>
+          </article>
+          <article class="lane-card">
+            <span class="num">2</span>
+            <h3>Desktop Audit</h3>
+            <ul>
+              <li>Maps PyQt/Svelte surfaces.</li>
+              <li>Flags stock-Anki desktop escape hatches.</li>
+              <li>Provides capture/check recipes.</li>
+            </ul>
+          </article>
+          <article class="lane-card">
+            <span class="num">3</span>
+            <h3>Android Audit</h3>
+            <ul>
+              <li>Maps activities, layouts, themes, resources.</li>
+              <li>Finds branding leaks and screenshot gaps.</li>
+              <li>Builds mobile capture checklist.</li>
+            </ul>
+          </article>
+          <article class="lane-card">
+            <span class="num">4</span>
+            <h3>Android Redesign</h3>
+            <ul>
+              <li>Defines CFA shell: Today, Study, Readiness, Map, Library, More.</li>
+              <li>Sets black/gold mobile tokens.</li>
+              <li>Prioritizes reviewer and dashboard redesign.</li>
+            </ul>
+          </article>
+          <article class="lane-card">
+            <span class="num">5</span>
+            <h3>Desktop Packaging</h3>
+            <ul>
+              <li>Identifies DMG/signing route.</li>
+              <li>Calls out local <code>just</code> wrapper gap.</li>
+              <li>Defines desktop proof commands.</li>
+            </ul>
+          </article>
+          <article class="lane-card">
+            <span class="num">6</span>
+            <h3>Android Packaging</h3>
+            <ul>
+              <li>Targets <code>:AnkiDroid:assembleFullRelease</code>.</li>
+              <li>Uses available signing path.</li>
+              <li>Defines install/launch proof.</li>
+            </ul>
+          </article>
+          <article class="lane-card">
+            <span class="num">7</span>
+            <h3>Visual Critique</h3>
+            <ul>
+              <li>Sets severity rubric.</li>
+              <li>Hunts stock-Anki smell.</li>
+              <li>Defines final screenshot acceptance.</li>
+            </ul>
+          </article>
+          <article class="lane-card">
+            <span class="num">8</span>
+            <h3>Report Planner</h3>
+            <ul>
+              <li>Keeps proof simple: Markdown + PDF.</li>
+              <li>Defines screenshot/log folders.</li>
+              <li>Uses Chrome headless PDF path.</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-header">
+        <div>
+          <h2>Exact Work Order</h2>
+          <p>This is the order I expect the lead to execute, with quality gates after each meaningful step.</p>
+        </div>
+        <span class="pill">Now → PR</span>
+      </div>
+      <div class="content">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 14%">Step</th>
+              <th style="width: 28%">Action</th>
+              <th style="width: 34%">Done When</th>
+              <th style="width: 24%">Proof</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>1. Branch</strong></td>
+              <td>Start <code>cfa/lane4-package-ui</code> from <code>cfa/final-integration</code>.</td>
+              <td>Working tree understood; branch is safe; unrelated changes preserved.</td>
+              <td>Git status/log captured before commits.</td>
+            </tr>
+            <tr>
+              <td><strong>2. Synthesize</strong></td>
+              <td>Turn agent outputs into one punch list.</td>
+              <td>Desktop + Android surfaces, defects, packaging tasks, and proof needs are aligned.</td>
+              <td>Entries land in <code>proof/final-submission/REPORT.md</code>.</td>
+            </tr>
+            <tr>
+              <td><strong>3. Android UI</strong></td>
+              <td>Build the CFA-first mobile shell and remove high-traffic stock feel.</td>
+              <td>Today, Study, Reviewer, Readiness, Map, Library, More read as ankiCFA.</td>
+              <td>Before/after screenshots and defect rows.</td>
+            </tr>
+            <tr>
+              <td><strong>4. Desktop UI</strong></td>
+              <td>Polish desktop CFA shell and stock escape hatches that show up in screenshots.</td>
+              <td>Home, Readiness, Concept Map, Progress, Reviewer, Browser/Add/Settings/About do not break the premium story.</td>
+              <td>Desktop screenshot set and critique rows.</td>
+            </tr>
+            <tr>
+              <td><strong>5. Strict Passes</strong></td>
+              <td>Repeat screenshot review rounds until no Critical/High remain.</td>
+              <td>Mediums have explicit rationale; lows are logged.</td>
+              <td>Final pass statement in Markdown and PDF.</td>
+            </tr>
+            <tr>
+              <td><strong>6. Package</strong></td>
+              <td>Create macOS DMG and Android full release APK.</td>
+              <td>Artifacts exist, are checksummed, and signing status is explicit.</td>
+              <td><code>SHA256SUMS.txt</code>, build logs, artifact paths.</td>
+            </tr>
+            <tr>
+              <td><strong>7. Prove</strong></td>
+              <td>Install and launch both deliverables cleanly.</td>
+              <td>Desktop clean profile and Android install/launch have logs + screenshots.</td>
+              <td>Install transcripts, launch logs, screenshots.</td>
+            </tr>
+            <tr>
+              <td><strong>8. PR</strong></td>
+              <td>Commit final state and open PR into <code>cfa/final-integration</code>.</td>
+              <td>PR links code changes to proof packet and known caveats.</td>
+              <td>PR URL and final summary.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-header">
+        <div>
+          <h2>Quality Gates</h2>
+          <p>These are the standards that decide whether the work keeps moving or loops back for fixes.</p>
+        </div>
+        <span class="pill">No cost cap</span>
+      </div>
+      <div class="content two-col">
+        <article class="gate pass">
+          <span class="tag">Ship Gate</span>
+          <h3>What must be true before final PR</h3>
+          <ul class="checklist">
+            <li>No unresolved Critical or High UI/UX defects in final screenshots.</li>
+            <li>Android high-traffic surfaces do not look like stock AnkiDroid.</li>
+            <li>Desktop does not collapse back into stock Anki on proof surfaces.</li>
+            <li>DMG and signed APK exist with checksums and launch proof.</li>
+            <li><code>REPORT.md</code> and <code>proof-packet.pdf</code> point to screenshots/logs.</li>
+          </ul>
+        </article>
+        <article class="gate warn">
+          <span class="tag">Loop Back</span>
+          <h3>What forces another pass</h3>
+          <ul class="checklist">
+            <li>Stock Anki blue, AnkiDroid copy, old palette soup, or test data residue appears in a final screenshot.</li>
+            <li>Reviewer or dashboard feels generic instead of CFA-first.</li>
+            <li>Readiness implies fake precision or hides insufficient evidence.</li>
+            <li>Packaging proof is source/dev-only instead of installable artifact proof.</li>
+            <li>Signing status is ambiguous or launch is not screenshot-backed.</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-header">
+        <div>
+          <h2>Final Deliverables</h2>
+          <p>This is what you should expect back when Lane 4 is done.</p>
+        </div>
+        <span class="pill">No video</span>
+      </div>
+      <div class="content">
+        <table>
+          <thead>
+            <tr>
+              <th>Deliverable</th>
+              <th>Expected Location / Form</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Markdown proof report</strong></td>
+              <td><code>proof/final-submission/REPORT.md</code></td>
+              <td>Authoritative surface → issue → severity → fix → screenshot log.</td>
+            </tr>
+            <tr>
+              <td><strong>PDF screenshot packet</strong></td>
+              <td><code>proof/final-submission/proof-packet.pdf</code></td>
+              <td>Readable visual proof for install, launch, desktop, and Android surfaces.</td>
+            </tr>
+            <tr>
+              <td><strong>Desktop package</strong></td>
+              <td>macOS DMG path, exact name TBD by build route</td>
+              <td>Installer artifact with checksum and signing/notarization status.</td>
+            </tr>
+            <tr>
+              <td><strong>Android package</strong></td>
+              <td><code>AnkiDroid-full-arm64-v8a-release.apk</code> or documented equivalent</td>
+              <td>Signed release APK with install/launch evidence.</td>
+            </tr>
+            <tr>
+              <td><strong>PR</strong></td>
+              <td>Into <code>cfa/final-integration</code></td>
+              <td>Reviewable integration branch with proof links and caveats.</td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="footer-note">
+          Design source: ankiCFA’s existing black/gold institutional direction and the shared CFA tokens reported by the audits. I am not using a generic Lavish/DaisyUI theme for this board because the artifact is about ankiCFA itself.
+        </p>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

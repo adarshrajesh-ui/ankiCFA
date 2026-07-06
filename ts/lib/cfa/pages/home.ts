@@ -9,7 +9,9 @@
 
 import type { CfaHomePayload, CfaTone, TopicRow } from "../types";
 
+import { productNavItems } from "../productNav";
 import { masteryFromTopic } from "./conceptmap";
+import { formatHeroAbstainReason } from "./evidence";
 
 /** A dashboard call-to-action. `cmd` is the bridgeCommand the Qt side routes. */
 export interface HomeCta {
@@ -52,14 +54,8 @@ export const HOME_CTAS: HomeCta[] = [
     },
 ];
 
-/** The frozen Home app-bar destinations, all delegated to existing flows. */
-export const HOME_NAV: HomeCta[] = [
-    { cmd: "cfa:home", label: "Home", sub: "Command center", primary: true },
-    { cmd: "cfa:study", label: "Study", sub: "Deck workspace" },
-    { cmd: "cfa:conceptmap", label: "Concept Map", sub: "Mastery map" },
-    { cmd: "cfa:readiness", label: "Readiness", sub: "Weak areas" },
-    { cmd: "cfa:sync", label: "Sync", sub: "Connect or sync" },
-];
+/** The shared phone/desktop product-nav destinations. */
+export const HOME_NAV = productNavItems("home");
 
 export interface HomeRisk {
     topic: string;
@@ -132,7 +128,9 @@ export function buildPriorityRisks(topics: TopicRow[], limit = 3): HomeRisk[] {
             return {
                 topic: topic.topic,
                 shortTopic: shortTopicName(topic.topic),
-                detail: `${recallRange(topic)} · ${integer(topic.gradedReviews)} graded reviews · ${pct(topic.weight)} exam weight.`,
+                detail: `${recallRange(topic)} · ${integer(topic.gradedReviews)} graded reviews · ${
+                    pct(topic.weight)
+                } exam weight.`,
                 priority,
                 mastery,
                 weight: topic.weight,
@@ -155,7 +153,7 @@ export function homeMetricChips(data: CfaHomePayload): string[] {
         days,
         `${integer(data.caption.gradedReviews)} graded reviews`,
         `${pct(data.caption.coveragePct)} topic coverage`,
-        data.aiEnabled ? "AI explanations ready" : "AI explanations off",
+        "Local explanations ready",
     ];
 }
 
@@ -168,10 +166,13 @@ export function syncChipLabel(data: CfaHomePayload): string {
 
 export function commandCenterLead(data: CfaHomePayload): string {
     if (data.heroMode === "bayesian_call" && data.heroBayesian) {
-        return `Current call: ${data.heroBayesian.call} (p=${data.heroBayesian.callProb.toFixed(2)}). The next session is built from the weakest exam-weighted topics.`;
+        return `Current call: ${data.heroBayesian.call} (p=${
+            data.heroBayesian.callProb.toFixed(2)
+        }). The next session is built from the weakest exam-weighted topics.`;
     }
     if (data.heroAbstain) {
-        return `${data.heroAbstain.reason} The priority queue remains available while the scores gather evidence.`;
+        const reason = formatHeroAbstainReason(data.heroAbstain.reason, data.caption);
+        return `${reason}. The priority queue remains available while the scores gather evidence.`;
     }
     return "A focused starting point: the next session, the weak areas driving it, and quick access to the Concept Map.";
 }
@@ -260,7 +261,8 @@ export function heroLead(p: CfaHomePayload): string {
         return `Current call: ${p.heroBayesian.call} (p=${p.heroBayesian.callProb.toFixed(2)}).`;
     }
     if (p.heroAbstain) {
-        return `${p.heroAbstain.reason} — keep studying to unlock a pass/fail call.`;
+        const reason = formatHeroAbstainReason(p.heroAbstain.reason, p.caption);
+        return `${reason} — keep studying to unlock a pass/fail call.`;
     }
     return "Keep studying to build an honest pass/fail estimate.";
 }

@@ -18,6 +18,7 @@ from __future__ import annotations
 import json
 from typing import Any
 
+import aqt
 from aqt import gui_hooks
 
 # Anki custom_data top-level keys must be <= 8 bytes.
@@ -36,8 +37,11 @@ def persist_ethics_attempt(col, card, payload: dict[str, Any]) -> None:
     )
 
 
-def _on_show_answer(reviewer, card) -> None:
+def _on_show_answer(card) -> None:
     """Read the pending ethics payload from the reviewer webview and persist it."""
+    reviewer = getattr(getattr(aqt, "mw", None), "reviewer", None)
+    if reviewer is None:
+        return
 
     def _cb(raw: Any) -> None:
         if not raw or raw in ("null", ""):

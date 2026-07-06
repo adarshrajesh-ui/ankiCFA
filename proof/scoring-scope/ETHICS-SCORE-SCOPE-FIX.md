@@ -8,7 +8,7 @@ impact the readiness score … the concept map").
 ## The defect
 
 The ethics minimal-pairs bank lives in the **`CFA::Ethics Pairs`** deck — a
-*sibling* of the **`CFA Level II`** deck, not a child of it (`import_pairs.py`
+_sibling_ of the **`CFA Level II`** deck, not a child of it (`import_pairs.py`
 puts it there deliberately). The desktop scored the headline numbers with:
 
 ```python
@@ -22,8 +22,8 @@ was excluded** from the desktop's three scores, the Bayesian verdict and the
 concept-map fills.
 
 Meanwhile the AnkiDroid client already scored the whole collection
-(`computeCfaScores(wholeCollection = true)`), so *the same reviews produced
-different numbers on desktop vs phone* — a direct violation of "a review on the
+(`computeCfaScores(wholeCollection = true)`), so _the same reviews produced
+different numbers on desktop vs phone_ — a direct violation of "a review on the
 phone appears on the desktop and vice-versa."
 
 The native Readiness state was additionally scoped to
@@ -45,10 +45,10 @@ so it drifted from the Home dashboard.
 
 Reviews seeded ONLY in the `CFA::Ethics Pairs` sibling deck (3 cards × 5 reviews):
 
-| scope | caption.gradedReviews | Ethics topic gradedReviews | Ethics covered |
-|---|---|---|---|
-| whole-collection (`deck_id=0`, the fix) | **15** | **15** | **True** |
-| old `CFA Level II` subtree scope | 0 | 0 | False |
+| scope                                   | caption.gradedReviews | Ethics topic gradedReviews | Ethics covered |
+| --------------------------------------- | --------------------- | -------------------------- | -------------- |
+| whole-collection (`deck_id=0`, the fix) | **15**                | **15**                     | **True**       |
+| old `CFA Level II` subtree scope        | 0                     | 0                          | False          |
 
 `test_home_payload_scores_whole_collection` further proves the Home/Concept-Map
 payload reflects the ethics reviews (8/8) while its heading still reads

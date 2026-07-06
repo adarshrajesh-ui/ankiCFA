@@ -8,6 +8,7 @@ Offline test harness (env has no system deps; use the project pyenv):
 Gate recipe: `just cfa-desktop-shell-test`.
 
 Adaptations (Phase 0 not yet landed by orchestrator at start):
+
 - Scores consumed via the existing Python `anki.cfa.*` API (memory/performance/
   readiness/bayesian). These become thin RPC wrappers later, so the mediasrv
   payload stays forward-compatible.
@@ -79,9 +80,9 @@ list. Deck list stays reachable (toolbar "Decks", the Home "Browse decks" CTA,
     — 151 days to exam, "likely pass (p=0.97)", Memory 82–100% / Performance
     67–84% / Readiness 53–100%, 8/8 topics, 536 graded reviews, 5 CTAs, AI Off.
 - Build: `./ninja pylib qt` green (proto regen -> `getCfaHomeView` in @generated/backend
-  + cfa-home route bundled). `svelte-check`: 0 errors / 0 warnings (1286 files).
+  - cfa-home route bundled). `svelte-check`: 0 errors / 0 warnings (1286 files).
 - Tests: `just cfa-desktop-shell-test` -> 10 passed (branding 4 + home 6).
-- SHA: (this commit)  ·  PR: #24
+- SHA: (this commit) · PR: #24
 
 ---
 
@@ -103,19 +104,20 @@ Top bar and CFA menu read as a CFA product.
   (verified `git diff 6ef32ec8c friday/ethics`), so no cross-worker conflict.
 - Evidence: `item3-toolbar-menu-before.txt` (stock decks/add/browse/stats +
   one-passage) / `item3-toolbar-menu-after.txt` (reframed links + menu labels).
-  The restyled toolbar *visual* lands in Increment 4 (design-system chrome).
+  The restyled toolbar _visual_ lands in Increment 4 (design-system chrome).
 - Build: `./ninja pylib qt` green. Tests: `just cfa-desktop-shell-test` → 19 passed
   (branding 4 + home 6 + menu 5 + toolbar 4).
-- SHA: (this commit)  ·  PR: #24
+- SHA: (this commit) · PR: #24
 
 ---
 
 ## Increment 4 — CFA design system re-skins the stock chrome
 
 The remaining stock surfaces (top toolbar + deck list) now carry the CFA palette
-+ type, so no screen reads as plain Anki.
 
-- Files (my scope only):
+- type, so no screen reads as plain Anki.
+
+* Files (my scope only):
   - `qt/aqt/cfa_chrome.py` (new) — builds CFA CSS from the parity-locked
     `cfa_style.TOKENS` and installs it via public gui_hooks:
     `webview_will_set_content` re-skins the `TopToolbar` (navy links, orange
@@ -124,14 +126,14 @@ The remaining stock surfaces (top toolbar + deck list) now carry the CFA palette
     caption. Idempotent `register()`.
   - `qt/aqt/cfa.py` — call `cfa_chrome.register()` from `setup_menu` (guarded).
   - `qt/tests/test_cfa_chrome.py` (5 tests).
-- Approach: additive — no stock render code rewritten, no scss rebuild. Palette
+* Approach: additive — no stock render code rewritten, no scss rebuild. Palette
   is byte-parity with the SvelteKit `_tokens.scss` (same source: `cfa_style.TOKENS`).
-- Scope check: no `friday/*` worker touches `deckbrowser.py`/`cfa_style.py`.
-- Evidence: `item4-chrome-before.txt` (chrome absent at base) + honest before/after
+* Scope check: no `friday/*` worker touches `deckbrowser.py`/`cfa_style.py`.
+* Evidence: `item4-chrome-before.txt` (chrome absent at base) + honest before/after
   CSS-composited render `item4-chrome-before-after.png` (real compiled
   toolbar.css/deckbrowser.css + the exact injected CFA CSS).
-- Build: `./ninja pylib qt` green. Tests: `just cfa-desktop-shell-test` → 24 passed.
-- SHA: (this commit)  ·  PR: #24
+* Build: `./ninja pylib qt` green. Tests: `just cfa-desktop-shell-test` → 24 passed.
+* SHA: (this commit) · PR: #24
 
 ---
 
@@ -158,7 +160,7 @@ A visible desktop control for the AI-toggle contract, reachable from the CFA Hom
   dialog renders `item5-ai-settings-off.png` (features greyed out) /
   `item5-ai-settings-on.png` (master + grading on).
 - Build: `./ninja pylib qt` green. Tests: `just cfa-desktop-shell-test` → 29 passed.
-- SHA: (this commit)  ·  PR: #24
+- SHA: (this commit) · PR: #24
 
 ---
 
@@ -169,6 +171,7 @@ A visible desktop control for the AI-toggle contract, reachable from the CFA Hom
 `dd19c8b21` chrome re-skin · `52db091d8` AI settings.
 
 Acceptance:
+
 - Launch lands on a CFA Home dashboard (3 honest scores + Bayesian call + exam
   countdown + study CTAs), NOT the Anki deck list. Deck list still reachable.
 - Title/app-id/icon are CFA-branded ("ankiCFA - {profile}", cfa.png).

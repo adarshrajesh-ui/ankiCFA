@@ -26,10 +26,9 @@ import time
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
+import aqt.mediasrv as mediasrv
 from anki.collection import Collection
 from anki.decks import DeckId
-
-import aqt.mediasrv as mediasrv
 
 MAIN_DECK = "CFA Level II"
 ETHICS_DECK = "CFA::Ethics Pairs"  # sibling of MAIN_DECK, NOT a child
@@ -42,7 +41,9 @@ def _empty_col() -> Collection:
     return Collection(path)
 
 
-def _seed_reviewed(col: Collection, deck_id: DeckId, topic_tag: str, n: int, reviews: int) -> None:
+def _seed_reviewed(
+    col: Collection, deck_id: DeckId, topic_tag: str, n: int, reviews: int
+) -> None:
     """Add ``n`` review cards under ``deck_id`` tagged ``topic_tag`` with FSRS
     memory state and ``reviews`` graded reviews apiece (direct DB writes)."""
     nt = col.models.by_name("Basic")

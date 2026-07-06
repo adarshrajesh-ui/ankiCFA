@@ -1,60 +1,60 @@
 {
-  "pairId": "SMD-01",
-  "itemId": "SMD-01",
-  "cluster": "cluster::suitability-mnpi-diligence",
-  "completed": true,
-  "correct": true,
-  "standard": "II(A) Material Nonpublic Information",
-  "rationale": "Standard II(A) prohibits acting on material nonpublic information, but the mosaic theory permits conclusions drawn from public information combined with individually non-material nonpublic details. In vignette_a the former employee handed Priya the exact unreleased earnings figure — material nonpublic information — so trading on it violates II(A); in vignette_b the same call yields only a non-material observation about quiet dock activity, so her conclusion is a permissible mosaic. The distractors (trading for clients, doing a week of public research, or the source being a former employee) are identical or near-identical across both cases and do not change the outcome.",
-  "source": "fallback",
-  "verdicts": {
-    "A": {
-      "judged": "violate",
-      "answer": "violate",
-      "ok": true
+    "pairId": "SMD-01",
+    "itemId": "SMD-01",
+    "cluster": "cluster::suitability-mnpi-diligence",
+    "completed": true,
+    "correct": true,
+    "standard": "II(A) Material Nonpublic Information",
+    "rationale": "Standard II(A) prohibits acting on material nonpublic information, but the mosaic theory permits conclusions drawn from public information combined with individually non-material nonpublic details. In vignette_a the former employee handed Priya the exact unreleased earnings figure — material nonpublic information — so trading on it violates II(A); in vignette_b the same call yields only a non-material observation about quiet dock activity, so her conclusion is a permissible mosaic. The distractors (trading for clients, doing a week of public research, or the source being a former employee) are identical or near-identical across both cases and do not change the outcome.",
+    "source": "fallback",
+    "verdicts": {
+        "A": {
+            "judged": "violate",
+            "answer": "violate",
+            "ok": true
+        },
+        "B": {
+            "judged": "conform",
+            "answer": "conform",
+            "ok": true
+        }
     },
-    "B": {
-      "judged": "conform",
-      "answer": "conform",
-      "ok": true
-    }
-  },
-  "decisiveCase": "A",
-  "highlight": "correct",
-  "found": 2,
-  "near": 0,
-  "total": 2,
-  "selectionIndices": [
-    24,
-    25,
-    26,
-    27,
-    28,
-    42,
-    43,
-    44,
-    45,
-    46,
-    47,
-    48,
-    49
-  ],
-  "spans": [
-    {
-      "phrase": "exact unreleased quarterly earnings figure",
-      "rationale": "A precise, still-unreleased earnings number is material and nonpublic, so it is the MNPI II(A) bars using.",
-      "tier": "full",
-      "matched": true,
-      "lo": 24,
-      "hi": 28
-    },
-    {
-      "phrase": "sells the company out of her clients' portfolios",
-      "rationale": "Trading on that MNPI is the prohibited act under II(A).",
-      "tier": "full",
-      "matched": true,
-      "lo": 42,
-      "hi": 49
-    }
-  ]
+    "decisiveCase": "A",
+    "highlight": "correct",
+    "found": 2,
+    "near": 0,
+    "total": 2,
+    "selectionIndices": [
+        24,
+        25,
+        26,
+        27,
+        28,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49
+    ],
+    "spans": [
+        {
+            "phrase": "exact unreleased quarterly earnings figure",
+            "rationale": "A precise, still-unreleased earnings number is material and nonpublic, so it is the MNPI II(A) bars using.",
+            "tier": "full",
+            "matched": true,
+            "lo": 24,
+            "hi": 28
+        },
+        {
+            "phrase": "sells the company out of her clients' portfolios",
+            "rationale": "Trading on that MNPI is the prohibited act under II(A).",
+            "tier": "full",
+            "matched": true,
+            "lo": 42,
+            "hi": 49
+        }
+    ]
 }

@@ -5,10 +5,15 @@ completed attempt (and relays it via `pycmd`), which the BACK reads and which W5
 `card.custom_data` (syncs).
 
 ## BEFORE (original `front.html`, single-phrase card)
+
 The payload was minimal — just enough to auto-rate:
 
 ```js
-var grade = { pairId: pairId, cluster: cluster, correct: root.dataset.correct === "1" };
+var grade = {
+    pairId: pairId,
+    cluster: cluster,
+    correct: root.dataset.correct === "1",
+};
 localStorage.setItem("cfaEthics:pending", JSON.stringify(grade));
 ```
 
@@ -16,6 +21,7 @@ i.e. `{ pairId, cluster, correct }` — no verdicts, no highlight spans, no per-
 tier, no source/standard provenance. W5 could persist only pass/fail.
 
 ## AFTER (multi-span flagship, this workstream)
+
 The card emits the full structured attempt detail the moment Check reveals the grade (see
 `front.html` `reveal()` → `pendingGrade`), and upgrades `source` to `"ai"` in place if the desktop
 AI bridge returns an `ai` grade. Verified by driving the REAL card in headless Chrome and reading

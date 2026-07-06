@@ -10,7 +10,7 @@ Compared against:
 - Pearl-to-turquoise page wash, translucent app bar, liquid-glass hero, map stage, side panel, cards, soft highlights, and subtle shadows.
 - Frozen hierarchy: center CFA readiness, 10 weighted section nodes, and subsection orbit with fixed organic geometry.
 - Minimalist-at-rest map: labels remain on center/section nodes, subsection detail appears through hover/tap tooltip and pinned panel.
-- Desktop layout preserves the frozen hero → map/panel stage → mechanic/hierarchy/AI/parity explanation sequence.
+- Desktop layout preserves the frozen hero -> map/panel stage -> mechanic/hierarchy/local-explanation/parity sequence.
 - Narrow widths keep the same feature and visual language, with stacked stage and restrained pan/pinch support instead of a separate simplified screen.
 
 ## Intentional Deviations
