@@ -32,12 +32,12 @@ CFA_NOTETYPE_NAME = "CFA Knowledge"
 # answer sits below a calm brand-line rule. {{Back}} already carries the
 # authored answer + the named-source footer span (build_cfa_deck.back_with_source).
 _FRONT_TMPL = """<div class="cfa-card">
-  <div class="cfa-eyebrow">ankiCFA · Level II</div>
+  <div class="cfa-eyebrow">EthosPrep · Level II</div>
   <div class="cfa-prompt">{{Front}}</div>
 </div>"""
 
 _BACK_TMPL = """<div class="cfa-card">
-  <div class="cfa-eyebrow">ankiCFA · Level II</div>
+  <div class="cfa-eyebrow">EthosPrep · Level II</div>
   <div class="cfa-prompt">{{Front}}</div>
   <hr id="answer" class="cfa-rule">
   <div class="cfa-answer">{{Back}}</div>

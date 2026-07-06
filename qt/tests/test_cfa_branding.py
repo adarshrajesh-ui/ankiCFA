@@ -1,7 +1,7 @@
 # Copyright: Ankitects Pty Ltd and contributors
 # License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
 
-"""Increment 1 (desktop-shell): the desktop app reads as ankiCFA, not Anki.
+"""Increment 1 (desktop-shell): the desktop app reads as EthosPrep, not Anki.
 
 Covers the window-title helper, the Qt application/desktop identity + startup
 banner, and the CFA window-icon asset and its .ui reference. Every assertion
@@ -24,21 +24,21 @@ def test_window_title_includes_profile() -> None:
     from aqt.main import AnkiQt
 
     stub = SimpleNamespace(pm=SimpleNamespace(name="User 1"))
-    assert AnkiQt.window_title(stub) == "ankiCFA - User 1"
+    assert AnkiQt.window_title(stub) == "EthosPrep - User 1"
 
 
 def test_window_title_without_profile() -> None:
     from aqt.main import AnkiQt
 
-    assert AnkiQt.window_title(SimpleNamespace(pm=None)) == "ankiCFA"
-    assert AnkiQt.window_title(SimpleNamespace()) == "ankiCFA"
+    assert AnkiQt.window_title(SimpleNamespace(pm=None)) == "EthosPrep"
+    assert AnkiQt.window_title(SimpleNamespace()) == "EthosPrep"
 
 
 def test_application_identity_is_cfa() -> None:
     src = (_REPO / "qt" / "aqt" / "__init__.py").read_text(encoding="utf-8")
-    assert 'setApplicationName("ankiCFA")' in src
-    assert 'setDesktopFileName("ankicfa")' in src
-    assert "Starting ankiCFA" in src
+    assert 'setApplicationName("EthosPrep")' in src
+    assert 'setDesktopFileName("ethosprep")' in src
+    assert "Starting EthosPrep" in src
 
 
 def test_window_icon_asset_and_reference() -> None:

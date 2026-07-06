@@ -52,7 +52,7 @@ License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
         />
     {:else}
         <div class="cfa-import-head">
-            <Eyebrow>ankiCFA · Level II · Import</Eyebrow>
+            <Eyebrow>EthosPrep · Level II · Import</Eyebrow>
         </div>
         <div class="pre-import-page">
             <StickyHeader {path} onImport={() => (importing = true)} />

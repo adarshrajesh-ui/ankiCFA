@@ -265,7 +265,7 @@ def logout_of_sync(mw: AnkiQt) -> None:
             "You're not logged in to a sync account.\n\n"
             "Click Sync on the top bar (or press Y) to log in.",
             parent=mw,
-            title="ankiCFA — Sync account",
+            title="EthosPrep — Sync account",
         )
         return
     account = mw.pm.profile.get("syncUser") or "your sync account"

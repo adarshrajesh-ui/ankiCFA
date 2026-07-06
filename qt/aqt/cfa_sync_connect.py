@@ -234,7 +234,7 @@ def _sync_endpoint_label(endpoint: str | None) -> str:
 def sync_connection_error_message(_endpoint: str | None = None) -> str:
     """Product-safe connection error text for the normal dialog surface."""
     return (
-        "ankiCFA couldn't connect this device to sync.\n\n"
+        "EthosPrep couldn't connect this device to sync.\n\n"
         "Open Settings & Sync, confirm your account is connected, then try "
         "Connect & Sync again."
     )
@@ -422,7 +422,7 @@ def open_sync_settings(mw: AnkiQt) -> None:
     status = sync_status_payload(mw)
     dialog = QDialog(mw)
     dialog.setObjectName("cfaSyncDialog")
-    dialog.setWindowTitle("ankiCFA - Settings & Sync")
+    dialog.setWindowTitle("EthosPrep - Settings & Sync")
     dialog_width = _sync_dialog_width(mw)
     dialog.setMinimumWidth(min(SYNC_DIALOG_MIN_WIDTH, dialog_width))
     dialog.resize(dialog_width, SYNC_DIALOG_DEFAULT_HEIGHT)
@@ -546,7 +546,7 @@ def connect_cfa_sync(mw: AnkiQt) -> None:
         showWarning(
             "Open a profile first, then sync your CFA progress.",
             parent=mw,
-            title="ankiCFA — Sync",
+            title="EthosPrep — Sync",
         )
         return
 

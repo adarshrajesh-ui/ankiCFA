@@ -28,7 +28,7 @@ test("D-P4-19: change-notetype adopts the CFA design system", () => {
     expect(src).toContain("import \"$lib/cfa/theme.scss\";");
     expect(src).toContain("import Eyebrow from \"$lib/cfa/Eyebrow.svelte\";");
     // …a brand eyebrow introduces the surface…
-    expect(src).toMatch(/<Eyebrow[^>]*>[^<]*ankiCFA · Level II · Change notetype/);
+    expect(src).toMatch(/<Eyebrow[^>]*>[^<]*EthosPrep · Level II · Change notetype/);
     // …and the content opts into the CFA page base, light-mode gated.
     expect(src).toMatch(/class="cfa-changenote cfa-app"/);
     expect(src).toContain("class:is-light={!$pageTheme.isDark}");

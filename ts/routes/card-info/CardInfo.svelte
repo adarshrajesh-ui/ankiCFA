@@ -44,7 +44,7 @@ License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
 <div class="cfa-cardinfo cfa-app">
     {#if stats}
         <div class="cfa-cardinfo-head">
-            <Eyebrow>ankiCFA · Level II · Card details</Eyebrow>
+            <Eyebrow>EthosPrep · Level II · Card details</Eyebrow>
         </div>
     {/if}
 

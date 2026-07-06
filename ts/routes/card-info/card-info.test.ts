@@ -26,7 +26,7 @@ test("D-P4-17: card info screen adopts the CFA design system", () => {
     expect(src).toContain("import \"$lib/cfa/theme.scss\";");
     expect(src).toContain("import Eyebrow from \"$lib/cfa/Eyebrow.svelte\";");
     // …a brand eyebrow introduces the surface…
-    expect(src).toMatch(/<Eyebrow[^>]*>[^<]*ankiCFA · Level II · Card details/);
+    expect(src).toMatch(/<Eyebrow[^>]*>[^<]*EthosPrep · Level II · Card details/);
     // …and the content opts into the CFA page base.
     expect(src).toMatch(/class="cfa-cardinfo cfa-app"/);
 });

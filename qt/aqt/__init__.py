@@ -571,7 +571,7 @@ def write_profile_results() -> None:
 
 
 def run() -> None:
-    print(f"Starting ankiCFA {_version}...")
+    print(f"Starting EthosPrep {_version}...")
     try:
         _run()
     except Exception:
@@ -677,9 +677,9 @@ def _run(argv: list[str] | None = None, exec: bool = True) -> AnkiApp | None:
         os.environ["QT_QPA_PLATFORM"] = "windows:altgr"
 
     # create the app
-    # CFA fork: brand the Qt application/desktop identity as ankiCFA.
-    QCoreApplication.setApplicationName("ankiCFA")
-    QGuiApplication.setDesktopFileName("ankicfa")
+    # CFA fork: brand the Qt application/desktop identity as EthosPrep.
+    QCoreApplication.setApplicationName("EthosPrep")
+    QGuiApplication.setDesktopFileName("ethosprep")
     app = AnkiApp(argv)
     if app.secondInstance():
         # we've signaled the primary instance, so we should close

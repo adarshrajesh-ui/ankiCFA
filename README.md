@@ -1,6 +1,6 @@
-# ankiCFA — a study app for the CFA® Level II exam
+# EthosPrep — a study app for the CFA® Level II exam
 
-> **Exam:** **CFA Level II.** ankiCFA is a fork of **[Anki](https://apps.ankiweb.net)**
+> **Exam:** **CFA Level II.** EthosPrep is a fork of **[Anki](https://apps.ankiweb.net)**
 > (upstream source: <https://github.com/ankitects/anki>).
 > **License:** GNU **AGPL-3.0-or-later** — unchanged from Anki (see [LICENSE](./LICENSE)).
 > **AI is optional; scores never use AI.** The three honest scores (Memory /
@@ -12,7 +12,7 @@
 > in **CFA → AI Settings…** (settings sync with the collection). No API key and
 > no AI-generated content are committed to this repository.
 
-**ankiCFA** adds a thin **exam-prep layer** on top of Anki's Rust scheduling engine
+**EthosPrep** adds a thin **exam-prep layer** on top of Anki's Rust scheduling engine
 for candidates studying for the **CFA Level II** exam. Anki's spaced-repetition
 engine, scheduler, sync, and user interface are all the work of the Anki authors;
 this fork adds only the CFA features described below and retains Anki's
@@ -27,7 +27,7 @@ is built from a separate **AnkiDroid** fork and shares the same Rust engine — 
 - [What this fork adds](#what-this-fork-adds)
 - [Building & running](#building--running)
   - [Prerequisites](#prerequisites)
-  - [Desktop (this repo — ankiCFA)](#desktop-this-repo--ankicfa)
+  - [Desktop (this repo — EthosPrep)](#desktop-this-repo--ethosprep)
   - [Mobile (AnkiDroid fork)](#mobile-ankidroid-fork)
 - [Architecture overview](#architecture-overview)
 - [Speedrun requirements status](#speedrun-requirements-status)
@@ -130,7 +130,7 @@ Platform-specific notes: [docs/mac.md](./docs/mac.md),
 [docs/windows.md](./docs/windows.md), [docs/linux.md](./docs/linux.md). More detail
 in [docs/development.md](./docs/development.md).
 
-### Desktop (this repo — ankiCFA)
+### Desktop (this repo — EthosPrep)
 
 ```bash
 # Build the desktop app (Rust core + protobuf codegen + web pages + pylib + qt).
@@ -197,7 +197,7 @@ adb install -r /Users/adarshrajesh/wed/AnkiDroid/AnkiDroid/build/outputs/apk/ful
 adb shell monkey -p com.ichi2.anki.debug -c android.intent.category.LAUNCHER 1
 ```
 
-The fork's AnkiDroid is branded **ankiCFA** with **native CFA screens** — Ethics
+The fork's AnkiDroid is branded **EthosPrep** with **native CFA screens** — Ethics
 minimal-pairs and the **Exam Readiness** screen (Memory / Performance / Readiness
 with ranges, give-up rule, and per-topic recall) call the same
 `ComputeCfaScores` engine as desktop. **Two-way sync** uses Anki's native Rust
@@ -305,7 +305,7 @@ just cfa-model-docs-test
 
 ## Architecture overview
 
-Anki (and therefore ankiCFA) is a layered system whose non-Rust APIs are all
+Anki (and therefore EthosPrep) is a layered system whose non-Rust APIs are all
 defined once in Protobuf and generated into each language:
 
 ```
@@ -434,14 +434,14 @@ Engine design: [docs/cfa/RUST_ENGINE_NOTE.md](./docs/cfa/RUST_ENGINE_NOTE.md).
 
 ## Credit to Anki
 
-ankiCFA is built on and forked from **Anki** by Ankitects Pty Ltd and contributors
+EthosPrep is built on and forked from **Anki** by Ankitects Pty Ltd and contributors
 (<https://apps.ankiweb.net>, <https://github.com/ankitects/anki>). All of Anki's
 spaced-repetition engine, scheduler, sync, and UI are Anki's work. This fork adds
 only the CFA exam-prep layer described above and retains Anki's AGPL-3.0-or-later
 license. The list of Anki contributors is in [CONTRIBUTORS](./CONTRIBUTORS); the
 upstream project's README follows below.
 
-> _CFA® is a registered trademark of CFA Institute. ankiCFA is an independent,
+> _CFA® is a registered trademark of CFA Institute. EthosPrep is an independent,
 > open-source study aid and is not affiliated with, endorsed by, or sponsored by
 > CFA Institute._
 

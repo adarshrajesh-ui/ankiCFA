@@ -57,7 +57,7 @@ License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
 
         <div class="cfa-graphs-shell">
             <section class="cfa-progress-hero">
-                <Eyebrow>ankiCFA · Level II · Study statistics</Eyebrow>
+                <Eyebrow>EthosPrep · Level II · Study statistics</Eyebrow>
                 <div class="cfa-progress-hero__body">
                     <div>
                         <h1>Progress Command Center</h1>

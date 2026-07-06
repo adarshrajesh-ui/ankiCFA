@@ -87,7 +87,7 @@ class CfaAiSettingsDialog(QDialog):
         super().__init__(mw)
         self.mw = mw
         self._on_saved = on_saved
-        self.setWindowTitle("ankiCFA — AI settings")
+        self.setWindowTitle("EthosPrep — AI settings")
         self.setMinimumWidth(460)
 
         cur = get_ai_toggles(mw.col)
@@ -183,7 +183,7 @@ class CfaAiSettingsDialog(QDialog):
         try:
             from aqt.cfa_style import page_heading
 
-            return page_heading("ankiCFA · AI", "AI features")
+            return page_heading("EthosPrep · AI", "AI features")
         except Exception:
             return "<b>AI features</b>"
 

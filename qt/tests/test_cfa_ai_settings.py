@@ -6,7 +6,7 @@
 The AI settings dialog reads/writes the shared col.conf toggle contract
 (cfa_ai_enabled master + cfa_ai_grading_enabled + cfa_ai_tabfill_enabled) and
 persists it; the per-feature switches are gated on the master. Fails on stock
-ankiCFA (no such control / keys).
+    EthosPrep (no such control / keys).
 """
 
 from __future__ import annotations
@@ -163,6 +163,6 @@ def test_dialog_has_brand_heading() -> None:
         dlg = ai.CfaAiSettingsDialog(_mw(col))
         texts = " ".join(lbl.text() for lbl in dlg.findChildren(QLabel)).lower()
         assert "ai features" in texts
-        assert "ankicfa" in texts
+        assert "ethosprep" in texts
     finally:
         col.close()
