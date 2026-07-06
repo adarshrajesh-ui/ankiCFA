@@ -1,4 +1,4 @@
-# CFA Level II Exam-Prep — Consolidated Results Report
+# EthosPrep CFA Level II Exam-Prep — Consolidated Results Report
 
 > **A14 deliverable.** Every measured / simulated number from the Phase A
 > evaluation, benchmark, ablation, calibration and robustness work, assembled in
@@ -180,3 +180,21 @@ A11: 3 MODEL-*.md (method + range + give-up rule each), 5-test doc-drift guard.
 A12: `RUST_ENGINE_NOTE.md` covers 3 RPCs; 24 Rust tests (11 exam-queue + 10
 deadline + 3 scores); 6-test drift guard. A13: real 226 MB macOS DMG, verifier
 confirms self-contained + all 8 CFA modules, 3-shot clean-machine install.
+
+---
+
+## Final synthetic-data disclaimer
+
+The following results in this report are **synthetic / simulated**, not measured
+on real CFA candidates or real longitudinal practice-test outcomes: A3 memory
+calibration, A4 performance-model accuracy, A5 paraphrase memory-vs-performance
+gap, A6 card-generation checker batches, and A8 study-feature ablation. Those
+simulations are included to make the model math, gates, and reporting process
+re-runnable; they should not be presented as real-world learning gains or
+validated CFA exam-score predictions.
+
+The following results are **measured on real built code / real local artifacts**:
+A7 coverage map over the authored deck, A9 50k-card benchmark on the backend,
+A10 crash/offline robustness, A11/A12 model/Rust documentation guards, and A13
+packaging/install proof. Readiness remains an honest estimate with ranges and
+give-up rules, not a validated real-exam score predictor.
