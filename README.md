@@ -235,7 +235,7 @@ The app intentionally shows **ranges and abstentions**, not a single flattering
 | AI outputs trace to named source                 | **Mostly done**             | Ethics AI records `source`, `standard`, `item_id`, `model`; see [`docs/cfa/AI-PROVENANCE.md`](./docs/cfa/AI-PROVENANCE.md)                                                                                              |
 | AI eval with accuracy/WAR cutoff                 | **Done with honest caveat** | AI-off accuracy `0.733`, wrong-answer rate `0.000`; AI-on eval evidence exists, but not every AI claim is proven                                                                                                        |
 | AI beats simpler baseline                        | **Not fully proven**        | TF-IDF baseline `0.933` beats deterministic fallback `0.733`; the LLM-beats-baseline claim remains honestly marked unproven in [`proof/friday/RESULTS-REPORT.md`](./proof/friday/RESULTS-REPORT.md)                     |
-| Desktop packaged installer                       | **Pending**                 | Desktop runs from source; final DMG should be built only after code freeze                                                                                                                                              |
+| Desktop packaged installer                       | **Not present yet**         | Desktop runs from source; expected DMG `out/installer/dist/anki-26.05-mac-apple.dmg` was checked and is missing. Build it only after code freeze.                                                                       |
 | Phone packaged build                             | **Done**                    | Signed release APK exists in the AnkiDroid fork build output; arm64 SHA-256 is recorded in [`proof/final-submission/logs/android/release-apk-sha256.txt`](./proof/final-submission/logs/android/release-apk-sha256.txt) |
 | Runs with AI off                                 | **Done**                    | Scores are pure local Rust/Python statistics; AI is never in the scoring path                                                                                                                                           |
 | AGPL credit to Anki                              | **Done**                    | This README and [LICENSE](./LICENSE) retain Anki credit/license                                                                                                                                                         |
@@ -243,7 +243,13 @@ The app intentionally shows **ranges and abstentions**, not a single flattering
 ### Packaged build status
 
 - **Desktop:** the source app runs with `just run`; the final desktop DMG is still
-  the last packaging step and should be built from the final frozen commit.
+  the last packaging step. The expected artifact path is
+  `out/installer/dist/anki-26.05-mac-apple.dmg`, and it is **not present yet** in
+  this checkout. After building the frozen code, verify it with:
+
+  ```bash
+  ls -lh out/installer/dist/anki-26.05-mac-apple.dmg
+  ```
 - **Android:** release APKs exist under
   `/Users/adarshrajesh/wed/AnkiDroid/AnkiDroid/build/outputs/apk/full/release/`.
   The arm64 release APK is signed with the repo fallback release keystore and has
