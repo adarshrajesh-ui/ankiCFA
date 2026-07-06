@@ -71,6 +71,7 @@ adb shell monkey -p com.ichi2.anki 1
 - [Architecture overview](#architecture-overview)
 - [Speedrun requirements status](#speedrun-requirements-status)
 - [Model evidence and honest reporting](#model-evidence-and-honest-reporting)
+- [Full reproduction checklist](#full-reproduction-checklist)
 - [CFA feature details](#cfa-feature-details)
 - [Due Friday deliverables (D1–D7)](#due-friday-deliverables-d1d7)
 - [Submission proof](#submission-proof)
@@ -207,7 +208,8 @@ engine is available to the mobile app without a second implementation.
 At a high level the AnkiDroid fork follows the standard AnkiDroid Android/Gradle
 build: the Rust backend is compiled for Android and packaged with the Kotlin/Java
 app into an APK. In this local submission environment, the fork lives at
-`/Users/adarshrajesh/wed/AnkiDroid`.
+`/Users/adarshrajesh/wed/AnkiDroid`; replace that path with the path to your
+AnkiDroid fork on another machine.
 
 ```bash
 cd /Users/adarshrajesh/wed/AnkiDroid
@@ -273,19 +275,26 @@ The app intentionally shows **ranges and abstentions**, not a single flattering
 | AI eval with accuracy/WAR cutoff                 | **Done with honest caveat** | AI-off accuracy `0.733`, wrong-answer rate `0.000`; AI-on eval evidence exists, but not every AI claim is proven                                                                                                        |
 | AI beats simpler baseline                        | **Not fully proven**        | TF-IDF baseline `0.933` beats deterministic fallback `0.733`; the LLM-beats-baseline claim remains honestly marked unproven in [`proof/friday/RESULTS-REPORT.md`](./proof/friday/RESULTS-REPORT.md)                     |
 | Desktop packaged installer                       | **Done**                    | Desktop installers are available from the successful EthosPrep packaging workflow artifacts linked above                                                                                                                |
-| Phone packaged build                             | **Done**                    | Signed release APK exists in the AnkiDroid fork build output; arm64 SHA-256 is recorded in [`proof/final-submission/logs/android/release-apk-sha256.txt`](./proof/final-submission/logs/android/release-apk-sha256.txt) |
+| Phone packaged build                             | **Done**                    | Signed universal release APK exists in the AnkiDroid fork build output; SHA-256 `ea540f68fb4b4f24350be08fef5ec2f3b19a82109702b58767e6081868689982`                                                                      |
 | Runs with AI off                                 | **Done**                    | Scores are pure local Rust/Python statistics; AI is never in the scoring path                                                                                                                                           |
 | AGPL credit to Anki                              | **Done**                    | This README and [LICENSE](./LICENSE) retain Anki credit/license                                                                                                                                                         |
 
 ### Packaged build status
 
-- **Desktop:** the source app runs with `just run`; the final desktop DMG is still
-  the last packaging step and should be built from the final frozen commit.
+- **Desktop:** packaged installers are built and available as GitHub Actions
+  artifacts from
+  [`Release 26.05` run 28772064211](https://github.com/adarshrajesh-ui/ankiCFA/actions/runs/28772064211),
+  which completed successfully on `2026-07-06`. Artifact names:
+  `installer-macos`, `installer-macos-intel`, `installer-windows`,
+  `installer-windows-arm`, `installer-linux-x86`, and `installer-linux-arm`.
+  The local `out/installer/dist/` directory may be empty because the canonical
+  desktop installers are stored as workflow artifacts.
 - **Android:** release APKs exist under
   `/Users/adarshrajesh/wed/AnkiDroid/AnkiDroid/build/outputs/apk/full/release/`.
-  The arm64 release APK is signed with the repo fallback release keystore and has
-  SHA-256
-  `33442f9df22c8f334acfcbd05471f1451ca96641accdd3b2383306da2ed990a5`.
+  The signed universal APK is:
+  `/Users/adarshrajesh/wed/AnkiDroid/AnkiDroid/build/outputs/apk/full/release/AnkiDroid-full-universal-release.apk`
+  with SHA-256
+  `ea540f68fb4b4f24350be08fef5ec2f3b19a82109702b58767e6081868689982`.
 
 ## Model evidence and honest reporting
 
@@ -340,6 +349,44 @@ just cfa-sync-dedup-test
 just cfa-desktop-shell-test
 just cfa-results-test
 just cfa-model-docs-test
+```
+
+## Full reproduction checklist
+
+Run from this repository unless a command explicitly changes into the AnkiDroid
+fork.
+
+Core desktop / shared engine:
+
+```bash
+just cfa-parity-test
+just cfa-scores-test
+just cfa-sync-test
+just cfa-sync-dedup-test
+just cfa-desktop-shell-test
+just cfa-results-test
+just cfa-model-docs-test
+just cfa-rust-note-test
+```
+
+Model, eval, reliability, and AI gates:
+
+```bash
+just cfa-eval-test
+just cfa-ablation-test
+just cfa-bench-test
+just cfa-crash-test
+just cfa-outline-test
+just cfa-ai-grade-test
+just cfa-ai-proxy-test
+```
+
+Android companion:
+
+```bash
+cd /Users/adarshrajesh/wed/AnkiDroid
+./gradlew :AnkiDroid:assembleFullDebug :AnkiDroid:testFullDebugUnitTest --tests "com.ichi2.anki.cfa.*"
+./gradlew :AnkiDroid:assembleFullRelease
 ```
 
 ## Architecture overview
@@ -402,7 +449,9 @@ New fork-only files (no upstream merge surface):
 (`_backend_generated.py`, `backend.ts`, the Rust service dispatch) is generated from
 the proto — no hand edits. See
 [docs/cfa/RUST_ENGINE_NOTE.md](./docs/cfa/RUST_ENGINE_NOTE.md) for the full rationale
-and merge-difficulty analysis.
+and merge-difficulty analysis, and
+[docs/cfa/UPSTREAM_FILES.md](./docs/cfa/UPSTREAM_FILES.md) for the upstream touched
+files / future-merge surface.
 
 ## CFA feature details
 
@@ -466,10 +515,25 @@ Harness: [`tools/cfa/sync_roundtrip.py`](./tools/cfa/sync_roundtrip.py) ·
 ## Submission proof
 
 Build-gate logs, test results, performance measurements, and packaging evidence are
-under [`proof/`](./proof). **Friday acceptance bundle:**
-[`proof/friday/`](./proof/friday/) — start with
-[`ACCEPTANCE.md`](./proof/friday/ACCEPTANCE.md) and [`REPORT.md`](./proof/friday/REPORT.md).
-Engine design: [docs/cfa/RUST_ENGINE_NOTE.md](./docs/cfa/RUST_ENGINE_NOTE.md).
+under [`proof/`](./proof).
+
+Start here:
+
+- **Sunday results report:** [`proof/friday/RESULTS-REPORT.md`](./proof/friday/RESULTS-REPORT.md)
+- **Brainlift:** [`Brainlift.md`](./Brainlift.md)
+- **Final packaging log:** [`proof/final-submission/REPORT.md`](./proof/final-submission/REPORT.md)
+- **Friday acceptance bundle:** [`proof/friday/ACCEPTANCE.md`](./proof/friday/ACCEPTANCE.md) and [`proof/friday/REPORT.md`](./proof/friday/REPORT.md)
+
+Model descriptions:
+
+- **Memory model:** [`docs/cfa/MODEL-MEMORY.md`](./docs/cfa/MODEL-MEMORY.md)
+- **Performance model:** [`docs/cfa/MODEL-PERFORMANCE.md`](./docs/cfa/MODEL-PERFORMANCE.md)
+- **Readiness model:** [`docs/cfa/MODEL-READINESS.md`](./docs/cfa/MODEL-READINESS.md)
+
+Engine / merge-surface notes:
+
+- **Rust engine note:** [`docs/cfa/RUST_ENGINE_NOTE.md`](./docs/cfa/RUST_ENGINE_NOTE.md)
+- **Upstream touched files:** [`docs/cfa/UPSTREAM_FILES.md`](./docs/cfa/UPSTREAM_FILES.md)
 
 ## Credit to Anki
 
