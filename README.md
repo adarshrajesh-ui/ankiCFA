@@ -222,39 +222,40 @@ an exam-prep app must separate three different questions:
 The app intentionally shows **ranges and abstentions**, not a single flattering
 "ready" number. If the app lacks enough evidence, it says so.
 
-| Speedrun requirement                             | Current status              | Evidence / caveat                                                                                                                                                                                                       |
-| ------------------------------------------------ | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Fork Anki, build desktop from source             | **Done**                    | `just run`; build and proof logs under [`proof/`](./proof)                                                                                                                                                              |
-| Real Rust engine change                          | **Done**                    | `BuildExamQueue` and `ComputeCfaScores` in `proto/`, `rslib/`, `pylib`; see [`docs/cfa/RUST_ENGINE_NOTE.md`](./docs/cfa/RUST_ENGINE_NOTE.md)                                                                            |
-| 3 Rust tests + Python test calling Rust          | **Done**                    | `rslib/src/scheduler/cfa_scores.rs`, `pylib/tests/test_cfa_parity.py`, `pylib/tests/test_cfa_scores.py`                                                                                                                 |
-| Desktop review loop on exam deck                 | **Done**                    | CFA Home/Study/Reviewer flow; `just cfa-desktop-shell-test`                                                                                                                                                             |
-| Memory score with range and give-up rule         | **Done**                    | [`docs/cfa/MODEL-MEMORY.md`](./docs/cfa/MODEL-MEMORY.md); `MIN_GRADED_REVIEWS=200`, `MIN_TOPIC_COVERAGE=0.50`                                                                                                           |
-| Phone app builds/runs and reviews same exam deck | **Done / proof caveated**   | AnkiDroid fork builds APKs and runs on emulator; proof split between this repo and the AnkiDroid fork                                                                                                                   |
-| Desktop/mobile share one engine                  | **Done**                    | Desktop calls Rust through `pylib`; Android calls the same Rust backend through `rsdroid`                                                                                                                               |
-| Two-way sync + offline + conflicts               | **Partial but functional**  | Backend/Rust tests and emulator proof exist; same-card conflict rule documented; some mobile-device proof is fragmented                                                                                                 |
-| AI outputs trace to named source                 | **Mostly done**             | Ethics AI records `source`, `standard`, `item_id`, `model`; see [`docs/cfa/AI-PROVENANCE.md`](./docs/cfa/AI-PROVENANCE.md)                                                                                              |
-| AI eval with accuracy/WAR cutoff                 | **Done with honest caveat** | AI-off accuracy `0.733`, wrong-answer rate `0.000`; AI-on eval evidence exists, but not every AI claim is proven                                                                                                        |
-| AI beats simpler baseline                        | **Not fully proven**        | TF-IDF baseline `0.933` beats deterministic fallback `0.733`; the LLM-beats-baseline claim remains honestly marked unproven in [`proof/friday/RESULTS-REPORT.md`](./proof/friday/RESULTS-REPORT.md)                     |
-| Desktop packaged installer                       | **Not present yet**         | Desktop runs from source; expected DMG `out/installer/dist/anki-26.05-mac-apple.dmg` was checked and is missing. Build it only after code freeze.                                                                       |
-| Phone packaged build                             | **Done**                    | Signed release APK exists in the AnkiDroid fork build output; arm64 SHA-256 is recorded in [`proof/final-submission/logs/android/release-apk-sha256.txt`](./proof/final-submission/logs/android/release-apk-sha256.txt) |
-| Runs with AI off                                 | **Done**                    | Scores are pure local Rust/Python statistics; AI is never in the scoring path                                                                                                                                           |
-| AGPL credit to Anki                              | **Done**                    | This README and [LICENSE](./LICENSE) retain Anki credit/license                                                                                                                                                         |
+| Speedrun requirement                             | Current status              | Evidence / caveat                                                                                                                                                                                   |
+| ------------------------------------------------ | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Fork Anki, build desktop from source             | **Done**                    | `just run`; build and proof logs under [`proof/`](./proof)                                                                                                                                          |
+| Real Rust engine change                          | **Done**                    | `BuildExamQueue` and `ComputeCfaScores` in `proto/`, `rslib/`, `pylib`; see [`docs/cfa/RUST_ENGINE_NOTE.md`](./docs/cfa/RUST_ENGINE_NOTE.md)                                                        |
+| 3 Rust tests + Python test calling Rust          | **Done**                    | `rslib/src/scheduler/cfa_scores.rs`, `pylib/tests/test_cfa_parity.py`, `pylib/tests/test_cfa_scores.py`                                                                                             |
+| Desktop review loop on exam deck                 | **Done**                    | CFA Home/Study/Reviewer flow; `just cfa-desktop-shell-test`                                                                                                                                         |
+| Memory score with range and give-up rule         | **Done**                    | [`docs/cfa/MODEL-MEMORY.md`](./docs/cfa/MODEL-MEMORY.md); `MIN_GRADED_REVIEWS=200`, `MIN_TOPIC_COVERAGE=0.50`                                                                                       |
+| Phone app builds/runs and reviews same exam deck | **Done / proof caveated**   | AnkiDroid fork builds APKs and runs on emulator; proof split between this repo and the AnkiDroid fork                                                                                               |
+| Desktop/mobile share one engine                  | **Done**                    | Desktop calls Rust through `pylib`; Android calls the same Rust backend through `rsdroid`                                                                                                           |
+| Two-way sync + offline + conflicts               | **Partial but functional**  | Backend/Rust tests and emulator proof exist; same-card conflict rule documented; some mobile-device proof is fragmented                                                                             |
+| AI outputs trace to named source                 | **Mostly done**             | Ethics AI records `source`, `standard`, `item_id`, `model`; see [`docs/cfa/AI-PROVENANCE.md`](./docs/cfa/AI-PROVENANCE.md)                                                                          |
+| AI eval with accuracy/WAR cutoff                 | **Done with honest caveat** | AI-off accuracy `0.733`, wrong-answer rate `0.000`; AI-on eval evidence exists, but not every AI claim is proven                                                                                    |
+| AI beats simpler baseline                        | **Not fully proven**        | TF-IDF baseline `0.933` beats deterministic fallback `0.733`; the LLM-beats-baseline claim remains honestly marked unproven in [`proof/friday/RESULTS-REPORT.md`](./proof/friday/RESULTS-REPORT.md) |
+| Desktop packaged installer                       | **Done via GitHub Actions** | Release workflow run [`28769022721`](https://github.com/adarshrajesh-ui/ankiCFA/actions/runs/28769022721) completed successfully and produced macOS, Windows, and Linux installer artifacts.        |
+| Phone packaged build                             | **Done**                    | Signed universal release APK exists in the AnkiDroid fork build output; SHA-256 `f6e82873a3a59865529aba6edb51b16967be823ab490901c314fab97add87b9d`.                                                 |
+| Runs with AI off                                 | **Done**                    | Scores are pure local Rust/Python statistics; AI is never in the scoring path                                                                                                                       |
+| AGPL credit to Anki                              | **Done**                    | This README and [LICENSE](./LICENSE) retain Anki credit/license                                                                                                                                     |
 
 ### Packaged build status
 
-- **Desktop:** the source app runs with `just run`; the final desktop DMG is still
-  the last packaging step. The expected artifact path is
-  `out/installer/dist/anki-26.05-mac-apple.dmg`, and it is **not present yet** in
-  this checkout. After building the frozen code, verify it with:
-
-  ```bash
-  ls -lh out/installer/dist/anki-26.05-mac-apple.dmg
-  ```
+- **Desktop:** packaged installers are built and available as GitHub Actions
+  artifacts from
+  [`Release 26.05` run 28769022721](https://github.com/adarshrajesh-ui/ankiCFA/actions/runs/28769022721),
+  which completed successfully on `2026-07-06`. Artifact names:
+  `installer-macos`, `installer-macos-intel`, `installer-windows`,
+  `installer-windows-arm`, `installer-linux-x86`, and `installer-linux-arm`.
+  The local `out/installer/dist/` directory may be empty because the canonical
+  desktop installers are stored as workflow artifacts.
 - **Android:** release APKs exist under
   `/Users/adarshrajesh/wed/AnkiDroid/AnkiDroid/build/outputs/apk/full/release/`.
-  The arm64 release APK is signed with the repo fallback release keystore and has
-  SHA-256
-  `33442f9df22c8f334acfcbd05471f1451ca96641accdd3b2383306da2ed990a5`.
+  The signed universal APK is:
+  `/Users/adarshrajesh/wed/AnkiDroid/AnkiDroid/build/outputs/apk/full/release/AnkiDroid-full-universal-release.apk`
+  with SHA-256
+  `f6e82873a3a59865529aba6edb51b16967be823ab490901c314fab97add87b9d`.
 
 ## Model evidence and honest reporting
 
