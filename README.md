@@ -264,6 +264,33 @@ honesty scaffolding are reproducible. The report labels simulated results as
 | Study feature ablation | CFA-priority `0.6435` > weakness-only `0.6157` > plain `0.5626` at equal study budget                     | `proof/friday/gnhf-speedrun/L1/ablation.txt`               |
 | Honest failures        | A1 AI baseline win unproven; A2 AI-off accuracy leg fails; A4 can fail on unlucky seeds; A8 null reported | `proof/friday/RESULTS-REPORT.md`                           |
 
+### Prompt-injection and AI safety testing
+
+AI text is treated as **untrusted**. The app does not let model output directly
+change scores, scheduling, sync, or collection state; AI can only draft card text
+or add ethics feedback that is shown with provenance and deterministic fallback.
+
+The prompt-injection/safety harness checks this in four ways:
+
+1. **Prompt hygiene:** `cfa/ethics_pairs/tests/test_ai_grading.py` asserts that
+   prompts include the passage, gold evidence, learner highlights, and coverage
+   guidance, but never include secrets such as `OPENAI_API_KEY`.
+2. **Structured provenance:** ethics AI responses must carry `source`, `standard`,
+   `item_id`, and `model`; if the response is missing, malformed, or AI is off,
+   the UI shows deterministic fallback instead of pretending it was AI.
+3. **Gold-set card checker:** `cfa/eval/cardgen_check.py` evaluates generated card
+   backs against 50 known-correct CFA Q&A pairs and buckets each draft as
+   `correct_useful`, `correct_but_bad`, or `wrong`.
+4. **Blocking bad batches:** the declared gate is `correct_useful >= 80%` and
+   `wrong <= 10%`. Tests include a bad generator oracle and a `--bad-sim` run;
+   failing real batches exit non-zero and are blocked. The simulated proof in
+   `proof/friday/gnhf-speedrun/L1/cardgen-check.txt` shows both a passing batch
+   and a deliberately bad batch that fails the gate.
+
+In plain English: even if source text or model output tries to steer the app, the
+output still has to survive an independent checker, carry named provenance, and
+stay outside the scoring engine.
+
 Re-run the main proof guards:
 
 ```bash
